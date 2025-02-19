@@ -1,0 +1,31 @@
+# Documentation and project context
+/guides/
+/memory-bank/
+
+# IDE files
+/.cursor/
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build output
+.next/
+out/
+build/
+dist/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db 
