@@ -4,18 +4,6 @@ import { useEffect, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { addTaskPrompt, updateTaskPrompt, deleteTaskPrompt } from "./prompts";
 
-// Extend the Session type to include accessToken
-declare module "next-auth" {
-  interface Session {
-    user?: {
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      accessToken?: string;
-    };
-  }
-}
-
 interface Task {
   id: number;
   text: string;

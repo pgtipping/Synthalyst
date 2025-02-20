@@ -1,0 +1,20 @@
+---
+description: 
+globs: 
+---
+
+# project specific rules
+
+## development folder
+
+- /nextjs-app
+
+## project guides
+
+- /guides
+
+## mandatory rules
+
+- DO NOT install packages in root folder
+- Always check folder before installing any package
+- focus ALL development in development folder (/nextjs-app)

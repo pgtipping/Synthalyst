@@ -5,25 +5,23 @@ import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import PlanForm from "./components/PlanForm";
-import PlanList from "./components/PlanList";
+import JDForm from "./components/JDForm";
 import TemplateList from "./components/TemplateList";
-import type { TrainingPlan } from "@/types/trainingPlan";
+import type { JobDescription } from "@/types/jobDescription";
 
-export default function TrainingPlanPage() {
+export default function JDDeveloperPage() {
   const { data: session } = useSession();
-  const [selectedTemplate, setSelectedTemplate] = useState<TrainingPlan | null>(
-    null
-  );
   const [activeTab, setActiveTab] = useState("create");
-  const [templates, setTemplates] = useState<TrainingPlan[]>([]);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<JobDescription | null>(null);
+  const [templates, setTemplates] = useState<JobDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const response = await fetch("/api/training-plan/templates");
+        const response = await fetch("/api/jd-developer/templates");
         if (!response.ok) {
           throw new Error("Failed to fetch templates");
         }
@@ -46,7 +44,7 @@ export default function TrainingPlanPage() {
     fetchTemplates();
   }, []);
 
-  const handleTemplateSelect = (template: TrainingPlan) => {
+  const handleTemplateSelect = (template: JobDescription) => {
     setSelectedTemplate(template);
     setActiveTab("create");
     toast({
@@ -59,9 +57,9 @@ export default function TrainingPlanPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Training Plan Creator</h1>
+          <h1 className="text-4xl font-bold mb-4">JD Developer</h1>
           <p className="text-gray-600 mb-8">
-            Please sign in to create and manage training plans.
+            Please sign in to create and manage job descriptions.
           </p>
         </div>
       </div>
@@ -70,19 +68,18 @@ export default function TrainingPlanPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Training Plan Creator</h1>
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8">JD Developer</h1>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="create">Create Plan</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="create">Create JD</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="saved">Saved Plans</TabsTrigger>
           </TabsList>
 
           <TabsContent value="create">
             <Card className="p-6">
-              <PlanForm
+              <JDForm
                 initialTemplate={selectedTemplate}
                 onClearTemplate={() => setSelectedTemplate(null)}
               />
@@ -97,12 +94,6 @@ export default function TrainingPlanPage() {
                 isLoading={isLoading}
                 error={error}
               />
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="saved">
-            <Card className="p-6">
-              <PlanList onUseAsTemplate={handleTemplateSelect} />
             </Card>
           </TabsContent>
         </Tabs>
