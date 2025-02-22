@@ -1,6 +1,7 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
+// Protect routes that require authentication
 export default withAuth(
   function middleware() {
     return NextResponse.next();
@@ -12,6 +13,13 @@ export default withAuth(
   }
 );
 
+// Only run middleware on protected routes
 export const config = {
-  matcher: ["/api/auth/:path*", "/auth/signin", "/auth/signup", "/auth/error"],
+  matcher: [
+    "/jd-developer/:path*",
+    "/2do/:path*",
+    "/training-plan/:path*",
+    "/blog/new",
+    "/blog/edit/:path*",
+  ],
 };

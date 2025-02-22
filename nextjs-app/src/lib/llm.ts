@@ -6,14 +6,17 @@ interface GenerateJobDescriptionInput {
   department?: string;
   location?: string;
   employmentType: string;
-  description: string;
+  description?: string;
   responsibilities: string[];
-  requiredSkills: string[];
+  requiredSkills: {
+    name: string;
+    level: "beginner" | "intermediate" | "advanced" | "expert";
+    description?: string;
+  }[];
   preferredSkills?: string[];
   education?: string[];
   experience?: string[];
   certifications?: string[];
-  benefits?: string[];
   salaryMin?: string;
   salaryMax?: string;
   salaryType: "hourly" | "monthly" | "yearly";
@@ -47,7 +50,6 @@ export async function generateJobDescription(
       skills: input.requiredSkills,
       certifications: input.certifications || null,
     },
-    benefits: input.benefits || null,
     salary:
       input.salaryMin || input.salaryMax
         ? {
@@ -89,10 +91,15 @@ IMPORTANT: Your response must be a valid JSON object matching this exact structu
   "qualifications": {
     "education": string[] | null,
     "experience": string[] | null,
-    "skills": string[],
+    "skills": [
+      {
+        "name": string,
+        "level": "beginner" | "intermediate" | "advanced" | "expert",
+        "description": string
+      }
+    ],
     "certifications": string[] | null
   },
-  "benefits": string[] | null,
   "salary": {
     "range": {
       "min": number,
@@ -125,11 +132,15 @@ Enhancement Guidelines:
    - Including collaboration aspects
    - Highlighting growth opportunities
 
-3. Enhance requirements by:
+3. Enhance requirements and qualifications by:
    - Making skills more specific to the industry
    - Adding relevant technical or soft skills
    - Including modern tools and methodologies
    - Specifying clear experience levels
+   - For each required skill:
+     * Determine appropriate competency level (beginner/intermediate/advanced/expert)
+     * Provide clear description of what that level means for the skill
+     * Ensure alignment with position level and responsibilities
 
 4. Professional Standards:
    - Use inclusive language

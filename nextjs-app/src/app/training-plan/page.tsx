@@ -9,6 +9,7 @@ import PlanForm from "./components/PlanForm";
 import PlanList from "./components/PlanList";
 import TemplateList from "./components/TemplateList";
 import type { TrainingPlan } from "@/types/trainingPlan";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function TrainingPlanPage() {
   const { data: session } = useSession();
@@ -70,8 +71,16 @@ export default function TrainingPlanPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Training Plan Creator</h1>
+      <div className="max-w-6xl mx-auto space-y-6">
+        <Breadcrumb
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Tools", href: "/tools" },
+            { label: "Training Plan", href: "/training-plan", active: true },
+          ]}
+        />
+
+        <h1 className="text-4xl font-bold">Training Plan Creator</h1>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 mb-8">

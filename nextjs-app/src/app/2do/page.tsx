@@ -12,6 +12,7 @@ import VoiceInput from "./components/VoiceInput";
 import CalendarView from "./components/CalendarView";
 import type { Task } from "@/types/task";
 import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function TodoPage() {
   const { data: session } = useSession();
@@ -224,8 +225,16 @@ export default function TodoPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <Breadcrumb
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Tools", href: "/tools" },
+            { label: "2Do", href: "/2do", active: true },
+          ]}
+        />
+
+        <div className="flex justify-between items-center">
           <h1 className="text-4xl font-bold">2Do Task Manager</h1>
           <VoiceInput
             isRecording={isRecording}

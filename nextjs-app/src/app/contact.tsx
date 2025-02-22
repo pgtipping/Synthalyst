@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -51,11 +52,17 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
-          Contact Us
-        </h2>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <Breadcrumb
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Contact", href: "/contact", active: true },
+          ]}
+        />
+
+        <h1 className="text-4xl font-bold">Contact Us</h1>
+
         <div className="max-w-2xl mx-auto">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -150,7 +157,7 @@ const Contact = () => {
           </form>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

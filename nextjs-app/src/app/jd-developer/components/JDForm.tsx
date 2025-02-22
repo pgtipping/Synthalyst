@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
+import type { JobDescription } from "@/types/jobDescription";
+import { Plus, X, Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,37 +26,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
-import type { JobDescription } from "@/types/jobDescription";
-import { Plus, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
+
+interface RequiredSkill {
+  name: string;
+  level: "beginner" | "intermediate" | "advanced" | "expert";
+  description?: string;
+}
 
 const formSchema = z.object({
-  title: z.string().min(1, "Job title is required"),
-  department: z.string().optional(),
-  location: z.string().optional(),
-  employmentType: z.string(),
-  description: z.string().min(1, "Job description is required"),
-  responsibilities: z
-    .array(z.string())
-    .min(1, "At least one responsibility is required"),
+  jobTitle: z.string().min(1, "Job title is required"),
+  department: z.string().min(1, "Department is required"),
+  location: z.string().min(1, "Location is required"),
+  employmentType: z.string().min(1, "Employment type is required"),
+  jobDescription: z.string().optional(),
+  responsibilities: z.array(z.string()).default([]),
   requiredSkills: z
-    .array(z.string())
-    .min(1, "At least one required skill is required"),
-  preferredSkills: z.array(z.string()).optional(),
-  education: z.array(z.string()).optional(),
-  experience: z.array(z.string()).optional(),
-  certifications: z.array(z.string()).optional(),
-  benefits: z.array(z.string()).optional(),
-  salaryMin: z.string().optional(),
-  salaryMax: z.string().optional(),
-  salaryType: z.enum(["hourly", "monthly", "yearly"]),
-  currency: z.string().optional(),
-  companyName: z.string().optional(),
-  companyDescription: z.string().optional(),
-  companyCulture: z.array(z.string()).optional(),
-  industry: z.string(),
-  level: z.string(),
+    .array(
+      z.object({
+        name: z.string(),
+        level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+        description: z.string().optional(),
+      })
+    )
+    .default([]),
+  industry: z.string().min(1, "Industry is required"),
+  level: z.string().min(1, "Level is required"),
+  salaryType: z.enum(["hourly", "monthly", "yearly"]).default("yearly"),
+  isTemplate: z.boolean().default(false),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface JDFormProps {
   initialTemplate: JobDescription | null;
@@ -65,36 +68,45 @@ interface ArrayInputProps {
   onChange: (value: string[]) => void;
   placeholder?: string;
   error?: string;
+  disabled?: boolean;
 }
 
-function ArrayInput({ value, onChange, placeholder, error }: ArrayInputProps) {
+function ArrayInput({
+  value,
+  onChange,
+  placeholder,
+  error,
+  disabled,
+}: ArrayInputProps) {
   const handleAdd = () => {
     onChange([...value, ""]);
   };
 
   const handleRemove = (index: number) => {
-    onChange(value.filter((_, i) => i !== index));
+    onChange(value.filter((_: string, i: number) => i !== index));
   };
 
   const handleChange = (index: number, newValue: string) => {
-    onChange(value.map((v, i) => (i === index ? newValue : v)));
+    onChange(value.map((v: string, i: number) => (i === index ? newValue : v)));
   };
 
   return (
     <div className="space-y-2">
-      {value.map((item, index) => (
+      {value.map((item: string, index: number) => (
         <div key={index} className="flex gap-2">
           <Input
             value={item}
             onChange={(e) => handleChange(index, e.target.value)}
             placeholder={placeholder}
             className="flex-1"
+            disabled={disabled}
           />
           <Button
             type="button"
             variant="ghost"
             size="icon"
             onClick={() => handleRemove(index)}
+            disabled={disabled}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -106,6 +118,7 @@ function ArrayInput({ value, onChange, placeholder, error }: ArrayInputProps) {
         size="sm"
         className="w-full"
         onClick={handleAdd}
+        disabled={disabled}
       >
         <Plus className="h-4 w-4 mr-2" />
         Add Item
@@ -123,70 +136,62 @@ export default function JDForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      department: "",
-      location: "",
-      employmentType: "full-time",
-      description: "",
-      responsibilities: [],
-      requiredSkills: [],
-      preferredSkills: [],
-      education: [],
-      experience: [],
-      certifications: [],
-      benefits: [],
-      salaryMin: "",
-      salaryMax: "",
-      salaryType: "yearly",
-      currency: "USD",
-      companyName: "",
-      companyDescription: "",
-      companyCulture: [],
-      industry: "",
-      level: "",
+      jobTitle: initialTemplate?.title || "",
+      department: initialTemplate?.department || "",
+      location: initialTemplate?.location || "",
+      employmentType: initialTemplate?.employmentType || "",
+      jobDescription: initialTemplate?.description || "",
+      responsibilities: initialTemplate?.responsibilities || [""],
+      requiredSkills: initialTemplate?.requirements.required.map(
+        (skill: RequiredSkill) => ({
+          name: skill.name || "",
+          level: skill.level || "intermediate",
+          description: skill.description || "",
+        })
+      ) || [{ name: "", level: "intermediate", description: "" }],
+      industry: initialTemplate?.metadata.industry || "",
+      level: initialTemplate?.metadata.level || "",
+      salaryType: initialTemplate?.metadata.salaryType || "yearly",
+      isTemplate: false,
     },
+  });
+
+  const {
+    fields: skillFields,
+    append: appendSkill,
+    remove: removeSkill,
+  } = useFieldArray({
+    control: form.control,
+    name: "requiredSkills",
   });
 
   useEffect(() => {
     if (initialTemplate) {
       form.reset({
-        title: initialTemplate.title,
+        jobTitle: initialTemplate.title,
         department: initialTemplate.department || "",
         location: initialTemplate.location || "",
-        employmentType: initialTemplate.employmentType || "full-time",
-        description: initialTemplate.description,
-        responsibilities: initialTemplate.responsibilities
-          .join("\n")
-          .split("\n"),
-        requiredSkills: initialTemplate.requirements.required
-          .join("\n")
-          .split("\n"),
-        preferredSkills:
-          initialTemplate.requirements.preferred?.join("\n").split("\n") || [],
-        education:
-          initialTemplate.qualifications.education?.join("\n").split("\n") ||
-          [],
-        experience:
-          initialTemplate.qualifications.experience?.join("\n").split("\n") ||
-          [],
-        certifications:
-          initialTemplate.qualifications.certifications
-            ?.join("\n")
-            .split("\n") || [],
-        benefits: initialTemplate.benefits?.join("\n").split("\n") || [],
-        salaryMin: initialTemplate.salary?.range?.min.toString() || "",
-        salaryMax: initialTemplate.salary?.range?.max.toString() || "",
-        salaryType: initialTemplate.salary?.type || "yearly",
-        currency: initialTemplate.salary?.currency || "USD",
-        companyName: initialTemplate.company?.name || "",
-        companyDescription: initialTemplate.company?.description || "",
-        companyCulture:
-          initialTemplate.company?.culture?.join("\n").split("\n") || [],
+        employmentType: initialTemplate.employmentType || "",
+        jobDescription: initialTemplate.description,
+        responsibilities: initialTemplate.responsibilities,
+        requiredSkills: initialTemplate.requirements.required.map(
+          (skill: RequiredSkill) => ({
+            name: skill.name,
+            level: skill.level as
+              | "beginner"
+              | "intermediate"
+              | "advanced"
+              | "expert",
+            description: skill.description || "",
+          })
+        ),
         industry: initialTemplate.metadata.industry || "",
         level: initialTemplate.metadata.level || "",
+        salaryType: initialTemplate.metadata.salaryType || "yearly",
+        isTemplate: true,
       });
     }
   }, [initialTemplate, form]);
@@ -428,7 +433,7 @@ export default function JDForm({
     createExampleTemplates();
   }, [session]);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormValues) => {
     if (!session?.user?.email) {
       toast({
         title: "Authentication Required",
@@ -445,23 +450,41 @@ export default function JDForm({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          title: values.jobTitle,
+          department: values.department,
+          location: values.location,
+          employmentType: values.employmentType,
+          description: values.jobDescription,
+          responsibilities: values.responsibilities,
+          requiredSkills: values.requiredSkills.map((skill) => ({
+            name: skill.name,
+            level: skill.level,
+            description: `${skill.level} level proficiency in ${skill.name}`,
+          })),
+          industry: values.industry,
+          level: values.level,
+          salaryType: values.salaryType,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate job description");
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to generate job description"
+        );
       }
 
-      // Success response
       toast({
         title: "Success",
         description: "Job description generated successfully.",
       });
 
-      // Reset form and template
       form.reset();
       onClearTemplate();
+      window.dispatchEvent(new CustomEvent("switchTab", { detail: "saved" }));
     } catch (error) {
+      console.error("Error generating job description:", error);
       toast({
         title: "Error",
         description:
@@ -475,7 +498,7 @@ export default function JDForm({
     }
   };
 
-  const handleSaveAsTemplate = async (values: z.infer<typeof formSchema>) => {
+  const handleSaveAsTemplate = async (values: FormValues) => {
     if (!session?.user?.email) {
       toast({
         title: "Authentication Required",
@@ -499,14 +522,20 @@ export default function JDForm({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save template");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save template");
       }
 
       toast({
         title: "Success",
         description: "Template saved successfully.",
       });
+
+      window.dispatchEvent(
+        new CustomEvent("switchTab", { detail: "templates" })
+      );
     } catch (error) {
+      console.error("Error saving template:", error);
       toast({
         title: "Error",
         description:
@@ -524,7 +553,7 @@ export default function JDForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
-            name="title"
+            name="jobTitle"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Job Title</FormLabel>
@@ -532,6 +561,7 @@ export default function JDForm({
                   <Input
                     placeholder="e.g., Senior Software Engineer"
                     {...field}
+                    disabled={isLoading || isSavingTemplate}
                   />
                 </FormControl>
                 <FormMessage />
@@ -546,7 +576,11 @@ export default function JDForm({
               <FormItem>
                 <FormLabel>Department</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Engineering" {...field} />
+                  <Input
+                    placeholder="e.g., Engineering"
+                    {...field}
+                    disabled={isLoading || isSavingTemplate}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -560,7 +594,11 @@ export default function JDForm({
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., New York, NY" {...field} />
+                  <Input
+                    placeholder="e.g., Remote, New York, NY"
+                    {...field}
+                    disabled={isLoading || isSavingTemplate}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -573,55 +611,57 @@ export default function JDForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Employment Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isLoading || isSavingTemplate}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select employment type" />
                     </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="full-time">Full-time</SelectItem>
-                    <SelectItem value="part-time">Part-time</SelectItem>
-                    <SelectItem value="contract">Contract</SelectItem>
-                    <SelectItem value="temporary">Temporary</SelectItem>
-                    <SelectItem value="internship">Internship</SelectItem>
-                  </SelectContent>
-                </Select>
+                    <SelectContent>
+                      <SelectItem value="full-time">Full-time</SelectItem>
+                      <SelectItem value="part-time">Part-time</SelectItem>
+                      <SelectItem value="contract">Contract</SelectItem>
+                      <SelectItem value="temporary">Temporary</SelectItem>
+                      <SelectItem value="internship">Internship</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="industry"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Industry</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isLoading || isSavingTemplate}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select industry" />
                     </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="technology">Technology</SelectItem>
-                    <SelectItem value="healthcare">Healthcare</SelectItem>
-                    <SelectItem value="finance">Finance</SelectItem>
-                    <SelectItem value="education">Education</SelectItem>
-                    <SelectItem value="retail">Retail</SelectItem>
-                    <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                    <SelectItem value="services">Services</SelectItem>
-                  </SelectContent>
-                </Select>
+                    <SelectContent>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="healthcare">Healthcare</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="retail">Retail</SelectItem>
+                      <SelectItem value="manufacturing">
+                        Manufacturing
+                      </SelectItem>
+                      <SelectItem value="services">Services</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -633,26 +673,27 @@ export default function JDForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Position Level</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isLoading || isSavingTemplate}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select position level" />
                     </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="entry">Entry Level</SelectItem>
-                    <SelectItem value="junior">Junior</SelectItem>
-                    <SelectItem value="mid">Mid Level</SelectItem>
-                    <SelectItem value="senior">Senior</SelectItem>
-                    <SelectItem value="lead">Lead</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="director">Director</SelectItem>
-                    <SelectItem value="executive">Executive</SelectItem>
-                  </SelectContent>
-                </Select>
+                    <SelectContent>
+                      <SelectItem value="entry">Entry Level</SelectItem>
+                      <SelectItem value="junior">Junior</SelectItem>
+                      <SelectItem value="mid">Mid Level</SelectItem>
+                      <SelectItem value="senior">Senior</SelectItem>
+                      <SelectItem value="lead">Lead</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="director">Director</SelectItem>
+                      <SelectItem value="executive">Executive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -661,7 +702,7 @@ export default function JDForm({
 
         <FormField
           control={form.control}
-          name="description"
+          name="jobDescription"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Job Description</FormLabel>
@@ -670,6 +711,7 @@ export default function JDForm({
                   placeholder="Enter a detailed description of the role..."
                   className="min-h-[100px]"
                   {...field}
+                  disabled={isLoading || isSavingTemplate}
                 />
               </FormControl>
               <FormMessage />
@@ -689,6 +731,7 @@ export default function JDForm({
                   onChange={field.onChange}
                   placeholder="Enter a responsibility"
                   error={form.formState.errors.responsibilities?.message}
+                  disabled={isLoading || isSavingTemplate}
                 />
               </FormControl>
               <FormMessage />
@@ -696,145 +739,93 @@ export default function JDForm({
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="requiredSkills"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Required Skills</FormLabel>
-                <FormControl>
-                  <ArrayInput
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Enter a required skill"
-                    error={form.formState.errors.requiredSkills?.message}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Required Skills</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                appendSkill({
+                  name: "",
+                  level: "intermediate",
+                  description: "",
+                })
+              }
+              disabled={isLoading || isSavingTemplate}
+            >
+              Add Skill
+            </Button>
+          </div>
 
-          <FormField
-            control={form.control}
-            name="preferredSkills"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Preferred Skills</FormLabel>
-                <FormControl>
-                  <ArrayInput
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder="Enter a preferred skill"
-                    error={form.formState.errors.preferredSkills?.message}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+          {skillFields.map((field, index) => (
+            <div key={field.id} className="flex gap-4">
+              <FormField
+                control={form.control}
+                name={`requiredSkills.${index}.name`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input {...field} placeholder="Skill name" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="education"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Education Requirements</FormLabel>
-                <FormControl>
-                  <ArrayInput
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder="Enter an education requirement"
-                    error={form.formState.errors.education?.message}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name={`requiredSkills.${index}.level`}
+                render={({ field }) => (
+                  <FormItem className="w-40">
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="beginner">Beginner</SelectItem>
+                          <SelectItem value="intermediate">
+                            Intermediate
+                          </SelectItem>
+                          <SelectItem value="advanced">Advanced</SelectItem>
+                          <SelectItem value="expert">Expert</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="experience"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Experience Requirements</FormLabel>
-                <FormControl>
-                  <ArrayInput
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder="Enter an experience requirement"
-                    error={form.formState.errors.experience?.message}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+              <FormField
+                control={form.control}
+                name={`requiredSkills.${index}.description`}
+                render={({ field }) => (
+                  <FormItem className="w-60">
+                    <FormControl>
+                      <Textarea {...field} placeholder="Skill description" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="certifications"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Required Certifications</FormLabel>
-                <FormControl>
-                  <ArrayInput
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder="Enter a certification"
-                    error={form.formState.errors.certifications?.message}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="benefits"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Benefits</FormLabel>
-                <FormControl>
-                  <ArrayInput
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder="Enter a benefit"
-                    error={form.formState.errors.benefits?.message}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="companyCulture"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Company Culture</FormLabel>
-                <FormControl>
-                  <ArrayInput
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder="Enter a culture point"
-                    error={form.formState.errors.companyCulture?.message}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => removeSkill(index)}
+                disabled={isLoading || isSavingTemplate}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
         </div>
 
         <div className="flex justify-end space-x-4">
@@ -845,6 +836,7 @@ export default function JDForm({
               form.reset();
               onClearTemplate();
             }}
+            disabled={isLoading || isSavingTemplate}
           >
             Reset
           </Button>
@@ -852,12 +844,26 @@ export default function JDForm({
             type="button"
             variant="secondary"
             onClick={() => handleSaveAsTemplate(form.getValues())}
-            disabled={isSavingTemplate}
+            disabled={isLoading || isSavingTemplate}
           >
-            {isSavingTemplate ? "Saving..." : "Save as Template"}
+            {isSavingTemplate ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save as Template"
+            )}
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Generating..." : "Generate Job Description"}
+          <Button type="submit" disabled={isLoading || isSavingTemplate}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              "Generate Job Description"
+            )}
           </Button>
         </div>
       </form>

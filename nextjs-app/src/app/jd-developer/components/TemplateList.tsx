@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "@/hooks/use-toast";
 import type { JobDescription } from "@/types/jobDescription";
 
 interface TemplateListProps {
@@ -26,6 +28,36 @@ export default function TemplateList({
   isLoading,
   error,
 }: TemplateListProps) {
+  const [localTemplates, setLocalTemplates] = useState(templates);
+
+  const handleDelete = async (templateId: string) => {
+    try {
+      const response = await fetch(
+        `/api/jd-developer/templates/${templateId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete template");
+      }
+
+      setLocalTemplates((prev) => prev.filter((t) => t.id !== templateId));
+      toast({
+        title: "Success",
+        description: "Template deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete template",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -52,7 +84,7 @@ export default function TemplateList({
   return (
     <ScrollArea className="h-[600px]">
       <div className="space-y-4">
-        {templates.map((template) => (
+        {localTemplates.map((template) => (
           <Card key={template.id}>
             <CardHeader>
               <CardTitle>{template.title}</CardTitle>
@@ -75,14 +107,22 @@ export default function TemplateList({
                 Created{" "}
                 {new Date(template.metadata.createdAt).toLocaleDateString()}
               </div>
-              <Button onClick={() => onUseTemplate(template)}>
-                Use Template
-              </Button>
+              <div className="flex space-x-2">
+                <Button onClick={() => onUseTemplate(template)}>
+                  Use Template
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(template.id)}
+                >
+                  Delete
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         ))}
 
-        {templates.length === 0 && (
+        {localTemplates.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">No templates available.</p>
           </div>

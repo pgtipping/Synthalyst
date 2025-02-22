@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { ImagePlus, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface CreatePostForm {
   title: string;
@@ -123,173 +123,183 @@ export default function NewPostPage() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Create New Post</h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <Breadcrumb
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Blog", href: "/blog" },
+            { label: "New Post", href: "/blog/new", active: true },
+          ]}
+        />
 
-      {error && (
-        <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-6">
-          {error}
-        </div>
-      )}
+        <h1 className="text-4xl font-bold">Create New Post</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              required
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-              placeholder="Enter post title"
-            />
+        {error && (
+          <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-6">
+            {error}
           </div>
+        )}
 
-          <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
-              required
-              rows={10}
-              value={formData.content}
-              onChange={(e) =>
-                setFormData({ ...formData, content: e.target.value })
-              }
-              placeholder="Write your post content here..."
-              className="min-h-[200px]"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                required
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                placeholder="Enter post title"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="excerpt">Excerpt</Label>
-            <Textarea
-              id="excerpt"
-              rows={3}
-              value={formData.excerpt}
-              onChange={(e) =>
-                setFormData({ ...formData, excerpt: e.target.value })
-              }
-              placeholder="Brief summary of your post"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="content">Content</Label>
+              <Textarea
+                id="content"
+                required
+                rows={10}
+                value={formData.content}
+                onChange={(e) =>
+                  setFormData({ ...formData, content: e.target.value })
+                }
+                placeholder="Write your post content here..."
+                className="min-h-[200px]"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label>Cover Image</Label>
-            <Card className="border-2 border-dashed">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-center">
-                  {!imagePreview ? (
-                    <label
-                      htmlFor="image-upload"
-                      className="flex flex-col items-center justify-center w-full h-48 cursor-pointer hover:bg-accent/50 rounded-lg transition-colors"
-                    >
-                      <ImagePlus className="h-12 w-12 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        Click to upload image
-                      </p>
-                      <input
-                        id="image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  ) : (
-                    <div className="relative w-full h-48">
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 z-10"
-                        onClick={() => {
-                          setImagePreview(null);
-                          setFormData({ ...formData, coverImage: "" });
-                        }}
+            <div className="space-y-2">
+              <Label htmlFor="excerpt">Excerpt</Label>
+              <Textarea
+                id="excerpt"
+                rows={3}
+                value={formData.excerpt}
+                onChange={(e) =>
+                  setFormData({ ...formData, excerpt: e.target.value })
+                }
+                placeholder="Brief summary of your post"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Cover Image</Label>
+              <Card className="border-2 border-dashed">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-center">
+                    {!imagePreview ? (
+                      <label
+                        htmlFor="image-upload"
+                        className="flex flex-col items-center justify-center w-full h-48 cursor-pointer hover:bg-accent/50 rounded-lg transition-colors"
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
-                      <Image
-                        src={imagePreview}
-                        alt="Cover preview"
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="categories">Categories</Label>
-            <Input
-              id="categories"
-              value={formData.categories.join(", ")}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  categories: e.target.value
-                    .split(",")
-                    .map((cat) => cat.trim())
-                    .filter(Boolean),
-                })
-              }
-              placeholder="Enter categories (comma-separated)"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
-            <Input
-              id="tags"
-              value={formData.tags.join(", ")}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  tags: e.target.value
-                    .split(",")
-                    .map((tag) => tag.trim())
-                    .filter(Boolean),
-                })
-              }
-              placeholder="Enter tags (comma-separated)"
-            />
-          </div>
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="published"
-                checked={formData.published}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, published: checked })
-                }
-              />
-              <Label htmlFor="published">Publish immediately</Label>
+                        <ImagePlus className="h-12 w-12 text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Click to upload image
+                        </p>
+                        <input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    ) : (
+                      <div className="relative w-full h-48">
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 z-10"
+                          onClick={() => {
+                            setImagePreview(null);
+                            setFormData({ ...formData, coverImage: "" });
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                        <Image
+                          src={imagePreview}
+                          alt="Cover preview"
+                          fill
+                          className="object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="featured"
-                checked={formData.featured}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, featured: checked })
+            <div className="space-y-2">
+              <Label htmlFor="categories">Categories</Label>
+              <Input
+                id="categories"
+                value={formData.categories.join(", ")}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    categories: e.target.value
+                      .split(",")
+                      .map((cat) => cat.trim())
+                      .filter(Boolean),
+                  })
                 }
+                placeholder="Enter categories (comma-separated)"
               />
-              <Label htmlFor="featured">Featured post</Label>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags</Label>
+              <Input
+                id="tags"
+                value={formData.tags.join(", ")}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    tags: e.target.value
+                      .split(",")
+                      .map((tag) => tag.trim())
+                      .filter(Boolean),
+                  })
+                }
+                placeholder="Enter tags (comma-separated)"
+              />
+            </div>
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="published"
+                  checked={formData.published}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, published: checked })
+                  }
+                />
+                <Label htmlFor="published">Publish immediately</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="featured"
+                  checked={formData.featured}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, featured: checked })
+                  }
+                />
+                <Label htmlFor="featured">Featured post</Label>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Post"}
-          </Button>
-        </div>
-      </form>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Post"}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

@@ -12,14 +12,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreVertical, Download, Copy, Trash } from "lucide-react";
+import { Download, Copy } from "lucide-react";
 import type { JobDescription } from "@/types/jobDescription";
 
 interface SavedJDsProps {
@@ -31,6 +26,7 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
   const [savedJDs, setSavedJDs] = useState<JobDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedJD, setExpandedJD] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSavedJDs = async () => {
@@ -43,12 +39,12 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
         }
         const data = await response.json();
         setSavedJDs(data.jobDescriptions);
-      } catch (error) {
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch saved job descriptions"
-        );
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch saved job descriptions";
+        setError(errorMessage);
         toast({
           title: "Error",
           description:
@@ -64,26 +60,31 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
   }, [session?.user?.email]);
 
   const handleDelete = async (jdId: string) => {
+    if (!session?.user?.email) return;
+
     try {
-      const response = await fetch(`/api/jd-developer/${jdId}`, {
+      const response = await fetch(`/api/jd-developer/saved/${jdId}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete job description");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete job description");
       }
 
-      setSavedJDs((prevJds) => prevJds.filter((jd) => jd.id !== jdId));
+      setSavedJDs((prevJDs) => prevJDs.filter((jd) => jd.id !== jdId));
       toast({
         title: "Success",
         description: "Job description deleted successfully.",
       });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to delete job description";
+    } catch (error) {
+      console.error("Error deleting job description:", error);
       toast({
         title: "Error",
-        description: errorMessage,
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete job description",
         variant: "destructive",
       });
     }
@@ -110,7 +111,7 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ jdId: jd.id }),
+        body: JSON.stringify({ id: jd.id }),
       });
 
       if (!response.ok) {
@@ -118,7 +119,7 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
       }
 
       const data = await response.json();
-      setSavedJDs((prevJds) => [data.jd, ...prevJds]);
+      setSavedJDs((prevJDs) => [data.jobDescription, ...prevJDs]);
       toast({
         title: "Success",
         description: "Job description duplicated successfully.",
@@ -134,6 +135,10 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
         variant: "destructive",
       });
     }
+  };
+
+  const toggleExpand = (jdId: string) => {
+    setExpandedJD(expandedJD === jdId ? null : jdId);
   };
 
   if (isLoading) {
@@ -159,78 +164,165 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
     return <div className="p-4 bg-red-50 text-red-700 rounded-md">{error}</div>;
   }
 
-  if (!session) {
+  if (savedJDs.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">
-          Please sign in to view your saved job descriptions.
-        </p>
+        <p className="text-gray-500">No saved job descriptions found.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {savedJDs.map((jd) => (
-        <Card key={jd.id}>
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle>{jd.title}</CardTitle>
-                <CardDescription>
-                  {jd.department} • {jd.location}
-                </CardDescription>
+    <ScrollArea className="h-[600px] pr-4">
+      <div className="space-y-4">
+        {savedJDs.map((jd) => (
+          <Card key={jd.id} className="w-full">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-xl">{jd.title}</CardTitle>
+                  <CardDescription>
+                    {jd.department} • {jd.location} • {jd.employmentType}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge variant="outline">{jd.metadata.industry}</Badge>
+                  <Badge variant="outline">{jd.metadata.level}</Badge>
+                </div>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleExport(jd)}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDuplicate(jd)}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Duplicate
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleDelete(jd.id)}
-                    className="text-red-600"
-                  >
-                    <Trash className="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Badge variant="secondary">{jd.metadata.industry}</Badge>
-              <Badge variant="secondary">{jd.metadata.level}</Badge>
-              <Badge variant="secondary">{jd.employmentType}</Badge>
-            </div>
-            <p className="text-sm text-gray-600 line-clamp-2">
-              {jd.description}
-            </p>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <div className="text-sm text-gray-500">
-              Created {new Date(jd.metadata.createdAt).toLocaleDateString()}
-            </div>
-            <Button onClick={() => onUseAsTemplate(jd)}>Use as Template</Button>
-          </CardFooter>
-        </Card>
-      ))}
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {jd.description}
+                  </p>
+                  {jd.description.length > 150 && (
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto mt-2"
+                      onClick={() => toggleExpand(jd.id)}
+                    >
+                      {expandedJD === jd.id ? "Show less" : "Show more"}
+                    </Button>
+                  )}
+                </div>
 
-      {savedJDs.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500">No saved job descriptions found.</p>
-        </div>
-      )}
-    </div>
+                {expandedJD === jd.id && (
+                  <>
+                    <div>
+                      <h4 className="font-medium mb-2">Responsibilities</h4>
+                      <ul className="list-disc list-inside space-y-1">
+                        {jd.responsibilities.map((responsibility, index) => (
+                          <li
+                            key={index}
+                            className="text-sm text-muted-foreground"
+                          >
+                            {responsibility}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-2">Required Skills</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {jd.requirements.required.map((skill, index) => (
+                          <Badge key={index} variant="secondary">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {jd.requirements.preferred && (
+                      <div>
+                        <h4 className="font-medium mb-2">Preferred Skills</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {jd.requirements.preferred.map((skill, index) => (
+                            <Badge key={index} variant="outline">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {jd.qualifications.education && (
+                      <div>
+                        <h4 className="font-medium mb-2">Education</h4>
+                        <ul className="list-disc list-inside space-y-1">
+                          {jd.qualifications.education.map((edu, index) => (
+                            <li
+                              key={index}
+                              className="text-sm text-muted-foreground"
+                            >
+                              {edu}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {jd.benefits && (
+                      <div>
+                        <h4 className="font-medium mb-2">Benefits</h4>
+                        <ul className="list-disc list-inside space-y-1">
+                          {jd.benefits.map((benefit, index) => (
+                            <li
+                              key={index}
+                              className="text-sm text-muted-foreground"
+                            >
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <div className="text-sm text-muted-foreground">
+                Created: {new Date(jd.metadata.createdAt).toLocaleDateString()}
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExport(jd)}
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  Export
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDuplicate(jd)}
+                >
+                  <Copy className="h-4 w-4 mr-1" />
+                  Duplicate
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onUseAsTemplate(jd)}
+                >
+                  Use as Template
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDelete(jd.id)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </ScrollArea>
   );
 }

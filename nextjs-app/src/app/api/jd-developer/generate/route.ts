@@ -10,14 +10,19 @@ const generateSchema = z.object({
   department: z.string().optional(),
   location: z.string().optional(),
   employmentType: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   responsibilities: z.array(z.string()),
-  requiredSkills: z.array(z.string()),
+  requiredSkills: z.array(
+    z.object({
+      name: z.string(),
+      level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+      description: z.string().optional(),
+    })
+  ),
   preferredSkills: z.array(z.string()).optional(),
   education: z.array(z.string()).optional(),
   experience: z.array(z.string()).optional(),
   certifications: z.array(z.string()).optional(),
-  benefits: z.array(z.string()).optional(),
   salaryMin: z.string().optional(),
   salaryMax: z.string().optional(),
   salaryType: z.enum(["hourly", "monthly", "yearly"]),
@@ -48,6 +53,13 @@ export async function POST(request: Request) {
       userEmail: session.user.email,
     });
 
+    if (!enhancedDescription) {
+      return NextResponse.json(
+        { error: "Failed to generate job description" },
+        { status: 500 }
+      );
+    }
+
     // Save to database
     const jobDescription = await prisma.jobDescription.create({
       data: {
@@ -55,14 +67,18 @@ export async function POST(request: Request) {
         content: JSON.stringify(enhancedDescription),
         industry: enhancedDescription.metadata.industry,
         level: enhancedDescription.metadata.level,
-        skills: enhancedDescription.requirements.required,
+        skills: enhancedDescription.qualifications.skills.map(
+          (skill) => skill.name
+        ),
         userId: session.user.id,
       },
     });
 
     return NextResponse.json({ jobDescription }, { status: 201 });
   } catch (error) {
-    console.error("Error generating job description:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Error generating job description:", errorMessage);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -72,7 +88,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: "Failed to generate job description" },
+      { error: "Failed to generate job description: " + errorMessage },
       { status: 500 }
     );
   }

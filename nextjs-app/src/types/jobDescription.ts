@@ -13,10 +13,13 @@ export interface JobDescription {
   qualifications: {
     education?: string[];
     experience?: string[];
-    skills: string[];
+    skills: {
+      name: string;
+      level: "beginner" | "intermediate" | "advanced" | "expert";
+      description: string;
+    }[];
     certifications?: string[];
   };
-  benefits?: string[];
   salary?: {
     range?: {
       min: number;
