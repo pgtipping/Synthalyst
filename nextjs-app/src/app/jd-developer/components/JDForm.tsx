@@ -28,11 +28,24 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
-interface RequiredSkill {
+type RequiredSkill = {
   name: string;
   level: "beginner" | "intermediate" | "advanced" | "expert";
   description?: string;
-}
+};
+
+type SkillInput = RequiredSkill | string;
+
+const convertToRequiredSkill = (skill: SkillInput): RequiredSkill => {
+  if (typeof skill === "string") {
+    return {
+      name: skill,
+      level: "intermediate",
+      description: "",
+    };
+  }
+  return skill;
+};
 
 const formSchema = z.object({
   jobTitle: z.string().min(1, "Job title is required"),
@@ -52,7 +65,6 @@ const formSchema = z.object({
     .default([]),
   industry: z.string().min(1, "Industry is required"),
   level: z.string().min(1, "Level is required"),
-  salaryType: z.enum(["hourly", "monthly", "yearly"]).default("yearly"),
   isTemplate: z.boolean().default(false),
 });
 
@@ -145,16 +157,13 @@ export default function JDForm({
       employmentType: initialTemplate?.employmentType || "",
       jobDescription: initialTemplate?.description || "",
       responsibilities: initialTemplate?.responsibilities || [""],
-      requiredSkills: initialTemplate?.requirements.required.map(
-        (skill: RequiredSkill) => ({
-          name: skill.name || "",
-          level: skill.level || "intermediate",
-          description: skill.description || "",
-        })
-      ) || [{ name: "", level: "intermediate", description: "" }],
-      industry: initialTemplate?.metadata.industry || "",
-      level: initialTemplate?.metadata.level || "",
-      salaryType: initialTemplate?.metadata.salaryType || "yearly",
+      requiredSkills: Array.isArray(initialTemplate?.requirements?.required)
+        ? (initialTemplate.requirements.required as SkillInput[]).map(
+            convertToRequiredSkill
+          )
+        : [{ name: "", level: "intermediate", description: "" }],
+      industry: initialTemplate?.metadata?.industry || "",
+      level: initialTemplate?.metadata?.level || "",
       isTemplate: false,
     },
   });
@@ -177,20 +186,13 @@ export default function JDForm({
         employmentType: initialTemplate.employmentType || "",
         jobDescription: initialTemplate.description,
         responsibilities: initialTemplate.responsibilities,
-        requiredSkills: initialTemplate.requirements.required.map(
-          (skill: RequiredSkill) => ({
-            name: skill.name,
-            level: skill.level as
-              | "beginner"
-              | "intermediate"
-              | "advanced"
-              | "expert",
-            description: skill.description || "",
-          })
-        ),
+        requiredSkills: Array.isArray(initialTemplate.requirements.required)
+          ? (initialTemplate.requirements.required as SkillInput[]).map(
+              convertToRequiredSkill
+            )
+          : [{ name: "", level: "intermediate", description: "" }],
         industry: initialTemplate.metadata.industry || "",
         level: initialTemplate.metadata.level || "",
-        salaryType: initialTemplate.metadata.salaryType || "yearly",
         isTemplate: true,
       });
     }
@@ -218,58 +220,85 @@ export default function JDForm({
             "Optimize application performance and scalability",
             "Implement security best practices and maintain code quality",
           ],
-          requiredSkills: [
-            "5+ years of professional software development experience",
-            "Strong proficiency in one or more: Python, JavaScript/TypeScript, Java, or Go",
-            "Experience with modern web frameworks (React, Next.js, etc.)",
-            "Strong understanding of software design patterns and principles",
-            "Experience with cloud platforms (AWS, GCP, or Azure)",
-            "Excellent problem-solving and debugging skills",
-            "Strong knowledge of database systems and data modeling",
-          ],
-          preferredSkills: [
-            "Experience with microservices architecture",
-            "Familiarity with DevOps practices and tools",
-            "Experience with Kubernetes and container orchestration",
-            "Knowledge of machine learning frameworks",
-            "Open source contributions",
-          ],
-          education: [
-            "Bachelors degree in Computer Science or related field",
-            "Masters degree preferred",
-          ],
-          experience: [
-            "5+ years of professional software development",
-            "2+ years of technical leadership experience",
-            "Experience in agile development environments",
-          ],
-          certifications: [
-            "Relevant cloud certifications (AWS, GCP, Azure)",
-            "Security certifications a plus",
-          ],
-          benefits: [
-            "Competitive salary and equity package",
-            "Health, dental, and vision insurance",
-            "Flexible work hours and remote work options",
-            "Professional development budget",
-            "Regular team events and activities",
-          ],
-          salaryMin: "130000",
-          salaryMax: "180000",
-          salaryType: "yearly",
-          currency: "USD",
-          companyName: "TechCorp",
-          companyDescription:
-            "A leading technology company focused on building innovative solutions that transform industries.",
-          companyCulture: [
-            "Innovation-driven environment",
-            "Collaborative and inclusive workplace",
-            "Focus on continuous learning",
-            "Work-life balance",
-          ],
-          industry: "technology",
-          level: "senior",
-          isTemplate: true,
+          requirements: {
+            required: [
+              {
+                name: "Software Development",
+                level: "expert",
+                description:
+                  "5+ years of professional software development experience",
+              },
+              {
+                name: "Programming Languages",
+                level: "advanced",
+                description:
+                  "Strong proficiency in Python, JavaScript/TypeScript, Java, or Go",
+              },
+              {
+                name: "Web Frameworks",
+                level: "advanced",
+                description:
+                  "Experience with modern web frameworks (React, Next.js, etc.)",
+              },
+              {
+                name: "Software Design",
+                level: "expert",
+                description:
+                  "Strong understanding of software design patterns and principles",
+              },
+              {
+                name: "Cloud Platforms",
+                level: "advanced",
+                description: "Experience with AWS, GCP, or Azure",
+              },
+            ],
+            preferred: [
+              "Experience with microservices architecture",
+              "Familiarity with DevOps practices and tools",
+              "Experience with Kubernetes and container orchestration",
+              "Knowledge of machine learning frameworks",
+              "Open source contributions",
+            ],
+          },
+          qualifications: {
+            education: [
+              "Bachelors degree in Computer Science or related field",
+              "Masters degree preferred",
+            ],
+            experience: [
+              "5+ years of professional software development",
+              "2+ years of technical leadership experience",
+              "Experience in agile development environments",
+            ],
+            certifications: [
+              "Relevant cloud certifications (AWS, GCP, Azure)",
+              "Security certifications a plus",
+            ],
+          },
+          salary: {
+            range: {
+              min: 130000,
+              max: 180000,
+            },
+            type: "yearly",
+            currency: "USD",
+          },
+          company: {
+            name: "TechCorp",
+            description:
+              "A leading technology company focused on building innovative solutions that transform industries.",
+            culture: [
+              "Innovation-driven environment",
+              "Collaborative and inclusive workplace",
+              "Focus on continuous learning",
+              "Work-life balance",
+            ],
+          },
+          metadata: {
+            industry: "technology",
+            level: "senior",
+            isTemplate: true,
+          },
         },
         {
           title: "Product Marketing Manager",
@@ -287,58 +316,84 @@ export default function JDForm({
             "Lead product launches and go-to-market strategies",
             "Track and analyze product marketing metrics",
           ],
-          requiredSkills: [
-            "4+ years of product marketing experience",
-            "Strong analytical and strategic thinking abilities",
-            "Excellent written and verbal communication skills",
-            "Experience with market research and analysis",
-            "Project management expertise",
-            "Data-driven decision making",
-            "Strong presentation skills",
-          ],
-          preferredSkills: [
-            "Experience in SaaS or B2B marketing",
-            "Knowledge of marketing automation tools",
-            "Experience with product launch campaigns",
-            "Understanding of technical products",
-            "Content creation and storytelling abilities",
-          ],
-          education: [
-            "Bachelors degree in Marketing, Business, or related field",
-            "MBA preferred",
-          ],
-          experience: [
-            "4+ years in product marketing",
-            "Experience with go-to-market strategies",
-            "Track record of successful product launches",
-          ],
-          certifications: [
-            "Product Marketing Alliance certification",
-            "Digital Marketing certifications",
-          ],
-          benefits: [
-            "Competitive base salary plus bonus",
-            "Comprehensive healthcare coverage",
-            "401(k) matching",
-            "Professional development opportunities",
-            "Flexible work arrangements",
-          ],
-          salaryMin: "100000",
-          salaryMax: "150000",
-          salaryType: "yearly",
-          currency: "USD",
-          companyName: "MarketPro",
-          companyDescription:
-            "A fast-growing company that helps businesses transform their digital presence and market reach.",
-          companyCulture: [
-            "Results-driven environment",
-            "Cross-functional collaboration",
-            "Creative freedom",
-            "Data-informed decision making",
-          ],
-          industry: "marketing",
-          level: "mid",
-          isTemplate: true,
+          requirements: {
+            required: [
+              {
+                name: "Product Marketing",
+                level: "advanced",
+                description: "4+ years of product marketing experience",
+              },
+              {
+                name: "Strategic Thinking",
+                level: "expert",
+                description:
+                  "Strong analytical and strategic thinking abilities",
+              },
+              {
+                name: "Communication",
+                level: "expert",
+                description:
+                  "Excellent written and verbal communication skills",
+              },
+              {
+                name: "Market Research",
+                level: "advanced",
+                description: "Experience with market research and analysis",
+              },
+              {
+                name: "Project Management",
+                level: "advanced",
+                description:
+                  "Project management expertise and data-driven decision making",
+              },
+            ],
+            preferred: [
+              "Experience in SaaS or B2B marketing",
+              "Knowledge of marketing automation tools",
+              "Experience with product launch campaigns",
+              "Understanding of technical products",
+              "Content creation and storytelling abilities",
+            ],
+          },
+          qualifications: {
+            education: [
+              "Bachelors degree in Marketing, Business, or related field",
+              "MBA preferred",
+            ],
+            experience: [
+              "4+ years in product marketing",
+              "Experience with go-to-market strategies",
+              "Track record of successful product launches",
+            ],
+            certifications: [
+              "Product Marketing Alliance certification",
+              "Digital Marketing certifications",
+            ],
+          },
+          salary: {
+            range: {
+              min: 100000,
+              max: 150000,
+            },
+            type: "yearly",
+            currency: "USD",
+          },
+          company: {
+            name: "MarketPro",
+            description:
+              "A fast-growing company that helps businesses transform their digital presence and market reach.",
+            culture: [
+              "Results-driven environment",
+              "Cross-functional collaboration",
+              "Creative freedom",
+              "Data-informed decision making",
+            ],
+          },
+          metadata: {
+            industry: "marketing",
+            level: "mid",
+            isTemplate: true,
+          },
         },
         {
           title: "UX/UI Designer",
@@ -356,58 +411,82 @@ export default function JDForm({
             "Collaborate with developers on implementation",
             "Maintain and evolve our design system",
           ],
-          requiredSkills: [
-            "3+ years of UX/UI design experience",
-            "Proficiency in Figma, Sketch, or similar tools",
-            "Strong portfolio demonstrating UI and UX work",
-            "Experience with user research and testing",
-            "Understanding of accessibility standards",
-            "Knowledge of design systems",
-            "Excellent visual design skills",
-          ],
-          preferredSkills: [
-            "Experience with motion design",
-            "Basic understanding of HTML/CSS",
-            "Experience with design tokens",
-            "Knowledge of agile methodologies",
-            "Experience with mobile app design",
-          ],
-          education: [
-            "Bachelors degree in Design, HCI, or related field",
-            "UX certification programs",
-          ],
-          experience: [
-            "3+ years in UX/UI design",
-            "Experience with enterprise applications",
-            "Portfolio of shipped products",
-          ],
-          certifications: [
-            "Google UX Design Certificate",
-            "Interaction Design Foundation Certification",
-          ],
-          benefits: [
-            "Competitive salary",
-            "Health and wellness benefits",
-            "Design tool subscriptions",
-            "Conference and learning budget",
-            "Remote work setup allowance",
-          ],
-          salaryMin: "90000",
-          salaryMax: "130000",
-          salaryType: "yearly",
-          currency: "USD",
-          companyName: "DesignFlex",
-          companyDescription:
-            "A design-led technology company creating next-generation digital experiences.",
-          companyCulture: [
-            "Design-first mindset",
-            "User-centered approach",
-            "Collaborative environment",
-            "Continuous feedback and iteration",
-          ],
-          industry: "design",
-          level: "mid",
-          isTemplate: true,
+          requirements: {
+            required: [
+              {
+                name: "UX/UI Design",
+                level: "advanced",
+                description: "3+ years of UX/UI design experience",
+              },
+              {
+                name: "Design Tools",
+                level: "expert",
+                description: "Proficiency in Figma, Sketch, or similar tools",
+              },
+              {
+                name: "Portfolio",
+                level: "advanced",
+                description: "Strong portfolio demonstrating UI and UX work",
+              },
+              {
+                name: "User Research",
+                level: "advanced",
+                description: "Experience with user research and testing",
+              },
+              {
+                name: "Design Systems",
+                level: "intermediate",
+                description:
+                  "Knowledge of design systems and accessibility standards",
+              },
+            ],
+            preferred: [
+              "Experience with motion design",
+              "Basic understanding of HTML/CSS",
+              "Experience with design tokens",
+              "Knowledge of agile methodologies",
+              "Experience with mobile app design",
+            ],
+          },
+          qualifications: {
+            education: [
+              "Bachelors degree in Design, HCI, or related field",
+              "UX certification programs",
+            ],
+            experience: [
+              "3+ years in UX/UI design",
+              "Experience with enterprise applications",
+              "Portfolio of shipped products",
+            ],
+            certifications: [
+              "Google UX Design Certificate",
+              "Interaction Design Foundation Certification",
+            ],
+          },
+          salary: {
+            range: {
+              min: 90000,
+              max: 130000,
+            },
+            type: "yearly",
+            currency: "USD",
+          },
+          company: {
+            name: "DesignFlex",
+            description:
+              "A design-led technology company creating next-generation digital experiences.",
+            culture: [
+              "Design-first mindset",
+              "User-centered approach",
+              "Collaborative environment",
+              "Continuous feedback and iteration",
+            ],
+          },
+          metadata: {
+            industry: "design",
+            level: "mid",
+            isTemplate: true,
+          },
         },
       ];
 
@@ -464,7 +543,10 @@ export default function JDForm({
           })),
           industry: values.industry,
           level: values.level,
-          salaryType: values.salaryType,
+          salaryType: "yearly",
+          salaryMin: "0",
+          salaryMax: "0",
+          currency: "USD",
         }),
       });
 
@@ -510,15 +592,54 @@ export default function JDForm({
 
     setIsSavingTemplate(true);
     try {
+      const templateData = {
+        title: values.jobTitle,
+        department: values.department,
+        location: values.location,
+        employmentType: values.employmentType,
+        description: values.jobDescription || "",
+        responsibilities: values.responsibilities,
+        requirements: {
+          required: values.requiredSkills.map((skill) => ({
+            name: skill.name,
+            level: skill.level,
+            description:
+              skill.description ||
+              `${skill.level} level proficiency in ${skill.name}`,
+          })),
+          preferred: [],
+        },
+        qualifications: {
+          education: [],
+          experience: [],
+          certifications: [],
+        },
+        salary: {
+          range: {
+            min: 0,
+            max: 0,
+          },
+          type: "yearly" as const,
+          currency: "USD",
+        },
+        company: {
+          name: "",
+          description: "",
+          culture: [],
+        },
+        metadata: {
+          industry: values.industry,
+          level: values.level,
+          isTemplate: true,
+        },
+      };
+
       const response = await fetch("/api/jd-developer/templates", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...values,
-          isTemplate: true,
-        }),
+        body: JSON.stringify(templateData),
       });
 
       if (!response.ok) {

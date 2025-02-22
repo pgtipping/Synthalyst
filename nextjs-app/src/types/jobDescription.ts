@@ -33,6 +33,7 @@ export interface JobDescription {
     description?: string;
     culture?: string[];
   };
+  benefits?: string[];
   metadata: {
     createdAt: string;
     updatedAt: string;

@@ -23,41 +23,49 @@ interface SavedJDsProps {
 
 export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
   const { data: session } = useSession();
-  const [savedJDs, setSavedJDs] = useState<JobDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [savedJDs, setSavedJDs] = useState<JobDescription[]>([]);
   const [expandedJD, setExpandedJD] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSavedJDs = async () => {
-      if (!session?.user?.email) return;
+      if (!session?.user?.email) {
+        setError("Please sign in to view saved job descriptions");
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const response = await fetch("/api/jd-developer/saved");
         if (!response.ok) {
-          throw new Error("Failed to fetch saved job descriptions");
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || "Failed to fetch saved job descriptions"
+          );
         }
         const data = await response.json();
         setSavedJDs(data.jobDescriptions);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : "Failed to fetch saved job descriptions";
-        setError(errorMessage);
-        toast({
-          title: "Error",
-          description:
-            "Failed to load saved job descriptions. Please try again.",
-          variant: "destructive",
-        });
+      } catch (error) {
+        console.error("Error fetching saved job descriptions:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch saved job descriptions"
+        );
+        if (
+          error instanceof Error &&
+          error.message === "Authentication required"
+        ) {
+          window.location.reload(); // Refresh the page to trigger re-authentication
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchSavedJDs();
-  }, [session?.user?.email]);
+  }, [session]);
 
   const handleDelete = async (jdId: string) => {
     if (!session?.user?.email) return;
@@ -137,8 +145,26 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
     }
   };
 
-  const toggleExpand = (jdId: string) => {
-    setExpandedJD(expandedJD === jdId ? null : jdId);
+  const toggleExpand = async (jdId: string) => {
+    if (!session?.user?.email) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to view job descriptions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setExpandedJD(expandedJD === jdId ? null : jdId);
+    } catch (error) {
+      console.error("Error toggling job description:", error);
+      toast({
+        title: "Error",
+        description: "Failed to expand job description. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {

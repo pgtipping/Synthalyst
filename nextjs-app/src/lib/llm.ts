@@ -201,9 +201,21 @@ Make the enhancements substantial while keeping the core job requirements intact
 
     let enhancedDescription;
     try {
-      enhancedDescription = JSON.parse(
-        completion.choices[0].message.content.trim()
-      );
+      const content = completion.choices[0].message.content.trim();
+
+      // Handle markdown code blocks
+      let jsonStr = content;
+      if (content.includes("```json")) {
+        const codeBlockStart = content.indexOf("```json") + "```json".length;
+        const codeBlockEnd = content.lastIndexOf("```");
+        if (codeBlockEnd > codeBlockStart) {
+          jsonStr = content.slice(codeBlockStart, codeBlockEnd);
+        }
+      }
+
+      // Clean up any remaining whitespace and parse
+      jsonStr = jsonStr.trim();
+      enhancedDescription = JSON.parse(jsonStr);
 
       // Validate the response structure
       if (

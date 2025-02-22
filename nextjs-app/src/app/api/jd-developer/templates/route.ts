@@ -11,22 +11,43 @@ const createTemplateSchema = z.object({
   employmentType: z.string(),
   description: z.string().min(1, "Description is required"),
   responsibilities: z.array(z.string()),
-  requiredSkills: z.array(z.string()),
-  preferredSkills: z.array(z.string()).optional(),
-  education: z.array(z.string()).optional(),
-  experience: z.array(z.string()).optional(),
-  certifications: z.array(z.string()).optional(),
-  benefits: z.array(z.string()).optional(),
-  salaryMin: z.string().optional(),
-  salaryMax: z.string().optional(),
-  salaryType: z.enum(["hourly", "monthly", "yearly"]),
-  currency: z.string().optional(),
-  companyName: z.string().optional(),
-  companyDescription: z.string().optional(),
-  companyCulture: z.array(z.string()).optional(),
-  industry: z.string(),
-  level: z.string(),
-  isTemplate: z.boolean(),
+  requirements: z.object({
+    required: z.array(
+      z.object({
+        name: z.string(),
+        level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+        description: z.string().optional(),
+      })
+    ),
+    preferred: z.array(z.string()).optional(),
+  }),
+  qualifications: z.object({
+    education: z.array(z.string()).optional(),
+    experience: z.array(z.string()).optional(),
+    certifications: z.array(z.string()).optional(),
+  }),
+  salary: z
+    .object({
+      range: z.object({
+        min: z.number(),
+        max: z.number(),
+      }),
+      type: z.enum(["hourly", "monthly", "yearly"]),
+      currency: z.string().optional(),
+    })
+    .optional(),
+  company: z
+    .object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      culture: z.array(z.string()).optional(),
+    })
+    .optional(),
+  metadata: z.object({
+    industry: z.string(),
+    level: z.string(),
+    isTemplate: z.boolean(),
+  }),
 });
 
 export async function GET() {
@@ -79,65 +100,28 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = createTemplateSchema.parse(body);
 
-    // Create the template content
-    const templateContent = {
-      title: validatedData.title,
-      department: validatedData.department,
-      location: validatedData.location,
-      employmentType: validatedData.employmentType,
-      description: validatedData.description,
-      responsibilities: validatedData.responsibilities,
-      requirements: {
-        required: validatedData.requiredSkills,
-        preferred: validatedData.preferredSkills,
-      },
-      qualifications: {
-        education: validatedData.education,
-        experience: validatedData.experience,
-        skills: validatedData.requiredSkills,
-        certifications: validatedData.certifications,
-      },
-      benefits: validatedData.benefits,
-      salary:
-        validatedData.salaryMin || validatedData.salaryMax
-          ? {
-              range: {
-                min: parseInt(validatedData.salaryMin || "0"),
-                max: parseInt(validatedData.salaryMax || "0"),
-              },
-              type: validatedData.salaryType,
-              currency: validatedData.currency,
-            }
-          : undefined,
-      company: {
-        name: validatedData.companyName,
-        description: validatedData.companyDescription,
-        culture: validatedData.companyCulture,
-      },
-      metadata: {
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: session.user.email,
-        isTemplate: true,
-        industry: validatedData.industry,
-        level: validatedData.level,
-      },
-    };
-
-    // Save the template
+    // Save the template directly since it's already in JD format
     const template = await prisma.jobDescription.create({
       data: {
         title: validatedData.title,
-        content: JSON.stringify(templateContent),
-        industry: validatedData.industry,
-        level: validatedData.level,
-        skills: validatedData.requiredSkills,
+        content: JSON.stringify({
+          ...validatedData,
+          metadata: {
+            ...validatedData.metadata,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: session.user.email,
+          },
+        }),
+        industry: validatedData.metadata.industry,
+        level: validatedData.metadata.level,
+        skills: validatedData.requirements.required.map((skill) => skill.name),
         userId: session.user.id,
       },
     });
 
     return NextResponse.json(
-      { template: { id: template.id, ...templateContent } },
+      { template: { id: template.id, ...validatedData } },
       { status: 201 }
     );
   } catch (error) {
