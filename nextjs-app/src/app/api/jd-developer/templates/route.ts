@@ -50,6 +50,52 @@ const createTemplateSchema = z.object({
   }),
 });
 
+// Helper function to remove duplicates
+async function removeDuplicateTemplates() {
+  const templates = await prisma.jobDescription.findMany({
+    where: {
+      content: {
+        contains: '"isTemplate":true',
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  // Create a map to store unique templates by title
+  const uniqueTemplates = new Map();
+
+  // Keep only the most recent template for each title
+  templates.forEach((template) => {
+    const content = JSON.parse(template.content);
+    const title = content.title;
+
+    if (!uniqueTemplates.has(title)) {
+      uniqueTemplates.set(title, template);
+    }
+  });
+
+  // Delete all templates that are not in the uniqueTemplates map
+  const templatesToKeep = Array.from(uniqueTemplates.values()).map((t) => t.id);
+  await prisma.jobDescription.deleteMany({
+    where: {
+      AND: [
+        {
+          content: {
+            contains: '"isTemplate":true',
+          },
+        },
+        {
+          id: {
+            notIn: templatesToKeep,
+          },
+        },
+      ],
+    },
+  });
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -59,6 +105,9 @@ export async function GET() {
         { status: 401 }
       );
     }
+
+    // Remove duplicates before returning templates
+    await removeDuplicateTemplates();
 
     const templates = await prisma.jobDescription.findMany({
       where: {
@@ -136,6 +185,28 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { error: "Failed to create template" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    await removeDuplicateTemplates();
+
+    return NextResponse.json({ message: "Duplicates removed successfully" });
+  } catch (error) {
+    console.error("Error removing duplicates:", error);
+    return NextResponse.json(
+      { error: "Failed to remove duplicates" },
       { status: 500 }
     );
   }

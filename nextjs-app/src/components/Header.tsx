@@ -1,15 +1,78 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Header() {
+  const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { toast } = useToast();
+
+  // Debug session state
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Session Status:", status);
+      console.log("Session Data:", session);
+    }
+  }, [session, status]);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ callbackUrl: "/" });
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const renderAuthButton = () => {
+    if (status === "loading") {
+      return (
+        <Button variant="ghost" disabled className="flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading...
+        </Button>
+      );
+    }
+
+    if (status === "authenticated" && session?.user) {
+      return (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground hidden md:inline">
+            {session.user.email}
+          </span>
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <User className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <Link href="/login">
+        <Button variant="ghost" className="flex items-center gap-2">
+          <User className="w-4 h-4" />
+          Login
+        </Button>
+      </Link>
+    );
   };
 
   return (
@@ -59,9 +122,7 @@ export default function Header() {
             </Link>
           </nav>
           <div className="flex items-center space-x-2">
-            <Link href="/login">
-              <Button variant="ghost">Login</Button>
-            </Link>
+            {renderAuthButton()}
             <Link href="/get-started">
               <Button>Get Started</Button>
             </Link>
@@ -101,11 +162,7 @@ export default function Header() {
                 Contact
               </Link>
               <div className="flex flex-col space-y-2 pt-4 border-t">
-                <Link href="/login" onClick={() => setMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full">
-                    Login
-                  </Button>
-                </Link>
+                {renderAuthButton()}
                 <Link href="/get-started" onClick={() => setMenuOpen(false)}>
                   <Button className="w-full">Get Started</Button>
                 </Link>

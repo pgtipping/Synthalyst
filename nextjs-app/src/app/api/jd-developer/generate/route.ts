@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { generateJobDescription } from "@/lib/llm";
 import { z } from "zod";
 
@@ -60,21 +59,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Save to database
-    const jobDescription = await prisma.jobDescription.create({
-      data: {
-        title: enhancedDescription.title,
-        content: JSON.stringify(enhancedDescription),
-        industry: enhancedDescription.metadata.industry,
-        level: enhancedDescription.metadata.level,
-        skills: enhancedDescription.qualifications.skills.map(
-          (skill) => skill.name
-        ),
-        userId: session.user.id,
-      },
-    });
-
-    return NextResponse.json({ jobDescription }, { status: 201 });
+    // Return the generated content without saving to database
+    return NextResponse.json(
+      { generatedContent: enhancedDescription },
+      { status: 200 }
+    );
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error occurred";

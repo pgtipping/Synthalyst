@@ -1,3 +1,4 @@
+// API Model
 export interface JobDescription {
   id: string;
   title: string;
@@ -41,5 +42,29 @@ export interface JobDescription {
     isTemplate: boolean;
     industry?: string;
     level?: string;
+    version: number;
+    isLatest: boolean;
+    contentHash: string;
+    parentId?: string;
+    canonicalId?: string;
   };
+  versions?: JobDescription[];
+}
+
+// Database Model
+export interface JobDescriptionDB {
+  id: string;
+  title: string;
+  content: string;
+  industry: string | null;
+  level: string | null;
+  skills: string[];
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+  isLatest: boolean;
+  contentHash: string;
+  parentId: string | null;
+  canonicalId: string | null;
 }

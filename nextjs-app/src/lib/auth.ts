@@ -19,6 +19,9 @@ export const authOptions: AuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
         params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
           scope: "openid email profile",
         },
       },
@@ -71,20 +74,37 @@ export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
+    async signIn({ user }) {
+      if (!user?.email) {
+        return false;
+      }
+      return true;
+    },
     async jwt({ token, account, user }) {
       if (account) {
         token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
       }
       if (user) {
         token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = user.image;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as ExtendedUser).id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string | null;
+        session.user.image = token.picture as string | null;
         if (token.accessToken) {
           (session.user as ExtendedUser).accessToken =
             token.accessToken as string;

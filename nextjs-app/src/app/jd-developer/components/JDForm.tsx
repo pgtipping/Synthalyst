@@ -63,6 +63,9 @@ const formSchema = z.object({
       })
     )
     .default([]),
+  education: z.array(z.string()).default([]),
+  experience: z.array(z.string()).default([]),
+  certifications: z.array(z.string()).default([]),
   industry: z.string().min(1, "Industry is required"),
   level: z.string().min(1, "Level is required"),
   isTemplate: z.boolean().default(false),
@@ -162,6 +165,9 @@ export default function JDForm({
             convertToRequiredSkill
           )
         : [{ name: "", level: "intermediate", description: "" }],
+      education: initialTemplate?.qualifications.education || [],
+      experience: initialTemplate?.qualifications.experience || [],
+      certifications: initialTemplate?.qualifications.certifications || [],
       industry: initialTemplate?.metadata?.industry || "",
       level: initialTemplate?.metadata?.level || "",
       isTemplate: false,
@@ -191,6 +197,9 @@ export default function JDForm({
               convertToRequiredSkill
             )
           : [{ name: "", level: "intermediate", description: "" }],
+        education: initialTemplate.qualifications.education || [],
+        experience: initialTemplate.qualifications.experience || [],
+        certifications: initialTemplate.qualifications.certifications || [],
         industry: initialTemplate.metadata.industry || "",
         level: initialTemplate.metadata.level || "",
         isTemplate: true,
@@ -202,6 +211,23 @@ export default function JDForm({
   useEffect(() => {
     const createExampleTemplates = async () => {
       if (!session?.user?.email) return;
+
+      // First check if templates exist
+      try {
+        const response = await fetch("/api/jd-developer/templates");
+        if (!response.ok) {
+          throw new Error("Failed to fetch templates");
+        }
+        const data = await response.json();
+
+        // If templates already exist, don't create more
+        if (data.templates && data.templates.length > 0) {
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking existing templates:", error);
+        return;
+      }
 
       const templates = [
         {
@@ -541,6 +567,11 @@ export default function JDForm({
             level: skill.level,
             description: `${skill.level} level proficiency in ${skill.name}`,
           })),
+          qualifications: {
+            education: values.education,
+            experience: values.experience,
+            certifications: values.certifications,
+          },
           industry: values.industry,
           level: values.level,
           salaryType: "yearly",
@@ -557,14 +588,44 @@ export default function JDForm({
         );
       }
 
-      toast({
-        title: "Success",
-        description: "Job description generated successfully.",
+      const { generatedContent } = await response.json();
+
+      // Update form with generated content
+      form.reset({
+        jobTitle: generatedContent.title,
+        department: generatedContent.department || "",
+        location: generatedContent.location || "",
+        employmentType: generatedContent.employmentType || "",
+        jobDescription: generatedContent.description,
+        responsibilities: generatedContent.responsibilities,
+        requiredSkills: generatedContent.qualifications.skills.map(
+          (skill: {
+            name: string;
+            level: "beginner" | "intermediate" | "advanced" | "expert";
+            description: string;
+          }) => ({
+            name: skill.name,
+            level: skill.level,
+            description: skill.description,
+          })
+        ),
+        education: generatedContent.qualifications.education || [],
+        experience: generatedContent.qualifications.experience || [],
+        certifications: generatedContent.qualifications.certifications || [],
+        industry: generatedContent.metadata.industry || "",
+        level: generatedContent.metadata.level || "",
+        isTemplate: false,
       });
 
-      form.reset();
-      onClearTemplate();
-      window.dispatchEvent(new CustomEvent("switchTab", { detail: "saved" }));
+      toast({
+        title: "Success",
+        description:
+          "Job description generated successfully. Review and click 'Save Job Description' to save it.",
+      });
+
+      // Don't switch tabs or clear template yet - let user review
+      // onClearTemplate();
+      // window.dispatchEvent(new CustomEvent("switchTab", { detail: "saved" }));
     } catch (error) {
       console.error("Error generating job description:", error);
       toast({
@@ -610,9 +671,9 @@ export default function JDForm({
           preferred: [],
         },
         qualifications: {
-          education: [],
-          experience: [],
-          certifications: [],
+          education: values.education,
+          experience: values.experience,
+          certifications: values.certifications,
         },
         salary: {
           range: {
@@ -665,6 +726,74 @@ export default function JDForm({
       });
     } finally {
       setIsSavingTemplate(false);
+    }
+  };
+
+  const handleSaveJobDescription = async (values: FormValues) => {
+    if (!session?.user?.email) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save job descriptions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/jd-developer/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: values.jobTitle,
+          department: values.department,
+          location: values.location,
+          employmentType: values.employmentType,
+          description: values.jobDescription,
+          responsibilities: values.responsibilities,
+          requiredSkills: values.requiredSkills.map((skill) => ({
+            name: skill.name,
+            level: skill.level,
+            description:
+              skill.description ||
+              `${skill.level} level proficiency in ${skill.name}`,
+          })),
+          qualifications: {
+            education: values.education,
+            experience: values.experience,
+            certifications: values.certifications,
+          },
+          industry: values.industry,
+          level: values.level,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save job description");
+      }
+
+      toast({
+        title: "Success",
+        description: "Job description saved successfully.",
+      });
+
+      onClearTemplate();
+      window.dispatchEvent(new CustomEvent("switchTab", { detail: "saved" }));
+    } catch (error) {
+      console.error("Error saving job description:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to save job description",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -949,6 +1078,66 @@ export default function JDForm({
           ))}
         </div>
 
+        <FormField
+          control={form.control}
+          name="education"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Education Requirements</FormLabel>
+              <FormControl>
+                <ArrayInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Enter education requirement"
+                  error={form.formState.errors.education?.message}
+                  disabled={isLoading || isSavingTemplate}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="experience"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Experience Requirements</FormLabel>
+              <FormControl>
+                <ArrayInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Enter experience requirement"
+                  error={form.formState.errors.experience?.message}
+                  disabled={isLoading || isSavingTemplate}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="certifications"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Required Certifications</FormLabel>
+              <FormControl>
+                <ArrayInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Enter required certification"
+                  error={form.formState.errors.certifications?.message}
+                  disabled={isLoading || isSavingTemplate}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex justify-end space-x-4">
           <Button
             type="button"
@@ -975,6 +1164,18 @@ export default function JDForm({
             ) : (
               "Save as Template"
             )}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              // Save the current form state
+              const values = form.getValues();
+              handleSaveJobDescription(values);
+            }}
+            disabled={isLoading || isSavingTemplate}
+          >
+            Save Job Description
           </Button>
           <Button type="submit" disabled={isLoading || isSavingTemplate}>
             {isLoading ? (

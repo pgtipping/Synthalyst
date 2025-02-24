@@ -2,132 +2,311 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { JobDescription } from "@/types/jobDescription";
+import { TemplateVersionHistory } from "@/app/components/templates/TemplateVersionHistory";
+import { TemplateVersionComparison } from "@/app/components/templates/TemplateVersionComparison";
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+}
+
+interface ExtendedJobDescription extends JobDescription {
+  categories?: Category[];
+  versions?: JobDescription[];
+}
 
 interface TemplateListProps {
-  templates: JobDescription[];
+  templates: ExtendedJobDescription[];
   onUseTemplate: (template: JobDescription) => void;
   isLoading: boolean;
   error: string | null;
 }
 
-export default function TemplateList({
+export function TemplateList({
   templates,
   onUseTemplate,
   isLoading,
   error,
 }: TemplateListProps) {
-  const [localTemplates, setLocalTemplates] = useState(templates);
-
-  const handleDelete = async (templateId: string) => {
-    try {
-      const response = await fetch(
-        `/api/jd-developer/templates/${templateId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete template");
-      }
-
-      setLocalTemplates((prev) => prev.filter((t) => t.id !== templateId));
-      toast({
-        title: "Success",
-        description: "Template deleted successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to delete template",
-        variant: "destructive",
-      });
-    }
-  };
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ExtendedJobDescription | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<JobDescription | null>(
+    null
+  );
+  const [comparisonVersions, setComparisonVersions] = useState<{
+    oldVersion: JobDescription;
+    newVersion: JobDescription;
+  } | null>(null);
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading templates...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
-    return <div className="p-4 bg-red-50 text-red-700 rounded-md">{error}</div>;
+    return (
+      <div className="text-center py-8">
+        <div className="text-destructive mb-2">Error loading templates</div>
+        <p className="text-muted-foreground">{error}</p>
+      </div>
+    );
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/jd-developer/templates/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete template");
+      }
+
+      toast({
+        title: "Success",
+        description: "Template deleted successfully.",
+      });
+
+      // Refresh the page to update the list
+      window.location.reload();
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete template. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCompareVersions = (v1: JobDescription, v2: JobDescription) => {
+    setComparisonVersions({ oldVersion: v2, newVersion: v1 });
+    setSelectedVersion(null);
+  };
+
+  if (templates.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No templates available.</p>
+      </div>
+    );
   }
 
   return (
-    <ScrollArea className="h-[600px]">
+    <div className="space-y-6">
       <div className="space-y-4">
-        {localTemplates.map((template) => (
-          <Card key={template.id}>
-            <CardHeader>
-              <CardTitle>{template.title}</CardTitle>
-              <CardDescription>
-                {template.department} • {template.location}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="secondary">{template.metadata.industry}</Badge>
-                <Badge variant="secondary">{template.metadata.level}</Badge>
-                <Badge variant="secondary">{template.employmentType}</Badge>
+        {templates.map((template) => (
+          <div key={template.id} className="bg-card rounded-lg border p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-xl font-semibold">{template.title}</h3>
+                <p className="text-muted-foreground mt-1">
+                  {template.department} • {template.location}
+                  {template.employmentType &&
+                    ` • ${template.employmentType.toLowerCase()}`}
+                </p>
               </div>
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {template.description}
-              </p>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div className="text-sm text-gray-500">
-                Created{" "}
-                {new Date(template.metadata.createdAt).toLocaleDateString()}
+              <div className="flex gap-2">
+                <Badge variant="outline">{template.metadata.industry}</Badge>
+                <Badge variant="outline">{template.metadata.level}</Badge>
               </div>
-              <div className="flex space-x-2">
-                <Button onClick={() => onUseTemplate(template)}>
-                  Use Template
+            </div>
+
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+              {template.description}
+            </p>
+
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-muted-foreground">
+                Last updated:{" "}
+                {new Date(template.metadata.updatedAt).toLocaleDateString()}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onUseTemplate(template)}
+                >
+                  Use as Template
                 </Button>
                 <Button
                   variant="destructive"
+                  size="sm"
                   onClick={() => handleDelete(template.id)}
                 >
                   Delete
                 </Button>
               </div>
-            </CardFooter>
-          </Card>
-        ))}
-
-        {localTemplates.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No templates available.</p>
+            </div>
           </div>
-        )}
+        ))}
       </div>
-    </ScrollArea>
+
+      {/* Template Details Dialog */}
+      <Dialog
+        open={!!selectedTemplate}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTemplate(null);
+            setSelectedVersion(null);
+            setComparisonVersions(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{selectedTemplate?.title}</DialogTitle>
+            <DialogDescription>
+              Version {selectedTemplate?.metadata.version}
+            </DialogDescription>
+          </DialogHeader>
+
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList>
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="history">Version History</TabsTrigger>
+              {comparisonVersions && (
+                <TabsTrigger value="comparison">Version Comparison</TabsTrigger>
+              )}
+            </TabsList>
+
+            <TabsContent value="details" className="mt-4">
+              {selectedVersion || selectedTemplate ? (
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Description</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {(selectedVersion || selectedTemplate)?.description}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">
+                      Responsibilities
+                    </h4>
+                    <ul className="list-disc pl-4 space-y-1">
+                      {(
+                        selectedVersion || selectedTemplate
+                      )?.responsibilities.map((resp, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">
+                          {resp}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">
+                      Required Skills
+                    </h4>
+                    <ul className="list-disc pl-4 space-y-1">
+                      {(
+                        selectedVersion || selectedTemplate
+                      )?.requirements.required.map((skill, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">
+                          {skill}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {(() => {
+                    const preferredSkills = (
+                      selectedVersion || selectedTemplate
+                    )?.requirements?.preferred;
+                    return preferredSkills &&
+                      Array.isArray(preferredSkills) &&
+                      preferredSkills.length > 0 ? (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">
+                          Preferred Skills
+                        </h4>
+                        <ul className="list-disc pl-4 space-y-1">
+                          {preferredSkills.map((skill, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-muted-foreground"
+                            >
+                              {skill}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null;
+                  })()}
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Metadata</h4>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline">
+                        v
+                        {
+                          (selectedVersion || selectedTemplate)?.metadata
+                            .version
+                        }
+                      </Badge>
+                      {(selectedVersion || selectedTemplate)?.metadata
+                        .isLatest && <Badge variant="secondary">Latest</Badge>}
+                      <Badge variant="secondary">
+                        {
+                          (selectedVersion || selectedTemplate)?.metadata
+                            .industry
+                        }
+                      </Badge>
+                      <Badge variant="secondary">
+                        {(selectedVersion || selectedTemplate)?.metadata.level}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  Select a version to view details
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-4">
+              {selectedTemplate?.versions && (
+                <TemplateVersionHistory
+                  versions={selectedTemplate.versions}
+                  onSelectVersion={setSelectedVersion}
+                  onCompareVersions={handleCompareVersions}
+                  currentVersionId={selectedVersion?.id}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="comparison" className="mt-4">
+              {comparisonVersions && (
+                <TemplateVersionComparison
+                  oldVersion={comparisonVersions.oldVersion}
+                  newVersion={comparisonVersions.newVersion}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

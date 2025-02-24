@@ -32,49 +32,62 @@ interface GenerateJobDescriptionInput {
 export async function generateJobDescription(
   input: GenerateJobDescriptionInput
 ): Promise<JobDescription> {
-  // Transform input data to match expected structure
-  const transformedInput = {
-    title: input.title,
-    department: input.department || null,
-    location: input.location || null,
-    employmentType: input.employmentType,
-    description: input.description,
-    responsibilities: input.responsibilities,
-    requirements: {
-      required: input.requiredSkills,
-      preferred: input.preferredSkills || null,
-    },
-    qualifications: {
-      education: input.education || null,
-      experience: input.experience || null,
-      skills: input.requiredSkills,
-      certifications: input.certifications || null,
-    },
-    salary:
-      input.salaryMin || input.salaryMax
+  try {
+    // Transform input data to match expected structure
+    const transformedInput = {
+      title: input.title,
+      department: input.department || null,
+      location: input.location || null,
+      employmentType: input.employmentType,
+      description: input.description || "",
+      responsibilities: input.responsibilities,
+      requirements: {
+        required: input.requiredSkills.map((skill) => ({
+          name: skill.name,
+          level: skill.level,
+          description:
+            skill.description ||
+            `${skill.level} level proficiency in ${skill.name}`,
+        })),
+        preferred: input.preferredSkills || null,
+      },
+      qualifications: {
+        education: input.education || null,
+        experience: input.experience || null,
+        skills: input.requiredSkills.map((skill) => ({
+          name: skill.name,
+          level: skill.level,
+          description:
+            skill.description ||
+            `${skill.level} level proficiency in ${skill.name}`,
+        })),
+        certifications: input.certifications || null,
+      },
+      salary:
+        input.salaryMin || input.salaryMax
+          ? {
+              range: {
+                min: parseInt(input.salaryMin || "0"),
+                max: parseInt(input.salaryMax || "0"),
+              },
+              type: input.salaryType,
+              currency: input.currency || null,
+            }
+          : null,
+      company: input.companyName
         ? {
-            range: {
-              min: parseInt(input.salaryMin || "0"),
-              max: parseInt(input.salaryMax || "0"),
-            },
-            type: input.salaryType,
-            currency: input.currency || null,
+            name: input.companyName,
+            description: input.companyDescription || null,
+            culture: input.companyCulture || null,
           }
         : null,
-    company: input.companyName
-      ? {
-          name: input.companyName,
-          description: input.companyDescription || null,
-          culture: input.companyCulture || null,
-        }
-      : null,
-    metadata: {
-      industry: input.industry || null,
-      level: input.level || null,
-    },
-  };
+      metadata: {
+        industry: input.industry || null,
+        level: input.level || null,
+      },
+    };
 
-  const systemPrompt = `You are an expert in HR and job description writing with extensive experience in talent acquisition and employer branding. Your task is to significantly enhance and professionalize job descriptions while maintaining strict JSON output format.
+    const systemPrompt = `You are an expert in HR and job description writing with extensive experience in talent acquisition and employer branding. Your task is to generate professional and compelling job descriptions in JSON format.
 
 IMPORTANT: Your response must be a valid JSON object matching this exact structure:
 {
@@ -119,65 +132,50 @@ IMPORTANT: Your response must be a valid JSON object matching this exact structu
   }
 }
 
-Enhancement Guidelines:
-1. Make the description more compelling and engaging by:
-   - Adding specific impact and growth opportunities
-   - Highlighting unique aspects of the role
-   - Including team and project context
-   - Emphasizing company culture and values
+Generation Guidelines:
+1. Create a compelling and engaging description that:
+   - Highlights specific impact and growth opportunities
+   - Emphasizes unique aspects of the role
+   - Includes team and project context
+   - Reflects company culture and values
 
-2. Improve responsibilities by:
-   - Making them more specific and actionable
-   - Adding measurable outcomes
-   - Including collaboration aspects
-   - Highlighting growth opportunities
+2. Generate clear responsibilities that:
+   - Are specific and actionable
+   - Include measurable outcomes
+   - Emphasize collaboration
+   - Showcase growth opportunities
 
-3. Enhance requirements and qualifications by:
-   - Making skills more specific to the industry
-   - Adding relevant technical or soft skills
-   - Including modern tools and methodologies
-   - Specifying clear experience levels
+3. Define comprehensive requirements and qualifications:
+   - Include industry-specific skills
+   - Balance technical and soft skills
+   - Incorporate modern tools and methodologies
+   - Specify clear experience levels
    - For each required skill:
-     * Determine appropriate competency level (beginner/intermediate/advanced/expert)
-     * Provide clear description of what that level means for the skill
-     * Ensure alignment with position level and responsibilities
+     * Set appropriate competency level (beginner/intermediate/advanced/expert)
+     * Provide clear description of skill requirements
+     * Align with position level and responsibilities
 
 4. Professional Standards:
    - Use inclusive language
-   - Maintain industry-standard terminology
-   - Ensure clear progression requirements
+   - Apply industry-standard terminology
+   - Define clear progression requirements
    - Include measurable success criteria
-   - Focus on growth and development
+   - Emphasize growth and development
    - Use action verbs and specific metrics
 
 5. CRITICAL: Output must be valid JSON matching the exact structure above`;
-
-  const userPrompt = `Please significantly enhance this job description and return it in the required JSON format:
-
-${JSON.stringify(transformedInput, null, 2)}
-
-Enhancement Requirements:
-1. Expand and improve the description to be more engaging and detailed
-2. Make responsibilities more specific with measurable outcomes
-3. Add relevant modern skills and technologies to requirements
-4. Include specific growth and development opportunities
-5. Add industry-specific terminology and best practices
-6. Return ONLY the enhanced JSON object, no additional text
-7. Ensure the JSON structure exactly matches the specified format
-
-Make the enhancements substantial while keeping the core job requirements intact.`;
-
-  try {
-    console.log("\n=== JOB DESCRIPTION GENERATION ===");
-    console.log("\nInput Data:");
-    console.log(JSON.stringify(transformedInput, null, 2));
 
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,
     });
 
+    console.log("\n=== JOB DESCRIPTION GENERATION ===\n");
+    console.log("Input Data:");
+    console.log(JSON.stringify(transformedInput, null, 2));
+
+    let enhancedDescription: JobDescription;
+
     const completion = await groq.chat.completions.create({
-      model: "mixtral-8x7b-32768",
       messages: [
         {
           role: "system",
@@ -185,11 +183,16 @@ Make the enhancements substantial while keeping the core job requirements intact
         },
         {
           role: "user",
-          content: userPrompt,
+          content: `Please generate a fresh, professional job description based on these requirements:
+
+${JSON.stringify(transformedInput, null, 2)}`,
         },
       ],
+      model: "mixtral-8x7b-32768",
       temperature: 0.7,
-      max_tokens: 2000,
+      max_tokens: 4096,
+      top_p: 1,
+      stream: false,
     });
 
     if (!completion.choices?.[0]?.message?.content) {
@@ -199,17 +202,15 @@ Make the enhancements substantial while keeping the core job requirements intact
     console.log("\nRaw LLM Response:");
     console.log(completion.choices[0].message.content);
 
-    let enhancedDescription;
     try {
-      const content = completion.choices[0].message.content.trim();
+      let jsonStr = completion.choices[0].message.content.trim();
 
       // Handle markdown code blocks
-      let jsonStr = content;
-      if (content.includes("```json")) {
-        const codeBlockStart = content.indexOf("```json") + "```json".length;
-        const codeBlockEnd = content.lastIndexOf("```");
+      if (jsonStr.includes("```json")) {
+        const codeBlockStart = jsonStr.indexOf("```json") + "```json".length;
+        const codeBlockEnd = jsonStr.lastIndexOf("```");
         if (codeBlockEnd > codeBlockStart) {
-          jsonStr = content.slice(codeBlockStart, codeBlockEnd);
+          jsonStr = jsonStr.slice(codeBlockStart, codeBlockEnd);
         }
       }
 
@@ -229,28 +230,28 @@ Make the enhancements substantial while keeping the core job requirements intact
 
       console.log("\nParsed Enhanced Description:");
       console.log(JSON.stringify(enhancedDescription, null, 2));
+
+      // Add metadata
+      const finalResult = {
+        ...enhancedDescription,
+        metadata: {
+          ...enhancedDescription.metadata,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          createdBy: input.userEmail,
+          isTemplate: false,
+        },
+      };
+
+      console.log("\nFinal Result with Metadata:");
+      console.log(JSON.stringify(finalResult, null, 2));
+      console.log("\n=== END JOB DESCRIPTION GENERATION ===\n");
+
+      return finalResult;
     } catch (parseError) {
       console.error("\nError parsing LLM response:", parseError);
       throw new Error("Failed to parse job description from LLM response");
     }
-
-    // Add metadata
-    const finalResult = {
-      ...enhancedDescription,
-      metadata: {
-        ...enhancedDescription.metadata,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: input.userEmail,
-        isTemplate: false,
-      },
-    };
-
-    console.log("\nFinal Result with Metadata:");
-    console.log(JSON.stringify(finalResult, null, 2));
-    console.log("\n=== END JOB DESCRIPTION GENERATION ===\n");
-
-    return finalResult;
   } catch (error) {
     console.error("Error calling LLM:", error);
     if (error instanceof Error) {
@@ -261,11 +262,10 @@ Make the enhancements substantial while keeping the core job requirements intact
       } else if (error.message.includes("404")) {
         throw new Error("Invalid model name or API endpoint.");
       }
+      throw error;
     }
     throw new Error(
-      error instanceof Error
-        ? error.message
-        : "Failed to generate job description. Please try again later."
+      "Failed to generate job description. Please try again later."
     );
   }
 }

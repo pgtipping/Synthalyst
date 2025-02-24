@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -64,8 +63,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      <Header />
-
       {/* Hero Section */}
       <section className="relative py-20 px-4 hero-gradient">
         <div className="container mx-auto max-w-6xl">

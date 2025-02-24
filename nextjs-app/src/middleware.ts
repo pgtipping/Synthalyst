@@ -3,23 +3,32 @@ import { NextResponse } from "next/server";
 
 // Protect routes that require authentication
 export default withAuth(
-  function middleware() {
+  function middleware(req) {
+    const token = req.nextauth.token;
+
+    // If no token exists, redirect to login
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
     return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ token }) => !!token,
     },
+    pages: {
+      signIn: "/login",
+    },
   }
 );
 
-// Only run middleware on protected routes
+// Configure which routes to protect
 export const config = {
   matcher: [
     "/jd-developer/:path*",
     "/2do/:path*",
     "/training-plan/:path*",
-    "/blog/new",
-    "/blog/edit/:path*",
+    "/api/protected/:path*",
   ],
 };

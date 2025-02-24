@@ -6,14 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import JDForm from "./components/JDForm";
-import TemplateList from "./components/TemplateList";
+import { TemplateList } from "./components/TemplateList";
 import SavedJDs from "./components/SavedJDs";
 import type { JobDescription } from "@/types/jobDescription";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-
-interface SwitchTabEvent extends CustomEvent {
-  detail: string;
-}
 
 export default function JDDeveloperPage() {
   const { data: session } = useSession();
@@ -27,16 +23,17 @@ export default function JDDeveloperPage() {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const response = await fetch("/api/jd-developer/templates");
+        setIsLoading(true);
+        const response = await fetch("/api/jd-developer/templates?latest=true");
         if (!response.ok) {
           throw new Error("Failed to fetch templates");
         }
         const data = await response.json();
         setTemplates(data.templates);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch templates"
-        );
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to fetch templates";
+        setError(errorMessage);
         toast({
           title: "Error",
           description: "Failed to load templates. Please try again.",
@@ -47,20 +44,10 @@ export default function JDDeveloperPage() {
       }
     };
 
-    fetchTemplates();
-  }, []);
-
-  useEffect(() => {
-    const handleTabSwitch = (event: CustomEvent<string>) => {
-      setActiveTab(event.detail);
-    };
-
-    window.addEventListener("switchTab", handleTabSwitch as EventListener);
-
-    return () => {
-      window.removeEventListener("switchTab", handleTabSwitch as EventListener);
-    };
-  }, []);
+    if (session) {
+      fetchTemplates();
+    }
+  }, [session]);
 
   const handleTemplateSelect = (template: JobDescription) => {
     setSelectedTemplate(template);
@@ -70,25 +57,6 @@ export default function JDDeveloperPage() {
       description: "The template has been loaded into the form.",
     });
   };
-
-  useEffect(() => {
-    const handleSwitchTab = (event: SwitchTabEvent) => {
-      const tab = event.detail;
-      const tabsElement = document.querySelector('[role="tablist"]');
-      if (tabsElement) {
-        const trigger = tabsElement.querySelector(
-          `[data-state][value="${tab}"]`
-        );
-        if (trigger) {
-          (trigger as HTMLElement).click();
-        }
-      }
-    };
-
-    window.addEventListener("switchTab", handleSwitchTab as EventListener);
-    return () =>
-      window.removeEventListener("switchTab", handleSwitchTab as EventListener);
-  }, []);
 
   if (!session) {
     return (
