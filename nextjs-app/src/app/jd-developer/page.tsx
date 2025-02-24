@@ -13,45 +13,60 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function JDDeveloperPage() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState("create");
+  const [activeTab, setActiveTab] = useState<string>("form");
+  const [templates, setTemplates] = useState<JobDescription[]>([]);
   const [selectedTemplate, setSelectedTemplate] =
     useState<JobDescription | null>(null);
-  const [templates, setTemplates] = useState<JobDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchTemplates = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/jd-developer/templates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch templates");
+      }
+      const data = await response.json();
+      setTemplates(data.templates);
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+      setError("Failed to fetch templates");
+      toast({
+        title: "Error",
+        description: "Failed to fetch templates",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTemplates = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch("/api/jd-developer/templates?latest=true");
-        if (!response.ok) {
-          throw new Error("Failed to fetch templates");
-        }
-        const data = await response.json();
-        setTemplates(data.templates);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch templates";
-        setError(errorMessage);
-        toast({
-          title: "Error",
-          description: "Failed to load templates. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+    if (!session?.user?.email) return;
+
+    // Initial fetch
+    fetchTemplates();
+
+    // Listen for tab switch events
+    const handleTabSwitch = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      setActiveTab(customEvent.detail);
+      if (customEvent.detail === "templates") {
+        fetchTemplates();
       }
     };
 
-    if (session) {
-      fetchTemplates();
-    }
+    window.addEventListener("switchTab", handleTabSwitch);
+
+    return () => {
+      window.removeEventListener("switchTab", handleTabSwitch);
+    };
   }, [session]);
 
   const handleTemplateSelect = (template: JobDescription) => {
     setSelectedTemplate(template);
-    setActiveTab("create");
+    setActiveTab("form");
     toast({
       title: "Template Selected",
       description: "The template has been loaded into the form.",
@@ -72,7 +87,7 @@ export default function JDDeveloperPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-6xl space-y-4">
+    <div className="container py-10">
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
@@ -89,11 +104,11 @@ export default function JDDeveloperPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="create">Create</TabsTrigger>
+          <TabsTrigger value="form">Create</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="saved">Saved JDs</TabsTrigger>
         </TabsList>
-        <TabsContent value="create">
+        <TabsContent value="form">
           <Card className="p-6">
             <JDForm
               initialTemplate={selectedTemplate}
