@@ -8,18 +8,21 @@ export interface JobDescription {
   description: string;
   responsibilities: string[];
   requirements: {
-    required: string[];
-    preferred?: string[];
-  };
-  qualifications: {
-    education?: string[];
-    experience?: string[];
-    skills: {
+    required: {
       name: string;
       level: "beginner" | "intermediate" | "advanced" | "expert";
       description: string;
     }[];
-    certifications?: string[];
+    preferred?: {
+      name: string;
+      level: "beginner" | "intermediate" | "advanced" | "expert";
+      description: string;
+    }[];
+  };
+  qualifications: {
+    education: string[] | null;
+    experience: string[] | null;
+    certifications: string[] | null;
   };
   salary?: {
     range?: {

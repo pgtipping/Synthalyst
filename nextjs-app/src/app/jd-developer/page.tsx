@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import JDForm from "./components/JDForm";
-import { TemplateList } from "./components/TemplateList";
+import TemplateList from "./components/TemplateList";
 import SavedJDs from "./components/SavedJDs";
 import type { JobDescription } from "@/types/jobDescription";
 import { Breadcrumb } from "@/components/ui/breadcrumb";

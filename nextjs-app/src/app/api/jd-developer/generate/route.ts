@@ -11,24 +11,48 @@ const generateSchema = z.object({
   employmentType: z.string(),
   description: z.string().optional(),
   responsibilities: z.array(z.string()),
-  requiredSkills: z.array(
-    z.object({
-      name: z.string(),
-      level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-      description: z.string().optional(),
+  requirements: z.object({
+    required: z.array(
+      z.object({
+        name: z.string(),
+        level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+        description: z.string(),
+      })
+    ),
+    preferred: z
+      .array(
+        z.object({
+          name: z.string(),
+          level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+          description: z.string(),
+        })
+      )
+      .optional(),
+  }),
+  qualifications: z.object({
+    education: z.array(z.string()).nullable(),
+    experience: z.array(z.string()).nullable(),
+    certifications: z.array(z.string()).nullable(),
+  }),
+  salary: z
+    .object({
+      range: z
+        .object({
+          min: z.number(),
+          max: z.number(),
+        })
+        .optional(),
+      type: z.enum(["hourly", "monthly", "yearly"]),
+      currency: z.string().optional(),
     })
-  ),
-  preferredSkills: z.array(z.string()).optional(),
-  education: z.array(z.string()).optional(),
-  experience: z.array(z.string()).optional(),
-  certifications: z.array(z.string()).optional(),
-  salaryMin: z.string().optional(),
-  salaryMax: z.string().optional(),
-  salaryType: z.enum(["hourly", "monthly", "yearly"]),
-  currency: z.string().optional(),
-  companyName: z.string().optional(),
-  companyDescription: z.string().optional(),
-  companyCulture: z.array(z.string()).optional(),
+    .optional(),
+  company: z
+    .object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      culture: z.array(z.string()).optional(),
+    })
+    .optional(),
   industry: z.string(),
   level: z.string(),
 });

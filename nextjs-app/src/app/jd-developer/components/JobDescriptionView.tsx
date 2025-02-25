@@ -31,7 +31,7 @@ export default function JobDescriptionView({
 }: JobDescriptionViewProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-3xl h-[85vh]">
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
@@ -55,8 +55,8 @@ export default function JobDescriptionView({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
-          <div className="space-y-6">
+        <ScrollArea className="h-full pr-4 -mr-4">
+          <div className="space-y-6 pb-6">
             <section>
               <h3 className="text-lg font-semibold mb-2">Description</h3>
               <p className="text-muted-foreground whitespace-pre-wrap">
@@ -78,12 +78,17 @@ export default function JobDescriptionView({
             <section>
               <h3 className="text-lg font-semibold mb-2">Required Skills</h3>
               <div className="space-y-2">
-                {jd.qualifications.skills.map((skill, index) => (
+                {jd.requirements.required.map((skill, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
                   >
-                    <span className="text-muted-foreground">{skill.name}</span>
+                    <div className="text-muted-foreground">
+                      <span className="font-medium">{skill.name}</span>
+                      {skill.description && (
+                        <span className="ml-2">- {skill.description}</span>
+                      )}
+                    </div>
                     <Badge>{skill.level}</Badge>
                   </div>
                 ))}
@@ -94,72 +99,88 @@ export default function JobDescriptionView({
               jd.requirements.preferred.length > 0 && (
                 <section>
                   <h3 className="text-lg font-semibold mb-2">
-                    Preferred Requirements
+                    Preferred Skills
                   </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    {jd.requirements.preferred.map((requirement, index) => (
-                      <li key={index} className="text-muted-foreground">
-                        {requirement}
-                      </li>
+                  <div className="space-y-2">
+                    {jd.requirements.preferred.map((skill, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="text-muted-foreground">
+                          <span className="font-medium">{skill.name}</span>
+                          {skill.description && (
+                            <span className="ml-2">- {skill.description}</span>
+                          )}
+                        </div>
+                        <Badge>{skill.level}</Badge>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </section>
               )}
 
-            {jd.qualifications.education &&
-              jd.qualifications.education.length > 0 && (
-                <section>
-                  <h3 className="text-lg font-semibold mb-2">Education</h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    {jd.qualifications.education.map((edu, index) => (
-                      <li key={index} className="text-muted-foreground">
-                        {edu}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
+            <section>
+              <h3 className="text-lg font-semibold mb-2">Qualifications</h3>
 
-            {jd.qualifications.experience &&
-              jd.qualifications.experience.length > 0 && (
-                <section>
-                  <h3 className="text-lg font-semibold mb-2">Experience</h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    {jd.qualifications.experience.map((exp, index) => (
-                      <li key={index} className="text-muted-foreground">
-                        {exp}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
+              {jd.qualifications.education &&
+                jd.qualifications.education.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-md font-medium mb-2">Education</h4>
+                    <ul className="list-disc list-inside space-y-1">
+                      {jd.qualifications.education.map((edu, index) => (
+                        <li key={index} className="text-muted-foreground">
+                          {edu}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-            {jd.qualifications.certifications &&
-              jd.qualifications.certifications.length > 0 && (
-                <section>
-                  <h3 className="text-lg font-semibold mb-2">Certifications</h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    {jd.qualifications.certifications.map((cert, index) => (
-                      <li key={index} className="text-muted-foreground">
-                        {cert}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
+              {jd.qualifications.experience &&
+                jd.qualifications.experience.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-md font-medium mb-2">Experience</h4>
+                    <ul className="list-disc list-inside space-y-1">
+                      {jd.qualifications.experience.map((exp, index) => (
+                        <li key={index} className="text-muted-foreground">
+                          {exp}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-            {jd.salary && (
-              <section>
-                <h3 className="text-lg font-semibold mb-2">Salary</h3>
-                <p className="text-muted-foreground">
-                  {jd.salary.range
-                    ? `${jd.salary.range.min.toLocaleString()} - ${jd.salary.range.max.toLocaleString()} ${
-                        jd.salary.currency || "USD"
-                      } per ${jd.salary.type}`
-                    : `Starting salary per ${jd.salary.type}`}
-                </p>
-              </section>
-            )}
+              {jd.qualifications.certifications &&
+                jd.qualifications.certifications.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-md font-medium mb-2">Certifications</h4>
+                    <ul className="list-disc list-inside space-y-1">
+                      {jd.qualifications.certifications.map((cert, index) => (
+                        <li key={index} className="text-muted-foreground">
+                          {cert}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+            </section>
+
+            <section>
+              <h3 className="text-lg font-semibold mb-2">Salary</h3>
+              {jd.salary?.range ? (
+                <div className="text-muted-foreground">
+                  <p>
+                    {jd.salary.range.min.toLocaleString()} -{" "}
+                    {jd.salary.range.max.toLocaleString()}{" "}
+                    {jd.salary.currency || "USD"} per{" "}
+                    {jd.salary.type || "yearly"}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-muted-foreground">Not specified</p>
+              )}
+            </section>
 
             {jd.benefits && jd.benefits.length > 0 && (
               <section>
@@ -210,41 +231,25 @@ export default function JobDescriptionView({
           </div>
         </ScrollArea>
 
-        <div className="flex items-center justify-end space-x-2 mt-6 pt-4 border-t">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDuplicate(jd)}
-            className="flex items-center"
-          >
-            <Copy className="w-4 h-4 mr-2" />
+        <div className="flex justify-end gap-2 pt-4 border-t mt-auto">
+          <Button variant="outline" size="sm" onClick={() => onDuplicate(jd)}>
+            <Copy className="h-4 w-4 mr-2" />
             Duplicate
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onExport(jd)}
-            className="flex items-center"
-          >
-            <Download className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={() => onExport(jd)}>
+            <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(jd)}
-            className="flex items-center"
-          >
-            <Edit className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={() => onEdit(jd)}>
+            <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
           <Button
             variant="destructive"
             size="sm"
             onClick={() => onDelete(jd.id)}
-            className="flex items-center"
           >
-            <Trash2 className="w-4 h-4 mr-2" />
+            <Trash2 className="h-4 w-4 mr-2" />
             Delete
           </Button>
         </div>

@@ -35,7 +35,7 @@ interface TemplateListProps {
   error: string | null;
 }
 
-export function TemplateList({
+export default function TemplateList({
   templates,
   onUseTemplate,
   isLoading,
@@ -223,7 +223,7 @@ export function TemplateList({
                         selectedVersion || selectedTemplate
                       )?.requirements.required.map((skill, i) => (
                         <li key={i} className="text-sm text-muted-foreground">
-                          {skill}
+                          {skill.name} - {skill.level} - {skill.description}
                         </li>
                       ))}
                     </ul>
@@ -246,7 +246,7 @@ export function TemplateList({
                               key={i}
                               className="text-sm text-muted-foreground"
                             >
-                              {skill}
+                              {skill.name} - {skill.level} - {skill.description}
                             </li>
                           ))}
                         </ul>

@@ -31,10 +31,10 @@ import { Label } from "@/components/ui/label";
 type RequiredSkill = {
   name: string;
   level: "beginner" | "intermediate" | "advanced" | "expert";
-  description?: string;
+  description: string;
 };
 
-type SkillInput = RequiredSkill | string;
+type SkillInput = RequiredSkill;
 
 const convertToRequiredSkill = (skill: SkillInput): RequiredSkill => {
   if (typeof skill === "string") {
@@ -54,18 +54,39 @@ const formSchema = z.object({
   employmentType: z.string().min(1, "Employment type is required"),
   jobDescription: z.string().optional(),
   responsibilities: z.array(z.string()).default([]),
-  requiredSkills: z
-    .array(
-      z.object({
-        name: z.string(),
-        level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-        description: z.string().optional(),
-      })
-    )
-    .default([]),
-  education: z.array(z.string()).default([]),
-  experience: z.array(z.string()).default([]),
-  certifications: z.array(z.string()).default([]),
+  requirements: z
+    .object({
+      required: z
+        .array(
+          z.object({
+            name: z.string(),
+            level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+            description: z.string(),
+          })
+        )
+        .default([]),
+      preferred: z
+        .array(
+          z.object({
+            name: z.string(),
+            level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+            description: z.string(),
+          })
+        )
+        .optional(),
+    })
+    .default({ required: [], preferred: [] }),
+  qualifications: z
+    .object({
+      education: z.array(z.string()).default([]),
+      experience: z.array(z.string()).default([]),
+      certifications: z.array(z.string()).default([]),
+    })
+    .default({
+      education: [],
+      experience: [],
+      certifications: [],
+    }),
   industry: z.string().min(1, "Industry is required"),
   level: z.string().min(1, "Level is required"),
   isTemplate: z.boolean().default(false),
@@ -159,15 +180,20 @@ export default function JDForm({
       location: initialTemplate?.location || "",
       employmentType: initialTemplate?.employmentType || "",
       jobDescription: initialTemplate?.description || "",
-      responsibilities: initialTemplate?.responsibilities || [""],
-      requiredSkills: Array.isArray(initialTemplate?.requirements?.required)
-        ? (initialTemplate.requirements.required as SkillInput[]).map(
-            convertToRequiredSkill
-          )
-        : [{ name: "", level: "intermediate", description: "" }],
-      education: initialTemplate?.qualifications.education || [],
-      experience: initialTemplate?.qualifications.experience || [],
-      certifications: initialTemplate?.qualifications.certifications || [],
+      responsibilities: initialTemplate?.responsibilities || [],
+      requirements: {
+        required: Array.isArray(initialTemplate?.requirements?.required)
+          ? initialTemplate.requirements.required.map(convertToRequiredSkill)
+          : [{ name: "", level: "intermediate", description: "" }],
+        preferred: Array.isArray(initialTemplate?.requirements?.preferred)
+          ? initialTemplate.requirements.preferred.map(convertToRequiredSkill)
+          : [],
+      },
+      qualifications: {
+        education: initialTemplate?.qualifications?.education || [],
+        experience: initialTemplate?.qualifications?.experience || [],
+        certifications: initialTemplate?.qualifications?.certifications || [],
+      },
       industry: initialTemplate?.metadata?.industry || "",
       level: initialTemplate?.metadata?.level || "",
       isTemplate: false,
@@ -180,7 +206,7 @@ export default function JDForm({
     remove: removeSkill,
   } = useFieldArray({
     control: form.control,
-    name: "requiredSkills",
+    name: "requirements.required",
   });
 
   useEffect(() => {
@@ -192,14 +218,19 @@ export default function JDForm({
         employmentType: initialTemplate.employmentType || "",
         jobDescription: initialTemplate.description,
         responsibilities: initialTemplate.responsibilities,
-        requiredSkills: Array.isArray(initialTemplate.requirements.required)
-          ? (initialTemplate.requirements.required as SkillInput[]).map(
-              convertToRequiredSkill
-            )
-          : [{ name: "", level: "intermediate", description: "" }],
-        education: initialTemplate.qualifications.education || [],
-        experience: initialTemplate.qualifications.experience || [],
-        certifications: initialTemplate.qualifications.certifications || [],
+        requirements: {
+          required: Array.isArray(initialTemplate.requirements.required)
+            ? initialTemplate.requirements.required.map(convertToRequiredSkill)
+            : [{ name: "", level: "intermediate", description: "" }],
+          preferred: Array.isArray(initialTemplate.requirements.preferred)
+            ? initialTemplate.requirements.preferred.map(convertToRequiredSkill)
+            : [],
+        },
+        qualifications: {
+          education: initialTemplate.qualifications.education || [],
+          experience: initialTemplate.qualifications.experience || [],
+          certifications: initialTemplate.qualifications.certifications || [],
+        },
         industry: initialTemplate.metadata.industry || "",
         level: initialTemplate.metadata.level || "",
         isTemplate: true,
@@ -562,22 +593,25 @@ export default function JDForm({
           employmentType: values.employmentType,
           description: values.jobDescription,
           responsibilities: values.responsibilities,
-          requiredSkills: values.requiredSkills.map((skill) => ({
-            name: skill.name,
-            level: skill.level,
-            description: `${skill.level} level proficiency in ${skill.name}`,
-          })),
+          requirements: {
+            required: values.requirements.required,
+            preferred: values.requirements.preferred || null,
+          },
           qualifications: {
-            education: values.education,
-            experience: values.experience,
-            certifications: values.certifications,
+            education: values.qualifications.education,
+            experience: values.qualifications.experience,
+            certifications: values.qualifications.certifications,
           },
           industry: values.industry,
           level: values.level,
-          salaryType: "yearly",
-          salaryMin: "0",
-          salaryMax: "0",
-          currency: "USD",
+          salary: {
+            range: {
+              min: 0,
+              max: 0,
+            },
+            type: "yearly",
+            currency: "USD",
+          },
         }),
       });
 
@@ -598,20 +632,15 @@ export default function JDForm({
         employmentType: generatedContent.employmentType || "",
         jobDescription: generatedContent.description,
         responsibilities: generatedContent.responsibilities,
-        requiredSkills: generatedContent.qualifications.skills.map(
-          (skill: {
-            name: string;
-            level: "beginner" | "intermediate" | "advanced" | "expert";
-            description: string;
-          }) => ({
-            name: skill.name,
-            level: skill.level,
-            description: skill.description,
-          })
-        ),
-        education: generatedContent.qualifications.education || [],
-        experience: generatedContent.qualifications.experience || [],
-        certifications: generatedContent.qualifications.certifications || [],
+        requirements: {
+          required: generatedContent.requirements.required,
+          preferred: generatedContent.requirements.preferred || [],
+        },
+        qualifications: {
+          education: generatedContent.qualifications.education,
+          experience: generatedContent.qualifications.experience,
+          certifications: generatedContent.qualifications.certifications,
+        },
         industry: generatedContent.metadata.industry || "",
         level: generatedContent.metadata.level || "",
         isTemplate: false,
@@ -619,21 +648,14 @@ export default function JDForm({
 
       toast({
         title: "Success",
-        description:
-          "Job description generated successfully. Review and click 'Save Job Description' to save it.",
+        description: "Job description generated successfully!",
       });
-
-      // Don't switch tabs or clear template yet - let user review
-      // onClearTemplate();
-      // window.dispatchEvent(new CustomEvent("switchTab", { detail: "saved" }));
     } catch (error) {
       console.error("Error generating job description:", error);
       toast({
         title: "Error",
         description:
-          error instanceof Error
-            ? error.message
-            : "Failed to generate job description",
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     } finally {
@@ -644,14 +666,15 @@ export default function JDForm({
   const handleSaveAsTemplate = async (values: FormValues) => {
     if (!session?.user?.email) {
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to create templates.",
+        title: "Authentication required",
+        description: "Please sign in to save templates.",
         variant: "destructive",
       });
       return;
     }
 
     setIsSavingTemplate(true);
+
     try {
       const templateData = {
         title: values.jobTitle,
@@ -661,32 +684,17 @@ export default function JDForm({
         description: values.jobDescription || "",
         responsibilities: values.responsibilities,
         requirements: {
-          required: values.requiredSkills.map((skill) => ({
+          required: values.requirements.required.map((skill) => ({
             name: skill.name,
             level: skill.level,
-            description:
-              skill.description ||
-              `${skill.level} level proficiency in ${skill.name}`,
+            description: skill.description,
           })),
-          preferred: [],
+          preferred: values.requirements.preferred || [],
         },
         qualifications: {
-          education: values.education,
-          experience: values.experience,
-          certifications: values.certifications,
-        },
-        salary: {
-          range: {
-            min: 0,
-            max: 0,
-          },
-          type: "yearly" as const,
-          currency: "USD",
-        },
-        company: {
-          name: "",
-          description: "",
-          culture: [],
+          education: values.qualifications.education || [],
+          experience: values.qualifications.experience || [],
+          certifications: values.qualifications.certifications || [],
         },
         metadata: {
           industry: values.industry,
@@ -710,9 +718,10 @@ export default function JDForm({
 
       toast({
         title: "Success",
-        description: "Template saved successfully.",
+        description: "Template saved successfully",
       });
 
+      // Switch to templates tab
       window.dispatchEvent(
         new CustomEvent("switchTab", { detail: "templates" })
       );
@@ -721,7 +730,9 @@ export default function JDForm({
       toast({
         title: "Error",
         description:
-          error instanceof Error ? error.message : "Failed to save template",
+          error instanceof Error
+            ? error.message
+            : "Failed to save template. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -739,35 +750,45 @@ export default function JDForm({
       return;
     }
 
-    setIsLoading(true);
+    setIsSavingTemplate(true);
     try {
+      const jobData = {
+        title: values.jobTitle,
+        department: values.department,
+        location: values.location,
+        employmentType: values.employmentType,
+        description: values.jobDescription || "",
+        responsibilities: values.responsibilities,
+        requirements: {
+          required: values.requirements.required,
+          preferred: values.requirements.preferred || null,
+        },
+        qualifications: {
+          education: values.qualifications.education,
+          experience: values.qualifications.experience,
+          certifications: values.qualifications.certifications,
+        },
+        salary: {
+          range: {
+            min: 0,
+            max: 0,
+          },
+          type: "yearly" as const,
+          currency: "USD",
+        },
+        metadata: {
+          industry: values.industry,
+          level: values.level,
+          isTemplate: false,
+        },
+      };
+
       const response = await fetch("/api/jd-developer/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          title: values.jobTitle,
-          department: values.department,
-          location: values.location,
-          employmentType: values.employmentType,
-          description: values.jobDescription,
-          responsibilities: values.responsibilities,
-          requiredSkills: values.requiredSkills.map((skill) => ({
-            name: skill.name,
-            level: skill.level,
-            description:
-              skill.description ||
-              `${skill.level} level proficiency in ${skill.name}`,
-          })),
-          qualifications: {
-            education: values.education,
-            experience: values.experience,
-            certifications: values.certifications,
-          },
-          industry: values.industry,
-          level: values.level,
-        }),
+        body: JSON.stringify(jobData),
       });
 
       if (!response.ok) {
@@ -777,23 +798,21 @@ export default function JDForm({
 
       toast({
         title: "Success",
-        description: "Job description saved successfully.",
+        description: "Job description saved successfully!",
       });
 
-      onClearTemplate();
+      // Switch to saved tab
       window.dispatchEvent(new CustomEvent("switchTab", { detail: "saved" }));
     } catch (error) {
       console.error("Error saving job description:", error);
       toast({
         title: "Error",
         description:
-          error instanceof Error
-            ? error.message
-            : "Failed to save job description",
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSavingTemplate(false);
     }
   };
 
@@ -1013,7 +1032,7 @@ export default function JDForm({
             <div key={field.id} className="flex gap-4">
               <FormField
                 control={form.control}
-                name={`requiredSkills.${index}.name`}
+                name={`requirements.required.${index}.name`}
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>
@@ -1026,7 +1045,7 @@ export default function JDForm({
 
               <FormField
                 control={form.control}
-                name={`requiredSkills.${index}.level`}
+                name={`requirements.required.${index}.level`}
                 render={({ field }) => (
                   <FormItem className="w-40">
                     <FormControl>
@@ -1054,7 +1073,7 @@ export default function JDForm({
 
               <FormField
                 control={form.control}
-                name={`requiredSkills.${index}.description`}
+                name={`requirements.required.${index}.description`}
                 render={({ field }) => (
                   <FormItem className="w-60">
                     <FormControl>
@@ -1080,16 +1099,18 @@ export default function JDForm({
 
         <FormField
           control={form.control}
-          name="education"
+          name="qualifications.education"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Education Requirements</FormLabel>
+              <FormLabel>Educational Requirements</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Enter education requirement"
-                  error={form.formState.errors.education?.message}
+                  placeholder="Enter required degree, certification, or educational qualification"
+                  error={
+                    form.formState.errors?.qualifications?.education?.message
+                  }
                   disabled={isLoading || isSavingTemplate}
                 />
               </FormControl>
@@ -1100,16 +1121,18 @@ export default function JDForm({
 
         <FormField
           control={form.control}
-          name="experience"
+          name="qualifications.experience"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Experience Requirements</FormLabel>
+              <FormLabel>Professional Experience</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Enter experience requirement"
-                  error={form.formState.errors.experience?.message}
+                  placeholder="Enter required work experience or professional background"
+                  error={
+                    form.formState.errors?.qualifications?.experience?.message
+                  }
                   disabled={isLoading || isSavingTemplate}
                 />
               </FormControl>
@@ -1120,7 +1143,7 @@ export default function JDForm({
 
         <FormField
           control={form.control}
-          name="certifications"
+          name="qualifications.certifications"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Required Certifications</FormLabel>
@@ -1129,7 +1152,10 @@ export default function JDForm({
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Enter required certification"
-                  error={form.formState.errors.certifications?.message}
+                  error={
+                    form.formState.errors?.qualifications?.certifications
+                      ?.message
+                  }
                   disabled={isLoading || isSavingTemplate}
                 />
               </FormControl>

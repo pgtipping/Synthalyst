@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import crypto from "crypto";
 
 const createTemplateSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -16,33 +17,16 @@ const createTemplateSchema = z.object({
       z.object({
         name: z.string(),
         level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-        description: z.string().optional(),
+        description: z.string(),
       })
     ),
     preferred: z.array(z.string()).optional(),
   }),
   qualifications: z.object({
-    education: z.array(z.string()).optional(),
-    experience: z.array(z.string()).optional(),
-    certifications: z.array(z.string()).optional(),
+    education: z.array(z.string()),
+    experience: z.array(z.string()),
+    certifications: z.array(z.string()),
   }),
-  salary: z
-    .object({
-      range: z.object({
-        min: z.number(),
-        max: z.number(),
-      }),
-      type: z.enum(["hourly", "monthly", "yearly"]),
-      currency: z.string().optional(),
-    })
-    .optional(),
-  company: z
-    .object({
-      name: z.string().optional(),
-      description: z.string().optional(),
-      culture: z.array(z.string()).optional(),
-    })
-    .optional(),
   metadata: z.object({
     industry: z.string(),
     level: z.string(),
@@ -149,28 +133,44 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = createTemplateSchema.parse(body);
 
-    // Save the template directly since it's already in JD format
+    // Create a content object that matches our database schema
+    const content = {
+      ...validatedData,
+      metadata: {
+        ...validatedData.metadata,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: session.user.email,
+        version: 1,
+        isLatest: true,
+        contentHash: "",
+      },
+    };
+
+    // Generate content hash
+    const contentHash = crypto
+      .createHash("sha256")
+      .update(JSON.stringify(content))
+      .digest("hex");
+
+    // Update content with hash
+    content.metadata.contentHash = contentHash;
+
+    // Save the template
     const template = await prisma.jobDescription.create({
       data: {
         title: validatedData.title,
-        content: JSON.stringify({
-          ...validatedData,
-          metadata: {
-            ...validatedData.metadata,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            createdBy: session.user.email,
-          },
-        }),
+        content: JSON.stringify(content),
         industry: validatedData.metadata.industry,
         level: validatedData.metadata.level,
         skills: validatedData.requirements.required.map((skill) => skill.name),
         userId: session.user.id,
+        contentHash: contentHash,
       },
     });
 
     return NextResponse.json(
-      { template: { id: template.id, ...validatedData } },
+      { template: { id: template.id, ...content } },
       { status: 201 }
     );
   } catch (error) {

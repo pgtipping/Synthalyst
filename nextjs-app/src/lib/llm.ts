@@ -8,22 +8,36 @@ interface GenerateJobDescriptionInput {
   employmentType: string;
   description?: string;
   responsibilities: string[];
-  requiredSkills: {
-    name: string;
-    level: "beginner" | "intermediate" | "advanced" | "expert";
+  requirements: {
+    required: {
+      name: string;
+      level: "beginner" | "intermediate" | "advanced" | "expert";
+      description: string;
+    }[];
+    preferred?: {
+      name: string;
+      level: "beginner" | "intermediate" | "advanced" | "expert";
+      description: string;
+    }[];
+  };
+  qualifications: {
+    education: string[] | null;
+    experience: string[] | null;
+    certifications: string[] | null;
+  };
+  salary?: {
+    range?: {
+      min: number;
+      max: number;
+    };
+    type: "hourly" | "monthly" | "yearly";
+    currency?: string;
+  };
+  company?: {
+    name?: string;
     description?: string;
-  }[];
-  preferredSkills?: string[];
-  education?: string[];
-  experience?: string[];
-  certifications?: string[];
-  salaryMin?: string;
-  salaryMax?: string;
-  salaryType: "hourly" | "monthly" | "yearly";
-  currency?: string;
-  companyName?: string;
-  companyDescription?: string;
-  companyCulture?: string[];
+    culture?: string[];
+  };
   industry: string;
   level: string;
   userEmail: string;
@@ -42,45 +56,16 @@ export async function generateJobDescription(
       description: input.description || "",
       responsibilities: input.responsibilities,
       requirements: {
-        required: input.requiredSkills.map((skill) => ({
-          name: skill.name,
-          level: skill.level,
-          description:
-            skill.description ||
-            `${skill.level} level proficiency in ${skill.name}`,
-        })),
-        preferred: input.preferredSkills || null,
+        required: input.requirements.required,
+        preferred: input.requirements.preferred || null,
       },
       qualifications: {
-        education: input.education || null,
-        experience: input.experience || null,
-        skills: input.requiredSkills.map((skill) => ({
-          name: skill.name,
-          level: skill.level,
-          description:
-            skill.description ||
-            `${skill.level} level proficiency in ${skill.name}`,
-        })),
-        certifications: input.certifications || null,
+        education: input.qualifications.education,
+        experience: input.qualifications.experience,
+        certifications: input.qualifications.certifications,
       },
-      salary:
-        input.salaryMin || input.salaryMax
-          ? {
-              range: {
-                min: parseInt(input.salaryMin || "0"),
-                max: parseInt(input.salaryMax || "0"),
-              },
-              type: input.salaryType,
-              currency: input.currency || null,
-            }
-          : null,
-      company: input.companyName
-        ? {
-            name: input.companyName,
-            description: input.companyDescription || null,
-            culture: input.companyCulture || null,
-          }
-        : null,
+      salary: input.salary || null,
+      company: input.company || null,
       metadata: {
         industry: input.industry || null,
         level: input.level || null,
@@ -94,41 +79,46 @@ IMPORTANT: Your response must be a valid JSON object matching this exact structu
   "title": string,
   "department": string | null,
   "location": string | null,
-  "employmentType": string | null,
+  "employmentType": string,
   "description": string,
   "responsibilities": string[],
   "requirements": {
-    "required": string[],
-    "preferred": string[] | null
-  },
-  "qualifications": {
-    "education": string[] | null,
-    "experience": string[] | null,
-    "skills": [
+    "required": [
       {
         "name": string,
         "level": "beginner" | "intermediate" | "advanced" | "expert",
         "description": string
       }
     ],
+    "preferred": [
+      {
+        "name": string,
+        "level": "beginner" | "intermediate" | "advanced" | "expert",
+        "description": string
+      }
+    ] | null
+  },
+  "qualifications": {
+    "education": string[] | null,
+    "experience": string[] | null,
     "certifications": string[] | null
   },
   "salary": {
     "range": {
       "min": number,
       "max": number
-    } | null,
+    },
     "type": "hourly" | "monthly" | "yearly",
-    "currency": string | null
+    "currency": string
   } | null,
   "company": {
-    "name": string | null,
-    "description": string | null,
-    "culture": string[] | null
+    "name": string,
+    "description": string,
+    "culture": string[]
   } | null,
   "metadata": {
-    "industry": string | null,
-    "level": string | null
+    "industry": string,
+    "level": string
   }
 }
 
@@ -145,17 +135,20 @@ Generation Guidelines:
    - Emphasize collaboration
    - Showcase growth opportunities
 
-3. Define comprehensive requirements and qualifications:
-   - Include industry-specific skills
-   - Balance technical and soft skills
-   - Incorporate modern tools and methodologies
-   - Specify clear experience levels
-   - For each required skill:
+3. Define comprehensive requirements:
+   - Place ALL skills (technical and soft) under requirements.required or requirements.preferred
+   - Include both technical and soft skills (like communication, leadership)
+   - For each skill:
      * Set appropriate competency level (beginner/intermediate/advanced/expert)
      * Provide clear description of skill requirements
      * Align with position level and responsibilities
 
-4. Professional Standards:
+4. Always include qualifications:
+   - education: Must be present (use null if not required)
+   - experience: Must be present (use null if not required)
+   - certifications: Must be present (use null if not required)
+
+5. Professional Standards:
    - Use inclusive language
    - Apply industry-standard terminology
    - Define clear progression requirements
@@ -163,7 +156,11 @@ Generation Guidelines:
    - Emphasize growth and development
    - Use action verbs and specific metrics
 
-5. CRITICAL: Output must be valid JSON matching the exact structure above`;
+6. CRITICAL:
+   - Output must be valid JSON matching the exact structure above
+   - ALL skills must be under requirements (not in qualifications)
+   - Qualifications must ONLY contain education, experience, and certifications
+   - All qualification fields must be present (use null if not required)`;
 
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,

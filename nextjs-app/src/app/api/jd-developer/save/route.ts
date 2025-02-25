@@ -12,22 +12,45 @@ const saveSchema = z.object({
   employmentType: z.string(),
   description: z.string(),
   responsibilities: z.array(z.string()),
-  requiredSkills: z.array(
-    z.object({
-      name: z.string(),
-      level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-      description: z.string(),
-    })
-  ),
-  qualifications: z
+  requirements: z.object({
+    required: z.array(
+      z.object({
+        name: z.string(),
+        level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+        description: z.string(),
+      })
+    ),
+    preferred: z
+      .array(
+        z.object({
+          name: z.string(),
+          level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+          description: z.string(),
+        })
+      )
+      .optional()
+      .nullable(),
+  }),
+  qualifications: z.object({
+    education: z.array(z.string()),
+    experience: z.array(z.string()),
+    certifications: z.array(z.string()),
+  }),
+  salary: z
     .object({
-      education: z.array(z.string()).optional(),
-      experience: z.array(z.string()).optional(),
-      certifications: z.array(z.string()).optional(),
+      range: z.object({
+        min: z.number(),
+        max: z.number(),
+      }),
+      type: z.enum(["hourly", "monthly", "yearly"]),
+      currency: z.string(),
     })
     .optional(),
-  industry: z.string(),
-  level: z.string(),
+  metadata: z.object({
+    industry: z.string(),
+    level: z.string(),
+    isTemplate: z.boolean(),
+  }),
 });
 
 // Function to generate content hash
@@ -56,17 +79,9 @@ export async function POST(request: Request) {
       employmentType: validatedData.employmentType,
       description: validatedData.description,
       responsibilities: validatedData.responsibilities,
-      requirements: {
-        required: validatedData.requiredSkills,
-        preferred: [],
-      },
-      qualifications: {
-        education: validatedData.qualifications?.education || [],
-        experience: validatedData.qualifications?.experience || [],
-        skills: validatedData.requiredSkills,
-        certifications: validatedData.qualifications?.certifications || [],
-      },
-      salary: {
+      requirements: validatedData.requirements,
+      qualifications: validatedData.qualifications,
+      salary: validatedData.salary || {
         range: {
           min: 0,
           max: 0,
@@ -76,12 +91,12 @@ export async function POST(request: Request) {
       },
       company: null,
       metadata: {
-        industry: validatedData.industry,
-        level: validatedData.level,
+        industry: validatedData.metadata.industry,
+        level: validatedData.metadata.level,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: session.user.email,
-        isTemplate: false,
+        isTemplate: validatedData.metadata.isTemplate,
         version: 1,
         isLatest: true,
       },
@@ -97,7 +112,7 @@ export async function POST(request: Request) {
         content,
         industry: jobDescriptionData.metadata.industry,
         level: jobDescriptionData.metadata.level,
-        skills: jobDescriptionData.qualifications.skills.map(
+        skills: jobDescriptionData.requirements.required.map(
           (skill) => skill.name
         ),
         userId: session.user.id,
