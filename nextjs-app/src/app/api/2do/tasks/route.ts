@@ -1,44 +1,25 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { validateRequest, handleAPIError, APIError } from "@/lib/middleware";
+import { logger } from "@/lib/logger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { z } from "zod";
 
-const createTaskSchema = z.object({
+const taskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  status: z.enum(["todo", "in-progress", "completed"]),
-  priority: z.enum(["low", "medium", "high"]),
-  dueDate: z.string(),
+  dueDate: z.string().optional(),
+  priority: z.enum(["low", "medium", "high"]).optional(),
+  status: z.enum(["todo", "in-progress", "completed"]).default("todo"),
   tags: z.array(z.string()).optional(),
-  reminderAt: z.string().optional(),
-  subtasks: z
-    .array(
-      z.object({
-        title: z.string(),
-        completed: z.boolean(),
-      })
-    )
-    .optional(),
-  attachments: z
-    .array(
-      z.object({
-        name: z.string(),
-        url: z.string(),
-        type: z.string(),
-      })
-    )
-    .optional(),
 });
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      throw new APIError("Authentication required", 401, "UNAUTHORIZED");
     }
 
     const tasks = await prisma.task.findMany({
@@ -47,21 +28,40 @@ export async function GET() {
       },
       orderBy: [
         {
-          dueDate: "asc",
+          status: "asc",
         },
         {
-          createdAt: "desc",
+          priority: "desc",
+        },
+        {
+          dueDate: "asc",
         },
       ],
     });
 
-    return NextResponse.json({ tasks });
-  } catch (error) {
-    console.error("Error fetching tasks:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch tasks" },
-      { status: 500 }
+    // Fetch tags for each task
+    const tasksWithTags = await Promise.all(
+      tasks.map(async (task) => {
+        const taskTags = await prisma.taskTag.findMany({
+          where: { taskId: task.id },
+          select: { name: true },
+        });
+        return {
+          ...task,
+          tags: taskTags.map((tag) => tag.name),
+        };
+      })
     );
+
+    logger.info("Successfully retrieved tasks", {
+      count: tasks.length,
+      userId: session.user.id,
+    });
+
+    return NextResponse.json({ tasks: tasksWithTags });
+  } catch (error) {
+    logger.error("Failed to retrieve tasks", error);
+    return handleAPIError(error);
   }
 }
 
@@ -69,38 +69,57 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      throw new APIError("Authentication required", 401, "UNAUTHORIZED");
     }
 
-    const body = await request.json();
-    const validatedData = createTaskSchema.parse(body);
+    const taskData = await validateRequest(request, taskSchema);
+    const { tags: tagNames, ...taskFields } = taskData;
 
-    const task = await prisma.task.create({
-      data: {
-        ...validatedData,
-        userId: session.user.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
+    logger.info("Creating new task", {
+      title: taskData.title,
+      userId: session.user.id,
+    });
+
+    // Create task and tags in a transaction
+    const task = await prisma.$transaction(async (tx) => {
+      // Create the task
+      const newTask = await tx.task.create({
+        data: {
+          ...taskFields,
+          userId: session.user.id,
+        },
+      });
+
+      // Create tags if provided
+      if (tagNames && tagNames.length > 0) {
+        await tx.taskTag.createMany({
+          data: tagNames.map((name) => ({
+            name,
+            taskId: newTask.id,
+          })),
+        });
+      }
+
+      // Fetch the created task's tags
+      const taskTags = await tx.taskTag.findMany({
+        where: { taskId: newTask.id },
+        select: { name: true },
+      });
+
+      return {
+        ...newTask,
+        tags: taskTags.map((tag) => tag.name),
+      };
+    });
+
+    logger.info("Successfully created task", {
+      taskId: task.id,
+      userId: session.user.id,
     });
 
     return NextResponse.json({ task }, { status: 201 });
   } catch (error) {
-    console.error("Error creating task:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: error.errors[0].message },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Failed to create task" },
-      { status: 500 }
-    );
+    logger.error("Failed to create task", error);
+    return handleAPIError(error);
   }
 }

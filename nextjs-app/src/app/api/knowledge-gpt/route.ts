@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { z } from "zod";
+import { validateRequest, handleAPIError } from "@/lib/middleware";
+import { logger } from "@/lib/logger";
+import { Groq } from "groq-sdk";
+
+const requestSchema = z.object({
+  question: z.string().min(1, "Question is required"),
+  topics: z.array(z.string()).min(1, "At least one topic is required"),
+});
 
 export async function POST(request: Request) {
   try {
-    const { question, topics } = await request.json();
+    const { question, topics } = await validateRequest(request, requestSchema);
+
+    logger.info("Processing knowledge request", { question, topics });
 
     const prompt = `
     You are an expert teacher and knowledge curator. Please provide a detailed, accurate, and educational answer to the following question. Focus on the specified topics and provide practical examples where relevant.
@@ -23,40 +33,38 @@ export async function POST(request: Request) {
     Cite reliable sources or best practices where applicable.
     `;
 
-    const response = await axios.post(
-      "https://api.groq.com/v1/chat/completions",
-      {
-        model: "llama-3.2-3b-preview",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert teacher and knowledge curator, specializing in providing clear, accurate, and educational answers.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        max_tokens: 2000,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
-          "Content-Type": "application/json",
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+
+    const response = await groq.chat.completions.create({
+      model: "mixtral-8x7b-32768",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert teacher and knowledge curator, specializing in providing clear, accurate, and educational answers.",
         },
-      }
-    );
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      max_tokens: 2000,
+      temperature: 0.7,
+    });
+
+    if (!response.choices?.[0]?.message?.content) {
+      throw new Error("Invalid response from LLM");
+    }
+
+    logger.info("Successfully generated knowledge response");
 
     return NextResponse.json({
-      answer: response.data.choices[0].message.content,
+      answer: response.choices[0].message.content,
     });
   } catch (error) {
-    console.error("Knowledge GPT error:", error);
-    return NextResponse.json(
-      { error: "Failed to get answer" },
-      { status: 500 }
-    );
+    logger.error("Failed to process knowledge request", error);
+    return handleAPIError(error);
   }
 }

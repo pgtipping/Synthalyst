@@ -21,20 +21,17 @@ interface RouteHandlerConfig<T = unknown> {
   requireAuth?: boolean;
 }
 
-export type ApiHandler<T = unknown> = (
+export type ApiHandler<T = unknown, P = Record<string, string>> = (
   req: NextRequest,
-  params: { params: Record<string, string> },
+  context: { params: P },
   body?: T
 ) => Promise<NextResponse<ApiResponse>>;
 
-export function createHandler<T = unknown>(
-  handler: ApiHandler<T>,
+export function createHandler<T = unknown, P = Record<string, string>>(
+  handler: ApiHandler<T, P>,
   config: RouteHandlerConfig<T> = {}
 ) {
-  return async (
-    req: NextRequest,
-    params: { params: Record<string, string> }
-  ) => {
+  return async (req: NextRequest, context: { params: P }) => {
     try {
       // Method validation
       const allowedMethods: HttpMethod[] = [
@@ -87,7 +84,7 @@ export function createHandler<T = unknown>(
       }
 
       // Call the actual route handler
-      const response = await handler(req, params, body);
+      const response = await handler(req, context, body);
       return response;
     } catch (error) {
       return errorHandler(error);

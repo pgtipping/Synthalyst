@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { z } from "zod";
+import { validateRequest, handleAPIError } from "@/lib/middleware";
+import { logger } from "@/lib/logger";
+import { Groq } from "groq-sdk";
 
-// Blog post generation with advanced prompt engineering
-const generateBlogPost = async (
-  topic: string,
-  style: string,
-  audience: string
-) => {
+const blogPostSchema = z.object({
+  topic: z.string().min(1, "Topic is required"),
+  style: z.string().min(1, "Style is required"),
+  audience: z.string().min(1, "Target audience is required"),
+});
+
+export async function POST(request: Request) {
   try {
+    const { topic, style, audience } = await validateRequest(
+      request,
+      blogPostSchema
+    );
+
+    logger.info("Generating blog post", { topic, style, audience });
+
     const prompt = `
     Write a comprehensive, engaging blog post about "${topic}".
 
@@ -27,66 +38,37 @@ const generateBlogPost = async (
     - Approximately 800-1200 words long
     `;
 
-    const response = await axios.post(
-      "https://api.groq.com/v1/chat/completions",
-      {
-        model: "llama-3.2-3b-preview", // Groq API model name
-        messages: [
-          {
-            role: "system",
-            content: "You are a professional blog content generator.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        max_tokens: 1500,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
-          "Content-Type": "application/json",
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+
+    const response = await groq.chat.completions.create({
+      model: "mixtral-8x7b-32768",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional blog content generator.",
         },
-      }
-    );
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      max_tokens: 1500,
+      temperature: 0.7,
+    });
 
-    return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error("Blog post generation error:", error);
-    throw new Error("Failed to generate blog post");
-  }
-};
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const {
-      topic,
-      style = "informative",
-      audience = "general professionals",
-    } = body;
-
-    if (!topic) {
-      return NextResponse.json({ error: "Topic is required" }, { status: 400 });
+    if (!response.choices?.[0]?.message?.content) {
+      throw new Error("Failed to generate blog post content");
     }
 
-    const blogPost = await generateBlogPost(topic, style, audience);
+    logger.info("Successfully generated blog post");
 
     return NextResponse.json({
-      blogPost,
-      metadata: {
-        topic,
-        style,
-        audience,
-        generatedAt: new Date().toISOString(),
-      },
+      content: response.choices[0].message.content,
     });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to generate blog post" },
-      { status: 500 }
-    );
+    logger.error("Failed to generate blog post", error);
+    return handleAPIError(error);
   }
 }

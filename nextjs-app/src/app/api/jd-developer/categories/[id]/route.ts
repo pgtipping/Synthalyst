@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { type NextRequest } from "next/server";
+
+type Context = {
+  params: { id: string };
+};
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: Context
+): Promise<NextResponse> {
   try {
-    const { id } = params;
+    const { id } = context.params;
     const body = await request.json();
     const { name, description, color } = body;
 
@@ -37,11 +42,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: Context
+): Promise<NextResponse> {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     await prisma.templateCategory.delete({
       where: { id },

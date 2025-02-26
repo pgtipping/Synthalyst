@@ -8,9 +8,15 @@ import {
 import { ConflictError, NotFoundError } from "@/lib/errors";
 import slugify from "slugify";
 
-export const GET = createHandler(async (req: NextRequest, { params }) => {
+type Context = {
+  params: { slug: string };
+};
+
+export const GET = createHandler(async (req: NextRequest, context: Context) => {
+  const { slug } = context.params;
+
   const category = await prisma.category.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       _count: {
         select: {
@@ -28,11 +34,13 @@ export const GET = createHandler(async (req: NextRequest, { params }) => {
 });
 
 export const PATCH = createHandler<UpdateCategoryInput>(
-  async (req: NextRequest, { params }, body) => {
+  async (req: NextRequest, context: Context, body) => {
     if (!body) throw new Error("Request body is required");
 
+    const { slug: paramSlug } = context.params;
+
     const category = await prisma.category.findUnique({
-      where: { slug: params.slug },
+      where: { slug: paramSlug },
     });
 
     if (!category) {
@@ -89,9 +97,11 @@ export const PATCH = createHandler<UpdateCategoryInput>(
 );
 
 export const DELETE = createHandler(
-  async (req: NextRequest, { params }) => {
+  async (req: NextRequest, context: Context) => {
+    const { slug } = context.params;
+
     const category = await prisma.category.findUnique({
-      where: { slug: params.slug },
+      where: { slug },
       include: {
         _count: {
           select: {

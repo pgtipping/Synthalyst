@@ -1,18 +1,31 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
+import { validateRequest, handleAPIError, APIError } from "@/lib/middleware";
+import { logger } from "@/lib/logger";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
 });
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
-    const { name, email, password } = signupSchema.parse(body);
+    const { name, email, password } = await validateRequest(
+      request,
+      signupSchema,
+      false // Don't require authentication for signup
+    );
+
+    logger.info("Processing signup request", { email });
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -20,10 +33,7 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 400 }
-      );
+      throw new APIError("User already exists", 400, "USER_EXISTS");
     }
 
     // Hash password
@@ -40,24 +50,25 @@ export async function POST(req: Request) {
         id: true,
         name: true,
         email: true,
-        image: true,
+        createdAt: true,
       },
     });
 
-    return NextResponse.json({ user }, { status: 201 });
-  } catch (error) {
-    console.error("Signup error:", error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: error.errors[0].message },
-        { status: 400 }
-      );
-    }
+    logger.info("User created successfully", { userId: user.id });
 
     return NextResponse.json(
-      { error: "Failed to create account" },
-      { status: 500 }
+      {
+        message: "User created successfully",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+      },
+      { status: 201 }
     );
+  } catch (error) {
+    logger.error("Failed to create user", error);
+    return handleAPIError(error);
   }
 }
