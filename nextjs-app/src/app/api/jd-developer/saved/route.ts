@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { type NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -44,9 +45,9 @@ export async function GET() {
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -56,8 +57,10 @@ export async function DELETE(
       );
     }
 
+    const { id } = await props.params;
+
     const jobDescription = await prisma.jobDescription.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!jobDescription) {
@@ -75,7 +78,7 @@ export async function DELETE(
     }
 
     await prisma.jobDescription.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

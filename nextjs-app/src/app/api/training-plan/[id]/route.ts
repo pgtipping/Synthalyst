@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -30,11 +30,52 @@ const updatePlanSchema = z.object({
   difficulty: z.string().optional(),
 });
 
+type TrainingPlanContent = {
+  targetAudience?: {
+    level?: string;
+    prerequisites?: string[];
+    idealFor?: string[];
+  };
+  duration?: {
+    total?: string;
+    breakdown?: {
+      hoursPerSection?: string;
+      weeksToComplete?: string;
+    };
+  };
+  learningStyle?: {
+    primary?: string;
+    methods?: string[];
+    ratio?: {
+      theory: number;
+      practical: number;
+    };
+  };
+  materials?: {
+    required?: string[];
+    optional?: string[];
+    provided?: string[];
+  };
+  certification?: {
+    type?: string;
+    requirements?: string[];
+    validityPeriod?: string;
+  };
+  metadata?: {
+    updatedAt: string;
+    industry?: string;
+    category?: string;
+    tags?: string[];
+    difficulty?: string;
+  };
+};
+
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await props.params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -44,7 +85,7 @@ export async function PATCH(
     }
 
     const plan = await prisma.trainingPlan.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!plan) {
@@ -147,7 +188,7 @@ export async function PATCH(
 
     // Update the training plan
     const updatedPlan = await prisma.trainingPlan.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(validatedData.title && { title: validatedData.title }),
         ...(validatedData.description && {
@@ -156,14 +197,14 @@ export async function PATCH(
         ...(validatedData.objectives && {
           objectives: validatedData.objectives,
         }),
-        content: content as any, // Prisma will handle the JSON serialization
+        content: JSON.stringify(content),
       },
     });
 
     // Transform the plan to include parsed content
     const transformedPlan = {
       ...updatedPlan,
-      content: updatedPlan.content as unknown as Record<string, unknown>, // Safe cast since we know the content structure
+      content: JSON.parse(updatedPlan.content as string) as TrainingPlanContent,
     };
 
     return NextResponse.json({ plan: transformedPlan });
@@ -185,10 +226,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await props.params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -198,7 +240,7 @@ export async function DELETE(
     }
 
     const plan = await prisma.trainingPlan.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!plan) {
@@ -216,7 +258,7 @@ export async function DELETE(
     }
 
     await prisma.trainingPlan.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

@@ -23,7 +23,7 @@ interface RouteHandlerConfig<T = unknown> {
 
 export type ApiHandler<T = unknown, P = Record<string, string>> = (
   req: NextRequest,
-  context: { params: P },
+  props: { params: Promise<P> },
   body?: T
 ) => Promise<NextResponse<ApiResponse>>;
 
@@ -31,7 +31,7 @@ export function createHandler<T = unknown, P = Record<string, string>>(
   handler: ApiHandler<T, P>,
   config: RouteHandlerConfig<T> = {}
 ) {
-  return async (req: NextRequest, context: { params: P }) => {
+  return async (req: NextRequest, props: { params: Promise<P> }) => {
     try {
       // Method validation
       const allowedMethods: HttpMethod[] = [
@@ -84,7 +84,7 @@ export function createHandler<T = unknown, P = Record<string, string>>(
       }
 
       // Call the actual route handler
-      const response = await handler(req, context, body);
+      const response = await handler(req, props, body);
       return response;
     } catch (error) {
       return errorHandler(error);

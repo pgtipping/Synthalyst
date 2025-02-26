@@ -8,36 +8,38 @@ import {
 import { ConflictError, NotFoundError } from "@/lib/errors";
 import slugify from "slugify";
 
-type Context = {
-  params: { slug: string };
-};
+export const GET = createHandler(
+  async (req: NextRequest, props: { params: Promise<{ slug: string }> }) => {
+    const { slug } = await props.params;
 
-export const GET = createHandler(async (req: NextRequest, context: Context) => {
-  const { slug } = context.params;
-
-  const category = await prisma.category.findUnique({
-    where: { slug },
-    include: {
-      _count: {
-        select: {
-          posts: true,
+    const category = await prisma.category.findUnique({
+      where: { slug },
+      include: {
+        _count: {
+          select: {
+            posts: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (!category) {
-    throw new NotFoundError("Category not found");
+    if (!category) {
+      throw new NotFoundError("Category not found");
+    }
+
+    return successResponse(category);
   }
-
-  return successResponse(category);
-});
+);
 
 export const PATCH = createHandler<UpdateCategoryInput>(
-  async (req: NextRequest, context: Context, body) => {
+  async (
+    req: NextRequest,
+    props: { params: Promise<{ slug: string }> },
+    body
+  ) => {
     if (!body) throw new Error("Request body is required");
 
-    const { slug: paramSlug } = context.params;
+    const { slug: paramSlug } = await props.params;
 
     const category = await prisma.category.findUnique({
       where: { slug: paramSlug },
@@ -97,8 +99,8 @@ export const PATCH = createHandler<UpdateCategoryInput>(
 );
 
 export const DELETE = createHandler(
-  async (req: NextRequest, context: Context) => {
-    const { slug } = context.params;
+  async (req: NextRequest, props: { params: Promise<{ slug: string }> }) => {
+    const { slug } = await props.params;
 
     const category = await prisma.category.findUnique({
       where: { slug },

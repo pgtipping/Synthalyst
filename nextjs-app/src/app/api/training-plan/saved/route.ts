@@ -44,10 +44,7 @@ export async function GET() {
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -57,8 +54,18 @@ export async function DELETE(
       );
     }
 
+    // Get the ID from the URL
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+    if (!id) {
+      return NextResponse.json(
+        { error: "Plan ID is required" },
+        { status: 400 }
+      );
+    }
+
     const plan = await prisma.trainingPlan.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!plan) {
@@ -76,10 +83,10 @@ export async function DELETE(
     }
 
     await prisma.trainingPlan.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: "Plan deleted successfully" });
   } catch (error) {
     console.error("Error deleting training plan:", error);
     return NextResponse.json(

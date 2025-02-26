@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNewVersion } from "@/lib/templates";
 import { z } from "zod";
+import { type NextRequest } from "next/server";
 
 const updateTemplateSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -35,9 +36,9 @@ const updateTemplateSchema = z.object({
 });
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -47,8 +48,10 @@ export async function DELETE(
       );
     }
 
+    const { id } = await props.params;
+
     const template = await prisma.jobDescription.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!template) {
@@ -76,7 +79,7 @@ export async function DELETE(
     }
 
     await prisma.jobDescription.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
@@ -90,9 +93,9 @@ export async function DELETE(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -102,14 +105,11 @@ export async function PUT(
       );
     }
 
+    const { id } = await props.params;
     const body = await request.json();
     const validatedData = updateTemplateSchema.parse(body);
 
-    const result = await createNewVersion(
-      validatedData,
-      params.id,
-      session.user.id
-    );
+    const result = await createNewVersion(validatedData, id, session.user.id);
 
     if (result.type === "unchanged") {
       return NextResponse.json(

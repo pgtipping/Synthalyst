@@ -3,11 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseJobDescription } from "@/lib/templates";
+import { type NextRequest } from "next/server";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -17,9 +18,11 @@ export async function GET(
       );
     }
 
+    const { id } = await props.params;
+
     // Get the template and its version history
     const template = await prisma.jobDescription.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!template) {

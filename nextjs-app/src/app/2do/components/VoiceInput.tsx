@@ -5,52 +5,70 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff } from "lucide-react";
 
 interface VoiceInputProps {
-  isRecording: boolean;
-  onStart: () => void;
-  onStop: () => void;
+  isListening: boolean;
+  onListeningChange: (isListening: boolean) => void;
   onTranscript: (transcript: string) => void;
 }
 
-export default function VoiceInput({
-  isRecording,
-  onStart,
-  onStop,
+interface SpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  onresult: (event: {
+    results: {
+      [key: number]: {
+        [key: number]: { transcript: string; isFinal: boolean };
+      };
+    };
+  }) => void;
+  onerror: (event: { error: string }) => void;
+  onend: () => void;
+}
+
+// @ts-expect-error - Web Speech API types are not fully supported in TypeScript
+declare global {
+  interface Window {
+    SpeechRecognition: { new (): SpeechRecognitionInstance };
+    webkitSpeechRecognition: { new (): SpeechRecognitionInstance };
+  }
+}
+
+const VoiceInput = ({
+  isListening,
+  onListeningChange,
   onTranscript,
-}: VoiceInputProps) {
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+}: VoiceInputProps) => {
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "SpeechRecognition" in window) {
-      recognitionRef.current = new window.SpeechRecognition();
-    } else if (
+    if (
       typeof window !== "undefined" &&
-      "webkitSpeechRecognition" in window
+      (window.SpeechRecognition || window.webkitSpeechRecognition)
     ) {
-      recognitionRef.current = new window.webkitSpeechRecognition();
-    }
-
-    if (recognitionRef.current) {
+      const SpeechRecognitionImpl =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognitionImpl();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = "en-US";
 
       recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0].transcript)
-          .join(" ");
-
-        if (event.results[0].isFinal) {
-          onTranscript(transcript);
+        const results = event.results;
+        const lastResult = results[results.length - 1];
+        if (lastResult && lastResult[0] && lastResult[0].isFinal) {
+          onTranscript(lastResult[0].transcript);
         }
       };
 
       recognitionRef.current.onerror = (event) => {
         console.error("Speech recognition error:", event.error);
-        onStop();
+        onListeningChange(false);
       };
 
       recognitionRef.current.onend = () => {
-        onStop();
+        onListeningChange(false);
       };
     }
 
@@ -59,48 +77,32 @@ export default function VoiceInput({
         recognitionRef.current.stop();
       }
     };
-  }, [onStop, onTranscript]);
+  }, [onListeningChange, onTranscript]);
 
-  const handleToggleRecording = () => {
-    if (!recognitionRef.current) {
-      console.error("Speech recognition not supported");
-      return;
+  useEffect(() => {
+    if (recognitionRef.current) {
+      if (isListening) {
+        recognitionRef.current.start();
+      } else {
+        recognitionRef.current.stop();
+      }
     }
-
-    if (isRecording) {
-      recognitionRef.current.stop();
-      onStop();
-    } else {
-      recognitionRef.current.start();
-      onStart();
-    }
-  };
-
-  if (!recognitionRef.current) {
-    return (
-      <Button variant="outline" disabled>
-        <MicOff className="h-4 w-4 mr-2" />
-        Voice Input Not Supported
-      </Button>
-    );
-  }
+  }, [isListening]);
 
   return (
     <Button
-      variant={isRecording ? "destructive" : "outline"}
-      onClick={handleToggleRecording}
+      variant="outline"
+      size="icon"
+      onClick={() => onListeningChange(!isListening)}
+      className={isListening ? "bg-red-100 hover:bg-red-200" : ""}
     >
-      {isRecording ? (
-        <>
-          <MicOff className="h-4 w-4 mr-2" />
-          Stop Recording
-        </>
+      {isListening ? (
+        <MicOff className="h-4 w-4" />
       ) : (
-        <>
-          <Mic className="h-4 w-4 mr-2" />
-          Start Recording
-        </>
+        <Mic className="h-4 w-4" />
       )}
     </Button>
   );
-}
+};
+
+export default VoiceInput;

@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
+import { type NextRequest } from "next/server";
 
 const prisma = new PrismaClient();
 
 export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+  request: NextRequest,
+  props: { params: Promise<{ slug: string }> }
+): Promise<NextResponse> {
   try {
     const session = await getServerSession();
 
@@ -18,8 +19,10 @@ export async function POST(
       );
     }
 
+    const { slug } = await props.params;
+
     const post = await prisma.post.findUnique({
-      where: { slug: params.slug },
+      where: { slug },
     });
 
     if (!post) {
@@ -27,7 +30,7 @@ export async function POST(
     }
 
     const updatedPost = await prisma.post.update({
-      where: { slug: params.slug },
+      where: { slug },
       data: {
         likes: post.likes + 1,
       },
