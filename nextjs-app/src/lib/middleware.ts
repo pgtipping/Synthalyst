@@ -23,7 +23,8 @@ export async function validateRequest<T>(
 ): Promise<T> {
   try {
     // Rate limiting
-    const ip = headers().get("x-forwarded-for") ?? "127.0.0.1";
+    const headersList = await headers();
+    const ip = headersList.get("x-forwarded-for") ?? "127.0.0.1";
     const { success } = await rateLimit(ip);
     if (!success) {
       throw new APIError("Too many requests", 429, "RATE_LIMIT_EXCEEDED");
@@ -58,18 +59,22 @@ export function handleAPIError(error: unknown) {
   if (error instanceof APIError) {
     return NextResponse.json(
       {
-        error: error.message,
-        code: error.code,
+        error: {
+          message: error.message,
+          code: error.code,
+        },
       },
       { status: error.statusCode }
     );
   }
 
-  // Default error response
+  // Handle unexpected errors
   return NextResponse.json(
     {
-      error: "Internal server error",
-      code: "INTERNAL_SERVER_ERROR",
+      error: {
+        message: "Internal server error",
+        code: "INTERNAL_SERVER_ERROR",
+      },
     },
     { status: 500 }
   );

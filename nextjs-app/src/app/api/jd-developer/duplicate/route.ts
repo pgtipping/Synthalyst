@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createHash } from "crypto";
 
 export async function POST(request: Request) {
   try {
@@ -47,11 +48,18 @@ export async function POST(request: Request) {
       },
     };
 
+    // Generate content hash
+    const contentString = JSON.stringify(newContent);
+    const contentHash = createHash("sha256")
+      .update(contentString)
+      .digest("hex");
+
     // Save the duplicate
     const duplicateJD = await prisma.jobDescription.create({
       data: {
         title: `${originalJD.title} (Copy)`,
-        content: JSON.stringify(newContent),
+        content: contentString,
+        contentHash,
         industry: originalJD.industry,
         level: originalJD.level,
         skills: originalJD.skills,

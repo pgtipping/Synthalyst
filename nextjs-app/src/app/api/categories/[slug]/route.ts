@@ -8,7 +8,7 @@ import {
 import { ConflictError, NotFoundError } from "@/lib/errors";
 import slugify from "slugify";
 
-export const GET = createHandler(
+export const GET = createHandler<void, { slug: string }>(
   async (req: NextRequest, props: { params: Promise<{ slug: string }> }) => {
     const { slug } = await props.params;
 
@@ -31,7 +31,7 @@ export const GET = createHandler(
   }
 );
 
-export const PATCH = createHandler<UpdateCategoryInput>(
+export const PATCH = createHandler<UpdateCategoryInput, { slug: string }>(
   async (
     req: NextRequest,
     props: { params: Promise<{ slug: string }> },
@@ -98,7 +98,7 @@ export const PATCH = createHandler<UpdateCategoryInput>(
   }
 );
 
-export const DELETE = createHandler(
+export const DELETE = createHandler<void, { slug: string }>(
   async (req: NextRequest, props: { params: Promise<{ slug: string }> }) => {
     const { slug } = await props.params;
 

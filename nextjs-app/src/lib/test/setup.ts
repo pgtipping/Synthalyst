@@ -1,6 +1,8 @@
 import { prisma } from "../prisma";
 import { hash } from "bcryptjs";
 
+const MAX_RETRIES = 3;
+
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -217,61 +219,27 @@ export async function logDatabaseState() {
   console.log("\n===================\n");
 }
 
-interface SectionState {
-  isLoading: boolean;
-  error: string | null;
-  retryCount: number;
-}
-
-type SectionStateDispatch = React.Dispatch<React.SetStateAction<SectionState>>;
-type SectionStateEntry = [SectionState, SectionStateDispatch];
-
-// Retry handlers
-const handleRetry = async (
-  section: "featured" | "recent" | "popular",
-  fetchFn: () => Promise<void>
-) => {
-  const stateMap: Record<string, SectionStateEntry> = {
-    featured: [featuredState, setFeaturedState],
-    recent: [recentState, setRecentState],
-    popular: [popularState, setPopularState],
-  };
-
-  const [state, setState] = stateMap[section];
-
-  if (state.retryCount < MAX_RETRIES) {
-    setState((prev: SectionState) => ({
-      ...prev,
-      retryCount: prev.retryCount + 1,
-    }));
-    await fetchFn();
-  }
-};
-
-// Fetch helper with retry logic
-const fetchWithRetry = async <T>(url: string, retryCount = 0): Promise<T[]> => {
+export async function fetchWithRetry<T>(
+  url: string,
+  retryCount = 0
+): Promise<T[]> {
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const data = await response.json();
-
-    // Validate data structure
-    if (!data?.data?.posts || !Array.isArray(data.data.posts)) {
-      throw new Error("Invalid response data structure");
-    }
-
-    return data.data.posts as T[];
+    return await response.json();
   } catch (error) {
     if (retryCount < MAX_RETRIES) {
-      console.log(`Retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`);
-      await delay(RETRY_DELAY * Math.pow(2, retryCount)); // Exponential backoff
-      return fetchWithRetry<T>(url, retryCount + 1);
+      console.log(
+        `Retrying fetch (attempt ${retryCount + 1}/${MAX_RETRIES})...`
+      );
+      await sleep(1000 * Math.pow(2, retryCount)); // Exponential backoff
+      return fetchWithRetry(url, retryCount + 1);
     }
     throw error;
   }
-};
+}
 
 export async function createTestUserWithPassword(
   override: Partial<{ email: string; name: string; password: string }> = {}
@@ -279,7 +247,7 @@ export async function createTestUserWithPassword(
   const defaultUser = {
     email: "test@example.com",
     name: "Test User",
-    password: "testpassword123",
+    password: "password123",
     ...override,
   };
 
@@ -293,9 +261,9 @@ export async function createTestUserWithPassword(
         emailVerified: new Date(),
       },
     });
-    return { user, password: defaultUser.password };
+    return { ...user, password: defaultUser.password };
   } catch (error) {
-    console.error("Error creating test user:", error);
+    console.error("Error creating test user with password:", error);
     throw error;
   }
 }

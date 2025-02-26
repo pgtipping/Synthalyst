@@ -82,17 +82,28 @@ export function TemplateVersionComparison({
           {/* Required Skills */}
           <div>
             <h4 className="text-sm font-medium mb-2">Required Skills</h4>
-            <ul className="list-disc pl-4 space-y-1">
+            <ul className="list-disc pl-4 space-y-2">
               {version.requirements.required.map((skill, i) => (
                 <li
                   key={i}
                   className={
-                    isNew && !oldVersion.requirements.required.includes(skill)
+                    isNew &&
+                    !oldVersion.requirements.required.some(
+                      (oldSkill) => oldSkill.name === skill.name
+                    )
                       ? "text-green-600 dark:text-green-400"
                       : ""
                   }
                 >
-                  {skill}
+                  <div className="flex items-center">
+                    <span className="font-medium">{skill.name}</span>
+                    <Badge variant="secondary" className="ml-2">
+                      {skill.level}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {skill.description}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -103,18 +114,28 @@ export function TemplateVersionComparison({
             version.requirements.preferred.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium mb-2">Preferred Skills</h4>
-                <ul className="list-disc pl-4 space-y-1">
+                <ul className="list-disc pl-4 space-y-2">
                   {version.requirements.preferred.map((skill, i) => (
                     <li
                       key={i}
                       className={
                         isNew &&
-                        !oldVersion.requirements.preferred?.includes(skill)
+                        !oldVersion.requirements.preferred?.some(
+                          (oldSkill) => oldSkill.name === skill.name
+                        )
                           ? "text-green-600 dark:text-green-400"
                           : ""
                       }
                     >
-                      {skill}
+                      <div className="flex items-center">
+                        <span className="font-medium">{skill.name}</span>
+                        <Badge variant="secondary" className="ml-2">
+                          {skill.level}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {skill.description}
+                      </p>
                     </li>
                   ))}
                 </ul>

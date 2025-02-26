@@ -8,6 +8,7 @@ import {
 } from "@/lib/validations/category";
 import { ConflictError } from "@/lib/errors";
 import slugify from "slugify";
+import { Prisma } from "@prisma/client";
 
 export const GET = createHandler(async (req: NextRequest) => {
   const url = new URL(req.url);
@@ -21,11 +22,16 @@ export const GET = createHandler(async (req: NextRequest) => {
   });
 
   // Build where clause
-  const where = {
+  const where: Prisma.CategoryWhereInput = {
     ...(searchQuery && {
       OR: [
-        { name: { contains: searchQuery, mode: "insensitive" } },
-        { description: { contains: searchQuery, mode: "insensitive" } },
+        { name: { contains: searchQuery, mode: Prisma.QueryMode.insensitive } },
+        {
+          description: {
+            contains: searchQuery,
+            mode: Prisma.QueryMode.insensitive,
+          },
+        },
       ],
     }),
   };

@@ -10,10 +10,16 @@ const basePostSchema = z.object({
   authorEmail: z.string().email("Invalid author email"),
 });
 
-export const createPostSchema = basePostSchema.extend({
-  published: z.boolean().default(false),
-  featured: z.boolean().default(false),
-});
+export const createPostSchema = basePostSchema
+  .extend({
+    published: z.boolean(),
+    featured: z.boolean(),
+  })
+  .transform((data) => ({
+    ...data,
+    published: data.published ?? false,
+    featured: data.featured ?? false,
+  }));
 
 export const updatePostSchema = basePostSchema.extend({
   published: z.boolean().optional(),
