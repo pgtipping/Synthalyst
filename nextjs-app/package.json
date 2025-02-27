@@ -20,7 +20,8 @@
     "test-prod-signup-api-direct": "ts-node scripts/test-prod-signup-api-direct.ts",
     "deploy": "./scripts/deploy-with-logging.sh",
     "logs": "./scripts/check-vercel-logs.sh",
-    "signup-logs": "./scripts/check-signup-errors.sh"
+    "signup-logs": "./scripts/check-signup-errors.sh",
+    "apply-migrations": "node --experimental-modules scripts/apply-prod-migrations.mjs"
   },
   "dependencies": {
     "@botpress/client": "0.2.0",
