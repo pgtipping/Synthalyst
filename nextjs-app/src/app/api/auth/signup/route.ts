@@ -19,13 +19,15 @@ const signupSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    console.log("Starting signup process...");
+
     const { name, email, password } = await validateRequest(
       request,
       signupSchema,
       false // Don't require authentication for signup
     );
 
-    logger.info("Processing signup request", { email });
+    console.log("Request validated, checking for existing user...");
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -33,11 +35,16 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
+      console.log("User already exists:", email);
       throw new APIError("User already exists", 400, "USER_EXISTS");
     }
 
+    console.log("User doesn't exist, hashing password...");
+
     // Hash password
     const hashedPassword = await hash(password, 12);
+
+    console.log("Password hashed, creating user...");
 
     // Create user
     const user = await prisma.user.create({
@@ -54,7 +61,7 @@ export async function POST(request: Request) {
       },
     });
 
-    logger.info("User created successfully", { userId: user.id });
+    console.log("User created successfully:", user.id);
 
     return NextResponse.json(
       {
@@ -68,7 +75,14 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    logger.error("Failed to create user", error);
+    console.error("Signup error:", error);
+    if (error instanceof Error) {
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    }
     return handleAPIError(error);
   }
 }
