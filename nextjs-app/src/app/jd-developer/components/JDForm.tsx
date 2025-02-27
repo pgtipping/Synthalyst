@@ -47,50 +47,77 @@ const convertToRequiredSkill = (skill: SkillInput): RequiredSkill => {
   return skill;
 };
 
-const formSchema = z.object({
-  jobTitle: z.string().min(1, "Job title is required"),
-  department: z.string().min(1, "Department is required"),
-  location: z.string().min(1, "Location is required"),
-  employmentType: z.string().min(1, "Employment type is required"),
-  jobDescription: z.string().optional(),
-  responsibilities: z.array(z.string()).default([]),
-  requirements: z
-    .object({
-      required: z
-        .array(
-          z.object({
-            name: z.string(),
-            level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-            description: z.string(),
-          })
-        )
-        .default([]),
-      preferred: z
-        .array(
-          z.object({
-            name: z.string(),
-            level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-            description: z.string(),
-          })
-        )
-        .optional(),
-    })
-    .default({ required: [], preferred: [] }),
-  qualifications: z
-    .object({
-      education: z.array(z.string()).default([]),
-      experience: z.array(z.string()).default([]),
-      certifications: z.array(z.string()).default([]),
-    })
-    .default({
-      education: [],
-      experience: [],
-      certifications: [],
-    }),
-  industry: z.string().min(1, "Industry is required"),
-  level: z.string().min(1, "Level is required"),
-  isTemplate: z.boolean().default(false),
-});
+const formSchema = z
+  .object({
+    jobTitle: z.string().min(1, "Job title is required"),
+    department: z
+      .string()
+      .optional()
+      .transform((val) => {
+        // Make department optional for CEO positions
+        const isCEOPosition =
+          val?.toLowerCase().includes("ceo") ||
+          val?.toLowerCase().includes("chief executive officer");
+        return isCEOPosition ? undefined : val;
+      }),
+    location: z.string().min(1, "Location is required"),
+    employmentType: z.string().min(1, "Employment type is required"),
+    jobDescription: z.string().optional(),
+    responsibilities: z.array(z.string()).default([]),
+    requirements: z
+      .object({
+        required: z
+          .array(
+            z.object({
+              name: z.string(),
+              level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+              description: z.string(),
+            })
+          )
+          .default([]),
+        preferred: z
+          .array(
+            z.object({
+              name: z.string(),
+              level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+              description: z.string(),
+            })
+          )
+          .optional(),
+      })
+      .default({ required: [], preferred: [] }),
+    qualifications: z
+      .object({
+        education: z.array(z.string()).default([]),
+        experience: z.array(z.string()).default([]),
+        certifications: z.array(z.string()).default([]),
+      })
+      .default({
+        education: [],
+        experience: [],
+        certifications: [],
+      }),
+    industry: z.string().min(1, "Industry is required"),
+    level: z.string().min(1, "Level is required"),
+    isTemplate: z.boolean().default(false),
+  })
+  .refine(
+    (data) => {
+      // If it's a CEO position, department is not required
+      const isCEOPosition =
+        data.jobTitle.toLowerCase().includes("ceo") ||
+        data.jobTitle.toLowerCase().includes("chief executive officer");
+      if (isCEOPosition) {
+        return true;
+      }
+      // For non-CEO positions, department is required
+      return data.department && data.department.length > 0;
+    },
+    {
+      message: "Department is required for non-CEO positions",
+      path: ["department"],
+    }
+  );
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -591,16 +618,16 @@ export default function JDForm({
           department: values.department,
           location: values.location,
           employmentType: values.employmentType,
-          description: values.jobDescription,
-          responsibilities: values.responsibilities,
+          description: values.jobDescription || "",
+          responsibilities: values.responsibilities || [],
           requirements: {
-            required: values.requirements.required,
-            preferred: values.requirements.preferred || null,
+            required: values.requirements.required || [],
+            preferred: values.requirements.preferred || [],
           },
           qualifications: {
-            education: values.qualifications.education,
-            experience: values.qualifications.experience,
-            certifications: values.qualifications.certifications,
+            education: values.qualifications.education || [],
+            experience: values.qualifications.experience || [],
+            certifications: values.qualifications.certifications || [],
           },
           industry: values.industry,
           level: values.level,
@@ -682,14 +709,17 @@ export default function JDForm({
         location: values.location,
         employmentType: values.employmentType,
         description: values.jobDescription || "",
-        responsibilities: values.responsibilities,
+        responsibilities: values.responsibilities || [],
         requirements: {
-          required: values.requirements.required.map((skill) => ({
-            name: skill.name,
-            level: skill.level,
-            description: skill.description,
-          })),
-          preferred: values.requirements.preferred || [],
+          required:
+            values.requirements.required.map((skill) => ({
+              name: skill.name,
+              level: skill.level,
+              description: skill.description,
+            })) || [],
+          preferred: values.requirements.preferred
+            ? values.requirements.preferred.map((skill) => skill.name)
+            : [],
         },
         qualifications: {
           education: values.qualifications.education || [],
@@ -758,15 +788,15 @@ export default function JDForm({
         location: values.location,
         employmentType: values.employmentType,
         description: values.jobDescription || "",
-        responsibilities: values.responsibilities,
+        responsibilities: values.responsibilities || [],
         requirements: {
-          required: values.requirements.required,
-          preferred: values.requirements.preferred || null,
+          required: values.requirements.required || [],
+          preferred: values.requirements.preferred || [],
         },
         qualifications: {
-          education: values.qualifications.education,
-          experience: values.qualifications.experience,
-          certifications: values.qualifications.certifications,
+          education: values.qualifications.education || [],
+          experience: values.qualifications.experience || [],
+          certifications: values.qualifications.certifications || [],
         },
         salary: {
           range: {
@@ -814,6 +844,27 @@ export default function JDForm({
     } finally {
       setIsSavingTemplate(false);
     }
+  };
+
+  const emptyFormState: FormValues = {
+    jobTitle: "",
+    department: "",
+    location: "",
+    employmentType: "",
+    jobDescription: "",
+    responsibilities: [],
+    requirements: {
+      required: [{ name: "", level: "intermediate" as const, description: "" }],
+      preferred: [],
+    },
+    qualifications: {
+      education: [],
+      experience: [],
+      certifications: [],
+    },
+    industry: "",
+    level: "",
+    isTemplate: false,
   };
 
   return (
@@ -882,7 +933,10 @@ export default function JDForm({
                 <FormLabel>Employment Type</FormLabel>
                 <FormControl>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.trigger("employmentType");
+                    }}
                     defaultValue={field.value}
                     disabled={isLoading || isSavingTemplate}
                   >
@@ -911,7 +965,10 @@ export default function JDForm({
                 <FormLabel>Industry</FormLabel>
                 <FormControl>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.trigger("industry");
+                    }}
                     defaultValue={field.value}
                     disabled={isLoading || isSavingTemplate}
                   >
@@ -944,7 +1001,10 @@ export default function JDForm({
                 <FormLabel>Position Level</FormLabel>
                 <FormControl>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.trigger("level");
+                    }}
                     defaultValue={field.value}
                     disabled={isLoading || isSavingTemplate}
                   >
@@ -1169,7 +1229,7 @@ export default function JDForm({
             type="button"
             variant="outline"
             onClick={() => {
-              form.reset();
+              form.reset(emptyFormState);
               onClearTemplate();
             }}
             disabled={isLoading || isSavingTemplate}

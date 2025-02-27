@@ -99,9 +99,9 @@ IMPORTANT: Your response must be a valid JSON object matching this exact structu
     ] | null
   },
   "qualifications": {
-    "education": string[] | null,
-    "experience": string[] | null,
-    "certifications": string[] | null
+    "education": string[],
+    "experience": string[],
+    "certifications": string[]
   },
   "salary": {
     "range": {
@@ -144,9 +144,9 @@ Generation Guidelines:
      * Align with position level and responsibilities
 
 4. Always include qualifications:
-   - education: Must be present (use null if not required)
-   - experience: Must be present (use null if not required)
-   - certifications: Must be present (use null if not required)
+   - education: Must be present (use empty array [] if no requirements)
+   - experience: Must be present (use empty array [] if no requirements)
+   - certifications: Must be present (use empty array [] if no requirements)
 
 5. Professional Standards:
    - Use inclusive language

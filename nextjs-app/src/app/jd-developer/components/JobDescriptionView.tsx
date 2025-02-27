@@ -238,7 +238,7 @@ export default function JobDescriptionView({
           </Button>
           <Button variant="outline" size="sm" onClick={() => onExport(jd)}>
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Export as PDF
           </Button>
           <Button variant="outline" size="sm" onClick={() => onEdit(jd)}>
             <Edit className="h-4 w-4 mr-2" />

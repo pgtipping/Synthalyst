@@ -17,6 +17,8 @@ import { toast } from "@/hooks/use-toast";
 import { Download, Copy, Trash2 } from "lucide-react";
 import type { JobDescription } from "@/types/jobDescription";
 import JobDescriptionView from "./JobDescriptionView";
+import { pdf } from "@react-pdf/renderer";
+import JobDescriptionPDF from "@/components/JobDescriptionPDF";
 
 interface SavedJDsProps {
   onUseAsTemplate: (jd: JobDescription) => void;
@@ -104,18 +106,35 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
     }
   };
 
-  const handleExport = (jd: JobDescription) => {
-    const dataStr = JSON.stringify(jd, null, 2);
-    const dataUri =
-      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-    const exportFileDefaultName = `${jd.title
-      .toLowerCase()
-      .replace(/\s+/g, "-")}-${jd.id}.json`;
+  const handleExport = async (jd: JobDescription) => {
+    try {
+      // Generate PDF blob
+      const blob = await pdf(<JobDescriptionPDF jd={jd} />).toBlob();
 
-    const linkElement = document.createElement("a");
-    linkElement.setAttribute("href", dataUri);
-    linkElement.setAttribute("download", exportFileDefaultName);
-    linkElement.click();
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob);
+
+      // Create filename
+      const exportFileDefaultName = `${jd.title
+        .toLowerCase()
+        .replace(/\s+/g, "-")}-${jd.id}.pdf`;
+
+      // Create and click download link
+      const linkElement = document.createElement("a");
+      linkElement.setAttribute("href", url);
+      linkElement.setAttribute("download", exportFileDefaultName);
+      linkElement.click();
+
+      // Clean up
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      toast({
+        title: "Error",
+        description: "Failed to export job description as PDF",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDuplicate = async (jd: JobDescription) => {
