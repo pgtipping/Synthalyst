@@ -50,8 +50,12 @@ async function testProdSignupAPI() {
         } else {
           console.log("Empty response body");
         }
-      } catch (parseError) {
-        console.log("Could not parse response as JSON:", parseError.message);
+      } catch (parseError: unknown) {
+        if (parseError instanceof Error) {
+          console.log("Could not parse response as JSON:", parseError.message);
+        } else {
+          console.log("Could not parse response as JSON:", String(parseError));
+        }
       }
 
       if (response.ok) {
