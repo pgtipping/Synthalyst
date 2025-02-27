@@ -78,10 +78,33 @@ export function handleAPIError(error: unknown) {
       {
         error: {
           message: error.message,
-          code: error.code,
+          code: error.code || "API_ERROR",
+          status: error.statusCode,
         },
       },
       { status: error.statusCode }
+    );
+  }
+
+  if (error instanceof Error) {
+    // Log the full error details
+    console.error("Unhandled Error:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+
+    // Return a more informative error response
+    return NextResponse.json(
+      {
+        error: {
+          message: `Server error: ${error.message}`,
+          code: "INTERNAL_SERVER_ERROR",
+          status: 500,
+          type: error.name,
+        },
+      },
+      { status: 500 }
     );
   }
 
@@ -91,6 +114,9 @@ export function handleAPIError(error: unknown) {
       error: {
         message: "Internal server error",
         code: "INTERNAL_SERVER_ERROR",
+        status: 500,
+        details:
+          typeof error === "object" ? "Unknown error object" : String(error),
       },
     },
     { status: 500 }
