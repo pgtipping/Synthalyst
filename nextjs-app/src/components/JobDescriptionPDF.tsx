@@ -177,6 +177,18 @@ export default function JobDescriptionPDF({ jd }: JobDescriptionPDFProps) {
             )}
         </View>
 
+        {/* Salary Information */}
+        {jd.salary && jd.salary.range && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Compensation</Text>
+            <Text style={styles.text}>
+              {jd.salary.range.min.toLocaleString()} -{" "}
+              {jd.salary.range.max.toLocaleString()}{" "}
+              {jd.salary.currency || "USD"} per {jd.salary.type || "yearly"}
+            </Text>
+          </View>
+        )}
+
         {/* Metadata */}
         <View style={styles.metadata}>
           <Text style={styles.metadataItem}>

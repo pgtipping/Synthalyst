@@ -14,19 +14,19 @@ interface GenerateJobDescriptionInput {
       level: "beginner" | "intermediate" | "advanced" | "expert";
       description: string;
     }[];
-    preferred?: {
+    preferred: {
       name: string;
       level: "beginner" | "intermediate" | "advanced" | "expert";
       description: string;
     }[];
   };
   qualifications: {
-    education: string[] | null;
-    experience: string[] | null;
-    certifications: string[] | null;
+    education: string[];
+    experience: string[];
+    certifications: string[];
   };
   salary?: {
-    range?: {
+    range: {
       min: number;
       max: number;
     };
@@ -57,7 +57,7 @@ export async function generateJobDescription(
       responsibilities: input.responsibilities,
       requirements: {
         required: input.requirements.required,
-        preferred: input.requirements.preferred || null,
+        preferred: input.requirements.preferred,
       },
       qualifications: {
         education: input.qualifications.education,
@@ -110,7 +110,7 @@ IMPORTANT: Your response must be a valid JSON object matching this exact structu
     },
     "type": "hourly" | "monthly" | "yearly",
     "currency": string
-  } | null,
+  },
   "company": {
     "name": string,
     "description": string,
@@ -138,17 +138,25 @@ Generation Guidelines:
 3. Define comprehensive requirements:
    - Place ALL skills (technical and soft) under requirements.required or requirements.preferred
    - Include both technical and soft skills (like communication, leadership)
+   - Preferred skills are optional
    - For each skill:
      * Set appropriate competency level (beginner/intermediate/advanced/expert)
      * Provide clear description of skill requirements
      * Align with position level and responsibilities
 
-4. Always include qualifications:
-   - education: Must be present (use empty array [] if no requirements)
-   - experience: Must be present (use empty array [] if no requirements)
-   - certifications: Must be present (use empty array [] if no requirements)
+4. Qualifications are optional but recommended:
+   - education: Education requirements if applicable
+   - experience: Experience requirements if applicable
+   - certifications: Certification requirements if applicable
+   - Empty arrays are acceptable for any qualification field
 
-5. Professional Standards:
+5. ALWAYS include salary information:
+   - Provide realistic salary ranges based on the job title, level, and industry
+   - Use appropriate currency (default to USD if not specified)
+   - Set salary type (hourly, monthly, yearly) based on the employment type and industry standards
+   - Ensure the salary range is competitive for the position
+
+6. Professional Standards:
    - Use inclusive language
    - Apply industry-standard terminology
    - Define clear progression requirements
@@ -156,11 +164,12 @@ Generation Guidelines:
    - Emphasize growth and development
    - Use action verbs and specific metrics
 
-6. CRITICAL:
+7. CRITICAL:
    - Output must be valid JSON matching the exact structure above
    - ALL skills must be under requirements (not in qualifications)
    - Qualifications must ONLY contain education, experience, and certifications
-   - All qualification fields must be present (use null if not required)`;
+   - ALWAYS include salary information with realistic values
+   - Department and location are optional and can be null`;
 
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,
@@ -222,7 +231,21 @@ ${JSON.stringify(transformedInput, null, 2)}`,
         !Array.isArray(enhancedDescription.responsibilities) ||
         !enhancedDescription.requirements?.required
       ) {
-        throw new Error("Invalid response structure");
+        throw new Error(
+          "Invalid response structure or missing required fields"
+        );
+      }
+
+      // Ensure salary is always present
+      if (!enhancedDescription.salary) {
+        enhancedDescription.salary = {
+          range: {
+            min: input.salary?.range?.min || 0,
+            max: input.salary?.range?.max || 0,
+          },
+          type: input.salary?.type || "yearly",
+          currency: input.salary?.currency || "USD",
+        };
       }
 
       console.log("\nParsed Enhanced Description:");

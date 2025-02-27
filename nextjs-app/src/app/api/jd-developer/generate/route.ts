@@ -27,25 +27,27 @@ const generateSchema = z.object({
           description: z.string(),
         })
       )
-      .optional(),
+      .min(1, "At least one preferred skill is required"),
   }),
   qualifications: z.object({
-    education: z.array(z.string()).nullable(),
-    experience: z.array(z.string()).nullable(),
-    certifications: z.array(z.string()).nullable(),
+    education: z
+      .array(z.string())
+      .min(1, "At least one education requirement is required"),
+    experience: z
+      .array(z.string())
+      .min(1, "At least one experience requirement is required"),
+    certifications: z
+      .array(z.string())
+      .min(1, "At least one certification is required"),
   }),
-  salary: z
-    .object({
-      range: z
-        .object({
-          min: z.number(),
-          max: z.number(),
-        })
-        .optional(),
-      type: z.enum(["hourly", "monthly", "yearly"]),
-      currency: z.string().optional(),
-    })
-    .optional(),
+  salary: z.object({
+    range: z.object({
+      min: z.number(),
+      max: z.number(),
+    }),
+    type: z.enum(["hourly", "monthly", "yearly"]),
+    currency: z.string().optional(),
+  }),
   company: z
     .object({
       name: z.string().optional(),

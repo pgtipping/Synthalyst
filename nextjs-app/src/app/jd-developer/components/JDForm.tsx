@@ -47,77 +47,64 @@ const convertToRequiredSkill = (skill: SkillInput): RequiredSkill => {
   return skill;
 };
 
-const formSchema = z
-  .object({
-    jobTitle: z.string().min(1, "Job title is required"),
-    department: z
-      .string()
-      .optional()
-      .transform((val) => {
-        // Make department optional for CEO positions
-        const isCEOPosition =
-          val?.toLowerCase().includes("ceo") ||
-          val?.toLowerCase().includes("chief executive officer");
-        return isCEOPosition ? undefined : val;
-      }),
-    location: z.string().min(1, "Location is required"),
-    employmentType: z.string().min(1, "Employment type is required"),
-    jobDescription: z.string().optional(),
-    responsibilities: z.array(z.string()).default([]),
-    requirements: z
-      .object({
-        required: z
-          .array(
-            z.object({
-              name: z.string(),
-              level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-              description: z.string(),
-            })
-          )
-          .default([]),
-        preferred: z
-          .array(
-            z.object({
-              name: z.string(),
-              level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-              description: z.string(),
-            })
-          )
-          .optional(),
-      })
-      .default({ required: [], preferred: [] }),
-    qualifications: z
-      .object({
-        education: z.array(z.string()).default([]),
-        experience: z.array(z.string()).default([]),
-        certifications: z.array(z.string()).default([]),
-      })
-      .default({
-        education: [],
-        experience: [],
-        certifications: [],
-      }),
-    industry: z.string().min(1, "Industry is required"),
-    level: z.string().min(1, "Level is required"),
-    isTemplate: z.boolean().default(false),
-  })
-  .refine(
-    (data) => {
-      // If it's a CEO position, department is not required
-      const isCEOPosition =
-        data.jobTitle.toLowerCase().includes("ceo") ||
-        data.jobTitle.toLowerCase().includes("chief executive officer");
-      if (isCEOPosition) {
-        return true;
-      }
-      // For non-CEO positions, department is required
-      return data.department && data.department.length > 0;
-    },
-    {
-      message: "Department is required for non-CEO positions",
-      path: ["department"],
-    }
-  );
+const formSchema = z.object({
+  jobTitle: z.string().min(1, "Job title is required"),
+  department: z.string().optional(),
+  location: z.string().optional(),
+  employmentType: z.string().min(1, "Employment type is required"),
+  jobDescription: z.string().optional(),
+  responsibilities: z.array(z.string()).default([]),
+  requirements: z
+    .object({
+      required: z
+        .array(
+          z.object({
+            name: z.string(),
+            level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+            description: z.string(),
+          })
+        )
+        .default([]),
+      preferred: z
+        .array(
+          z.object({
+            name: z.string(),
+            level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+            description: z.string(),
+          })
+        )
+        .default([]),
+    })
+    .default({ required: [], preferred: [] }),
+  qualifications: z
+    .object({
+      education: z.array(z.string()).default([]),
+      experience: z.array(z.string()).default([]),
+      certifications: z.array(z.string()).default([]),
+    })
+    .default({
+      education: [],
+      experience: [],
+      certifications: [],
+    }),
+  salary: z
+    .object({
+      min: z.number().min(0, "Minimum salary must be at least 0").optional(),
+      max: z.number().min(0, "Maximum salary must be at least 0").optional(),
+      type: z.enum(["hourly", "monthly", "yearly"]).default("yearly"),
+      currency: z.string().default("USD"),
+    })
+    .default({
+      min: 0,
+      max: 0,
+      type: "yearly",
+      currency: "USD",
+    })
+    .optional(),
+  industry: z.string().min(1, "Industry is required"),
+  level: z.string().min(1, "Level is required"),
+  isTemplate: z.boolean().default(false),
+});
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -212,14 +199,22 @@ export default function JDForm({
         required: Array.isArray(initialTemplate?.requirements?.required)
           ? initialTemplate.requirements.required.map(convertToRequiredSkill)
           : [{ name: "", level: "intermediate", description: "" }],
-        preferred: Array.isArray(initialTemplate?.requirements?.preferred)
-          ? initialTemplate.requirements.preferred.map(convertToRequiredSkill)
-          : [],
+        preferred:
+          Array.isArray(initialTemplate?.requirements?.preferred) &&
+          initialTemplate?.requirements?.preferred.length > 0
+            ? initialTemplate.requirements.preferred.map(convertToRequiredSkill)
+            : [{ name: "", level: "intermediate", description: "" }],
       },
       qualifications: {
         education: initialTemplate?.qualifications?.education || [],
         experience: initialTemplate?.qualifications?.experience || [],
         certifications: initialTemplate?.qualifications?.certifications || [],
+      },
+      salary: {
+        min: initialTemplate?.salary?.range?.min || 0,
+        max: initialTemplate?.salary?.range?.max || 0,
+        type: initialTemplate?.salary?.type || "yearly",
+        currency: initialTemplate?.salary?.currency || "USD",
       },
       industry: initialTemplate?.metadata?.industry || "",
       level: initialTemplate?.metadata?.level || "",
@@ -236,6 +231,15 @@ export default function JDForm({
     name: "requirements.required",
   });
 
+  const {
+    fields: preferredSkillFields,
+    append: appendPreferredSkill,
+    remove: removePreferredSkill,
+  } = useFieldArray({
+    control: form.control,
+    name: "requirements.preferred",
+  });
+
   useEffect(() => {
     if (initialTemplate) {
       form.reset({
@@ -249,14 +253,24 @@ export default function JDForm({
           required: Array.isArray(initialTemplate.requirements.required)
             ? initialTemplate.requirements.required.map(convertToRequiredSkill)
             : [{ name: "", level: "intermediate", description: "" }],
-          preferred: Array.isArray(initialTemplate.requirements.preferred)
-            ? initialTemplate.requirements.preferred.map(convertToRequiredSkill)
-            : [],
+          preferred:
+            Array.isArray(initialTemplate.requirements.preferred) &&
+            initialTemplate.requirements.preferred.length > 0
+              ? initialTemplate.requirements.preferred.map(
+                  convertToRequiredSkill
+                )
+              : [{ name: "", level: "intermediate", description: "" }],
         },
         qualifications: {
           education: initialTemplate.qualifications.education || [],
           experience: initialTemplate.qualifications.experience || [],
           certifications: initialTemplate.qualifications.certifications || [],
+        },
+        salary: {
+          min: initialTemplate.salary?.range?.min || 0,
+          max: initialTemplate.salary?.range?.max || 0,
+          type: initialTemplate.salary?.type || "yearly",
+          currency: initialTemplate.salary?.currency || "USD",
         },
         industry: initialTemplate.metadata.industry || "",
         level: initialTemplate.metadata.level || "",
@@ -637,14 +651,16 @@ export default function JDForm({
           },
           industry: values.industry,
           level: values.level,
-          salary: {
-            range: {
-              min: 0,
-              max: 0,
-            },
-            type: "yearly",
-            currency: "USD",
-          },
+          salary: values.salary
+            ? {
+                range: {
+                  min: values.salary.min || 0,
+                  max: values.salary.max || 0,
+                },
+                type: values.salary.type,
+                currency: values.salary.currency,
+              }
+            : undefined,
         }),
       });
 
@@ -667,13 +683,30 @@ export default function JDForm({
         responsibilities: generatedContent.responsibilities,
         requirements: {
           required: generatedContent.requirements.required,
-          preferred: generatedContent.requirements.preferred || [],
+          preferred:
+            Array.isArray(generatedContent.requirements.preferred) &&
+            generatedContent.requirements.preferred.length > 0
+              ? generatedContent.requirements.preferred
+              : [{ name: "", level: "intermediate" as const, description: "" }],
         },
         qualifications: {
           education: generatedContent.qualifications.education,
           experience: generatedContent.qualifications.experience,
           certifications: generatedContent.qualifications.certifications,
         },
+        salary: generatedContent.salary
+          ? {
+              min: generatedContent.salary.range?.min || 0,
+              max: generatedContent.salary.range?.max || 0,
+              type: generatedContent.salary.type || "yearly",
+              currency: generatedContent.salary.currency || "USD",
+            }
+          : {
+              min: 0,
+              max: 0,
+              type: "yearly" as const,
+              currency: "USD",
+            },
         industry: generatedContent.metadata.industry || "",
         level: generatedContent.metadata.level || "",
         isTemplate: false,
@@ -734,7 +767,11 @@ export default function JDForm({
                   if (typeof skill === "string") {
                     return skill;
                   }
-                  return skill.name;
+                  return {
+                    name: skill.name,
+                    level: skill.level,
+                    description: skill.description,
+                  };
                 })
               : [],
           },
@@ -743,6 +780,23 @@ export default function JDForm({
             experience: values.qualifications.experience || [],
             certifications: values.qualifications.certifications || [],
           },
+          salary: values.salary
+            ? {
+                range: {
+                  min: values.salary.min || 0,
+                  max: values.salary.max || 0,
+                },
+                type: values.salary.type,
+                currency: values.salary.currency,
+              }
+            : {
+                range: {
+                  min: 0,
+                  max: 0,
+                },
+                type: "yearly",
+                currency: "USD",
+              },
           metadata: {
             industry: values.industry,
             level: values.level,
@@ -829,14 +883,23 @@ export default function JDForm({
           experience: values.qualifications.experience || [],
           certifications: values.qualifications.certifications || [],
         },
-        salary: {
-          range: {
-            min: 0,
-            max: 0,
-          },
-          type: "yearly" as const,
-          currency: "USD",
-        },
+        salary: values.salary
+          ? {
+              range: {
+                min: values.salary.min || 0,
+                max: values.salary.max || 0,
+              },
+              type: values.salary.type as "hourly" | "monthly" | "yearly",
+              currency: values.salary.currency,
+            }
+          : {
+              range: {
+                min: 0,
+                max: 0,
+              },
+              type: "yearly",
+              currency: "USD",
+            },
         metadata: {
           industry: values.industry,
           level: values.level,
@@ -877,27 +940,6 @@ export default function JDForm({
     }
   };
 
-  const emptyFormState: FormValues = {
-    jobTitle: "",
-    department: "",
-    location: "",
-    employmentType: "",
-    jobDescription: "",
-    responsibilities: [],
-    requirements: {
-      required: [{ name: "", level: "intermediate" as const, description: "" }],
-      preferred: [],
-    },
-    qualifications: {
-      education: [],
-      experience: [],
-      certifications: [],
-    },
-    industry: "",
-    level: "",
-    isTemplate: false,
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -925,7 +967,7 @@ export default function JDForm({
             name="department"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Department</FormLabel>
+                <FormLabel>Department (Optional)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Engineering"
@@ -943,7 +985,7 @@ export default function JDForm({
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Location (Optional)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Remote, New York, NY"
@@ -1065,7 +1107,7 @@ export default function JDForm({
           name="jobDescription"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Job Description</FormLabel>
+              <FormLabel>Job Description (Optional)</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Enter a detailed description of the role..."
@@ -1084,7 +1126,7 @@ export default function JDForm({
           name="responsibilities"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Responsibilities</FormLabel>
+              <FormLabel>Responsibilities (Optional)</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
@@ -1101,7 +1143,7 @@ export default function JDForm({
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label>Required Skills</Label>
+            <Label>Required Skills (Optional)</Label>
             <Button
               type="button"
               variant="outline"
@@ -1188,12 +1230,101 @@ export default function JDForm({
           ))}
         </div>
 
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Preferred Skills (Optional)</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                appendPreferredSkill({
+                  name: "",
+                  level: "intermediate",
+                  description: "",
+                })
+              }
+              disabled={isLoading || isSavingTemplate}
+            >
+              Add Preferred Skill
+            </Button>
+          </div>
+
+          {preferredSkillFields.map((field, index) => (
+            <div key={field.id} className="flex gap-4">
+              <FormField
+                control={form.control}
+                name={`requirements.preferred.${index}.name`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input {...field} placeholder="Skill name" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={`requirements.preferred.${index}.level`}
+                render={({ field }) => (
+                  <FormItem className="w-40">
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="beginner">Beginner</SelectItem>
+                          <SelectItem value="intermediate">
+                            Intermediate
+                          </SelectItem>
+                          <SelectItem value="advanced">Advanced</SelectItem>
+                          <SelectItem value="expert">Expert</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={`requirements.preferred.${index}.description`}
+                render={({ field }) => (
+                  <FormItem className="w-60">
+                    <FormControl>
+                      <Textarea {...field} placeholder="Skill description" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => removePreferredSkill(index)}
+                disabled={isLoading || isSavingTemplate}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+
         <FormField
           control={form.control}
           name="qualifications.education"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Educational Requirements</FormLabel>
+              <FormLabel>Educational Requirements (Optional)</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
@@ -1215,7 +1346,7 @@ export default function JDForm({
           name="qualifications.experience"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Professional Experience</FormLabel>
+              <FormLabel>Professional Experience (Optional)</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
@@ -1237,7 +1368,7 @@ export default function JDForm({
           name="qualifications.certifications"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Required Certifications</FormLabel>
+              <FormLabel>Required Certifications (Optional)</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
@@ -1255,12 +1386,139 @@ export default function JDForm({
           )}
         />
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="salary.min"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Minimum Salary (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="e.g., 50000"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    disabled={isLoading || isSavingTemplate}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="salary.max"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Maximum Salary (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="e.g., 80000"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    disabled={isLoading || isSavingTemplate}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="salary.type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Salary Type (Optional)</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isLoading || isSavingTemplate}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select salary type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hourly">Hourly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="salary.currency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Currency (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., USD"
+                    {...field}
+                    disabled={isLoading || isSavingTemplate}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <div className="flex justify-end space-x-4">
           <Button
             type="button"
             variant="outline"
             onClick={() => {
-              form.reset(emptyFormState);
+              // Clear all form fields including select fields
+              form.reset({
+                jobTitle: "",
+                department: "",
+                location: "",
+                employmentType: "",
+                jobDescription: "",
+                responsibilities: [],
+                requirements: {
+                  required: [
+                    { name: "", level: "intermediate", description: "" },
+                  ],
+                  preferred: [
+                    { name: "", level: "intermediate", description: "" },
+                  ],
+                },
+                qualifications: {
+                  education: [],
+                  experience: [],
+                  certifications: [],
+                },
+                salary: {
+                  min: 0,
+                  max: 0,
+                  type: "yearly",
+                  currency: "USD",
+                },
+                industry: "",
+                level: "",
+                isTemplate: false,
+              });
+
+              // Force reset of select fields
+              setTimeout(() => {
+                form.setValue("employmentType", "");
+                form.setValue("industry", "");
+                form.setValue("level", "");
+                form.setValue("salary.type", "yearly");
+                form.setValue("salary.currency", "USD");
+              }, 0);
+
               onClearTemplate();
             }}
             disabled={isLoading || isSavingTemplate}
