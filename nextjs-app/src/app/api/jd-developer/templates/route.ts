@@ -131,10 +131,18 @@ export async function GET() {
     console.error("Error fetching templates:", error);
 
     if (error instanceof TypeError) {
+      console.error("TypeError details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: (error as { code?: string }).code,
+      });
+
       return NextResponse.json(
         {
           error: "Type error occurred",
           details: error.message,
+          code: (error as { code?: string }).code,
           location: "template fetching",
         },
         { status: 500 }
@@ -151,6 +159,12 @@ export async function GET() {
         { status: 500 }
       );
     }
+
+    // For any other errors
+    console.error("Unhandled error:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
     return NextResponse.json(
       {
@@ -208,6 +222,21 @@ export async function POST(request: Request) {
       },
     };
 
+    // Ensure qualifications arrays are never null
+    if (!content.qualifications) {
+      content.qualifications = {
+        education: [],
+        experience: [],
+        certifications: [],
+      };
+    } else {
+      content.qualifications.education = content.qualifications.education || [];
+      content.qualifications.experience =
+        content.qualifications.experience || [];
+      content.qualifications.certifications =
+        content.qualifications.certifications || [];
+    }
+
     // Generate content hash
     const contentHash = crypto
       .createHash("sha256")
@@ -245,10 +274,18 @@ export async function POST(request: Request) {
     }
 
     if (error instanceof TypeError) {
+      console.error("TypeError details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: (error as { code?: string }).code,
+      });
+
       return NextResponse.json(
         {
           error: "Type error occurred",
           details: error.message,
+          code: (error as { code?: string }).code,
           location: "template creation",
         },
         { status: 500 }
@@ -256,6 +293,11 @@ export async function POST(request: Request) {
     }
 
     // For any other errors
+    console.error("Unhandled error:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     return NextResponse.json(
       {
         error: "Failed to create template",

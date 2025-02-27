@@ -585,7 +585,13 @@ export default function JDForm({
           });
 
           if (!response.ok) {
-            console.error(`Failed to create template: ${template.title}`);
+            const errorData = await response
+              .json()
+              .catch(() => ({ error: "Unknown error" }));
+            console.error(
+              `Failed to create template: ${template.title}`,
+              errorData
+            );
           }
         } catch (error) {
           console.error(`Error creating template ${template.title}:`, error);
