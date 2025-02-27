@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { hash } from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { prisma, testPrismaConnection } from "@/lib/prisma";
 import { validateRequest, handleAPIError, APIError } from "@/lib/middleware";
 import { logger } from "@/lib/logger";
 
@@ -20,6 +20,19 @@ const signupSchema = z.object({
 export async function POST(request: Request) {
   try {
     logger.info("Starting signup process...");
+
+    // Test database connection first
+    logger.info("Testing database connection...");
+    const connectionTest = await testPrismaConnection();
+    if (!connectionTest) {
+      logger.error("Database connection test failed");
+      throw new APIError(
+        "Database connection failed",
+        500,
+        "DATABASE_CONNECTION_ERROR"
+      );
+    }
+    logger.info("Database connection test passed");
 
     // Log request headers for debugging
     const headers = Object.fromEntries(request.headers.entries());
@@ -95,8 +108,20 @@ export async function POST(request: Request) {
     // Create user with detailed error handling
     try {
       // Test database connection before attempting to create user
-      await prisma.$queryRaw`SELECT 1`;
-      logger.info("Database connection verified");
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+        logger.info("Database connection verified before user creation");
+      } catch (dbError) {
+        logger.error(
+          "Database connection failed before user creation",
+          dbError
+        );
+        throw new APIError(
+          "Database connection failed before user creation",
+          500,
+          "DATABASE_CONNECTION_ERROR"
+        );
+      }
 
       // Create user
       const user = await prisma.user.create({
