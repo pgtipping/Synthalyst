@@ -709,35 +709,58 @@ export default function JDForm({
     setIsSavingTemplate(true);
 
     try {
+      // Prepare data in the format expected by our updated API
       const templateData = {
-        title: values.jobTitle,
-        department: values.department,
-        location: values.location,
-        employmentType: values.employmentType,
-        description: values.jobDescription || "",
-        responsibilities: values.responsibilities || [],
+        name: values.jobTitle,
+        type: values.industry,
+        level: values.level,
+        content: JSON.stringify({
+          title: values.jobTitle,
+          department: values.department,
+          location: values.location,
+          employmentType: values.employmentType,
+          description: values.jobDescription || "",
+          responsibilities: values.responsibilities || [],
+          requirements: {
+            required:
+              values.requirements.required.map((skill) => ({
+                name: skill.name,
+                level: skill.level,
+                description: skill.description,
+              })) || [],
+            preferred: values.requirements.preferred
+              ? values.requirements.preferred.map((skill) => {
+                  // Handle both string and object formats
+                  if (typeof skill === "string") {
+                    return skill;
+                  }
+                  return skill.name;
+                })
+              : [],
+          },
+          qualifications: {
+            education: values.qualifications.education || [],
+            experience: values.qualifications.experience || [],
+            certifications: values.qualifications.certifications || [],
+          },
+          metadata: {
+            industry: values.industry,
+            level: values.level,
+            isTemplate: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        }),
         requirements: {
-          required:
-            values.requirements.required.map((skill) => ({
-              name: skill.name,
-              level: skill.level,
-              description: skill.description,
-            })) || [],
-          preferred: values.requirements.preferred
-            ? values.requirements.preferred.map((skill) => skill.name)
-            : [],
-        },
-        qualifications: {
-          education: values.qualifications.education || [],
-          experience: values.qualifications.experience || [],
-          certifications: values.qualifications.certifications || [],
-        },
-        metadata: {
-          industry: values.industry,
-          level: values.level,
-          isTemplate: true,
+          required: values.requirements.required || [],
+          preferred: values.requirements.preferred || [],
         },
       };
+
+      console.log(
+        "Sending template data:",
+        JSON.stringify(templateData, null, 2)
+      );
 
       const response = await fetch("/api/jd-developer/templates", {
         method: "POST",
@@ -748,7 +771,11 @@ export default function JDForm({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch((e) => {
+          console.error("Error parsing error response:", e);
+          return { error: "Unknown error occurred" };
+        });
+        console.error("Template save error:", errorData);
         throw new Error(errorData.error || "Failed to save template");
       }
 
@@ -766,9 +793,7 @@ export default function JDForm({
       toast({
         title: "Error",
         description:
-          error instanceof Error
-            ? error.message
-            : "Failed to save template. Please try again.",
+          error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     } finally {
