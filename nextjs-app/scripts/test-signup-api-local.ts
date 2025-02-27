@@ -12,7 +12,7 @@ async function testSignupAPI() {
     console.log(`Testing with email: ${testEmail}`);
 
     // Make the API request
-    const response = await fetch("http://localhost:3000/api/auth/signup", {
+    const response = await fetch("http://localhost:3001/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
