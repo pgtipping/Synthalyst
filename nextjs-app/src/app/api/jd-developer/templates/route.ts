@@ -105,16 +105,58 @@ export async function GET() {
     });
 
     // Parse the content JSON for each template
-    const parsedTemplates = templates.map((template) => ({
-      id: template.id,
-      ...JSON.parse(template.content),
-    }));
+    const parsedTemplates = templates.map((template) => {
+      try {
+        return {
+          id: template.id,
+          ...JSON.parse(template.content),
+        };
+      } catch (parseError) {
+        console.error(`Error parsing template ${template.id}:`, parseError);
+        // Return a minimal valid object for this template
+        return {
+          id: template.id,
+          title: `Error: Could not parse template ${template.id}`,
+          error: true,
+          metadata: {
+            createdAt: template.createdAt.toISOString(),
+            updatedAt: template.updatedAt.toISOString(),
+          },
+        };
+      }
+    });
 
     return NextResponse.json({ templates: parsedTemplates });
   } catch (error) {
     console.error("Error fetching templates:", error);
+
+    if (error instanceof TypeError) {
+      return NextResponse.json(
+        {
+          error: "Type error occurred",
+          details: error.message,
+          location: "template fetching",
+        },
+        { status: 500 }
+      );
+    }
+
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        {
+          error: "JSON parsing error",
+          details: error.message,
+          location: "template content parsing",
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Failed to fetch templates" },
+      {
+        error: "Failed to fetch templates",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -130,7 +172,26 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    // Add error handling for request body
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return NextResponse.json(
+        { error: "Invalid request body - failed to parse JSON" },
+        { status: 400 }
+      );
+    }
+
+    // Validate that body is not null or undefined
+    if (!body) {
+      return NextResponse.json(
+        { error: "Request body is required" },
+        { status: 400 }
+      );
+    }
+
     const validatedData = createTemplateSchema.parse(body);
 
     // Create a content object that matches our database schema
@@ -183,8 +244,23 @@ export async function POST(request: Request) {
       );
     }
 
+    if (error instanceof TypeError) {
+      return NextResponse.json(
+        {
+          error: "Type error occurred",
+          details: error.message,
+          location: "template creation",
+        },
+        { status: 500 }
+      );
+    }
+
+    // For any other errors
     return NextResponse.json(
-      { error: "Failed to create template" },
+      {
+        error: "Failed to create template",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -205,8 +281,23 @@ export async function DELETE() {
     return NextResponse.json({ message: "Duplicates removed successfully" });
   } catch (error) {
     console.error("Error removing duplicates:", error);
+
+    if (error instanceof TypeError) {
+      return NextResponse.json(
+        {
+          error: "Type error occurred",
+          details: error.message,
+          location: "duplicate removal",
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Failed to remove duplicates" },
+      {
+        error: "Failed to remove duplicates",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
