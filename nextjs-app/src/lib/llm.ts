@@ -138,7 +138,7 @@ Generation Guidelines:
 3. Define comprehensive requirements:
    - Place ALL skills (technical and soft) under requirements.required or requirements.preferred
    - Include both technical and soft skills (like communication, leadership)
-   - ALWAYS include preferred skills - this is MANDATORY
+   - Preferred skills are optional but recommended when appropriate
    - For each skill:
      * Set appropriate competency level (beginner/intermediate/advanced/expert)
      * Provide clear description of skill requirements
@@ -163,7 +163,8 @@ Generation Guidelines:
    - ALL skills must be under requirements (not in qualifications)
    - Qualifications must ONLY contain education, experience, and certifications
    - All qualification fields MUST be non-empty arrays with at least one item
-   - Salary information is optional and can be omitted if not provided in the input`;
+   - Salary information is optional and can be omitted if not provided in the input
+   - Department and location are optional and can be null`;
 
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,
@@ -224,7 +225,6 @@ ${JSON.stringify(transformedInput, null, 2)}`,
         !enhancedDescription.description ||
         !Array.isArray(enhancedDescription.responsibilities) ||
         !enhancedDescription.requirements?.required ||
-        !enhancedDescription.requirements?.preferred ||
         !Array.isArray(enhancedDescription.qualifications?.education) ||
         !Array.isArray(enhancedDescription.qualifications?.experience) ||
         !Array.isArray(enhancedDescription.qualifications?.certifications) ||

@@ -47,91 +47,64 @@ const convertToRequiredSkill = (skill: SkillInput): RequiredSkill => {
   return skill;
 };
 
-const formSchema = z
-  .object({
-    jobTitle: z.string().min(1, "Job title is required"),
-    department: z
-      .string()
-      .optional()
-      .transform((val) => {
-        // Make department optional for CEO positions
-        const isCEOPosition =
-          val?.toLowerCase().includes("ceo") ||
-          val?.toLowerCase().includes("chief executive officer");
-        return isCEOPosition ? undefined : val;
-      }),
-    location: z.string().min(1, "Location is required"),
-    employmentType: z.string().min(1, "Employment type is required"),
-    jobDescription: z.string().optional(),
-    responsibilities: z.array(z.string()).default([]),
-    requirements: z
-      .object({
-        required: z
-          .array(
-            z.object({
-              name: z.string(),
-              level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-              description: z.string(),
-            })
-          )
-          .default([]),
-        preferred: z
-          .array(
-            z.object({
-              name: z.string(),
-              level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-              description: z.string(),
-            })
-          )
-          .default([]),
-      })
-      .default({ required: [], preferred: [] }),
-    qualifications: z
-      .object({
-        education: z.array(z.string()).default([]),
-        experience: z.array(z.string()).default([]),
-        certifications: z.array(z.string()).default([]),
-      })
-      .default({
-        education: [],
-        experience: [],
-        certifications: [],
-      }),
-    salary: z
-      .object({
-        min: z.number().min(0, "Minimum salary must be at least 0").optional(),
-        max: z.number().min(0, "Maximum salary must be at least 0").optional(),
-        type: z.enum(["hourly", "monthly", "yearly"]).default("yearly"),
-        currency: z.string().default("USD"),
-      })
-      .default({
-        min: 0,
-        max: 0,
-        type: "yearly",
-        currency: "USD",
-      })
-      .optional(),
-    industry: z.string().min(1, "Industry is required"),
-    level: z.string().min(1, "Level is required"),
-    isTemplate: z.boolean().default(false),
-  })
-  .refine(
-    (data) => {
-      // If it's a CEO position, department is not required
-      const isCEOPosition =
-        data.jobTitle.toLowerCase().includes("ceo") ||
-        data.jobTitle.toLowerCase().includes("chief executive officer");
-      if (isCEOPosition) {
-        return true;
-      }
-      // For non-CEO positions, department is required
-      return data.department && data.department.length > 0;
-    },
-    {
-      message: "Department is required for non-CEO positions",
-      path: ["department"],
-    }
-  );
+const formSchema = z.object({
+  jobTitle: z.string().min(1, "Job title is required"),
+  department: z.string().optional(),
+  location: z.string().optional(),
+  employmentType: z.string().min(1, "Employment type is required"),
+  jobDescription: z.string().optional(),
+  responsibilities: z.array(z.string()).default([]),
+  requirements: z
+    .object({
+      required: z
+        .array(
+          z.object({
+            name: z.string(),
+            level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+            description: z.string(),
+          })
+        )
+        .default([]),
+      preferred: z
+        .array(
+          z.object({
+            name: z.string(),
+            level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+            description: z.string(),
+          })
+        )
+        .default([]),
+    })
+    .default({ required: [], preferred: [] }),
+  qualifications: z
+    .object({
+      education: z.array(z.string()).default([]),
+      experience: z.array(z.string()).default([]),
+      certifications: z.array(z.string()).default([]),
+    })
+    .default({
+      education: [],
+      experience: [],
+      certifications: [],
+    }),
+  salary: z
+    .object({
+      min: z.number().min(0, "Minimum salary must be at least 0").optional(),
+      max: z.number().min(0, "Maximum salary must be at least 0").optional(),
+      type: z.enum(["hourly", "monthly", "yearly"]).default("yearly"),
+      currency: z.string().default("USD"),
+    })
+    .default({
+      min: 0,
+      max: 0,
+      type: "yearly",
+      currency: "USD",
+    })
+    .optional(),
+  industry: z.string().min(1, "Industry is required"),
+  level: z.string().min(1, "Level is required"),
+  isTemplate: z.boolean().default(false),
+});
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -992,7 +965,7 @@ export default function JDForm({
             name="department"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Department</FormLabel>
+                <FormLabel>Department (Optional)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Engineering"
@@ -1010,7 +983,7 @@ export default function JDForm({
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Location (Optional)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Remote, New York, NY"
@@ -1132,7 +1105,7 @@ export default function JDForm({
           name="jobDescription"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Job Description</FormLabel>
+              <FormLabel>Job Description (Optional)</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Enter a detailed description of the role..."
@@ -1151,7 +1124,7 @@ export default function JDForm({
           name="responsibilities"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Responsibilities</FormLabel>
+              <FormLabel>Responsibilities (Optional)</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
@@ -1168,7 +1141,7 @@ export default function JDForm({
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label>Required Skills</Label>
+            <Label>Required Skills (Optional)</Label>
             <Button
               type="button"
               variant="outline"
@@ -1257,7 +1230,7 @@ export default function JDForm({
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label>Preferred Skills</Label>
+            <Label>Preferred Skills (Optional)</Label>
             <Button
               type="button"
               variant="outline"
@@ -1349,7 +1322,7 @@ export default function JDForm({
           name="qualifications.education"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Educational Requirements</FormLabel>
+              <FormLabel>Educational Requirements (Optional)</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
@@ -1371,7 +1344,7 @@ export default function JDForm({
           name="qualifications.experience"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Professional Experience</FormLabel>
+              <FormLabel>Professional Experience (Optional)</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
@@ -1393,7 +1366,7 @@ export default function JDForm({
           name="qualifications.certifications"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Required Certifications</FormLabel>
+              <FormLabel>Required Certifications (Optional)</FormLabel>
               <FormControl>
                 <ArrayInput
                   value={field.value}
