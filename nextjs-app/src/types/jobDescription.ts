@@ -13,19 +13,19 @@ export interface JobDescription {
       level: "beginner" | "intermediate" | "advanced" | "expert";
       description: string;
     }[];
-    preferred?: {
+    preferred: {
       name: string;
       level: "beginner" | "intermediate" | "advanced" | "expert";
       description: string;
     }[];
   };
   qualifications: {
-    education: string[] | null;
-    experience: string[] | null;
-    certifications: string[] | null;
+    education: string[];
+    experience: string[];
+    certifications: string[];
   };
-  salary?: {
-    range?: {
+  salary: {
+    range: {
       min: number;
       max: number;
     };

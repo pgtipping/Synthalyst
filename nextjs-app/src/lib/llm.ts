@@ -14,19 +14,19 @@ interface GenerateJobDescriptionInput {
       level: "beginner" | "intermediate" | "advanced" | "expert";
       description: string;
     }[];
-    preferred?: {
+    preferred: {
       name: string;
       level: "beginner" | "intermediate" | "advanced" | "expert";
       description: string;
     }[];
   };
   qualifications: {
-    education: string[] | null;
-    experience: string[] | null;
-    certifications: string[] | null;
+    education: string[];
+    experience: string[];
+    certifications: string[];
   };
-  salary?: {
-    range?: {
+  salary: {
+    range: {
       min: number;
       max: number;
     };
@@ -57,14 +57,14 @@ export async function generateJobDescription(
       responsibilities: input.responsibilities,
       requirements: {
         required: input.requirements.required,
-        preferred: input.requirements.preferred || null,
+        preferred: input.requirements.preferred,
       },
       qualifications: {
         education: input.qualifications.education,
         experience: input.qualifications.experience,
         certifications: input.qualifications.certifications,
       },
-      salary: input.salary || null,
+      salary: input.salary,
       company: input.company || null,
       metadata: {
         industry: input.industry || null,
@@ -138,15 +138,17 @@ Generation Guidelines:
 3. Define comprehensive requirements:
    - Place ALL skills (technical and soft) under requirements.required or requirements.preferred
    - Include both technical and soft skills (like communication, leadership)
+   - ALWAYS include preferred skills - this is MANDATORY
    - For each skill:
      * Set appropriate competency level (beginner/intermediate/advanced/expert)
      * Provide clear description of skill requirements
      * Align with position level and responsibilities
 
-4. Always include qualifications:
-   - education: Must be present (use empty array [] if no requirements)
-   - experience: Must be present (use empty array [] if no requirements)
-   - certifications: Must be present (use empty array [] if no requirements)
+4. MANDATORY: Always include qualifications with non-empty arrays:
+   - education: MUST be a non-empty array with at least one education requirement
+   - experience: MUST be a non-empty array with at least one experience requirement
+   - certifications: MUST be a non-empty array with at least one certification (or "No specific certifications required")
+   - NEVER return null or empty arrays for any qualification field
 
 5. Professional Standards:
    - Use inclusive language
@@ -160,7 +162,9 @@ Generation Guidelines:
    - Output must be valid JSON matching the exact structure above
    - ALL skills must be under requirements (not in qualifications)
    - Qualifications must ONLY contain education, experience, and certifications
-   - All qualification fields must be present (use null if not required)`;
+   - All qualification fields MUST be non-empty arrays with at least one item
+   - ALWAYS include salary information with realistic ranges based on the role and industry
+   - ALWAYS include preferred skills section with at least 2-3 items`;
 
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,
@@ -220,9 +224,18 @@ ${JSON.stringify(transformedInput, null, 2)}`,
         !enhancedDescription.title ||
         !enhancedDescription.description ||
         !Array.isArray(enhancedDescription.responsibilities) ||
-        !enhancedDescription.requirements?.required
+        !enhancedDescription.requirements?.required ||
+        !enhancedDescription.requirements?.preferred ||
+        !Array.isArray(enhancedDescription.qualifications?.education) ||
+        !Array.isArray(enhancedDescription.qualifications?.experience) ||
+        !Array.isArray(enhancedDescription.qualifications?.certifications) ||
+        enhancedDescription.qualifications.education.length === 0 ||
+        enhancedDescription.qualifications.experience.length === 0 ||
+        enhancedDescription.qualifications.certifications.length === 0
       ) {
-        throw new Error("Invalid response structure");
+        throw new Error(
+          "Invalid response structure or missing required fields"
+        );
       }
 
       console.log("\nParsed Enhanced Description:");
