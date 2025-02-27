@@ -130,6 +130,10 @@ export default function SignUpPage() {
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
               />
+              <p className="mt-1 text-sm text-gray-500">
+                Password must be at least 8 characters and contain at least one
+                uppercase letter, one lowercase letter, and one number.
+              </p>
             </div>
             <div>
               <label htmlFor="confirmPassword" className="sr-only">
