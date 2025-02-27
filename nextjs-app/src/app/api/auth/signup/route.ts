@@ -160,13 +160,54 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     logger.error("Signup error:", error);
+
+    // Enhanced error logging
     if (error instanceof Error) {
       logger.error("Error details:", {
         name: error.name,
         message: error.message,
         stack: error.stack,
       });
+
+      // Log additional details for Prisma errors
+      if (
+        error.name === "PrismaClientKnownRequestError" ||
+        error.name === "PrismaClientUnknownRequestError" ||
+        error.name === "PrismaClientRustPanicError" ||
+        error.name === "PrismaClientInitializationError" ||
+        error.name === "PrismaClientValidationError"
+      ) {
+        // @ts-expect-error - Accessing Prisma-specific properties
+        const code = error.code;
+        // @ts-expect-error - Accessing Prisma-specific properties
+        const meta = error.meta;
+        // @ts-expect-error - Accessing Prisma-specific properties
+        const clientVersion = error.clientVersion;
+
+        logger.error("Prisma error details:", {
+          code,
+          meta,
+          clientVersion,
+          cause: error.cause ? String(error.cause) : undefined,
+        });
+      }
+    } else {
+      // For non-Error objects
+      logger.error("Non-Error object thrown:", {
+        type: typeof error,
+        value: String(error),
+        valueJson: JSON.stringify(error),
+      });
     }
+
+    // Add environment information to help with debugging
+    logger.error("Environment context:", {
+      nodeEnv: process.env.NODE_ENV,
+      databaseUrl: process.env.DATABASE_URL ? "Set (redacted)" : "Not set",
+      nextAuthUrl: process.env.NEXTAUTH_URL ? "Set (redacted)" : "Not set",
+      vercelEnv: process.env.VERCEL_ENV || "Not set",
+    });
+
     return handleAPIError(error);
   }
 }

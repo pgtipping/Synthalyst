@@ -94,7 +94,49 @@ export function handleAPIError(error: unknown) {
       stack: error.stack,
     });
 
-    // Return a more informative error response
+    // Enhanced error handling for Prisma errors
+    if (error.name.startsWith("PrismaClient")) {
+      // @ts-expect-error - Accessing Prisma-specific properties
+      const code = error.code;
+      let errorMessage = `Database error: ${error.message}`;
+      let statusCode = 500;
+      let errorCode = "DATABASE_ERROR";
+
+      // Handle specific Prisma error codes
+      if (code === "P2002") {
+        errorMessage = "A unique constraint would be violated.";
+        statusCode = 400;
+        errorCode = "UNIQUE_CONSTRAINT_VIOLATION";
+      } else if (code === "P2025") {
+        errorMessage = "Record not found.";
+        statusCode = 404;
+        errorCode = "RECORD_NOT_FOUND";
+      } else if (code === "P2003") {
+        errorMessage = "Foreign key constraint failed.";
+        statusCode = 400;
+        errorCode = "FOREIGN_KEY_CONSTRAINT_FAILED";
+      } else if (code === "P2023") {
+        errorMessage = "Invalid ID format.";
+        statusCode = 400;
+        errorCode = "INVALID_ID_FORMAT";
+      }
+
+      return NextResponse.json(
+        {
+          error: {
+            message: errorMessage,
+            code: errorCode,
+            status: statusCode,
+            type: error.name,
+            // @ts-expect-error - Accessing Prisma-specific properties
+            details: error.meta ? JSON.stringify(error.meta) : undefined,
+          },
+        },
+        { status: statusCode }
+      );
+    }
+
+    // Return a more informative error response for other errors
     return NextResponse.json(
       {
         error: {
@@ -116,7 +158,7 @@ export function handleAPIError(error: unknown) {
         code: "INTERNAL_SERVER_ERROR",
         status: 500,
         details:
-          typeof error === "object" ? "Unknown error object" : String(error),
+          typeof error === "object" ? JSON.stringify(error) : String(error),
       },
     },
     { status: 500 }
