@@ -20,8 +20,8 @@ export async function validateRequest<T>(
   requireAuth: boolean = true
 ): Promise<T> {
   try {
-    // Authentication check
-    if (requireAuth) {
+    // Authentication check - only if required and not a public route
+    if (requireAuth && !isPublicRoute(request.url)) {
       const session = await getServerSession(authOptions);
       if (!session) {
         throw new APIError("Unauthorized", 401, "UNAUTHORIZED");
@@ -51,6 +51,22 @@ export async function validateRequest<T>(
       );
     }
     throw error;
+  }
+}
+
+function isPublicRoute(url: string): boolean {
+  const publicRoutes = [
+    "/api/auth/signup",
+    "/api/auth/signin",
+    "/api/auth/callback",
+  ];
+
+  try {
+    const parsedUrl = new URL(url);
+    return publicRoutes.some((route) => parsedUrl.pathname.endsWith(route));
+  } catch {
+    // If URL parsing fails, return false to be safe
+    return false;
   }
 }
 

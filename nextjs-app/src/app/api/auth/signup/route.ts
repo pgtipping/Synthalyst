@@ -3,7 +3,6 @@ import { z } from "zod";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { validateRequest, handleAPIError, APIError } from "@/lib/middleware";
-import { logger } from "@/lib/logger";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
