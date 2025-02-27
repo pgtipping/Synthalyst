@@ -25,7 +25,7 @@ interface GenerateJobDescriptionInput {
     experience: string[];
     certifications: string[];
   };
-  salary: {
+  salary?: {
     range: {
       min: number;
       max: number;
@@ -64,7 +64,7 @@ export async function generateJobDescription(
         experience: input.qualifications.experience,
         certifications: input.qualifications.certifications,
       },
-      salary: input.salary,
+      salary: input.salary || null,
       company: input.company || null,
       metadata: {
         industry: input.industry || null,
@@ -163,8 +163,7 @@ Generation Guidelines:
    - ALL skills must be under requirements (not in qualifications)
    - Qualifications must ONLY contain education, experience, and certifications
    - All qualification fields MUST be non-empty arrays with at least one item
-   - ALWAYS include salary information with realistic ranges based on the role and industry
-   - ALWAYS include preferred skills section with at least 2-3 items`;
+   - Salary information is optional and can be omitted if not provided in the input`;
 
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,

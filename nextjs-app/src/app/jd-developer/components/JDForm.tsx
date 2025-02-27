@@ -99,8 +99,8 @@ const formSchema = z
       }),
     salary: z
       .object({
-        min: z.number().min(0, "Minimum salary must be at least 0"),
-        max: z.number().min(0, "Maximum salary must be at least 0"),
+        min: z.number().min(0, "Minimum salary must be at least 0").optional(),
+        max: z.number().min(0, "Maximum salary must be at least 0").optional(),
         type: z.enum(["hourly", "monthly", "yearly"]).default("yearly"),
         currency: z.string().default("USD"),
       })
@@ -109,7 +109,8 @@ const formSchema = z
         max: 0,
         type: "yearly",
         currency: "USD",
-      }),
+      })
+      .optional(),
     industry: z.string().min(1, "Industry is required"),
     level: z.string().min(1, "Level is required"),
     isTemplate: z.boolean().default(false),
@@ -671,14 +672,16 @@ export default function JDForm({
           },
           industry: values.industry,
           level: values.level,
-          salary: {
-            range: {
-              min: values.salary.min,
-              max: values.salary.max,
-            },
-            type: values.salary.type,
-            currency: values.salary.currency,
-          },
+          salary: values.salary
+            ? {
+                range: {
+                  min: values.salary.min || 0,
+                  max: values.salary.max || 0,
+                },
+                type: values.salary.type,
+                currency: values.salary.currency,
+              }
+            : undefined,
         }),
       });
 
@@ -708,7 +711,7 @@ export default function JDForm({
           experience: generatedContent.qualifications.experience,
           certifications: generatedContent.qualifications.certifications,
         },
-        salary: {
+        salary: generatedContent.salary || {
           min: 0,
           max: 0,
           type: "yearly" as const,
@@ -787,14 +790,16 @@ export default function JDForm({
             experience: values.qualifications.experience || [],
             certifications: values.qualifications.certifications || [],
           },
-          salary: {
-            range: {
-              min: values.salary.min,
-              max: values.salary.max,
-            },
-            type: values.salary.type,
-            currency: values.salary.currency,
-          },
+          salary: values.salary
+            ? {
+                range: {
+                  min: values.salary.min || 0,
+                  max: values.salary.max || 0,
+                },
+                type: values.salary.type,
+                currency: values.salary.currency,
+              }
+            : undefined,
           metadata: {
             industry: values.industry,
             level: values.level,
@@ -881,14 +886,16 @@ export default function JDForm({
           experience: values.qualifications.experience || [],
           certifications: values.qualifications.certifications || [],
         },
-        salary: {
-          range: {
-            min: values.salary.min,
-            max: values.salary.max,
-          },
-          type: values.salary.type as "hourly" | "monthly" | "yearly",
-          currency: values.salary.currency,
-        },
+        salary: values.salary
+          ? {
+              range: {
+                min: values.salary.min || 0,
+                max: values.salary.max || 0,
+              },
+              type: values.salary.type as "hourly" | "monthly" | "yearly",
+              currency: values.salary.currency,
+            }
+          : undefined,
         metadata: {
           industry: values.industry,
           level: values.level,
@@ -1410,7 +1417,7 @@ export default function JDForm({
             name="salary.min"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Minimum Salary</FormLabel>
+                <FormLabel>Minimum Salary (Optional)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -1430,7 +1437,7 @@ export default function JDForm({
             name="salary.max"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Maximum Salary</FormLabel>
+                <FormLabel>Maximum Salary (Optional)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -1450,7 +1457,7 @@ export default function JDForm({
             name="salary.type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Salary Type</FormLabel>
+                <FormLabel>Salary Type (Optional)</FormLabel>
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
@@ -1477,7 +1484,7 @@ export default function JDForm({
             name="salary.currency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Currency</FormLabel>
+                <FormLabel>Currency (Optional)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., USD"
