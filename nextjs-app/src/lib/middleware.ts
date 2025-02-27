@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { ZodError, ZodSchema } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
-import { headers } from "next/headers";
-import { rateLimit } from "./rate-limit";
 
 export class APIError extends Error {
   constructor(
@@ -22,14 +20,6 @@ export async function validateRequest<T>(
   requireAuth: boolean = true
 ): Promise<T> {
   try {
-    // Rate limiting
-    const headersList = await headers();
-    const ip = headersList.get("x-forwarded-for") ?? "127.0.0.1";
-    const { success } = await rateLimit(ip);
-    if (!success) {
-      throw new APIError("Too many requests", 429, "RATE_LIMIT_EXCEEDED");
-    }
-
     // Authentication check
     if (requireAuth) {
       const session = await getServerSession(authOptions);
@@ -39,7 +29,18 @@ export async function validateRequest<T>(
     }
 
     // Request body validation
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      throw new APIError(
+        "Invalid JSON in request body: " +
+          (error instanceof Error ? error.message : "Unknown error"),
+        400,
+        "INVALID_JSON"
+      );
+    }
+
     return schema.parse(body);
   } catch (error) {
     if (error instanceof ZodError) {
