@@ -110,7 +110,7 @@ IMPORTANT: Your response must be a valid JSON object matching this exact structu
     },
     "type": "hourly" | "monthly" | "yearly",
     "currency": string
-  } | null,
+  },
   "company": {
     "name": string,
     "description": string,
@@ -138,19 +138,25 @@ Generation Guidelines:
 3. Define comprehensive requirements:
    - Place ALL skills (technical and soft) under requirements.required or requirements.preferred
    - Include both technical and soft skills (like communication, leadership)
-   - Preferred skills are optional but recommended when appropriate
+   - Preferred skills are optional
    - For each skill:
      * Set appropriate competency level (beginner/intermediate/advanced/expert)
      * Provide clear description of skill requirements
      * Align with position level and responsibilities
 
-4. MANDATORY: Always include qualifications with non-empty arrays:
-   - education: MUST be a non-empty array with at least one education requirement
-   - experience: MUST be a non-empty array with at least one experience requirement
-   - certifications: MUST be a non-empty array with at least one certification (or "No specific certifications required")
-   - NEVER return null or empty arrays for any qualification field
+4. Qualifications are optional but recommended:
+   - education: Education requirements if applicable
+   - experience: Experience requirements if applicable
+   - certifications: Certification requirements if applicable
+   - Empty arrays are acceptable for any qualification field
 
-5. Professional Standards:
+5. ALWAYS include salary information:
+   - Provide realistic salary ranges based on the job title, level, and industry
+   - Use appropriate currency (default to USD if not specified)
+   - Set salary type (hourly, monthly, yearly) based on the employment type and industry standards
+   - Ensure the salary range is competitive for the position
+
+6. Professional Standards:
    - Use inclusive language
    - Apply industry-standard terminology
    - Define clear progression requirements
@@ -158,12 +164,11 @@ Generation Guidelines:
    - Emphasize growth and development
    - Use action verbs and specific metrics
 
-6. CRITICAL:
+7. CRITICAL:
    - Output must be valid JSON matching the exact structure above
    - ALL skills must be under requirements (not in qualifications)
    - Qualifications must ONLY contain education, experience, and certifications
-   - All qualification fields MUST be non-empty arrays with at least one item
-   - Salary information is optional and can be omitted if not provided in the input
+   - ALWAYS include salary information with realistic values
    - Department and location are optional and can be null`;
 
     const groq = new Groq({
@@ -224,17 +229,23 @@ ${JSON.stringify(transformedInput, null, 2)}`,
         !enhancedDescription.title ||
         !enhancedDescription.description ||
         !Array.isArray(enhancedDescription.responsibilities) ||
-        !enhancedDescription.requirements?.required ||
-        !Array.isArray(enhancedDescription.qualifications?.education) ||
-        !Array.isArray(enhancedDescription.qualifications?.experience) ||
-        !Array.isArray(enhancedDescription.qualifications?.certifications) ||
-        enhancedDescription.qualifications.education.length === 0 ||
-        enhancedDescription.qualifications.experience.length === 0 ||
-        enhancedDescription.qualifications.certifications.length === 0
+        !enhancedDescription.requirements?.required
       ) {
         throw new Error(
           "Invalid response structure or missing required fields"
         );
+      }
+
+      // Ensure salary is always present
+      if (!enhancedDescription.salary) {
+        enhancedDescription.salary = {
+          range: {
+            min: input.salary?.range?.min || 0,
+            max: input.salary?.range?.max || 0,
+          },
+          type: input.salary?.type || "yearly",
+          currency: input.salary?.currency || "USD",
+        };
       }
 
       console.log("\nParsed Enhanced Description:");

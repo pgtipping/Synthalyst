@@ -199,9 +199,11 @@ export default function JDForm({
         required: Array.isArray(initialTemplate?.requirements?.required)
           ? initialTemplate.requirements.required.map(convertToRequiredSkill)
           : [{ name: "", level: "intermediate", description: "" }],
-        preferred: Array.isArray(initialTemplate?.requirements?.preferred)
-          ? initialTemplate.requirements.preferred.map(convertToRequiredSkill)
-          : [],
+        preferred:
+          Array.isArray(initialTemplate?.requirements?.preferred) &&
+          initialTemplate?.requirements?.preferred.length > 0
+            ? initialTemplate.requirements.preferred.map(convertToRequiredSkill)
+            : [{ name: "", level: "intermediate", description: "" }],
       },
       qualifications: {
         education: initialTemplate?.qualifications?.education || [],
@@ -251,9 +253,13 @@ export default function JDForm({
           required: Array.isArray(initialTemplate.requirements.required)
             ? initialTemplate.requirements.required.map(convertToRequiredSkill)
             : [{ name: "", level: "intermediate", description: "" }],
-          preferred: Array.isArray(initialTemplate.requirements.preferred)
-            ? initialTemplate.requirements.preferred.map(convertToRequiredSkill)
-            : [],
+          preferred:
+            Array.isArray(initialTemplate.requirements.preferred) &&
+            initialTemplate.requirements.preferred.length > 0
+              ? initialTemplate.requirements.preferred.map(
+                  convertToRequiredSkill
+                )
+              : [{ name: "", level: "intermediate", description: "" }],
         },
         qualifications: {
           education: initialTemplate.qualifications.education || [],
@@ -677,19 +683,30 @@ export default function JDForm({
         responsibilities: generatedContent.responsibilities,
         requirements: {
           required: generatedContent.requirements.required,
-          preferred: generatedContent.requirements.preferred || [],
+          preferred:
+            Array.isArray(generatedContent.requirements.preferred) &&
+            generatedContent.requirements.preferred.length > 0
+              ? generatedContent.requirements.preferred
+              : [{ name: "", level: "intermediate" as const, description: "" }],
         },
         qualifications: {
           education: generatedContent.qualifications.education,
           experience: generatedContent.qualifications.experience,
           certifications: generatedContent.qualifications.certifications,
         },
-        salary: generatedContent.salary || {
-          min: 0,
-          max: 0,
-          type: "yearly" as const,
-          currency: "USD",
-        },
+        salary: generatedContent.salary
+          ? {
+              min: generatedContent.salary.range?.min || 0,
+              max: generatedContent.salary.range?.max || 0,
+              type: generatedContent.salary.type || "yearly",
+              currency: generatedContent.salary.currency || "USD",
+            }
+          : {
+              min: 0,
+              max: 0,
+              type: "yearly" as const,
+              currency: "USD",
+            },
         industry: generatedContent.metadata.industry || "",
         level: generatedContent.metadata.level || "",
         isTemplate: false,
@@ -772,7 +789,14 @@ export default function JDForm({
                 type: values.salary.type,
                 currency: values.salary.currency,
               }
-            : undefined,
+            : {
+                range: {
+                  min: 0,
+                  max: 0,
+                },
+                type: "yearly",
+                currency: "USD",
+              },
           metadata: {
             industry: values.industry,
             level: values.level,
@@ -868,7 +892,14 @@ export default function JDForm({
               type: values.salary.type as "hourly" | "monthly" | "yearly",
               currency: values.salary.currency,
             }
-          : undefined,
+          : {
+              range: {
+                min: 0,
+                max: 0,
+              },
+              type: "yearly",
+              currency: "USD",
+            },
         metadata: {
           industry: values.industry,
           level: values.level,
@@ -907,35 +938,6 @@ export default function JDForm({
     } finally {
       setIsSavingTemplate(false);
     }
-  };
-
-  const emptyFormState: FormValues = {
-    jobTitle: "",
-    department: "",
-    location: "",
-    employmentType: "",
-    jobDescription: "",
-    responsibilities: [],
-    requirements: {
-      required: [{ name: "", level: "intermediate" as const, description: "" }],
-      preferred: [
-        { name: "", level: "intermediate" as const, description: "" },
-      ],
-    },
-    qualifications: {
-      education: [],
-      experience: [],
-      certifications: [],
-    },
-    salary: {
-      min: 0,
-      max: 0,
-      type: "yearly" as const,
-      currency: "USD",
-    },
-    industry: "",
-    level: "",
-    isTemplate: false,
   };
 
   return (
@@ -1476,7 +1478,47 @@ export default function JDForm({
             type="button"
             variant="outline"
             onClick={() => {
-              form.reset(emptyFormState);
+              // Clear all form fields including select fields
+              form.reset({
+                jobTitle: "",
+                department: "",
+                location: "",
+                employmentType: "",
+                jobDescription: "",
+                responsibilities: [],
+                requirements: {
+                  required: [
+                    { name: "", level: "intermediate", description: "" },
+                  ],
+                  preferred: [
+                    { name: "", level: "intermediate", description: "" },
+                  ],
+                },
+                qualifications: {
+                  education: [],
+                  experience: [],
+                  certifications: [],
+                },
+                salary: {
+                  min: 0,
+                  max: 0,
+                  type: "yearly",
+                  currency: "USD",
+                },
+                industry: "",
+                level: "",
+                isTemplate: false,
+              });
+
+              // Force reset of select fields
+              setTimeout(() => {
+                form.setValue("employmentType", "");
+                form.setValue("industry", "");
+                form.setValue("level", "");
+                form.setValue("salary.type", "yearly");
+                form.setValue("salary.currency", "USD");
+              }, 0);
+
               onClearTemplate();
             }}
             disabled={isLoading || isSavingTemplate}
