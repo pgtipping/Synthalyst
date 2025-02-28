@@ -25,6 +25,9 @@ class MockBotpressError extends Error {
   }
 }
 
+// Store the MockBotpressError in global scope for the mock to access
+(global as any).__MockBotpressError = MockBotpressError;
+
 // Mock next-auth
 jest.mock("next-auth", () => ({
   getServerSession: jest.fn().mockResolvedValue({
@@ -36,28 +39,50 @@ jest.mock("next-auth", () => ({
 
 // Mock the Botpress client
 jest.mock("@botpress/client", () => {
+  // Create a mock implementation that can be customized in tests
+  const mockCreateConversation = jest.fn().mockResolvedValue({
+    conversationId: "test-conversation-id",
+  });
+
+  const mockCreateMessage = jest.fn().mockResolvedValue({});
+
+  const mockListMessages = jest.fn().mockResolvedValue({
+    messages: [
+      {
+        payload: {
+          type: "text",
+          text: "Hello! How can I help you today?",
+        },
+      },
+    ],
+  });
+
+  // Store mock functions in global scope for tests to access
+  (global as any).__mockBotpressClient = {
+    createConversation: mockCreateConversation,
+    createMessage: mockCreateMessage,
+    listMessages: mockListMessages,
+  };
+
   return {
     Client: jest.fn().mockImplementation(() => ({
-      createConversation: jest.fn().mockResolvedValue({
-        conversationId: "test-conversation-id",
-      }),
-      createMessage: jest.fn().mockResolvedValue({}),
-      listMessages: jest.fn().mockResolvedValue({
-        messages: [
-          {
-            payload: {
-              type: "text",
-              text: "Hello! How can I help you today?",
-            },
-          },
-        ],
-      }),
+      createConversation: mockCreateConversation,
+      createMessage: mockCreateMessage,
+      listMessages: mockListMessages,
     })),
-    BotpressError: MockBotpressError,
+    BotpressError: (global as any).__MockBotpressError,
   };
 });
 
 describe("Chat API", () => {
+  // Get the mock functions from global scope
+  const mockBotpressClient = (global as any).__mockBotpressClient;
+
+  beforeEach(() => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+  });
+
   describe("POST /api/chat", () => {
     it("should process chat message successfully", async () => {
       const request = new NextRequest("http://localhost:3000/api/chat", {
@@ -96,8 +121,8 @@ describe("Chat API", () => {
     });
 
     it("should handle conversation not found error", async () => {
-      const mockClient = new Client({ token: "test", workspaceId: "test" });
-      (mockClient.createConversation as jest.Mock).mockRejectedValueOnce(
+      // Mock the error for this test
+      mockBotpressClient.createConversation.mockRejectedValueOnce(
         new MockBotpressError(
           "conversation_not_found",
           404,
@@ -124,8 +149,8 @@ describe("Chat API", () => {
     });
 
     it("should handle rate limit exceeded error", async () => {
-      const mockClient = new Client({ token: "test", workspaceId: "test" });
-      (mockClient.createConversation as jest.Mock).mockRejectedValueOnce(
+      // Mock the error for this test
+      mockBotpressClient.createConversation.mockRejectedValueOnce(
         new MockBotpressError(
           "rate_limit_exceeded",
           429,
@@ -152,8 +177,8 @@ describe("Chat API", () => {
     });
 
     it("should handle unauthorized access error", async () => {
-      const mockClient = new Client({ token: "test", workspaceId: "test" });
-      (mockClient.createConversation as jest.Mock).mockRejectedValueOnce(
+      // Mock the error for this test
+      mockBotpressClient.createConversation.mockRejectedValueOnce(
         new MockBotpressError("unauthorized", 401, "Unauthorized access", {})
       );
 
@@ -175,25 +200,6 @@ describe("Chat API", () => {
     });
 
     it("should include user email in conversation tags when authenticated", async () => {
-      const mockCreateConversation = jest.fn().mockResolvedValue({
-        conversationId: "test-conversation-id",
-      });
-
-      (Client as jest.Mock).mockImplementationOnce(() => ({
-        createConversation: mockCreateConversation,
-        createMessage: jest.fn().mockResolvedValue({}),
-        listMessages: jest.fn().mockResolvedValue({
-          messages: [
-            {
-              payload: {
-                type: "text",
-                text: "Hello! How can I help you today?",
-              },
-            },
-          ],
-        }),
-      }));
-
       const request = new NextRequest("http://localhost:3000/api/chat", {
         method: "POST",
         body: JSON.stringify({
@@ -204,7 +210,7 @@ describe("Chat API", () => {
 
       await POST(request);
 
-      expect(mockCreateConversation).toHaveBeenCalledWith({
+      expect(mockBotpressClient.createConversation).toHaveBeenCalledWith({
         channel: "web",
         tags: {
           source: "web",
