@@ -1,6 +1,6 @@
 # Active Development Context - 2024-02-28
 
-## Current Focus: Interview Questions Generator Test Improvements
+## Current Focus: API Test Improvements
 
 ### Interview Questions Generator
 
@@ -21,6 +21,11 @@
 - Set up proper mocking for NextResponse in the test environment
 - Implemented Training Plan API tests that now pass successfully
 - Improved test infrastructure for API route testing
+- Created and fixed API tests for the Interview Questions Generator
+  - Implemented proper mocking of Groq SDK
+  - Added tests for success and error cases
+  - Fixed environment variable handling in tests
+  - Documented API testing patterns in .cursorrules
 
 #### Current Issues
 

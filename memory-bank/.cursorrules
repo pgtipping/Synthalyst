@@ -787,3 +787,105 @@ Before running ANY command:
 - Use `npm test -- -t "ComponentName"` to run tests for a specific component
 - Use `npm test -- --watch` for watch mode during development
 - Use `npm test -- --coverage` to generate coverage reports
+
+# API Testing Patterns - 2024-02-28 22:15
+
+## Mock Setup for API Tests - 2024-02-28 22:15
+
+1. Use module-level mock functions:
+
+   ```typescript
+   // Mock Groq SDK
+   jest.mock("groq-sdk", () => {
+     const mockCreate = jest.fn();
+
+     // Store the mock function in module scope for tests to access
+     (global as any).__mockGroqCreate = mockCreate;
+
+     return {
+       Groq: jest.fn().mockImplementation(() => ({
+         chat: {
+           completions: {
+             create: mockCreate,
+           },
+         },
+       })),
+     };
+   });
+   ```
+
+2. Access the mock function in tests:
+
+   ```typescript
+   describe("API Tests", () => {
+     // Get the mock function from global scope
+     const mockCreate = (global as any).__mockGroqCreate;
+
+     beforeEach(() => {
+       // Clear all mocks before each test
+       jest.clearAllMocks();
+     });
+
+     it("should call the API", async () => {
+       // Mock the response
+       mockCreate.mockResolvedValueOnce({
+         choices: [{ message: { content: "Response" } }],
+       });
+
+       // Test the API
+       // ...
+     });
+   });
+   ```
+
+3. Mock environment variables:
+
+   ```typescript
+   // Store original environment
+   const originalEnv = process.env;
+
+   beforeEach(() => {
+     // Set up environment variables
+     process.env = { ...originalEnv, API_KEY: "test-api-key" };
+   });
+
+   afterEach(() => {
+     // Restore environment variables
+     process.env = originalEnv;
+   });
+   ```
+
+## API Test Structure - 2024-02-28 22:15
+
+1. Test successful API calls:
+
+   - Mock successful responses
+   - Verify response status and body
+   - Verify API was called with correct parameters
+
+2. Test validation errors:
+
+   - Test with invalid or missing parameters
+   - Verify 400 status code
+   - Verify error messages
+
+3. Test API errors:
+
+   - Mock API failures
+   - Verify proper error handling
+   - Verify 500 status code
+
+4. Test edge cases:
+   - Empty responses
+   - Malformed responses
+   - Missing API keys
+
+## API Test Best Practices - 2024-02-28 22:15
+
+1. Always mock external API calls
+2. Test both success and error paths
+3. Verify proper error handling
+4. Check for appropriate status codes
+5. Validate response structure
+6. Test input validation
+7. Restore environment variables after tests
