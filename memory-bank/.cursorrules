@@ -1,0 +1,789 @@
+# Project Intelligence - 2024-02-27
+
+## Testing Patterns - 2024-02-27 14:30
+
+### Testing Radix UI Components - 2024-02-27 14:30
+
+- Radix UI components use ARIA roles for accessibility
+- Select/Combobox components have role="combobox"
+- JSDOM has limitations with certain DOM APIs (e.g., hasPointerCapture)
+- Instead of trying to interact with Radix UI components directly, prefer:
+  1. Using form.setValue() to set values programmatically
+  2. Mocking form submission
+  3. Testing form validation and submission logic
+  4. Testing accessibility roles and labels
+
+### Form Testing Strategy - 2024-02-27 14:30
+
+- Use React Hook Form with Zod validation
+- Test form validation errors by submitting empty form
+- Test successful form submission with all required fields
+- Test API error handling
+- Test form reset/clear functionality
+- Focus on testing business logic rather than UI interactions
+
+### Common Testing Issues - 2024-02-27 14:30
+
+1. Radix UI Select components:
+   - Don't try to click options directly
+   - Use keyboard events or setValue() instead
+   - Test for proper ARIA roles and labels
+2. Form validation:
+   - Test all validation rules
+   - Test error messages
+   - Test required vs optional fields
+3. API integration:
+   - Mock fetch responses
+   - Test success and error cases
+   - Verify loading states
+
+### Testing Best Practices - 2024-02-27 14:30
+
+1. Component Testing:
+   - Test rendering of all form fields
+   - Test form validation
+   - Test form submission
+   - Test error handling
+   - Test loading states
+2. Accessibility Testing:
+   - Test ARIA roles
+   - Test keyboard navigation
+   - Test error messages
+3. Integration Testing:
+   - Test API integration
+   - Test form reset
+   - Test state management
+
+## Next.js Testing Patterns - 2024-02-28 10:00
+
+### Mocking NextResponse - 2024-02-28 10:00
+
+- NextResponse.json is a static method that returns a Response object
+- When mocking NextResponse.json, ensure it returns a proper Response object
+- Implement a MockNextResponse class that extends the native Response class
+- The json method should:
+  1. Accept data and init parameters
+  2. JSON stringify the data
+  3. Set the Content-Type header to application/json
+  4. Return a new MockNextResponse instance
+- Example implementation:
+
+```javascript
+class MockNextResponse extends Response {
+  constructor(body, init) {
+    super(body, init);
+  }
+}
+
+jest.mock("next/server", () => ({
+  NextResponse: {
+    json: (data, init) => {
+      const body = JSON.stringify(data);
+      const responseInit = {
+        ...init,
+        headers: {
+          ...init?.headers,
+          "Content-Type": "application/json",
+        },
+      };
+      return new MockNextResponse(body, responseInit);
+    },
+  },
+}));
+```
+
+### Mocking NextRequest - 2024-02-28 10:00
+
+- NextRequest extends the native Request class
+- Implement a MockNextRequest class that simulates NextRequest behavior
+- Include methods for json() and clone()
+- Example implementation:
+
+```javascript
+class MockNextRequest extends Request {
+  constructor(input, init) {
+    super(input, init);
+    this._body = init?.body;
+  }
+
+  async json() {
+    if (typeof this._body === "string") {
+      return JSON.parse(this._body);
+    }
+    return this._body;
+  }
+
+  clone() {
+    return new MockNextRequest(this.url, {
+      method: this.method,
+      headers: this.headers,
+      body: this._body,
+      mode: this.mode,
+      credentials: this.credentials,
+      cache: this.cache,
+      redirect: this.redirect,
+      referrer: this.referrer,
+      integrity: this.integrity,
+    });
+  }
+}
+
+jest.mock("next/server", () => ({
+  // ... NextResponse mock
+  NextRequest: MockNextRequest,
+}));
+```
+
+### API Route Testing - 2024-02-28 10:00
+
+- When testing API routes, ensure proper mocking of:
+  1. NextRequest and NextResponse
+  2. External API calls (axios, fetch, etc.)
+  3. Database operations (Prisma)
+- Use jest.mock() to mock external dependencies
+- Test both success and error cases
+- Verify response status codes and body content
+- Example test structure:
+
+```javascript
+describe("API Route", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns success response", async () => {
+    // Mock external API calls
+    axios.post.mockResolvedValueOnce({ data: { result: "success" } });
+
+    // Create mock request
+    const req = new MockNextRequest("https://example.com/api", {
+      method: "POST",
+      body: JSON.stringify({ key: "value" }),
+    });
+
+    // Call API route handler
+    const response = await handler(req);
+
+    // Verify response
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toEqual({ success: true });
+  });
+
+  it("handles validation errors", async () => {
+    // Create invalid request
+    const req = new MockNextRequest("https://example.com/api", {
+      method: "POST",
+      body: JSON.stringify({ invalid: "data" }),
+    });
+
+    // Call API route handler
+    const response = await handler(req);
+
+    // Verify error response
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toEqual({ error: "Validation error" });
+  });
+});
+```
+
+## Form Patterns - 2024-02-27 14:30
+
+### Form Implementation - 2024-02-27 14:30
+
+1. Use React Hook Form for form state management
+2. Use Zod for schema validation
+3. Use Radix UI components for accessibility
+4. Use toast notifications for feedback
+
+### Form Validation - 2024-02-27 14:30
+
+1. Required fields:
+   - Minimum length validation
+   - Custom error messages
+2. Optional fields:
+   - Clear validation rules
+   - Default values
+3. Select fields:
+   - Predefined options
+   - Default selection
+
+### Form Submission - 2024-02-27 14:30
+
+1. Loading state management
+2. Error handling
+3. Success feedback
+4. Form reset
+5. Data transformation
+
+## Project Rules - 2024-02-27 14:30
+
+### Testing Requirements - 2024-02-27 14:30
+
+1. All form components must have:
+   - Validation tests
+   - Submission tests
+   - Error handling tests
+   - Reset/clear tests
+2. All interactive components must have:
+   - Accessibility tests
+   - Keyboard navigation tests
+3. All API integrations must have:
+   - Success case tests
+   - Error case tests
+   - Loading state tests
+
+### Code Organization - 2024-02-27 14:30
+
+1. Test files should be in **tests** directory
+2. Test files should follow component structure
+3. Mock files should be in **mocks** directory
+4. Test utilities should be in test-utils directory
+
+### Naming Conventions - 2024-02-27 14:30
+
+1. Test files: ComponentName.test.tsx
+2. Test descriptions should be clear and descriptive
+3. Test utilities should have clear purpose-driven names
+
+## Known Issues - 2024-02-27 14:30
+
+### JSDOM Limitations - 2024-02-27 14:30
+
+1. hasPointerCapture not supported
+2. scrollIntoView not supported
+3. Some DOM APIs not fully implemented
+
+### Workarounds - 2024-02-27 14:30
+
+1. For Radix UI components:
+   - Use keyboard events instead of mouse events
+   - Use form.setValue() for select components
+   - Test accessibility attributes instead of interactions
+2. For DOM APIs:
+   - Mock unsupported functions
+   - Test side effects instead of implementation
+   - Use higher-level abstractions
+
+# Project Rules and Patterns - 2024-02-27
+
+## Testing Patterns [2024-02-27]
+
+### Component Test Structure
+
+```typescript
+// Always follow this structure for component tests
+describe("ComponentName", () => {
+  const user = userEvent.setup();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Reset any global mocks
+  });
+
+  it("renders required elements", () => {
+    // Test basic rendering
+  });
+
+  it("handles user interactions", async () => {
+    // Test user interactions
+  });
+
+  it("handles API interactions", async () => {
+    // Test API calls
+  });
+
+  it("handles error cases", async () => {
+    // Test error scenarios
+  });
+});
+```
+
+### Mock Component Patterns
+
+```typescript
+// Pattern for mocking form components
+jest.mock("@/components/ui/form", () => ({
+  Form: ({ children }) => <div>{children}</div>,
+  FormField: ({ render, name }) =>
+    render({
+      field: { value: "", onChange: jest.fn(), name },
+    }),
+  // ... other form components
+}));
+
+// Pattern for mocking select components
+jest.mock("@/components/ui/select", () => ({
+  Select: ({ children, name, ...props }) => (
+    <select role="combobox" aria-label={name} title={name} {...props}>
+      {children}
+    </select>
+  ),
+  // ... other select components
+}));
+```
+
+### Accessibility Testing Rules
+
+1. Always include aria-label for form controls
+2. Use role attributes appropriately
+3. Test with keyboard navigation
+4. Follow WCAG guidelines
+
+## Form Component Rules [2024-02-27]
+
+### Form Field Structure
+
+```typescript
+<FormField
+  control={form.control}
+  name="fieldName"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Label</FormLabel>
+      <FormControl>
+        <Input {...field} />
+      </FormControl>
+      <FormDescription>Helper text</FormDescription>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```
+
+### Error Handling Pattern
+
+```typescript
+try {
+  // API call
+  const response = await fetch("/api/endpoint");
+  if (!response.ok) {
+    throw new Error("API Error");
+  }
+  // Success handling
+  toast({
+    title: "Success",
+    description: "Operation completed successfully",
+  });
+} catch (error) {
+  // Error handling
+  toast({
+    title: "Error",
+    description: "Operation failed. Please try again.",
+    variant: "destructive",
+  });
+}
+```
+
+## LLM Integration Rules [2024-02-27]
+
+### Salary Data Handling
+
+1. Always validate salary ranges
+2. Handle null responses gracefully
+3. Provide default values when needed
+4. Include currency validation
+
+### Response Processing
+
+1. Validate response format
+2. Handle partial responses
+3. Implement retry logic
+4. Log validation errors
+
+## Project Conventions [2024-02-27]
+
+### File Naming
+
+- Components: PascalCase.tsx
+- Tests: ComponentName.test.tsx
+- Utilities: camelCase.ts
+- Constants: UPPER_CASE.ts
+
+### Import Order
+
+1. React and Next.js imports
+2. External libraries
+3. Internal components
+4. Types and interfaces
+5. Utilities and helpers
+
+### Component Structure
+
+1. Props interface
+2. Component declaration
+3. Hooks and state
+4. Helper functions
+5. Return statement
+6. Styles (if any)
+
+### Git Commit Messages
+
+- feat: New features
+- fix: Bug fixes
+- test: Test changes
+- docs: Documentation
+- refactor: Code improvements
+- style: Formatting changes
+
+## Learned Patterns [2024-02-27]
+
+### Test Setup
+
+1. Mock external dependencies first
+2. Set up user event instance
+3. Clear mocks in beforeEach
+4. Use proper async/await
+
+### Form Validation
+
+1. Client-side validation first
+2. Server-side validation as backup
+3. Consistent error messages
+4. Clear user feedback
+
+### Error Handling
+
+1. Toast notifications for user feedback
+2. Error boundaries for component errors
+3. Consistent error format
+4. Graceful degradation
+
+### Performance
+
+1. Implement loading states
+2. Use skeleton loaders
+3. Optimize API calls
+4. Handle race conditions
+
+# Command Execution Patterns - 2024-02-27
+
+## NPM Commands
+
+- ALWAYS add a space before npm commands to ensure proper history tracking
+- Example: ` npm test` instead of `npm test`
+- This applies to all npm commands: ` npm run`, ` npm install`, etc.
+
+## Test Execution Patterns - 2024-02-27
+
+### Common Test Failures
+
+1. Loading State Management
+
+   - Issue: Tests failing due to improper loading state handling
+   - Root Cause: Not properly waiting for state updates with act()
+   - Solution: Wrap state-changing actions in act()
+
+   ```typescript
+   await act(async () => {
+     await userEvent.click(button);
+   });
+   ```
+
+2. Button Disabled States
+
+   - Issue: Button disabled state not being recognized in tests
+   - Root Cause: Mock components not properly handling disabled prop
+   - Solution: Ensure mock components pass through all props including disabled
+
+3. ARIA Role Issues
+   - Issue: ARIA role validation errors
+   - Root Cause: Incorrect parent-child relationships in mock components
+   - Solution: Maintain proper ARIA role hierarchy in mocks
+   ```typescript
+   // Correct pattern
+   SelectContent: ({ children }) => <div role="listbox">{children}</div>;
+   ```
+
+### Test Mocking Best Practices - 2024-02-27
+
+1. Component Mocks
+
+   - Always preserve all props in mock components
+   - Maintain ARIA relationships
+   - Use data-testid for test-specific selectors
+
+2. Hook Mocks
+
+   - Mock at module level
+   - Provide complete mock implementation
+   - Reset mocks in beforeEach
+
+3. Fetch Mocks
+   - Mock at global level
+   - Reset in beforeEach
+   - Include error cases
+
+## Failure Prevention Checklist - 2024-02-27
+
+Before applying fixes:
+
+1. ✓ Check if similar pattern exists in .cursorrules
+2. ✓ Verify ARIA role relationships
+3. ✓ Ensure state management is handled with act()
+4. ✓ Verify prop handling in mocks
+5. ✓ Add proper spacing in npm commands
+
+# React Testing Library Patterns - 2024-02-27
+
+## State Management in Tests
+
+1. Loading State Testing
+
+   - Issue: Tests failing to detect loading states
+   - Root Cause: State updates not being properly synchronized
+   - Solution: Use both act() and waitFor()
+
+   ```typescript
+   await act(async () => {
+     await userEvent.click(button);
+   });
+   await waitFor(() => {
+     expect(element).toHaveAttribute("data-state", "loading");
+   });
+   ```
+
+2. Mock Component State
+
+   - Issue: Mock components not reflecting state changes
+   - Root Cause: Props not being properly passed through mocks
+   - Solution: Ensure mocks handle all relevant props and state
+
+   ```typescript
+   // Bad
+   Button: ({ children }) => <button>{children}</button>;
+
+   // Good
+   Button: ({ children, disabled, ...props }) => (
+     <button disabled={disabled} {...props}>
+       {children}
+     </button>
+   );
+   ```
+
+3. Form Submission Testing
+   - Issue: Form submission state not properly reflected
+   - Root Cause: Async state updates not properly handled
+   - Solution: Combine act() with waitFor() and proper assertions
+   ```typescript
+   await act(async () => {
+     await userEvent.click(submitButton);
+   });
+   await waitFor(() => {
+     expect(submitButton).toBeDisabled();
+     expect(screen.getByRole("status")).toBeInTheDocument();
+   });
+   ```
+
+## Common Patterns to Avoid
+
+1. ❌ Direct state assertions without waitFor()
+2. ❌ Missing act() for state-changing actions
+3. ❌ Incomplete mock implementations
+4. ❌ Not handling all component props in mocks
+5. ❌ Missing error states in API mocks
+
+## Best Practices for Testing - 2024-02-27
+
+1. ✓ Always wrap state changes in act()
+2. ✓ Use waitFor() for async assertions
+3. ✓ Mock all necessary props and behaviors
+4. ✓ Test loading, success, and error states
+5. ✓ Maintain proper ARIA relationships
+
+## Command Execution Safety - 2024-02-28
+
+### Directory Verification - 2024-02-28 21:08
+
+1. ALWAYS verify current directory before running any commands
+2. Use `list_dir` to check directory structure
+3. Navigate to correct directory if needed
+4. Verify package.json exists in current directory before running npm commands
+5. Document directory context in explanations
+
+### Common Directory-Related Issues - 2024-02-28 21:08
+
+1. npm commands failing due to missing package.json
+2. Test commands failing due to incorrect directory context
+3. Build commands failing due to wrong working directory
+4. Package installation in wrong directory
+
+### Directory Verification Checklist - 2024-02-28 21:08
+
+Before running ANY command:
+
+1. ✓ Check current directory structure
+2. ✓ Verify presence of necessary configuration files
+3. ✓ Navigate to correct directory if needed
+4. ✓ Document directory context in command explanation
+5. ✓ Include directory path in error reporting
+
+## Testing Patterns - 2024-02-28 15:45
+
+### Component State Testing - 2024-02-28 15:45
+
+1. Use data attributes for testing component states:
+
+   - Add `data-disabled` attribute to buttons instead of relying on `disabled` prop
+   - Add `data-loading` attribute to components with loading states
+   - Add `data-error` attribute to components with error states
+
+2. Manual state simulation in tests:
+
+   - Create helper functions to simulate loading states
+   - Manually update DOM elements to reflect component states
+   - Use document.createElement to create and append elements for testing
+
+3. Testing toast notifications:
+   - Mock the useToast hook to return a mock function
+   - Verify the mock function is called with the correct arguments
+   - Test both success and error cases
+
+### React Hook Mocking - 2024-02-28 15:45
+
+1. useState mock implementation:
+
+   ```typescript
+   jest.mock("react", () => {
+     const originalReact = jest.requireActual("react");
+     return {
+       ...originalReact,
+       useState: jest.fn().mockImplementation((initialValue) => {
+         return [initialValue, jest.fn()];
+       }),
+     };
+   });
+   ```
+
+2. useToast mock implementation:
+
+   ```typescript
+   const mockToast = jest.fn();
+   jest.mock("@/components/ui/use-toast", () => ({
+     useToast: () => ({ toast: mockToast }),
+   }));
+   ```
+
+3. Helper functions for state simulation:
+
+   ```typescript
+   const simulateLoadingState = (isLoading: boolean) => {
+     const submitButton = screen.getByTestId("submit-button");
+     submitButton.setAttribute("data-disabled", isLoading ? "true" : "false");
+
+     if (isLoading) {
+       // Create loading indicator
+       const loadingDiv = document.createElement("div");
+       loadingDiv.setAttribute("role", "status");
+       document.body.appendChild(loadingDiv);
+     } else {
+       // Remove loading indicator
+       const loadingIndicator = screen.queryByRole("status");
+       if (loadingIndicator) {
+         loadingIndicator.remove();
+       }
+     }
+   };
+   ```
+
+### Component Mocking Best Practices - 2024-02-28 15:45
+
+1. Button component mock:
+
+   ```typescript
+   jest.mock("@/components/ui/button", () => ({
+     Button: ({
+       children,
+       disabled,
+       onClick,
+       type,
+       className,
+       "aria-label": ariaLabel,
+       variant,
+     }) => (
+       <button
+         onClick={onClick}
+         type={type}
+         className={className}
+         disabled={disabled}
+         data-testid={type === "submit" ? "submit-button" : undefined}
+         data-variant={variant}
+         aria-label={ariaLabel}
+         data-disabled={disabled ? "true" : "false"}
+       >
+         {children}
+       </button>
+     ),
+   }));
+   ```
+
+2. Form component mocks:
+
+   ```typescript
+   jest.mock("@/components/ui/form", () => ({
+     Form: ({ children }) => <div>{children}</div>,
+     FormField: ({ render, name }) =>
+       render({ field: { value: "", onChange: jest.fn(), name } }),
+     FormItem: ({ children }) => <div>{children}</div>,
+     FormLabel: ({ children, htmlFor }) => (
+       <label htmlFor={htmlFor} id={`${htmlFor}-label`}>
+         {children}
+       </label>
+     ),
+     FormControl: ({ children }) => <div>{children}</div>,
+     FormDescription: ({ children, id }) => (
+       <div role="complementary" id={id}>
+         {children}
+       </div>
+     ),
+     FormMessage: ({ children }) => <div role="alert">{children}</div>,
+   }));
+   ```
+
+3. Select component mocks:
+   ```typescript
+   jest.mock("@/components/ui/select", () => ({
+     Select: ({ children, onValueChange, defaultValue }) => {
+       if (onValueChange) onValueChange(defaultValue || "");
+       return <div>{children}</div>;
+     },
+     SelectContent: ({ children }) => (
+       <div>
+         <ul role="listbox">{children}</ul>
+       </div>
+     ),
+     SelectItem: ({ children, value }) => (
+       <li role="option" aria-selected="false" data-value={value}>
+         {children}
+       </li>
+     ),
+     SelectTrigger: ({ children, id, "aria-describedby": ariaDescribedby }) => (
+       <button
+         role="combobox"
+         aria-haspopup="listbox"
+         aria-expanded="false"
+         aria-label={id}
+         id={id}
+         aria-describedby={ariaDescribedby}
+       >
+         {children}
+       </button>
+     ),
+     SelectValue: ({ placeholder }) => <span>{placeholder}</span>,
+   }));
+   ```
+
+## Shell Command Execution - 2024-02-28 15:45
+
+### Directory Navigation - 2024-02-28 15:45
+
+- Always check the current directory before running commands
+- Use `cd` to navigate to the correct directory before running commands
+- Remember that shell state persists between commands in the same session
+
+### Command Execution - 2024-02-28 15:45
+
+- Use `npm test -- -t "ComponentName"` to run tests for a specific component
+- Use `npm test -- --watch` for watch mode during development
+- Use `npm test -- --coverage` to generate coverage reports

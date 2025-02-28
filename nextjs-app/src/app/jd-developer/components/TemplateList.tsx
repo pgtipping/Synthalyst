@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { JobDescription } from "@/types/jobDescription";
-import { TemplateVersionHistory } from "@/app/components/templates/TemplateVersionHistory";
-import { TemplateVersionComparison } from "@/app/components/templates/TemplateVersionComparison";
+import { TemplateVersionHistory } from "./templates/TemplateVersionHistory";
+import { TemplateVersionComparison } from "./templates/TemplateVersionComparison";
 
 interface Category {
   id: string;

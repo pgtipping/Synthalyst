@@ -1,19 +1,49 @@
 import "@testing-library/jest-dom";
 import { cleanupDatabase } from "./setup";
 
+// Define types for our mocks
+interface RequestInit {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: unknown;
+}
+
+interface ResponseInit {
+  status?: number;
+  statusText?: string;
+  headers?: Record<string, string>;
+}
+
 beforeEach(async () => {
   await cleanupDatabase();
 });
 
 // Mock Next.js response utilities
 jest.mock("next/server", () => {
-  const originalModule = jest.requireActual("next/server");
+  class MockNextRequest {
+    url: string;
+    method: string;
+    headers: Record<string, string>;
+    body: unknown;
+    nextUrl: URL;
 
-  class MockNextRequest extends Request {
-    constructor(input: RequestInfo | URL, init?: RequestInit) {
-      super(input, init);
-      Object.defineProperty(this, "nextUrl", {
-        get: () => new URL(input.toString()),
+    constructor(input: string | URL | Request, init: RequestInit = {}) {
+      this.url = typeof input === "string" ? input : input.toString();
+      this.method = init.method || "GET";
+      this.headers = init.headers || {};
+      this.body = init.body;
+      this.nextUrl = new URL(this.url);
+    }
+
+    async json() {
+      return typeof this.body === "string" ? JSON.parse(this.body) : this.body;
+    }
+
+    clone() {
+      return new MockNextRequest(this.url, {
+        method: this.method,
+        headers: this.headers,
+        body: this.body,
       });
     }
   }
@@ -21,26 +51,23 @@ jest.mock("next/server", () => {
   class MockNextResponse extends Response {
     constructor(body?: BodyInit | null, init?: ResponseInit) {
       super(body, init);
-      Object.defineProperty(this, "status", {
-        get: () => init?.status || 200,
-      });
     }
   }
 
   return {
-    ...originalModule,
     NextRequest: MockNextRequest,
     NextResponse: {
-      json: (data: unknown, init?: ResponseInit) => {
-        const response = new MockNextResponse(JSON.stringify(data), {
-          ...init,
+      json: (data: unknown, init: ResponseInit = {}) => {
+        const responseInit = {
+          status: init.status || 200,
+          statusText: init.statusText || "",
           headers: {
-            "content-type": "application/json",
-            ...init?.headers,
+            "Content-Type": "application/json",
+            ...(init.headers || {}),
           },
-        });
-        response.json = async () => data;
-        return response;
+        };
+
+        return new MockNextResponse(JSON.stringify(data), responseInit);
       },
     },
   };

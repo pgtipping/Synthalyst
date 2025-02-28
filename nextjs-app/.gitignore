@@ -20,7 +20,6 @@
 *.pem
 Thumbs.db
 desktop.ini
-/memory-bank
 /guides
 
 # IDE - VSCode
@@ -70,9 +69,3 @@ next-env.d.ts
 *.pem
 *.key
 *.crt
-
-# memory bank
-/memory-bank/
-../memory-bank/
-
-.vercel
