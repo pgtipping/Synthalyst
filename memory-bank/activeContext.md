@@ -1,6 +1,6 @@
 # Active Development Context - 2024-02-28
 
-## Current Focus: API Test Improvements
+## Current Focus: API Test Improvements (2024-02-28 22:45)
 
 ### Interview Questions Generator
 
@@ -26,12 +26,18 @@
   - Added tests for success and error cases
   - Fixed environment variable handling in tests
   - Documented API testing patterns in .cursorrules
+- Fixed the Chat API tests by properly mocking the Botpress client
+- Implemented a pattern for mocking external API clients in tests
+- Added global mock storage to handle Jest's hoisting behavior
+- Ensured all error cases are properly tested
 
 #### Current Issues
 
 - Other API tests still failing with "Request is not defined" error
 - Some Prisma-related test failures in the test environment ("PrismaClient is unable to run in this browser environment")
 - Need to improve error handling in API routes
+- Database-related tests (Categories API) are failing with Prisma browser environment errors
+- Need to improve error handling in API routes that use Prisma
 
 ### JD Developer
 
@@ -96,6 +102,7 @@
    - Implement better error handling for LLM salary data
    - Add loading states for salary field generation
    - Complete test coverage
+   - Add salary range validation
 
 3. Shared Components
 

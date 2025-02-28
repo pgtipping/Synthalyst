@@ -193,6 +193,49 @@
    - API caching
    - Image optimization
 
+## Recent Updates (Last 24 Hours) - 2024-02-28 22:50
+
+### API Tests
+
+- ✅ Fixed Chat API tests by properly mocking the Botpress client
+- ✅ Implemented a pattern for mocking external API clients in tests
+- ✅ Added global mock storage to handle Jest's hoisting behavior
+- ✅ Ensured all error cases are properly tested in API routes
+- ✅ Created and fixed API tests for the Interview Questions Generator
+- ✅ Documented API testing patterns in `.cursorrules`
+
+### JD Developer
+
+- 🔄 Added salary field functionality
+- 🔄 Implemented form validation
+- 🔄 Added handling for null responses from LLM
+
+## Known Issues
+
+### API Tests
+
+- ❌ Database-related tests (Categories API) are failing with Prisma browser environment errors
+- ❌ Need to improve error handling in API routes that use Prisma
+
+### JD Developer
+
+- ❌ Salary field reset issues
+- ❌ LLM returning null for salary data
+- ❌ Incomplete test coverage
+
+## Next Priorities
+
+1. Complete JD Developer enhancements
+
+   - Improve LLM salary data handling
+   - Add loading states
+   - Complete test coverage
+   - Add salary range validation
+
+2. Fix database-related tests
+   - Investigate Prisma browser environment errors
+   - Implement proper mocking for Prisma in tests
+
 ## Recent Updates
 
 - Fixed InterviewQuestionsForm component tests
