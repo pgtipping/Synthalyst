@@ -48,6 +48,41 @@ interface Template {
   updatedAt: Date;
 }
 
+interface JobDescription {
+  id: string;
+  title: string;
+  content: string;
+  industry: string;
+  level: string;
+  skills: string[];
+  userId: string;
+  contentHash: string;
+  version: number;
+  isLatest: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  dueDate?: Date;
+  priority?: string;
+  status: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface TaskTag {
+  id: string;
+  name: string;
+  taskId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Define a comprehensive MockStorage interface
 export interface MockStorage {
   categories: Category[];
@@ -55,6 +90,9 @@ export interface MockStorage {
   posts: Post[];
   postCategories: PostCategory[];
   templates: Template[];
+  jobDescriptions: JobDescription[];
+  tasks: Task[];
+  taskTags: TaskTag[];
 }
 
 // Define interfaces for method parameters
@@ -169,12 +207,100 @@ interface CreateTemplateArgs {
   data: Omit<Template, "id" | "createdAt" | "updatedAt">;
 }
 
+// Add new interfaces for JobDescription methods
+interface FindManyJobDescriptionArgs {
+  where?: {
+    userId?: string;
+    isLatest?: boolean;
+    isTemplate?: boolean;
+    title?: { contains?: string };
+    industry?: string;
+    level?: string;
+    skills?: { hasSome?: string[] };
+  };
+  skip?: number;
+  take?: number;
+  orderBy?: {
+    createdAt?: "asc" | "desc";
+    updatedAt?: "asc" | "desc";
+    title?: "asc" | "desc";
+  };
+}
+
+interface FindUniqueJobDescriptionArgs {
+  where: {
+    id?: string;
+    contentHash?: string;
+  };
+  select?: Record<string, boolean>;
+}
+
+interface CreateJobDescriptionArgs {
+  data: {
+    title: string;
+    content: string;
+    industry: string;
+    level: string;
+    skills: string[];
+    userId: string;
+    contentHash: string;
+    version: number;
+    isLatest: boolean;
+  };
+}
+
+interface DeleteJobDescriptionArgs {
+  where: {
+    id: string;
+  };
+}
+
+// Add new interfaces for Task methods
+interface FindManyTaskArgs {
+  where?: {
+    userId?: string;
+    status?: string;
+    priority?: string;
+  };
+  orderBy?: unknown[];
+}
+
+interface CreateManyTaskTagArgs {
+  data: {
+    name: string;
+    taskId: string;
+  }[];
+}
+
+interface FindManyTaskTagArgs {
+  where: {
+    taskId: string;
+  };
+  select: {
+    name: boolean;
+  };
+}
+
+interface CreateTaskArgs {
+  data: {
+    title: string;
+    description?: string;
+    dueDate?: Date;
+    priority?: string;
+    status: string;
+    userId: string;
+  };
+}
+
 // Define a type for the transaction client
 interface TransactionClient {
   post: unknown;
   category: unknown;
   user: unknown;
   template: unknown;
+  jobDescription: unknown;
+  task: unknown;
+  taskTag: unknown;
 }
 
 // Create a factory function for creating mock Prisma clients
@@ -188,6 +314,9 @@ export const createMockPrismaClient = (
     posts: [],
     postCategories: [],
     templates: [],
+    jobDescriptions: [],
+    tasks: [],
+    taskTags: [],
     ...initialData,
   };
 
@@ -198,6 +327,9 @@ export const createMockPrismaClient = (
     storage.posts = initialData.posts || [];
     storage.postCategories = initialData.postCategories || [];
     storage.templates = initialData.templates || [];
+    storage.jobDescriptions = initialData.jobDescriptions || [];
+    storage.tasks = initialData.tasks || [];
+    storage.taskTags = initialData.taskTags || [];
   };
 
   // Create the mock client
@@ -562,6 +694,225 @@ export const createMockPrismaClient = (
         }
       }),
     },
+    jobDescription: {
+      findMany: jest.fn(async (args: FindManyJobDescriptionArgs = {}) => {
+        try {
+          let result = [...storage.jobDescriptions];
+
+          // Apply where filter if provided
+          if (args.where) {
+            if (args.where.userId) {
+              result = result.filter((jd) => jd.userId === args.where?.userId);
+            }
+            if (args.where.isLatest !== undefined) {
+              result = result.filter(
+                (jd) => jd.isLatest === args.where?.isLatest
+              );
+            }
+            if (args.where.title?.contains) {
+              const titleContains = args.where.title.contains;
+              result = result.filter((jd) =>
+                jd.title.toLowerCase().includes(titleContains.toLowerCase())
+              );
+            }
+            if (args.where.industry) {
+              result = result.filter(
+                (jd) => jd.industry === args.where?.industry
+              );
+            }
+            if (args.where.level) {
+              result = result.filter((jd) => jd.level === args.where?.level);
+            }
+            if (args.where.skills?.hasSome) {
+              const skillsToMatch = args.where.skills.hasSome;
+              result = result.filter((jd) =>
+                jd.skills.some((skill) => skillsToMatch.includes(skill))
+              );
+            }
+          }
+
+          // Apply pagination
+          if (args.skip !== undefined && args.take !== undefined) {
+            result = result.slice(args.skip, args.skip + args.take);
+          }
+
+          // Apply ordering
+          if (args.orderBy) {
+            if (args.orderBy.createdAt === "desc") {
+              result.sort(
+                (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+              );
+            } else if (args.orderBy.createdAt === "asc") {
+              result.sort(
+                (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+              );
+            } else if (args.orderBy.updatedAt === "desc") {
+              result.sort(
+                (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+              );
+            } else if (args.orderBy.updatedAt === "asc") {
+              result.sort(
+                (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime()
+              );
+            } else if (args.orderBy.title === "desc") {
+              result.sort((a, b) => b.title.localeCompare(a.title));
+            } else if (args.orderBy.title === "asc") {
+              result.sort((a, b) => a.title.localeCompare(b.title));
+            }
+          }
+
+          return result;
+        } catch (error) {
+          console.error("Mock Prisma operation failed:", error);
+          throw error;
+        }
+      }),
+      findUnique: jest.fn(async (args: FindUniqueJobDescriptionArgs) => {
+        try {
+          let result = null;
+
+          if (args.where.id) {
+            result = storage.jobDescriptions.find(
+              (jd) => jd.id === args.where.id
+            );
+          } else if (args.where.contentHash) {
+            result = storage.jobDescriptions.find(
+              (jd) => jd.contentHash === args.where.contentHash
+            );
+          }
+
+          if (result && args.select) {
+            const selectedFields: Record<string, unknown> = {};
+            Object.keys(args.select).forEach((key) => {
+              if (args.select?.[key]) {
+                selectedFields[key] = result?.[key as keyof JobDescription];
+              }
+            });
+            return selectedFields;
+          }
+
+          return result;
+        } catch (error) {
+          console.error("Mock Prisma operation failed:", error);
+          throw error;
+        }
+      }),
+      create: jest.fn(async (args: CreateJobDescriptionArgs) => {
+        try {
+          const newJobDescription: JobDescription = {
+            id: `jd_${Date.now()}`,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...args.data,
+          };
+          storage.jobDescriptions.push(newJobDescription);
+          return newJobDescription;
+        } catch (error) {
+          console.error("Mock Prisma operation failed:", error);
+          throw error;
+        }
+      }),
+      delete: jest.fn(async (args: DeleteJobDescriptionArgs) => {
+        try {
+          const index = storage.jobDescriptions.findIndex(
+            (jd) => jd.id === args.where.id
+          );
+          if (index !== -1) {
+            const deletedJd = storage.jobDescriptions[index];
+            storage.jobDescriptions.splice(index, 1);
+            return deletedJd;
+          }
+          throw new Error(`Job description with id ${args.where.id} not found`);
+        } catch (error) {
+          console.error("Mock Prisma operation failed:", error);
+          throw error;
+        }
+      }),
+    },
+    task: {
+      findMany: jest.fn(async (args: FindManyTaskArgs = {}) => {
+        try {
+          let result = [...storage.tasks];
+
+          // Apply where filter if provided
+          if (args.where) {
+            if (args.where.userId) {
+              result = result.filter(
+                (task) => task.userId === args.where?.userId
+              );
+            }
+            if (args.where.status) {
+              result = result.filter(
+                (task) => task.status === args.where?.status
+              );
+            }
+            if (args.where.priority) {
+              result = result.filter(
+                (task) => task.priority === args.where?.priority
+              );
+            }
+          }
+
+          return result;
+        } catch (error) {
+          console.error("Mock Prisma operation failed:", error);
+          throw error;
+        }
+      }),
+      create: jest.fn(async (args: CreateTaskArgs) => {
+        try {
+          const newTask: Task = {
+            id: `task_${Date.now()}`,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...args.data,
+          };
+          storage.tasks.push(newTask);
+          return newTask;
+        } catch (error) {
+          console.error("Mock Prisma operation failed:", error);
+          throw error;
+        }
+      }),
+    },
+    taskTag: {
+      findMany: jest.fn(async (args: FindManyTaskTagArgs) => {
+        try {
+          const result = storage.taskTags.filter(
+            (tag) => tag.taskId === args.where.taskId
+          );
+
+          if (args.select?.name) {
+            return result.map((tag) => ({ name: tag.name }));
+          }
+
+          return result;
+        } catch (error) {
+          console.error("Mock Prisma operation failed:", error);
+          throw error;
+        }
+      }),
+      createMany: jest.fn(async (args: CreateManyTaskTagArgs) => {
+        try {
+          const newTags = args.data.map((tagData) => ({
+            id: `tag_${Date.now()}_${Math.random()
+              .toString(36)
+              .substring(2, 9)}`,
+            name: tagData.name,
+            taskId: tagData.taskId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }));
+
+          storage.taskTags.push(...newTags);
+
+          return { count: newTags.length };
+        } catch (error) {
+          console.error("Mock Prisma operation failed:", error);
+          throw error;
+        }
+      }),
+    },
     $transaction: jest.fn(
       async <T>(
         callback: (prisma: TransactionClient) => Promise<T>
@@ -572,6 +923,9 @@ export const createMockPrismaClient = (
             category: mockClient.category,
             user: mockClient.user,
             template: mockClient.template,
+            jobDescription: mockClient.jobDescription,
+            task: mockClient.task,
+            taskTag: mockClient.taskTag,
           });
         } catch (error) {
           console.error("Mock Prisma transaction failed:", error);
