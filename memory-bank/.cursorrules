@@ -1,5 +1,26 @@
 # Project Intelligence - 2024-02-27
 
+## UI Patterns - 2024-03-01 15:30
+
+### Loading State Pattern - 2024-03-01 15:30
+
+- Implement minimum loading times (e.g., 500ms) to prevent brief flashes of loading states
+- Use consistent loading UI components across the application
+- Include both a visual indicator (spinner) and text feedback
+- Consider adding secondary messages for longer loading operations
+- Measure actual operation time and add delay if needed:
+  ```typescript
+  const startTime = Date.now();
+  // Perform async operation
+  const elapsedTime = Date.now() - startTime;
+  if (elapsedTime < 500) {
+    await new Promise((resolve) => setTimeout(resolve, 500 - elapsedTime));
+  }
+  ```
+- Use larger spinners (h-10 w-10) for primary content areas
+- Use smaller spinners (h-4 w-4) for inline or button loading states
+- Include appropriate text feedback based on the context
+
 ## Testing Patterns - 2024-02-27 14:30
 
 ### Testing Radix UI Components - 2024-02-27 14:30
@@ -1303,3 +1324,33 @@ If you encounter foreign key constraint violations:
 4. Check that the database schema matches the NextAuth requirements
 
 This pattern is essential for any feature that requires saving user-related data to the database when using OAuth authentication.
+
+## JD Developer Patterns - 2024-03-01 10:30
+
+### Template Filtering Pattern - 2024-03-01 10:30
+
+- Templates are stored in the same database table as regular job descriptions
+- Templates are identified by the `isTemplate` flag in the metadata
+- Two-layer filtering approach is used to ensure proper separation:
+  1. Database query filtering: `content: { not: { contains: '"isTemplate":true' } }`
+  2. Parsed content verification: `if (parsedContent.metadata?.isTemplate === true) { return null; }`
+- This double-checking approach ensures templates only appear in the templates list
+- Always filter out null entries after parsing: `.filter(Boolean)`
+- Handle JSON parsing errors gracefully with try/catch blocks
+- Log parsing errors for debugging: `console.error(`Error parsing JD ${jd.id}:`, error);`
+
+### Template Guide Pattern - 2024-03-01 10:30
+
+- When no templates exist, show a comprehensive guide instead of sample templates
+- Guide should clearly indicate which fields are required:
+  - Job Title (mandatory)
+  - Employment Type (mandatory)
+  - Position Level (mandatory)
+  - Industry (mandatory)
+- Guide should also mention optional fields:
+  - Department (optional)
+  - Location (optional)
+- Organize guide into clear sections with proper spacing and icons
+- Use visual hierarchy to emphasize important information
+- Include Pro Tips section with helpful guidance
+- Use consistent tab naming across the application (e.g., "Create" tab)

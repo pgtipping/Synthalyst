@@ -2,6 +2,34 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Improved loading state UI for templates tab
+
+  - Added a minimum loading time of 500ms to ensure a smoother transition
+  - Enhanced the loading UI with a larger spinner and better messaging
+  - Made the loading state more consistent with the Saved JDs tab
+  - Fixed the issue of brief loading state flashes
+  - Location: `nextjs-app/src/app/jd-developer/page.tsx`, `nextjs-app/src/app/jd-developer/components/TemplateList.tsx`
+
+- ✅ Fixed template filtering in JD Developer
+
+  - Updated the saved JDs API endpoint to properly filter out templates
+  - Enhanced the templates API endpoint to ensure only valid templates are returned
+  - Added double-checking of parsed content to verify template status
+  - Improved error handling for JSON parsing
+  - Fixed issue where templates were appearing in both templates list and saved JDs list
+  - Location: `nextjs-app/src/app/api/jd-developer/saved/route.ts`, `nextjs-app/src/app/api/jd-developer/templates/route.ts`
+
+- ✅ Enhanced JD Developer template guide
+
+  - Improved UI with better styling and visual hierarchy
+  - Added clear instructions about required fields (Job Title, Employment Type, Position Level, Industry)
+  - Added information about optional fields (Department, Location)
+  - Organized content into sections with proper spacing and icons
+  - Added Pro Tips section with helpful guidance
+  - Fixed tab name reference (changed from "JD Generator" to "Create")
+  - Improved bullet list alignment for better readability
+  - Location: `nextjs-app/src/app/jd-developer/components/TemplateList.tsx`
+
 - ✅ Fixed job description saving in production environment
 
   - Added PrismaAdapter to NextAuth configuration
