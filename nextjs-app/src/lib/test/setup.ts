@@ -13,7 +13,9 @@ async function cleanupDatabaseWithRetry(maxRetries = 3, retryDelay = 1000) {
     try {
       console.log(`Database cleanup attempt ${attempt}/${maxRetries}...`);
 
-      // First, terminate all other connections to prevent deadlocks
+      // In test environment, we're using a mock Prisma client
+      // So we can just call the $executeRawUnsafe method directly
+      // This will reset the mock storage
       await prisma.$executeRawUnsafe(`
         SELECT pg_terminate_backend(pid)
         FROM pg_stat_activity
