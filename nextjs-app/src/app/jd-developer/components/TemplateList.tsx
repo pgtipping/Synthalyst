@@ -105,51 +105,163 @@ export default function TemplateList({
 
   if (templates.length === 0) {
     return (
-      <div className="bg-card rounded-lg border p-6 text-center py-8">
-        <h3 className="text-xl font-semibold mb-4">
-          Welcome to the JD Developer!
-        </h3>
-        <div className="max-w-2xl mx-auto text-left space-y-4">
-          <p className="text-muted-foreground">
-            You don't have any templates yet. Here's how to get started:
-          </p>
-          <div className="space-y-2">
-            <h4 className="font-medium">How to create your first template:</h4>
-            <ol className="list-decimal pl-5 space-y-2">
-              <li>
-                Go to the <strong>JD Generator</strong> tab
-              </li>
-              <li>
-                Fill out the job details form with your desired position
-                information
-              </li>
-              <li>
-                Click <strong>Generate Job Description</strong> to create a JD
-              </li>
-              <li>Review the generated content and make any necessary edits</li>
-              <li>
-                Click <strong>Save as Template</strong> to save it for future
-                use
-              </li>
-            </ol>
-          </div>
-          <div className="space-y-2">
-            <h4 className="font-medium">Benefits of templates:</h4>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>
-                Save time by reusing job descriptions for similar positions
-              </li>
-              <li>Maintain consistency across your job postings</li>
-              <li>Quickly adapt existing templates for new roles</li>
-              <li>Organize your job descriptions by department or job level</li>
-            </ul>
-          </div>
-          <div className="mt-6 p-4 bg-muted rounded-md">
-            <p className="text-sm">
-              <strong>Pro tip:</strong> Create templates for different
-              departments or job levels to build a comprehensive library of job
-              descriptions that you can easily customize for specific positions.
+      <div className="bg-card rounded-lg border p-6 text-center py-8 shadow-sm">
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold mb-2 text-primary">
+              Welcome to the JD Developer!
+            </h3>
+            <p className="text-muted-foreground">
+              You don&apos;t have any templates yet. Here&apos;s how to get
+              started:
             </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-background rounded-lg p-5 border shadow-sm">
+              <h4 className="font-semibold text-lg mb-3 flex items-center text-primary">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Create Your First Template
+              </h4>
+              <ol className="list-decimal pl-5 space-y-3 text-left">
+                <li>
+                  Go to the <strong>JD Generator</strong> tab
+                </li>
+                <li>
+                  Fill out the <strong>required fields</strong>:
+                  <ul className="list-disc pl-5 mt-1 text-sm">
+                    <li>
+                      <strong>Job Title</strong> (mandatory)
+                    </li>
+                    <li>
+                      <strong>Employment Type</strong> (mandatory)
+                    </li>
+                    <li>
+                      <strong>Position Level</strong> (mandatory)
+                    </li>
+                    <li>
+                      <strong>Industry</strong> (mandatory)
+                    </li>
+                    <li>Department (optional)</li>
+                    <li>Location (optional)</li>
+                  </ul>
+                </li>
+                <li>
+                  Click{" "}
+                  <span className="px-2 py-1 bg-primary/10 text-primary rounded font-medium">
+                    Generate Job Description
+                  </span>{" "}
+                  to create a JD
+                </li>
+                <li>
+                  Review the generated content and make any necessary edits
+                </li>
+                <li>
+                  Click{" "}
+                  <span className="px-2 py-1 bg-primary/10 text-primary rounded font-medium">
+                    Save as Template
+                  </span>{" "}
+                  to save it for future use
+                </li>
+              </ol>
+            </div>
+
+            <div className="space-y-5 text-left">
+              <div className="bg-background rounded-lg p-5 border shadow-sm">
+                <h4 className="font-semibold text-lg mb-3 flex items-center text-primary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Benefits of Templates
+                </h4>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    Save time by reusing job descriptions for similar positions
+                  </li>
+                  <li>Maintain consistency across your job postings</li>
+                  <li>Quickly adapt existing templates for new roles</li>
+                  <li>
+                    Organize your job descriptions by department or job level
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-primary/5 rounded-lg p-5 border border-primary/20 shadow-sm">
+                <h4 className="font-semibold text-lg mb-2 flex items-center text-primary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Pro Tips
+                </h4>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Create templates for different departments to build a
+                    comprehensive library
+                  </li>
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Add detailed responsibilities to make your templates more
+                    valuable
+                  </li>
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Once you save a template, it will appear in this list for
+                    future use
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
