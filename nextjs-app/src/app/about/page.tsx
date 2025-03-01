@@ -1,3 +1,5 @@
+"use client";
+
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import Image from "next/image";
 import { Users, Globe, Award, BookOpen, Lightbulb } from "lucide-react";
