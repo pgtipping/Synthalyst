@@ -74,7 +74,7 @@ export default function TemplateList({
                   <h4 className="font-medium mb-2">Learning Objectives</h4>
                   <ul className="list-disc list-inside space-y-1">
                     {template.objectives.map((objective, index) => (
-                      <li key={index} className="text-sm text-muted-foreground">
+                      <li key={index} className="text-sm text-black">
                         {objective}
                       </li>
                     ))}
@@ -83,7 +83,7 @@ export default function TemplateList({
 
                 <div>
                   <h4 className="font-medium mb-2">Learning Style</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-black">
                     Primary: {template.learningStyle.primary}
                     {template.learningStyle.ratio && (
                       <span className="ml-2">
@@ -96,10 +96,7 @@ export default function TemplateList({
                     <h5 className="text-sm font-medium">Methods:</h5>
                     <ul className="list-disc list-inside">
                       {template.learningStyle.methods.map((method, index) => (
-                        <li
-                          key={index}
-                          className="text-sm text-muted-foreground"
-                        >
+                        <li key={index} className="text-sm text-black">
                           {method}
                         </li>
                       ))}

@@ -61,7 +61,7 @@ export default function TrainingPlanPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">Training Plan Creator</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-black mb-8">
             Please sign in to create and manage training plans.
           </p>
         </div>

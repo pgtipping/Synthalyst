@@ -159,11 +159,16 @@ This ai takes audio inputs, transcribes into notes and performs actions like cre
 
 Learn any language for free!
 
+- Select your language and the language you'd like to learn.
+- Choose fluency goal and the time frame.
+- Receive curated lessons, exercises, and practice materials.
+- Practice with AI Tutor, track your progress and get personalized recommendations.
+- OR go old school and practice listening and speaking with the AI Translator.
 - Speak and hear the translation in the chosen language with transcription.
 - Repeat the translation, get feedback on accuracy through written transcription or ai feedback.
 - Repeat until your pronunciation score is satisfactory.
 
-Need to communicate in a foreign language? use as two-way voice translation service!
+Need to communicate in a foreign language? Download the mobile app and use as two-way voice translation service!
 
 ### New Hire Induction Program Creator
 

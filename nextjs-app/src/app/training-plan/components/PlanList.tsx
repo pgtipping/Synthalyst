@@ -136,10 +136,7 @@ export default function PlanList({ onUseAsTemplate }: PlanListProps) {
                     {plan.objectives
                       .slice(0, expandedPlan === plan.id ? undefined : 3)
                       .map((objective, index) => (
-                        <li
-                          key={index}
-                          className="text-sm text-muted-foreground"
-                        >
+                        <li key={index} className="text-sm text-black">
                           {objective}
                         </li>
                       ))}
@@ -161,7 +158,7 @@ export default function PlanList({ onUseAsTemplate }: PlanListProps) {
                   <>
                     <div>
                       <h4 className="font-medium mb-2">Learning Style</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-black">
                         Primary: {plan.learningStyle.primary}
                         {plan.learningStyle.ratio && (
                           <span className="ml-2">
@@ -174,10 +171,7 @@ export default function PlanList({ onUseAsTemplate }: PlanListProps) {
                         <h5 className="text-sm font-medium">Methods:</h5>
                         <ul className="list-disc list-inside">
                           {plan.learningStyle.methods.map((method, index) => (
-                            <li
-                              key={index}
-                              className="text-sm text-muted-foreground"
-                            >
+                            <li key={index} className="text-sm text-black">
                               {method}
                             </li>
                           ))}
@@ -196,7 +190,7 @@ export default function PlanList({ onUseAsTemplate }: PlanListProps) {
                                 (material, index) => (
                                   <li
                                     key={index}
-                                    className="text-sm text-muted-foreground"
+                                    className="text-sm text-black"
                                   >
                                     {material}
                                   </li>
@@ -211,7 +205,7 @@ export default function PlanList({ onUseAsTemplate }: PlanListProps) {
                     {plan.certification && (
                       <div>
                         <h4 className="font-medium mb-2">Certification</h4>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-black">
                           Type: {plan.certification.type}
                           {plan.certification.validityPeriod && (
                             <span className="ml-2">
@@ -234,7 +228,7 @@ export default function PlanList({ onUseAsTemplate }: PlanListProps) {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-black">
                 Created:{" "}
                 {new Date(plan.metadata.createdAt).toLocaleDateString()}
               </div>

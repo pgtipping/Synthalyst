@@ -123,7 +123,7 @@ export default function Home() {
                 <h3 className="text-xl font-semibold mb-2 group-hover:text-primary">
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <p className="text-black">{feature.description}</p>
               </Link>
             ))}
           </div>
@@ -139,7 +139,7 @@ export default function Home() {
                 <div className="text-4xl font-bold text-primary mb-2">
                   {stat.value}
                 </div>
-                <div className="text-muted-foreground">{stat.label}</div>
+                <div className="text-black">{stat.label}</div>
               </div>
             ))}
           </div>

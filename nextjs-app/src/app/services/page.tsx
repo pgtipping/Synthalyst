@@ -20,9 +20,9 @@ export default function Services() {
   const freeServices = [
     {
       icon: <FileText className="w-5 h-5" />,
-      title: "HR Document Templates",
+      title: "Document Templates",
       description:
-        "Access a library of free HR document templates for your business needs.",
+        "Access a library of free document templates for your business needs.",
     },
     {
       icon: <Brain className="w-5 h-5" />,
@@ -36,8 +36,8 @@ export default function Services() {
     },
     {
       icon: <CheckCircle2 className="w-5 h-5" />,
-      title: "HR Knowledge Base",
-      description: "Access our collection of HR articles and resources.",
+      title: "Learning Content Creator",
+      description: "Create tailored learning content for any topic.",
     },
   ];
 
@@ -123,19 +123,17 @@ export default function Services() {
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Services</h1>
           <p className="text-xl md:text-2xl leading-relaxed max-w-3xl">
             Discover our range of AI-powered tools and services designed to
-            enhance your HR operations and productivity.
+            enhance your operations and productivity.
           </p>
         </div>
 
         {/* Free Services */}
         <div className="bg-white p-8 rounded-xl shadow-md">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8">
-            Free Services
-          </h2>
-          <p className="text-lg text-gray-700 leading-relaxed mb-8">
+          <h2 className="text-3xl font-bold text-black mb-8">Free Services</h2>
+          <p className="text-lg text-black leading-relaxed mb-8">
             We offer a range of free services to help you get started with your
-            HR needs. These include access to free HR documents, templates, and
-            basic tools.
+            needs. These include access to free forms, templates, and basic
+            tools.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -146,7 +144,7 @@ export default function Services() {
               >
                 <div className="text-blue-600 mb-4">{service.icon}</div>
                 <h3 className="text-lg font-semibold mb-2">{service.title}</h3>
-                <p className="text-gray-600 text-sm">{service.description}</p>
+                <p className="text-black text-sm">{service.description}</p>
               </div>
             ))}
           </div>
@@ -167,12 +165,10 @@ export default function Services() {
             <div className="bg-blue-600 text-white p-2 rounded-full">
               <Sparkles className="w-5 h-5" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-800">
-              Premium Services
-            </h2>
+            <h2 className="text-3xl font-bold text-black">Premium Services</h2>
           </div>
 
-          <p className="text-lg text-gray-700 leading-relaxed mb-8">
+          <p className="text-lg text-black leading-relaxed mb-8">
             Upgrade to our premium services for enhanced features, unlimited
             usage, and priority support. Our premium plans are designed for
             businesses that need more advanced HR solutions.
@@ -186,7 +182,7 @@ export default function Services() {
               >
                 <div className="text-blue-600 mb-4">{service.icon}</div>
                 <h3 className="text-lg font-semibold mb-2">{service.title}</h3>
-                <p className="text-gray-600 text-sm">{service.description}</p>
+                <p className="text-black text-sm">{service.description}</p>
               </div>
             ))}
           </div>
@@ -203,7 +199,7 @@ export default function Services() {
 
         {/* Our Tools */}
         <div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-black mb-8 text-center">
             Our AI-Powered Tools
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -221,7 +217,7 @@ export default function Services() {
                 <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-600">
                   {tool.title}
                 </h3>
-                <p className="text-gray-600">{tool.description}</p>
+                <p className="text-black">{tool.description}</p>
               </Link>
             ))}
           </div>

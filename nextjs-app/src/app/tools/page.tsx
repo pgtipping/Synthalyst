@@ -232,7 +232,7 @@ export default function ToolsPage() {
                     <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-600">
                       {tool.title}
                     </h3>
-                    <p className="text-gray-600">{tool.description}</p>
+                    <p className="text-black">{tool.description}</p>
                     {tool.isExternal && (
                       <div className="mt-4 text-sm text-blue-600">
                         Opens in a new tab

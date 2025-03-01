@@ -22,12 +22,12 @@
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
-    /* Brand silver */
-    --secondary: 220 14% 80%;
+    /* Brand silver - updated to be darker */
+    --secondary: 220 14% 60%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215.4 16.3% 26.9%;
 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
@@ -57,12 +57,12 @@
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    /* Brand silver */
-    --secondary: 217.2 32.6% 17.5%;
+    /* Brand silver - updated to be lighter */
+    --secondary: 217.2 32.6% 87.5%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 85.1%;
 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
@@ -98,11 +98,11 @@ h3,
 h4,
 h5,
 h6 {
-  @apply text-gray-800;
+  @apply text-black;
 }
 
 p {
-  @apply text-gray-700;
+  @apply text-black;
 }
 
 a {
@@ -144,7 +144,7 @@ button.bg-blue-600,
 
 button.bg-gray-200,
 .button.bg-gray-200 {
-  @apply text-gray-800;
+  @apply text-black;
 }
 
 /* Custom brand color classes */
@@ -157,7 +157,7 @@ button.bg-gray-200,
 }
 
 .text-brand-silver {
-  @apply text-gray-300;
+  @apply text-black;
 }
 
 .bg-brand-silver {
@@ -165,7 +165,7 @@ button.bg-gray-200,
 }
 
 .text-brand-black {
-  @apply text-gray-900;
+  @apply text-black;
 }
 
 .bg-brand-black {

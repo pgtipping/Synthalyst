@@ -58,7 +58,7 @@ export default function About() {
             <h2 className="text-2xl font-bold text-blue-600 mb-4">
               Our Mission
             </h2>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-black leading-relaxed">
               To democratize access to advanced AI tools that enhance
               productivity, learning, and professional development for
               individuals and organizations worldwide.
@@ -68,7 +68,7 @@ export default function About() {
             <h2 className="text-2xl font-bold text-blue-600 mb-4">
               Our Vision
             </h2>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-black leading-relaxed">
               To become the leading platform for AI-powered productivity and
               learning solutions, making advanced technology accessible to
               everyone regardless of technical expertise.
@@ -79,22 +79,20 @@ export default function About() {
         {/* Main Content */}
         <div className="bg-white p-8 rounded-xl shadow-md">
           <div className="prose max-w-none">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">
-              Who We Are
-            </h2>
-            <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            <h2 className="text-3xl font-bold text-black mb-6">Who We Are</h2>
+            <p className="text-lg text-black leading-relaxed mb-6">
               Synthalyst is a mobile-first web application designed to provide a
               suite of online tools and services for personal and business
               productivity enhancements. We cater to a global audience, with a
-              focus on users in Nigeria and across Africa.
+              focus on users in the US and Nigeria.
             </p>
-            <p className="text-lg text-gray-700 leading-relaxed mb-6">
-              Founded in 2023, our team consists of passionate developers, AI
+            <p className="text-lg text-black leading-relaxed mb-6">
+              Founded in 2024, our team consists of passionate developers, AI
               specialists, and HR professionals who understand the challenges
               faced by modern organizations and individuals in today&apos;s
               fast-paced digital environment.
             </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-lg text-black leading-relaxed">
               Our AI-powered assistance helps with tasks such as job description
               generation, task management, training plan creation, and learning
               content development - all designed to save you time and improve
@@ -105,7 +103,7 @@ export default function About() {
 
         {/* Our Values */}
         <div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-black mb-8 text-center">
             Our Values
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -116,7 +114,7 @@ export default function About() {
               >
                 <div className="text-blue-600 mb-4">{value.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{value.title}</h3>
-                <p className="text-gray-600">{value.description}</p>
+                <p className="text-black">{value.description}</p>
               </div>
             ))}
           </div>
@@ -126,19 +124,19 @@ export default function About() {
         <div className="bg-gray-100 p-8 rounded-xl">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="md:w-1/2">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
+              <h2 className="text-3xl font-bold text-black mb-4">
                 Global Presence
               </h2>
-              <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                While we&apos;re proudly based in Nigeria, our solutions are
-                used by clients across Africa and around the world. We
-                understand the unique challenges faced by businesses in emerging
-                markets and design our tools accordingly.
+              <p className="text-lg text-black leading-relaxed mb-4">
+                While we&apos;re proudly based in the US, our solutions are used
+                by clients across Africa and around the world. We understand the
+                unique challenges faced by businesses in emerging markets and
+                design our tools accordingly.
               </p>
               <div className="flex items-center gap-2 text-blue-600">
                 <Globe className="w-5 h-5" />
                 <span className="font-medium">
-                  Serving clients in over 10 countries
+                  Serving clients around the world
                 </span>
               </div>
             </div>

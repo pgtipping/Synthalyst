@@ -76,7 +76,7 @@ export default function TheSynthBlog() {
           <div>
             <label
               htmlFor="writing-style"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-black mb-1"
             >
               Writing Style
             </label>
@@ -100,7 +100,7 @@ export default function TheSynthBlog() {
           <div>
             <label
               htmlFor="target-audience"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-black mb-1"
             >
               Target Audience
             </label>
@@ -152,7 +152,7 @@ export default function TheSynthBlog() {
           <h2 className="text-2xl font-semibold mb-4">Generated Blog Post</h2>
 
           {metadata && (
-            <div className="mb-4 text-sm text-gray-600">
+            <div className="mb-4 text-sm text-black">
               <p>Topic: {metadata.topic}</p>
               <p>Style: {metadata.style}</p>
               <p>Audience: {metadata.audience}</p>
