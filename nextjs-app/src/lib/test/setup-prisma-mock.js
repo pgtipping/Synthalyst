@@ -1,7 +1,10 @@
 // This file is used to set up the Prisma mock for Jest
 // It's imported directly in jest.config.js
 
-import { mockPrismaClient, resetMockStorage } from "./prisma-mock";
+import { createMockPrismaClient, resetMockStorage } from "./prisma-mock";
+
+// Create a mock client instance
+const mockPrismaClient = createMockPrismaClient();
 
 // Store the mock functions in global scope for tests to access
 global.__mockPrismaClient = mockPrismaClient;
