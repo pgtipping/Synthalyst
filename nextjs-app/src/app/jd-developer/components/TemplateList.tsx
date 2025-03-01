@@ -508,48 +508,9 @@ export default function TemplateList({
                   to save it for future use
                 </li>
               </ol>
-            </div>
 
-            <div className="bg-background rounded-lg p-5 border shadow-sm">
-              <h4 className="font-semibold text-lg mb-3 flex items-center text-primary">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Pro Tips
-              </h4>
-              <ul className="list-disc pl-5 space-y-3 text-left">
-                <li>
-                  <strong>Be specific</strong> with your job title and industry
-                  for better results
-                </li>
-                <li>
-                  Add <strong>custom responsibilities</strong> to make your job
-                  description more targeted
-                </li>
-                <li>
-                  Include <strong>company culture</strong> details to attract
-                  the right candidates
-                </li>
-                <li>
-                  Save multiple templates for different <strong>roles</strong>{" "}
-                  and <strong>departments</strong>
-                </li>
-                <li>
-                  Use the <strong>duplicate</strong> feature to create
-                  variations of existing templates
-                </li>
-              </ul>
-
-              <div className="mt-6 text-center">
+              <div className="mt-6 pt-4 border-t border-border">
+                <div className="text-center mb-3 text-muted-foreground">OR</div>
                 <Button
                   onClick={createExampleTemplates}
                   disabled={isCreatingExamples}
@@ -567,6 +528,105 @@ export default function TemplateList({
                 <p className="text-xs text-muted-foreground mt-2">
                   This will create 3 example templates to help you get started
                 </p>
+              </div>
+            </div>
+
+            <div className="space-y-5 text-left">
+              <div className="bg-background rounded-lg p-5 border shadow-sm">
+                <h4 className="font-semibold text-lg mb-3 flex items-center text-primary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Benefits of Templates
+                </h4>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>
+                      Save time by reusing job descriptions for similar
+                      positions
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Maintain consistency across your job postings</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Quickly adapt existing templates for new roles</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>
+                      Organize your job descriptions by department or job level
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-primary/5 rounded-lg p-5 border border-primary/20 shadow-sm">
+                <h4 className="font-semibold text-lg mb-2 flex items-center text-primary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Pro Tips
+                </h4>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Create templates for different departments to build a
+                    comprehensive library
+                  </li>
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Add detailed responsibilities to make your templates more
+                    valuable
+                  </li>
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Once you save a template, it will appear in this list for
+                    future use
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
