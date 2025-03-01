@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 import { compare } from "bcryptjs";
+import { logger } from "./logger";
 
 interface ExtendedUser {
   id: string;
@@ -26,6 +27,20 @@ export const authOptions: AuthOptions = {
           response_type: "code",
           scope: "openid email profile",
         },
+      },
+      profile(profile) {
+        logger.info("Google profile received", {
+          email: profile.email,
+          name: profile.name,
+          hasImage: !!profile.picture,
+        });
+
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        };
       },
     }),
     CredentialsProvider({
@@ -71,6 +86,7 @@ export const authOptions: AuthOptions = {
   ],
   pages: {
     signIn: "/auth/signin",
+    signUp: "/auth/signup",
     error: "/auth/error",
   },
   session: {
@@ -82,10 +98,48 @@ export const authOptions: AuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, account, profile }) {
+      logger.info("Sign in attempt", {
+        provider: account?.provider,
+        email: user?.email,
+        hasProfile: !!profile,
+      });
+
       if (!user?.email) {
+        logger.error("Sign in failed - no email", {
+          provider: account?.provider,
+        });
         return false;
       }
+
+      // Ensure user exists in database for Google auth
+      if (account?.provider === "google") {
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+
+          if (!existingUser) {
+            logger.info("Creating new user from Google auth", {
+              email: user.email,
+            });
+            await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name,
+                image: user.image,
+              },
+            });
+          }
+        } catch (error) {
+          logger.error("Error ensuring user exists", {
+            error,
+            email: user.email,
+          });
+          // Continue anyway as the adapter should handle this
+        }
+      }
+
       return true;
     },
     async jwt({ token, account, user }) {
@@ -117,4 +171,15 @@ export const authOptions: AuthOptions = {
   },
   debug: process.env.NODE_ENV === "development",
   secret: process.env.NEXTAUTH_SECRET,
+  logger: {
+    error(code, metadata) {
+      logger.error(`NextAuth error: ${code}`, metadata);
+    },
+    warn(code) {
+      logger.warn(`NextAuth warning: ${code}`);
+    },
+    debug(code, metadata) {
+      logger.debug(`NextAuth debug: ${code}`, metadata);
+    },
+  },
 };
