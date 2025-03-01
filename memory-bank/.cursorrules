@@ -1138,3 +1138,37 @@ git add -i
 ```
 
 Remember that the shell is in the root directory of the project, so all paths should be relative to that location.
+
+## Sensitive Information Handling (2024-03-01)
+
+When working with sensitive information such as API keys, environment variables, and credentials:
+
+1. **NEVER commit .env files to the repository**
+
+   - The .env file should be listed in .gitignore
+   - Use .env.example to document required environment variables without actual values
+   - If .env is accidentally committed, it must be removed from the entire git history
+
+2. **Removing sensitive information from git history**
+
+   - If sensitive information is accidentally committed, use git filter-branch to remove it:
+
+   ```bash
+   git filter-branch --force --index-filter "git rm --cached --ignore-unmatch .env" --prune-empty --tag-name-filter cat -- --all
+   git push --force
+   ```
+
+   - This rewrites the git history to remove the sensitive file from all commits
+   - Force pushing is required to update the remote repository
+
+3. **GitHub Push Protection**
+
+   - GitHub has push protection that blocks commits containing secrets
+   - If a push is rejected due to containing secrets, you must remove the secrets from the git history
+   - Never use the GitHub option to allow the secret, as this is a security risk
+
+4. **Best Practices**
+   - Use environment variables for all sensitive information
+   - Document required environment variables in .env.example
+   - Use a password manager or secure vault for storing actual credentials
+   - Rotate any credentials that have been accidentally exposed
