@@ -1354,3 +1354,15 @@ This pattern is essential for any feature that requires saving user-related data
 - Use visual hierarchy to emphasize important information
 - Include Pro Tips section with helpful guidance
 - Use consistent tab naming across the application (e.g., "Create" tab)
+
+## Command Execution Patterns - 2024-03-01 16:45
+
+### Terminal Command Spacing - 2024-03-01 16:45
+
+- ALWAYS add a space before ALL terminal commands to ensure proper history tracking and prevent typo errors
+- Example: ` ls -la` instead of `ls -la`
+- Example: ` git status` instead of `git status`
+- Example: ` cd src` instead of `cd src`
+- This applies to all commands: ` npm`, ` git`, ` ls`, ` cd`, etc.
+- This practice helps prevent typo errors that typically occur when running terminal commands
+- It also makes commands more visible in the terminal history
