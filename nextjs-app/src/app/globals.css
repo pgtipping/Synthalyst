@@ -18,10 +18,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
+    /* Brand blue */
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    /* Brand silver */
+    --secondary: 220 14% 80%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -41,6 +43,7 @@
   }
 
   .dark {
+    /* Brand black */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
@@ -50,9 +53,11 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
+    /* Brand blue */
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
+    /* Brand silver */
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
@@ -101,7 +106,7 @@ p {
 }
 
 a {
-  @apply text-blue-500 hover:underline;
+  @apply text-blue-500 no-underline hover:text-blue-700 transition-colors;
 }
 
 ul {
@@ -123,4 +128,46 @@ ul {
     hsl(var(--primary)) 50%,
     hsl(var(--secondary)) 100%
   );
+}
+
+/* Accessibility improvements for buttons */
+button,
+.button {
+  @apply font-medium;
+}
+
+/* Ensure sufficient contrast for button text */
+button.bg-blue-600,
+.button.bg-blue-600 {
+  @apply text-white;
+}
+
+button.bg-gray-200,
+.button.bg-gray-200 {
+  @apply text-gray-800;
+}
+
+/* Custom brand color classes */
+.text-brand-blue {
+  @apply text-blue-600;
+}
+
+.bg-brand-blue {
+  @apply bg-blue-600;
+}
+
+.text-brand-silver {
+  @apply text-gray-300;
+}
+
+.bg-brand-silver {
+  @apply bg-gray-300;
+}
+
+.text-brand-black {
+  @apply text-gray-900;
+}
+
+.bg-brand-black {
+  @apply bg-gray-900;
 }
