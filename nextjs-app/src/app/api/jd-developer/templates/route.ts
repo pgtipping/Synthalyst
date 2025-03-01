@@ -76,6 +76,10 @@ async function removeDuplicateTemplates() {
   }
 }
 
+// Note: We considered adding sample templates visible to all users,
+// but decided to keep templates user-specific and provide a guide instead.
+// This simplifies permissions and encourages users to create their own templates.
+
 export async function GET() {
   logger.info("GET /api/jd-developer/templates - Starting request");
 
@@ -100,7 +104,7 @@ export async function GET() {
     }
 
     // Use withRetry for database operation
-    // Modified to only return templates created by the current user
+    // Return only templates created by the current user
     const templates = await withRetry(async () => {
       return prisma.jobDescription.findMany({
         where: {

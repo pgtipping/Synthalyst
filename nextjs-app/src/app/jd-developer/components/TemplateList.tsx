@@ -105,8 +105,53 @@ export default function TemplateList({
 
   if (templates.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">No templates available.</p>
+      <div className="bg-card rounded-lg border p-6 text-center py-8">
+        <h3 className="text-xl font-semibold mb-4">
+          Welcome to the JD Developer!
+        </h3>
+        <div className="max-w-2xl mx-auto text-left space-y-4">
+          <p className="text-muted-foreground">
+            You don't have any templates yet. Here's how to get started:
+          </p>
+          <div className="space-y-2">
+            <h4 className="font-medium">How to create your first template:</h4>
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>
+                Go to the <strong>JD Generator</strong> tab
+              </li>
+              <li>
+                Fill out the job details form with your desired position
+                information
+              </li>
+              <li>
+                Click <strong>Generate Job Description</strong> to create a JD
+              </li>
+              <li>Review the generated content and make any necessary edits</li>
+              <li>
+                Click <strong>Save as Template</strong> to save it for future
+                use
+              </li>
+            </ol>
+          </div>
+          <div className="space-y-2">
+            <h4 className="font-medium">Benefits of templates:</h4>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>
+                Save time by reusing job descriptions for similar positions
+              </li>
+              <li>Maintain consistency across your job postings</li>
+              <li>Quickly adapt existing templates for new roles</li>
+              <li>Organize your job descriptions by department or job level</li>
+            </ul>
+          </div>
+          <div className="mt-6 p-4 bg-muted rounded-md">
+            <p className="text-sm">
+              <strong>Pro tip:</strong> Create templates for different
+              departments or job levels to build a comprehensive library of job
+              descriptions that you can easily customize for specific positions.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
