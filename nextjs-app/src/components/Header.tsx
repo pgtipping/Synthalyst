@@ -4,8 +4,26 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Loader2 } from "lucide-react";
+import {
+  Menu,
+  X,
+  User,
+  Loader2,
+  ChevronDown,
+  Brain,
+  Target,
+  FileText,
+  Code,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -36,6 +54,39 @@ export default function Header() {
       });
     }
   };
+
+  const tools = [
+    {
+      icon: <Brain className="w-4 h-4 mr-2" />,
+      title: "JD Developer",
+      href: "/jd-developer",
+    },
+    {
+      icon: <Target className="w-4 h-4 mr-2" />,
+      title: "2Do Task Manager",
+      href: "/2do",
+    },
+    {
+      icon: <FileText className="w-4 h-4 mr-2" />,
+      title: "Training Plan Creator",
+      href: "/training-plan",
+    },
+    {
+      icon: <Code className="w-4 h-4 mr-2" />,
+      title: "Learning Content Creator",
+      href: "/learning-content",
+    },
+    {
+      icon: <Sparkles className="w-4 h-4 mr-2" />,
+      title: "Knowledge GPT",
+      href: "/knowledge-gpt",
+    },
+    {
+      icon: <Users className="w-4 h-4 mr-2" />,
+      title: "Competency Manager",
+      href: "/competency-manager",
+    },
+  ];
 
   const renderAuthButton = () => {
     if (status === "loading") {
@@ -108,6 +159,33 @@ export default function Header() {
             >
               Services
             </Link>
+
+            {/* Tools Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
+                Tools
+                <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {tools.map((tool, index) => (
+                  <DropdownMenuItem key={index} asChild>
+                    <Link href={tool.href} className="flex items-center">
+                      {tool.icon}
+                      <span>{tool.title}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/tools"
+                    className="flex items-center font-medium text-primary"
+                  >
+                    View All Tools
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Link
               href="/blog"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -147,6 +225,30 @@ export default function Header() {
               >
                 Services
               </Link>
+
+              {/* Mobile Tools Submenu */}
+              <div className="pl-4 space-y-2">
+                <div className="font-medium">Tools</div>
+                {tools.map((tool, index) => (
+                  <Link
+                    key={index}
+                    href={tool.href}
+                    className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {tool.icon}
+                    <span>{tool.title}</span>
+                  </Link>
+                ))}
+                <Link
+                  href="/tools"
+                  className="flex items-center text-sm font-medium text-primary py-1"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  View All Tools
+                </Link>
+              </div>
+
               <Link
                 href="/blog"
                 className="text-muted-foreground hover:text-foreground transition-colors"
