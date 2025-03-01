@@ -1085,3 +1085,26 @@ The application uses environment variables for configuration, with the following
    - `NEXTAUTH_SECRET`: Secret for NextAuth session encryption
    - `DATABASE_URL`: Connection string for the database
    - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: Google OAuth credentials
+
+## JD Developer Form Validation (2024-03-01)
+
+The JD Developer form has been updated to make education, experience, and certifications optional. The only mandatory fields for generating job descriptions are:
+
+- Job title
+- Employment type
+- Position level
+- Industry
+
+The API validation schema in `nextjs-app/src/app/api/jd-developer/generate/route.ts` has been modified to make these fields optional by using `.default([])` instead of `.min(1, "...")`. The POST function has also been updated to ensure that all arrays are properly passed to the `generateJobDescription` function, even if they're not provided in the request.
+
+The UI already correctly labels these fields as optional:
+
+- Educational Requirements (Optional)
+- Professional Experience (Optional)
+- Required Certifications (Optional)
+
+When working with the JD Developer component, ensure that:
+
+1. No validation is added that would make education, experience, or certifications required
+2. The LLM prompt for job description generation handles missing fields gracefully
+3. The UI clearly indicates which fields are required vs. optional

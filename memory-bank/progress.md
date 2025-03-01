@@ -2,6 +2,16 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed JD Developer validation requirements
+
+  - Removed mandatory education requirements from the API validation schema
+  - Removed mandatory experience requirements from the API validation schema
+  - Removed mandatory certifications requirements from the API validation schema
+  - Ensured proper data handling in the API route for optional fields
+  - Fixed console error: "Error generating job description: Error: At least one education requirement is required"
+  - Made job title, employment type, position level, and industry the only mandatory fields
+  - Location: `nextjs-app/src/app/api/jd-developer/generate/route.ts`
+
 - ✅ Added Google OAuth authentication to sign-in and sign-up pages
 
   - Implemented Google sign-in buttons on both authentication pages
@@ -228,6 +238,7 @@
    - ✅ Salary field reset not working properly (FIXED)
    - 🔄 LLM sometimes returns null for salary data (PARTIALLY FIXED)
    - ✅ Form validation needs improvement (FIXED)
+   - ✅ Education, experience, and certifications requirements causing errors (FIXED)
    - Need to add loading states for salary generation
    - Need to complete test coverage
 
