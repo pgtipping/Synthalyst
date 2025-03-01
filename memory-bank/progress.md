@@ -2,6 +2,15 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed 404 errors in navigation links
+
+  - Restructured pages to follow Next.js App Router conventions
+  - Created proper directory structure for About, Services, and Contact pages
+  - Moved content from flat files to proper page.tsx files in their respective directories
+  - Cleaned up old page files that were no longer needed
+  - Fixed issue where navigation links were showing 404 errors
+  - Location: `nextjs-app/src/app/about/page.tsx`, `nextjs-app/src/app/services/page.tsx`, `nextjs-app/src/app/contact/page.tsx`
+
 - ✅ Improved loading state UI for templates tab
 
   - Added a minimum loading time of 500ms to ensure a smoother transition

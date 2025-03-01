@@ -1,67 +1,111 @@
 # Project Brief - Synthalyst Web App
 
-The APP should have the following pages
+This app can be described as a Comprehensive Business and Productivity Platform designed to offer a blend of content, digital tools, and AI-powered services to individuals and businesses. It serves as a hub for professional development, productivity enhancement, and business solutions.
 
-- Home page highlighting APP contents with links to the corresponding pages
-- Blog page to post blogs with comments section, links to related articles, referenced content and pages.
+## Purpose & Value Proposition
+
+This app aims to be a one-stop platform for professionals and businesses seeking:
+
+- Expert content and on-demand consulting.
+- Custom document and task management solutions.
+- AI-powered learning and competency development tools.
+- End-to-end digital support from job description drafting to upskilling and productivity optimization.
+
+The platform's fusion of content, commerce, AI-powered tools, and advisory services distinguishes it as a next-generation professional ecosystem.
+
+## Core Pages and Features
+
+### Home Page
+
+- Highlights APP contents with navigational links to all core pages.
+- Displays live counts (e.g., downloads, clients, visitors, etc.) and client testimonials.
+- Provides social media links for external engagement.
+
+### Blog Page
+
+- Supports blog postings with a comments section for user interaction.
+- Includes links to related articles, referenced content, and other relevant APP pages.
+
+### Payment Page
+
 - Payment Page for paid services with payment options
-- Online Tools page for software applications
-- Adverts should be placed via a content management system on selected pages ??
-- Contact Us Page for visitors to send messages using a post route to an email address
-- Live Counts e.g. downloads, clients, visitors, etc., and client testimonials should be viewable on the home page
-- Social media links on home page
-- Registration page for visitors to; Register with name and email to download forms, templates, documents, use online tools, etc.; Register with authentication to subscribe for premium services.
-- Product promo page with links to features and payment options.
-- APP search tool.
-- Chatbot for providing navigation help, lead generation, basic ai consulting services, general customer service.
 
-## Online Tools
+### Online Tools Page
+
+- Hosts and provides access to various software applications developed within the APP.
+
+### Contact Us Page
+
+- Contact Us Page for visitors to send messages using a post route to an email address
+
+### Registration Page
+
+- Registration page for visitors to; Register with name and email to download forms, templates, documents, use online tools, etc.
+- Register with authentication to subscribe to premium services.
+
+### Product Promo Page
+
+- Showcases product promotions, with links to detailed feature descriptions and payment options.
+
+### Chatbot Integration
+
+Offers multi-purpose assistance, including:
+
+- Navigation guidance
+- Lead generation
+- Basic AI consulting services
+- General customer support.
+
+## AI-Powered Tools and Services
 
 ### JD Developer
 
 Provide a form with key inputs from users. LLM will generate the JD based on system instructions and user inputs converted to queries
 
-### 2Do Assistant
+### 2Do Task Manager
 
-LLM powered task manager that manages user tasks primarily using natural language by voice input. provides feedback, status updates, reminders, and can sync with user calendars.
+- LLM powered task manager that manages user tasks primarily using natural language by voice input.
+- Provides feedback, status updates, reminders
+- Synchronizes with user calendars for better schedule management.
 
 ### Calling Assistant (US Only)
 
-Makes calls on behalf of users and provides a transcript of the call.
+- Makes calls on behalf of users and generates call transcript of the call.
 
 ### Training Plan and Curriculum Creator
 
-LLM that develops a Learning plan and curriculum based on user learning interests.
+- LLM-powered solution that develops personalized learning plans and curricula based on user learning goals.
 
 - guide: [llmImplementation.md](./llmImplementation.md)
 
 ### Learning Content Creator
 
-LLM that creates tailored learning content for users.
+Uses an LLM to generate customized learning content tailored to individual user needs.
 
 - guide: [llmImplementation.md](./llmImplementation.md)
 
 ### Knowledge GPT
 
-Expert Teacher and curator of knowledge materials.
+- Functions as an expert educator and curator, providing structured knowledge materials across various domains.
+- Serves as a subject matter expert providing information on a wide range of topics
 
 - guide: [llmImplementation.md](./llmImplementation.md)
 
 ### Competency Manager
 
-LLM that develops competency levels for any competency and for any industry.
+- LLM-powered tool that develops competency frameworks for any skill or industry
 
 - guide: [llmImplementation.md](./llmImplementation.md)
 
 ### Competency Matrix Creator
 
-LLM that creates a competency matrix for any competency and for any industry.
+- LLM-powered tool that creates competency matrices for any competency and for any industry.
 
 ### InQDoc
 
 Document Question Answering System that uses an llm to answer questions about documents.
 
-- developed in a separate project: [inqdoc](https://doc-chat-qa.vercel.app/)
+- developed in a separate project: [inqdoc](https://inqdoc.synthalyst.com/)
 
 This app will be integrated into the main app as a page.
 
@@ -83,10 +127,6 @@ Blog app powered by two LLMs, an agent provider and agent creator.
 
 This app will be integrated into the main app as a page.
 
-### Chatbot
-
-AI powered chatbot that provides navigation help, lead generation, basic ai consulting services, general customer service.
-
 ### Employee Turnover Calculator
 
 web app that calculates employee turnover rates based on user's manual or uploaded input of employee exit data.
@@ -97,19 +137,19 @@ This app will be integrated into the main app as a page.
 
 ### Interview Questions Generator
 
-Web app that generates interview questions based on user's input of job description and competency.
+App that generates interview questions based on user's input of job description and competency.
 
-AI Chatbot that generates interview questions based on user input. It is necessary to guide that input with form fields for industry, job level, role description, core competencies to evaluate and number of interview questions.
+- Uses an LLM to generate interview questions based on user input.
+- It is necessary to guide that input with form fields for industry, job level, role description, core competencies to evaluate and number of interview questions.
 
-These inputs should be used to craft a prompt for the GPT who will use the prompt to generate the interview questions.
+- User may enter the prompt directly or use the form.
+- User may also only provide as much information they have available in the form and the gpt will craft the prompt based on information provided.
 
-User may enter the prompt directly or use the form. User may also only provide as much information they have available in the form and the gpt will craft the prompt based on information provided.
+- The more fields completeted the more tailored the interview questions will be.
 
-the more fields completeted the more tailored the interview questions will be.
+- The gpt should also provide tips on how to evaluate responses to the questions.
 
-the gpt should also provide tips on how to evaluate responses to the questions.
-
-the gpt should also provide a rubric for scoring the responses to the questions.
+- The gpt should also provide a rubric for scoring the responses to the questions.
 
 ### Meeting Sec
 
@@ -119,7 +159,9 @@ This ai takes audio inputs, transcribes into notes and performs actions like cre
 
 Learn any language for free!
 
-speak and hear the translation in the chosen language with transcription. Repeat the translation, get feedback on accuracy through written transcription or ai feedback. Repeat until your pronunciation score is satisfactory.
+- Speak and hear the translation in the chosen language with transcription.
+- Repeat the translation, get feedback on accuracy through written transcription or ai feedback.
+- Repeat until your pronunciation score is satisfactory.
 
 Need to communicate in a foreign language? use as two-way voice translation service!
 
@@ -127,9 +169,9 @@ Need to communicate in a foreign language? use as two-way voice translation serv
 
 System takes company information and directions on how to present the company information
 
-- welcome style and possible content
-- basic introduction
-- starter information e.g. play message from the CEO
+- Welcome style and possible content
+- Basic introduction
+- Starter information e.g. play message from the CEO
 - Other information flow and steps including presentation style, slides, video, etc
 - concluding statements and actions, e.g., take a brief survey, clarify any segments, introduction to the buddy and the buddy program, etc.
 
@@ -138,11 +180,5 @@ System takes company information and directions on how to present the company in
 Web app that calculates the affordability of an apartment based on user's input of income, rent, utilities, etc.
 
 - developed in a separate project: [Apartment Affordability Calculator](https://apartment-affordability-checker.vercel.app/)
-
-This app will be integrated into the main app as a page.
-
-### The Synth AI
-
-AI powered chatbot that provides navigation help, lead generation, basic ai consulting services, general customer service.
 
 This app will be integrated into the main app as a page.

@@ -546,3 +546,66 @@ The application uses NextAuth.js for authentication with the following features:
    - Configure OAuth consent screen
    - Create OAuth client ID
    - Set authorized JavaScript origins and redirect URIs
+
+## Technical Approaches
+
+### Template Filtering Approach
+
+The JD Developer component uses a two-layer filtering approach to ensure templates and saved job descriptions are properly separated:
+
+1. **Database Query Filtering**:
+
+   ```typescript
+   // For saved JDs (excluding templates)
+   const savedJDs = await prisma.jobDescription.findMany({
+     where: {
+       userId: session.user.id,
+       content: {
+         not: {
+           contains: '"isTemplate":true',
+         },
+       },
+     },
+     orderBy: {
+       createdAt: "desc",
+     },
+   });
+
+   // For templates (only templates)
+   const templates = await prisma.jobDescription.findMany({
+     where: {
+       userId: session.user.id,
+       content: {
+         contains: '"isTemplate":true',
+       },
+     },
+     orderBy: {
+       createdAt: "desc",
+     },
+   });
+   ```
+
+2. **In-Memory Filtering After Parsing**:
+   ```typescript
+   // Parse the content JSON for each job description
+   const parsedJDs = savedJDs
+     .map((jd) => {
+       try {
+         const parsedContent = JSON.parse(jd.content);
+         // Double-check that this is not a template
+         if (parsedContent.metadata?.isTemplate === true) {
+           return null; // Skip this item
+         }
+         return {
+           id: jd.id,
+           ...parsedContent,
+         };
+       } catch (error) {
+         console.error(`Error parsing JD ${jd.id}:`, error);
+         return null;
+       }
+     })
+     .filter(Boolean); // Remove any null entries
+   ```
+
+This approach ensures that templates only appear in the templates list and saved job descriptions only appear in the saved JDs list, even if there are inconsistencies in the database.
