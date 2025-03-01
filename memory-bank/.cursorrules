@@ -1398,11 +1398,70 @@ This pattern is essential for any feature that requires saving user-related data
   - Interactive features (forms, buttons, etc.)
   - Browser APIs (localStorage, navigator, etc.)
   - React hooks (useState, useEffect, etc.)
+  - Event handlers (onClick, onError, etc.)
 - Server Components are better for:
   - Fetching data
   - Accessing backend resources directly
   - Keeping sensitive information on the server
   - Reducing client-side JavaScript
+
+### Event Handlers in Server Components - 2024-03-01 17:30
+
+- Event handlers cannot be passed to Client Component props from Server Components
+- Error: "Event handlers cannot be passed to Client Component props"
+- Common event handlers that require Client Components:
+  - onClick
+  - onChange
+  - onSubmit
+  - onError
+  - onLoad
+  - onFocus
+  - onBlur
+- Solutions:
+  1. Convert the component to a Client Component by adding "use client" directive
+  2. Move the event handler to a separate Client Component
+  3. Use a different approach that doesn't require event handlers
+- Example with Image component:
+
+  ```tsx
+  // This will cause an error in Server Components
+  <Image
+    src="/image.jpg"
+    alt="Image"
+    onError={(e) => {
+      e.currentTarget.src = "/fallback.jpg";
+    }}
+  />;
+
+  // Solution: Convert to Client Component
+  ("use client");
+  // Now the event handler is allowed
+  <Image
+    src="/image.jpg"
+    alt="Image"
+    onError={(e) => {
+      e.currentTarget.src = "/fallback.jpg";
+    }}
+  />;
+  ```
+
+### Deployment Considerations - 2024-03-01 18:30
+
+- Vercel deployment will fail if Server Components contain event handlers
+- Error during static generation: "Event handlers cannot be passed to Client Component props"
+- This error only appears during the build process, not in development
+- Always check for event handlers in Server Components before deployment
+- Common components that might need event handlers:
+  - Image components with onError fallbacks
+  - Form elements with onChange handlers
+  - Buttons with onClick handlers
+  - Input elements with onFocus/onBlur handlers
+- Deployment checklist:
+  1. Identify all components with event handlers
+  2. Convert those components or their parent components to Client Components
+  3. Test the application in development mode
+  4. Monitor the build logs for any errors
+  5. Verify that all pages are properly generated and optimized
 
 ### Navigation Best Practices - 2024-03-01 16:30
 

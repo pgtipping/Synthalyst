@@ -2,6 +2,23 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Successfully deployed the application to Vercel
+
+  - Fixed the Vercel deployment error by converting the About page to a Client Component
+  - Verified that all pages are properly generated and optimized
+  - Confirmed that the application is now running in production
+  - Deployment logs show successful build and deployment
+  - All navigation links now work correctly in production
+  - Location: `memory-bank/vercelLogs.md`
+
+- ✅ Fixed Vercel deployment error
+
+  - Converted the About page to a Client Component by adding "use client" directive
+  - Fixed error: "Event handlers cannot be passed to Client Component props"
+  - Resolved issue with onError handler in Image component
+  - Ensured proper handling of client-side functionality in Server Components
+  - Location: `nextjs-app/src/app/about/page.tsx`
+
 - ✅ Fixed 404 errors in navigation links
 
   - Restructured pages to follow Next.js App Router conventions
