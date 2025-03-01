@@ -1030,3 +1030,58 @@ The project uses a standardized approach for mocking the Prisma client in API te
 - This prevents Next.js from using its SWC compiler, which is more efficient
 - For Next.js 15.1.7, the Babel configuration must include @babel/plugin-syntax-import-attributes
 - Consider migrating away from custom Babel configuration in the future to use Next.js SWC compiler
+
+## Authentication System (2024-03-01)
+
+### Google OAuth Integration
+
+The application uses NextAuth.js for authentication and supports both traditional email/password authentication and Google OAuth. The Google OAuth implementation has the following characteristics:
+
+1. **Configuration**:
+
+   - Google OAuth credentials (Client ID and Secret) are stored in the `.env` file
+   - The NextAuth configuration is in `nextjs-app/src/app/api/auth/[...nextauth]/auth.ts`
+   - Google provider is configured alongside the credentials provider
+
+2. **UI Implementation**:
+
+   - Both sign-in and sign-up pages have Google sign-in buttons
+   - The buttons include loading states and error handling
+   - A divider separates the Google sign-in option from the traditional form
+   - Consistent styling is maintained across authentication pages (indigo for sign-in, blue for sign-up)
+
+3. **Environment Configuration**:
+
+   - Local development: `NEXTAUTH_URL=http://localhost:3000`
+   - Production: `NEXTAUTH_URL=https://your-production-domain.com`
+   - Google Cloud Console configuration:
+     - Authorized JavaScript origins: `http://localhost:3000` (dev) and `https://your-production-domain.com` (prod)
+     - Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google` (dev) and `https://your-production-domain.com/api/auth/callback/google` (prod)
+
+4. **Authentication Flow**:
+   - Google sign-in button triggers `signIn("google", { callbackUrl })` function
+   - User is redirected to Google's authentication page
+   - After successful authentication, user is redirected back to the application
+   - NextAuth handles the session management
+
+### Environment Configuration Pattern
+
+The application uses environment variables for configuration, with the following pattern:
+
+1. **Local Development**:
+
+   - `.env` file contains development configuration
+   - Variables are commented with explanations
+   - Duplicate entries are avoided
+
+2. **Production**:
+
+   - Production values should be set in the deployment platform (Vercel)
+   - Alternative: use `.env.production` for production values
+   - Comments indicate which values to use in production
+
+3. **Critical Variables**:
+   - `NEXTAUTH_URL`: The base URL of the application
+   - `NEXTAUTH_SECRET`: Secret for NextAuth session encryption
+   - `DATABASE_URL`: Connection string for the database
+   - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: Google OAuth credentials

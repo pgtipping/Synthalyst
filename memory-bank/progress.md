@@ -2,6 +2,21 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Added Google OAuth authentication to sign-in and sign-up pages
+
+  - Implemented Google sign-in buttons on both authentication pages
+  - Added loading states and error handling for Google authentication
+  - Ensured consistent UI design between traditional and Google authentication options
+  - Added dividers with explanatory text between authentication methods
+  - Location: `nextjs-app/src/app/auth/signin/page.tsx`, `nextjs-app/src/app/auth/signup/page.tsx`
+
+- ✅ Fixed environment configuration issues
+
+  - Removed duplicate NEXTAUTH_URL entries in the .env file
+  - Added clear comments to distinguish between local and production URLs
+  - Ensured proper configuration for NextAuth.js
+  - Location: `.env`
+
 - ✅ Fixed Vercel deployment failures:
 
   - Added "use client" directive to components using React hooks:

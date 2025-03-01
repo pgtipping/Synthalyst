@@ -10,14 +10,21 @@
    - Tailwind CSS
    - Radix UI
 
-2. Development Tools:
+2. Backend & Authentication:
+
+   - NextAuth.js for authentication
+   - Google OAuth for social login
+   - Prisma ORM for database access
+   - PostgreSQL database
+
+3. Development Tools:
 
    - VS Code
    - Git
    - ESLint
    - Prettier
 
-3. UI Components:
+4. UI Components:
    - Button
    - Header
    - Card
@@ -496,3 +503,46 @@ const Form = () => {
 - Automated testing
 - Build verification
 - Deployment checks
+
+## Authentication System (2024-03-01)
+
+The application uses NextAuth.js for authentication with the following features:
+
+1. **Authentication Providers**:
+
+   - Credentials provider (email/password)
+   - Google OAuth provider
+
+2. **Configuration**:
+
+   - NextAuth configuration in `nextjs-app/src/app/api/auth/[...nextauth]/auth.ts`
+   - Environment variables in `.env` file:
+     ```
+     NEXTAUTH_URL=http://localhost:3000
+     NEXTAUTH_SECRET=your-secret-here
+     GOOGLE_CLIENT_ID=your-google-client-id
+     GOOGLE_CLIENT_SECRET=your-google-client-secret
+     ```
+
+3. **Authentication Pages**:
+
+   - Sign-in page: `nextjs-app/src/app/auth/signin/page.tsx`
+   - Sign-up page: `nextjs-app/src/app/auth/signup/page.tsx`
+   - Both pages support email/password and Google authentication
+
+4. **Session Management**:
+
+   - JWT strategy for session tokens
+   - Session data stored in cookies
+   - Session expiration configurable in NextAuth options
+
+5. **Protected Routes**:
+
+   - Client-side protection using NextAuth hooks
+   - Server-side protection using NextAuth session
+
+6. **Google OAuth Setup**:
+   - Create project in Google Cloud Console
+   - Configure OAuth consent screen
+   - Create OAuth client ID
+   - Set authorized JavaScript origins and redirect URIs
