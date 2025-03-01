@@ -548,7 +548,7 @@ export default function TemplateList({
                   </svg>
                   Benefits of Templates
                 </h4>
-                <ul className="list-disc pl-5 space-y-2">
+                <ul className="list-disc pl-5 space-y-3">
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <span>
@@ -574,7 +574,7 @@ export default function TemplateList({
               </div>
 
               <div className="bg-primary/5 rounded-lg p-5 border border-primary/20 shadow-sm">
-                <h4 className="font-semibold text-lg mb-2 flex items-center text-primary">
+                <h4 className="font-semibold text-lg mb-3 flex items-center text-primary">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5 mr-2"
@@ -589,7 +589,7 @@ export default function TemplateList({
                   </svg>
                   Pro Tips
                 </h4>
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-3">
                   <li className="flex items-start">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
