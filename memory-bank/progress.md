@@ -2,6 +2,14 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed Next.js client-side hooks in Suspense boundaries issue
+
+  - Wrapped `useSearchParams()` in a Suspense boundary in the signup page
+  - Refactored the signup page to follow the same pattern as the signin page
+  - Fixed Vercel deployment failures with error: "useSearchParams() should be wrapped in a suspense boundary"
+  - Documented the pattern in .cursorrules for future reference
+  - Location: `nextjs-app/src/app/auth/signup/page.tsx`
+
 - ✅ Fixed JD Developer validation requirements
 
   - Removed mandatory education requirements from the API validation schema

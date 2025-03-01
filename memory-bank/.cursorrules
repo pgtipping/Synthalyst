@@ -1172,3 +1172,73 @@ When working with sensitive information such as API keys, environment variables,
    - Document required environment variables in .env.example
    - Use a password manager or secure vault for storing actual credentials
    - Rotate any credentials that have been accidentally exposed
+
+## Next.js Client-Side Hooks and Suspense - 2024-03-01 15:30
+
+### useSearchParams and Suspense Boundaries - 2024-03-01 15:30
+
+- Next.js 15.1.7 requires client-side hooks like `useSearchParams()` to be wrapped in Suspense boundaries
+- Failure to wrap these hooks in Suspense boundaries will cause Vercel deployment failures
+- Error message: `useSearchParams() should be wrapped in a suspense boundary at page "/path". Read more: <https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout>`
+- This is a requirement for static site generation (SSG) and server-side rendering (SSR)
+
+### Implementation Pattern - 2024-03-01 15:30
+
+1. Import Suspense from React:
+
+   ```javascript
+   import { Suspense } from "react";
+   ```
+
+2. Create a separate component that uses the client-side hooks:
+
+   ```javascript
+   function PageContent() {
+     const searchParams = useSearchParams();
+     // Use searchParams here
+     return <div>...</div>;
+   }
+   ```
+
+3. Wrap the component in Suspense in the main page component:
+   ```javascript
+   export default function Page() {
+     return (
+       <Suspense fallback={<div>Loading...</div>}>
+         <PageContent />
+       </Suspense>
+     );
+   }
+   ```
+
+### Affected Hooks - 2024-03-01 15:30
+
+- useSearchParams
+- usePathname
+- useRouter (in some cases)
+- Any other client-side hooks that rely on browser APIs
+
+### Example Implementation - 2024-03-01 15:30
+
+```javascript
+"use client";
+
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+function SignUpForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get("callbackUrl") || "/";
+
+  // Rest of the component...
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignUpForm />
+    </Suspense>
+  );
+}
+```

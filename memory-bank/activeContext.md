@@ -2,13 +2,21 @@
 
 ## Current Focus (2024-03-01)
 
-The current focus is on improving the JD Developer component by removing unnecessary validation requirements. We've successfully modified the API route to make education, experience, and certifications optional, fixing a console error that was preventing job description generation.
+The current focus is on fixing deployment issues with Vercel. We've identified and resolved an issue with the signup page where `useSearchParams()` was not wrapped in a Suspense boundary, causing deployment failures. This is a requirement in Next.js 15.1.7 for client-side hooks.
 
-Previous focus was on enhancing the authentication system by adding Google OAuth integration to the application. We've successfully implemented Google sign-in buttons on both the sign-in and sign-up pages, and fixed environment configuration issues.
+Previous focus was on improving the JD Developer component by removing unnecessary validation requirements. We've successfully modified the API route to make education, experience, and certifications optional, fixing a console error that was preventing job description generation.
+
+We've also enhanced the authentication system by adding Google OAuth integration to the application. We've successfully implemented Google sign-in buttons on both the sign-in and sign-up pages, and fixed environment configuration issues.
 
 We've successfully implemented and fixed tests for these endpoints using a standardized mock Prisma client pattern. The mock Prisma client has been enhanced to support all required models, including JobDescription, Task, and User.
 
 ## Recent Changes (2024-03-01)
+
+- Fixed Vercel deployment issues:
+
+  - Wrapped `useSearchParams()` in a Suspense boundary in the signup page
+  - Refactored the signup page to follow the same pattern as the signin page
+  - Location: `nextjs-app/src/app/auth/signup/page.tsx`
 
 - Fixed JD Developer validation requirements:
 
@@ -33,11 +41,13 @@ Previous changes:
 
 ## Next Steps (2024-03-01)
 
-1. Test the JD Developer form to ensure it works without education, experience, and certifications
-2. Consider adding loading states for salary generation in JD Developer
-3. Complete test coverage for JD Developer
-4. Test the Google authentication flow in the development environment
-5. Configure Google OAuth for production environment
+1. Monitor the Vercel deployment to ensure the fix resolves the issue
+2. Check for similar issues in other pages that might use client-side hooks without Suspense boundaries
+3. Test the JD Developer form to ensure it works without education, experience, and certifications
+4. Consider adding loading states for salary generation in JD Developer
+5. Complete test coverage for JD Developer
+6. Test the Google authentication flow in the development environment
+7. Configure Google OAuth for production environment
 
 Previous next steps:
 
@@ -48,6 +58,7 @@ Previous next steps:
 
 ## Active Decisions (2024-03-01)
 
+- Using Suspense boundaries for client-side hooks like `useSearchParams()` to comply with Next.js 15.1.7 requirements
 - Making education, experience, and certifications optional in the JD Developer form
 - Using Google OAuth as an additional authentication method alongside email/password
 - Maintaining consistent UI patterns across authentication methods
@@ -58,6 +69,8 @@ Previous next steps:
 
 ## Considerations (2024-03-01)
 
+- Next.js 15.1.7 requires client-side hooks like `useSearchParams()` to be wrapped in Suspense boundaries
+- We should review all pages using client-side hooks to ensure they follow this pattern
 - The JD Developer form should clearly indicate which fields are required vs. optional
 - The LLM prompt for job description generation may need adjustments to handle missing fields
 - The Google OAuth configuration needs to be properly set up in the Google Cloud Console
