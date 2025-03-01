@@ -110,8 +110,8 @@
    - Radix UI for accessible components
    - NextAuth.js for authentication
    - Prisma for database access
-   - @vercel/analytics for user behavior tracking
-   - @vercel/speed-insights for performance monitoring
+   - @vercel/analytics for user behavior tracking (import from '@vercel/analytics/react')
+   - @vercel/speed-insights for performance monitoring (import from '@vercel/speed-insights/react')
 
 2. UI Dependencies:
 

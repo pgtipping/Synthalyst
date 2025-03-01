@@ -2,6 +2,13 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed SpeedInsights import path
+
+  - Changed import from '@vercel/speed-insights/next' to '@vercel/speed-insights/react'
+  - Resolved "Module not found: Can't resolve '@vercel/speed-insights/next'" error
+  - Ensured proper integration of performance monitoring
+  - Location: `nextjs-app/src/app/layout.tsx`
+
 - ✅ Added Vercel Analytics and Speed Insights
 
   - Installed @vercel/analytics and @vercel/speed-insights packages

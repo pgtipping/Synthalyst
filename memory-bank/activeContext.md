@@ -2,7 +2,7 @@
 
 ## Current Focus (2024-03-01)
 
-The current focus is on enhancing the application's analytics capabilities by adding Vercel Analytics and Speed Insights. This will help track user interactions, monitor performance metrics, and identify areas for improvement. We've successfully integrated both Vercel Analytics and Speed Insights into the application's root layout to ensure all pages are tracked.
+The current focus is on enhancing the application's analytics capabilities by adding Vercel Analytics and Speed Insights. This will help track user interactions, monitor performance metrics, and identify areas for improvement. We've successfully integrated both Vercel Analytics and Speed Insights into the application's root layout to ensure all pages are tracked. We've also fixed an import path issue with the SpeedInsights component, changing it from '@vercel/speed-insights/next' to '@vercel/speed-insights/react'.
 
 Previously, the focus was on ensuring the application is properly deployed and functioning in production. We've successfully fixed a Vercel deployment error by converting the About page to a Client Component to properly handle event handlers. The deployment is now successful, with all pages being properly generated and optimized. We've also fixed 404 errors in the navigation by properly structuring the pages according to Next.js App Router conventions and cleaned up the codebase by removing old page files that were no longer needed.
 
@@ -13,6 +13,12 @@ We've also enhanced the authentication system by adding Google OAuth integration
 We've successfully implemented and fixed tests for these endpoints using a standardized mock Prisma client pattern. The mock Prisma client has been enhanced to support all required models, including JobDescription, Task, and User.
 
 ## Recent Changes (2024-03-01)
+
+- Fixed SpeedInsights import path:
+
+  - Changed import from '@vercel/speed-insights/next' to '@vercel/speed-insights/react'
+  - Resolved "Module not found: Can't resolve '@vercel/speed-insights/next'" error
+  - Location: `nextjs-app/src/app/layout.tsx`
 
 - Added Vercel Analytics and Speed Insights:
 
