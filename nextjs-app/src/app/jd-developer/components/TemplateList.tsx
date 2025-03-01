@@ -88,8 +88,8 @@ export default function TemplateList({
         description: "Template deleted successfully.",
       });
 
-      // Refresh the page to update the list
-      window.location.reload();
+      // Refresh the page to update the list but stay on templates tab
+      window.location.href = "/jd-developer?tab=templates";
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -422,8 +422,8 @@ export default function TemplateList({
       // Mark that templates have been created
       localStorage.setItem("hasCreatedTemplates", "true");
 
-      // Refresh the page to show the new templates
-      window.location.reload();
+      // Refresh the page to show the new templates but stay on templates tab
+      window.location.href = "/jd-developer?tab=templates";
     } catch (error) {
       console.error("Error creating example templates:", error);
       toast({
@@ -593,7 +593,7 @@ export default function TemplateList({
                   <li className="flex items-start">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      className="h-5 w-4 mr-2 mt-0.5 text-primary"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -605,7 +605,7 @@ export default function TemplateList({
                   <li className="flex items-start">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      className="h-5 w-4 mr-2 mt-0.5 text-primary"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -617,7 +617,7 @@ export default function TemplateList({
                   <li className="flex items-start">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2 mt-0.5 text-primary"
+                      className="h-5 w-4 mr-2 mt-0.5 text-primary"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >

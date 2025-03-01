@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
@@ -13,7 +14,9 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function JDDeveloperPage() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<string>("form");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams?.get("tab");
+  const [activeTab, setActiveTab] = useState<string>(tabParam || "form");
   const [templates, setTemplates] = useState<JobDescription[]>([]);
   const [selectedTemplate, setSelectedTemplate] =
     useState<JobDescription | null>(null);
@@ -48,6 +51,11 @@ export default function JDDeveloperPage() {
     // Initial fetch
     fetchTemplates();
 
+    // Set active tab from URL parameter if present
+    if (tabParam && ["form", "templates", "saved"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+
     // Listen for tab switch events
     const handleTabSwitch = (event: Event) => {
       const customEvent = event as CustomEvent;
@@ -62,7 +70,7 @@ export default function JDDeveloperPage() {
     return () => {
       window.removeEventListener("switchTab", handleTabSwitch);
     };
-  }, [session]);
+  }, [session, tabParam]);
 
   const handleTemplateSelect = (template: JobDescription) => {
     setSelectedTemplate(template);
