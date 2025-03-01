@@ -890,191 +890,133 @@ Before running ANY command:
 6. Test input validation
 7. Restore environment variables after tests
 
-## Mock Prisma Client Implementation - 2024-02-28 23:20
+## Mock Prisma Client Pattern - 2024-03-01
 
-### Mock Storage Pattern
+The project uses a standardized approach for mocking the Prisma client in API tests. This pattern is implemented in `nextjs-app/src/lib/test/prisma-mock.ts` and should be followed for all API tests.
 
-- Create in-memory storage for mock data:
+### Key Components:
 
-  ```typescript
-  const mockStorage: {
-    categories: Category[];
-    users: User[];
-    posts: Post[];
-    postCategories: PostCategory[];
-  } = {
-    categories: [],
-    users: [],
-    posts: [],
-    postCategories: [],
-  };
-  ```
+1. **TypeScript Interfaces**: Define interfaces for all mock storage objects to ensure type safety.
 
-- Reset mock storage between tests:
-  ```typescript
-  export function resetMockStorage() {
-    mockStorage.categories = [];
-    mockStorage.users = [];
-    mockStorage.posts = [];
-    mockStorage.postCategories = [];
-  }
-  ```
+   ```typescript
+   export interface MockStorage {
+     templates: Template[];
+     // Add other entities as needed
+   }
+   ```
 
-### Mock Method Implementation
+2. **Mock Implementation**: Create a mock implementation that mimics the Prisma client's behavior.
 
-- Implement mock methods for database operations:
+   ```typescript
+   export const createMockPrismaClient = (
+     initialData: Partial<MockStorage> = {}
+   ) => {
+     const storage: MockStorage = {
+       templates: [],
+       // Initialize other entities
+       ...initialData,
+     };
 
-  ```typescript
-  export const mockPrismaClient = {
-    category: {
-      findMany: jest.fn(async (args) => {
-        // Implementation that mimics Prisma behavior
-      }),
-      findFirst: jest.fn(async (args) => {
-        // Implementation that mimics Prisma behavior
-      }),
-      create: jest.fn(async (args) => {
-        // Implementation that mimics Prisma behavior
-      }),
-      // Other methods...
-    },
-    // Other models...
-  } as unknown as PrismaClient;
-  ```
+     return {
+       template: {
+         findMany: async () => storage.templates,
+         findUnique: async (args: { where: { id: string } }) =>
+           storage.templates.find((t) => t.id === args.where.id) || null,
+         // Add other methods as needed
+       },
+       // Add other models as needed
+     };
+   };
+   ```
 
-- Support filtering, pagination, and relationships:
+3. **Error Handling**: Implement consistent error handling across all mock methods.
 
-  ```typescript
-  // Apply where filter if provided
-  if (args.where) {
-    // Implement filtering logic
-  }
+   ```typescript
+   try {
+     // Operation logic
+   } catch (error) {
+     console.error("Mock Prisma operation failed:", error);
+     throw error;
+   }
+   ```
 
-  // Apply pagination
-  if (args.skip !== undefined && args.take !== undefined) {
-    result = result.slice(args.skip, args.skip + args.take);
-  }
+4. **Test Setup**: Use the mock in tests by accessing the global mock instance.
 
-  // Apply include
-  if (args.include) {
-    // Implement relationship logic
-  }
-  ```
+   ```typescript
+   // Access the global mock Prisma client
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   const mockPrismaClient = (global as any).__mockPrismaClient as PrismaClient;
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   const resetMockStorage = (global as any).__resetMockStorage as () => void;
 
-### Error Handling
+   describe("API Test", () => {
+     beforeEach(() => {
+       // Reset the mock storage before each test
+       if (resetMockStorage) {
+         resetMockStorage();
+       }
+       jest.clearAllMocks();
+     });
 
-- Mock Prisma error classes:
+     // Test cases...
+   });
+   ```
 
-  ```typescript
-  export const Prisma = {
-    PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error {
-      code: string;
-      meta?: Record<string, unknown>;
-      clientVersion: string;
+5. **Creating Test Data**: Create test data using the mock Prisma client.
 
-      constructor(
-        message: string,
-        {
-          code,
-          clientVersion,
-          meta,
-        }: {
-          code: string;
-          clientVersion: string;
-          meta?: Record<string, unknown>;
-        }
-      ) {
-        super(message);
-        this.name = "PrismaClientKnownRequestError";
-        this.code = code;
-        this.clientVersion = clientVersion;
-        this.meta = meta;
-      }
-    },
-    PrismaClientValidationError: class PrismaClientValidationError extends Error {
-      constructor(message: string) {
-        super(message);
-        this.name = "PrismaClientValidationError";
-      }
-    },
-  };
-  ```
+   ```typescript
+   // Create a test user
+   const user = await mockPrismaClient.user.create({
+     data: {
+       id: "user1",
+       name: "Test User",
+       email: "test@example.com",
+       createdAt: new Date(),
+       updatedAt: new Date(),
+     },
+   });
 
-- Handle errors in the errorHandler middleware:
-  ```typescript
-  // Check by name instead of instanceof for Prisma errors
-  const err = error as Error & { name?: string; code?: string; meta?: unknown };
-  if (err?.name === "PrismaClientKnownRequestError" || err?.code) {
-    // Handle Prisma errors
-  }
-  ```
+   // Create a test category
+   const category = await mockPrismaClient.category.create({
+     data: {
+       id: "cat1",
+       name: "Test Category",
+       slug: "test-category",
+       description: "Test Description",
+       createdAt: new Date(),
+       updatedAt: new Date(),
+     },
+   });
+   ```
 
-### Setup in Jest
+6. **Handling Relationships**: For many-to-many relationships, directly update the storage.
 
-- Set up mock in jest.config.js:
+   ```typescript
+   // Add category to post using a direct update to the storage
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   (mockPrismaClient as any)._storage.postCategories.push({
+     postId: "post1",
+     categoryId: category.id,
+   });
+   ```
 
-  ```javascript
-  module.exports = {
-    setupFilesAfterEnv: [
-      "<rootDir>/jest.setup.js",
-      "<rootDir>/src/lib/test/setup-prisma-mock.js",
-    ],
-    // Other config...
-  };
-  ```
+7. **API Route Params**: When testing API routes, use the following pattern for params:
 
-- Mock the Prisma module:
-  ```javascript
-  jest.mock("@/lib/prisma", () => {
-    return {
-      prisma: global.__mockPrismaClient,
-      testPrismaConnection: jest.fn().mockResolvedValue(true),
-      reconnectPrisma: jest.fn().mockResolvedValue(true),
-      withRetry: jest.fn().mockImplementation((fn) => fn()),
-    };
-  });
-  ```
+   ```typescript
+   const response = await GET(request as unknown as NextRequest, {
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     params: Promise.resolve({}) as any,
+   });
+   ```
 
-### Test Implementation
+8. **Verifying Results**: Verify the results of API calls.
 
-- Clean database between tests:
-
-  ```typescript
-  beforeEach(async () => {
-    await cleanupDatabase();
-    jest.clearAllMocks();
-  });
-
-  afterEach(async () => {
-    await logDatabaseState();
-  });
-  ```
-
-- Create test data:
-
-  ```typescript
-  await createTestCategory({
-    name: "Category 1",
-    description: "Description 1",
-  });
-  ```
-
-- Test API endpoints:
-
-  ```typescript
-  const request = new MockNextRequest(
-    "http://localhost:3000/api/categories?page=1&limit=2"
-  );
-  const response = await GET(request as unknown as NextRequest, {
-    params: Promise.resolve({}),
-  });
-  const data = await response.json();
-
-  expect(response.status).toBe(200);
-  expect(data.success).toBe(true);
-  expect(data.data.categories.length).toBe(2);
-  expect(data.data.pagination.total).toBe(3);
-  ```
+   ```typescript
+   const data = await response.json();
+   expect(response.status).toBe(200);
+   expect(data.success).toBe(true);
+   expect(data.data.categories).toHaveLength(1);
+   ```
 
 # Next.js Client Components - 2024-03-01
 
