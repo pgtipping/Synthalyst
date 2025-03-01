@@ -131,6 +131,7 @@ export default function JDDeveloperPage() {
               onUseTemplate={handleTemplateSelect}
               isLoading={isLoading}
               error={error}
+              onTemplatesChanged={fetchTemplates}
             />
           </Card>
         </TabsContent>

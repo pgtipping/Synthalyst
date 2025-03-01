@@ -34,6 +34,7 @@ interface TemplateListProps {
   onUseTemplate: (template: JobDescription) => void;
   isLoading: boolean;
   error: string | null;
+  onTemplatesChanged?: () => void;
 }
 
 export default function TemplateList({
@@ -41,6 +42,7 @@ export default function TemplateList({
   onUseTemplate,
   isLoading,
   error,
+  onTemplatesChanged,
 }: TemplateListProps) {
   const [selectedTemplate, setSelectedTemplate] =
     useState<ExtendedJobDescription | null>(null);
@@ -88,8 +90,9 @@ export default function TemplateList({
         description: "Template deleted successfully.",
       });
 
-      // Refresh the page to update the list but stay on templates tab
-      window.location.href = "/jd-developer?tab=templates";
+      if (onTemplatesChanged) {
+        onTemplatesChanged();
+      }
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -419,11 +422,11 @@ export default function TemplateList({
         }
       }
 
-      // Mark that templates have been created
       localStorage.setItem("hasCreatedTemplates", "true");
 
-      // Refresh the page to show the new templates but stay on templates tab
-      window.location.href = "/jd-developer?tab=templates";
+      if (onTemplatesChanged) {
+        onTemplatesChanged();
+      }
     } catch (error) {
       console.error("Error creating example templates:", error);
       toast({
