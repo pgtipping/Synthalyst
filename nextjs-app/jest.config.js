@@ -9,7 +9,10 @@ module.exports = {
     "\\.(css|less|sass|scss)$": "identity-obj-proxy",
   },
   transform: {
-    "^.+\\.(js|jsx|ts|tsx|mjs)$": ["babel-jest", { presets: ["next/babel"] }],
+    "^.+\\.(js|jsx|ts|tsx|mjs)$": [
+      "babel-jest",
+      { configFile: "./.babelrc.test.js" },
+    ],
   },
   transformIgnorePatterns: [
     "/node_modules/(?!lucide-react|@radix-ui|@hookform|class-variance-authority|clsx|tailwind-merge)",
