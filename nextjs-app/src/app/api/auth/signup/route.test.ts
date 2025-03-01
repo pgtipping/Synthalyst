@@ -123,8 +123,11 @@ describe("Auth Signup API", () => {
 
     // Assertions
     expect(response.status).toBe(400);
-    expect(data.error).toBe("User already exists");
-    expect(data.code).toBe("USER_EXISTS");
+    expect(data.error).toEqual({
+      message: "User already exists",
+      code: "USER_EXISTS",
+      status: 400,
+    });
 
     // Verify Prisma calls
     expect(global.__mockPrismaClient.user.findUnique).toHaveBeenCalledWith({
@@ -157,7 +160,7 @@ describe("Auth Signup API", () => {
     // Assertions
     expect(response.status).toBe(400);
     expect(data.error).toBeDefined();
-    expect(data.code).toBe("VALIDATION_ERROR");
+    expect(data.error.code).toBe("VALIDATION_ERROR");
 
     // Verify Prisma calls were not made
     expect(global.__mockPrismaClient.user.findUnique).not.toHaveBeenCalled();
@@ -188,7 +191,7 @@ describe("Auth Signup API", () => {
     // Assertions
     expect(response.status).toBe(400);
     expect(data.error).toBeDefined();
-    expect(data.code).toBe("VALIDATION_ERROR");
+    expect(data.error.code).toBe("VALIDATION_ERROR");
 
     // Verify Prisma calls were not made
     expect(global.__mockPrismaClient.user.findUnique).not.toHaveBeenCalled();
@@ -219,7 +222,7 @@ describe("Auth Signup API", () => {
     // Assertions
     expect(response.status).toBe(400);
     expect(data.error).toBeDefined();
-    expect(data.code).toBe("VALIDATION_ERROR");
+    expect(data.error.code).toBe("VALIDATION_ERROR");
 
     // Verify Prisma calls were not made
     expect(global.__mockPrismaClient.user.findUnique).not.toHaveBeenCalled();
@@ -253,8 +256,11 @@ describe("Auth Signup API", () => {
 
     // Assertions
     expect(response.status).toBe(500);
-    expect(data.error).toBe("Database connection failed");
-    expect(data.code).toBe("DATABASE_CONNECTION_ERROR");
+    expect(data.error).toEqual({
+      message: "Database connection failed",
+      code: "DATABASE_CONNECTION_ERROR",
+      status: 500,
+    });
 
     // Verify Prisma calls were not made
     expect(global.__mockPrismaClient.user.findUnique).not.toHaveBeenCalled();
@@ -292,8 +298,8 @@ describe("Auth Signup API", () => {
 
     // Assertions
     expect(response.status).toBe(500);
-    expect(data.error).toContain("Failed to create user");
-    expect(data.code).toBe("USER_CREATION_ERROR");
+    expect(data.error.message).toContain("Failed to create user");
+    expect(data.error.code).toBe("USER_CREATION_ERROR");
 
     // Verify Prisma calls
     expect(global.__mockPrismaClient.user.findUnique).toHaveBeenCalledWith({
@@ -335,8 +341,11 @@ describe("Auth Signup API", () => {
 
     // Assertions
     expect(response.status).toBe(400);
-    expect(data.error).toBe("Email already in use");
-    expect(data.code).toBe("EMAIL_IN_USE");
+    expect(data.error).toEqual({
+      message: "Email already in use",
+      code: "EMAIL_IN_USE",
+      status: 400,
+    });
 
     // Verify Prisma calls
     expect(global.__mockPrismaClient.user.findUnique).toHaveBeenCalledWith({

@@ -261,6 +261,7 @@ interface FindManyTaskArgs {
     userId?: string;
     status?: string;
     priority?: string;
+    title?: string;
   };
   orderBy?: unknown[];
 }
@@ -849,6 +850,11 @@ export const createMockPrismaClient = (
             if (args.where.priority) {
               result = result.filter(
                 (task) => task.priority === args.where?.priority
+              );
+            }
+            if (args.where.title) {
+              result = result.filter(
+                (task) => task.title === args.where?.title
               );
             }
           }
