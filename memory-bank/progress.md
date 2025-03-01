@@ -2,6 +2,16 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Improved UI readability by changing grey/silver text to black
+
+  - Updated global CSS file to modify default text colors
+  - Changed text-gray-600, text-gray-700, text-gray-800, and text-muted-foreground classes to text-black
+  - Updated multiple pages including Home, About, Services, Tools, Training Plan, and The Synth
+  - Updated components including PlanForm, PlanList, TemplateList, and ChatBot
+  - Changed loading animation dots from grey to black in the ChatBot component
+  - Enhanced overall readability and user experience
+  - Location: Multiple files across the application
+
 - ✅ Fixed SpeedInsights import path
 
   - Changed import from '@vercel/speed-insights/next' to '@vercel/speed-insights/react'
