@@ -70,13 +70,13 @@ export async function DELETE(
       );
     }
 
-    // Remove ownership check to allow any authenticated user to delete templates
-    // if (template.userId !== session.user.id) {
-    //   return NextResponse.json(
-    //     { error: "Not authorized to delete this template" },
-    //     { status: 403 }
-    //   );
-    // }
+    // Re-enable ownership check to ensure users can only delete their own templates
+    if (template.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Not authorized to delete this template" },
+        { status: 403 }
+      );
+    }
 
     await prisma.jobDescription.delete({
       where: { id },
@@ -108,6 +108,26 @@ export async function PUT(
     const { id } = await props.params;
     const body = await request.json();
     const validatedData = updateTemplateSchema.parse(body);
+
+    // Check if the template exists and belongs to the user
+    const template = await prisma.jobDescription.findUnique({
+      where: { id },
+    });
+
+    if (!template) {
+      return NextResponse.json(
+        { error: "Template not found" },
+        { status: 404 }
+      );
+    }
+
+    // Ensure the user owns this template
+    if (template.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Not authorized to update this template" },
+        { status: 403 }
+      );
+    }
 
     const result = await createNewVersion(validatedData, id, session.user.id);
 

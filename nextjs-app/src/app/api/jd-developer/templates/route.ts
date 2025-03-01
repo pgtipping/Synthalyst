@@ -80,6 +80,15 @@ export async function GET() {
   logger.info("GET /api/jd-developer/templates - Starting request");
 
   try {
+    // Get the current user session
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     // Check database connection
     const isConnected = await testPrismaConnection();
     if (!isConnected) {
@@ -91,9 +100,11 @@ export async function GET() {
     }
 
     // Use withRetry for database operation
+    // Modified to only return templates created by the current user
     const templates = await withRetry(async () => {
       return prisma.jobDescription.findMany({
         where: {
+          userId: session.user.id,
           content: {
             contains: '"isTemplate":true',
           },
