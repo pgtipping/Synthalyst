@@ -1108,3 +1108,33 @@ When working with the JD Developer component, ensure that:
 1. No validation is added that would make education, experience, or certifications required
 2. The LLM prompt for job description generation handles missing fields gracefully
 3. The UI clearly indicates which fields are required vs. optional
+
+## Git Commit Approach (2024-03-01)
+
+When committing changes to the repository, always use `git add .` instead of specifying individual file paths like `memory-bank/file.md`. This is because:
+
+1. Specifying paths with directories can fail if the paths don't match exactly
+2. Using `git add .` ensures all changes in the current directory and subdirectories are staged
+3. Previous commits have failed when using specific directory paths like `memory-bank/activeContext.md`
+
+The correct approach for committing changes is:
+
+```bash
+# Stage all changes
+git add .
+
+# Commit with a descriptive message
+git commit -m "Descriptive message about the changes"
+```
+
+If you need to be selective about what to commit, use:
+
+```bash
+# Add specific files without directory prefixes
+git add filename.ext another-file.ext
+
+# Or use the interactive mode to select changes
+git add -i
+```
+
+Remember that the shell is in the root directory of the project, so all paths should be relative to that location.
