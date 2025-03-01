@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
@@ -12,7 +12,8 @@ import SavedJDs from "./components/SavedJDs";
 import type { JobDescription } from "@/types/jobDescription";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
-export default function JDDeveloperPage() {
+// Component that safely uses useSearchParams inside a Suspense boundary
+function JDDeveloperContent() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const tabParam = searchParams?.get("tab");
@@ -142,5 +143,25 @@ export default function JDDeveloperPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+// Main component that wraps the content in a Suspense boundary
+export default function JDDeveloperPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container py-10">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground">Loading JD Developer...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <JDDeveloperContent />
+    </Suspense>
   );
 }
