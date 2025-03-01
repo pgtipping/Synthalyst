@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -24,7 +24,7 @@ interface CreatePostForm {
   featured: boolean;
 }
 
-export default function NewPostPage() {
+function NewPostContent() {
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -301,5 +301,13 @@ export default function NewPostPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function NewPostPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NewPostContent />
+    </Suspense>
   );
 }
