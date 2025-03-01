@@ -1,5 +1,10 @@
 import "@testing-library/jest-dom";
 import { enableFetchMocks } from "jest-fetch-mock";
+import { TextEncoder, TextDecoder } from "util";
+
+// Add TextEncoder and TextDecoder to global
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 // Enable fetch mocks
 enableFetchMocks();
