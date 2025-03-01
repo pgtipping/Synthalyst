@@ -284,6 +284,12 @@ export default function JDForm({
     const createExampleTemplates = async () => {
       if (!session?.user?.email) return;
 
+      // Check if templates have been created before
+      const hasCreatedTemplates = localStorage.getItem("hasCreatedTemplates");
+      if (hasCreatedTemplates === "true") {
+        return; // Don't create templates if they've been created before
+      }
+
       // First check if templates exist
       try {
         const response = await fetch("/api/jd-developer/templates");
@@ -294,6 +300,8 @@ export default function JDForm({
 
         // If templates already exist, don't create more
         if (data.templates && data.templates.length > 0) {
+          // Mark that templates have been created
+          localStorage.setItem("hasCreatedTemplates", "true");
           return;
         }
       } catch (error) {
@@ -611,6 +619,9 @@ export default function JDForm({
           console.error(`Error creating template ${template.title}:`, error);
         }
       }
+
+      // Mark that templates have been created
+      localStorage.setItem("hasCreatedTemplates", "true");
     };
 
     createExampleTemplates();
