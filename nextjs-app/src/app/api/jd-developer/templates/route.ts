@@ -121,27 +121,28 @@ export async function GET() {
 
     logger.info(`Retrieved ${templates.length} templates successfully`);
 
-    // Parse the content JSON for each template
-    const parsedTemplates = templates.map((template) => {
-      try {
-        return {
-          id: template.id,
-          ...JSON.parse(template.content),
-        };
-      } catch (parseError) {
-        console.error(`Error parsing template ${template.id}:`, parseError);
-        // Return a minimal valid object for this template
-        return {
-          id: template.id,
-          title: `Error: Could not parse template ${template.id}`,
-          error: true,
-          metadata: {
-            createdAt: template.createdAt.toISOString(),
-            updatedAt: template.updatedAt.toISOString(),
-          },
-        };
-      }
-    });
+    // Parse the content JSON for each template and ensure they are actually templates
+    const parsedTemplates = templates
+      .map((template) => {
+        try {
+          const parsedContent = JSON.parse(template.content);
+
+          // Verify this is actually a template
+          if (parsedContent.metadata?.isTemplate !== true) {
+            return null; // Skip this item
+          }
+
+          return {
+            id: template.id,
+            ...parsedContent,
+          };
+        } catch (parseError) {
+          console.error(`Error parsing template ${template.id}:`, parseError);
+          // Return null for invalid templates
+          return null;
+        }
+      })
+      .filter(Boolean); // Remove any null entries
 
     return NextResponse.json({ templates: parsedTemplates });
   } catch (error) {

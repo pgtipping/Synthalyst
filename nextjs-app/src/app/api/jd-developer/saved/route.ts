@@ -29,10 +29,24 @@ export async function GET(): Promise<NextResponse> {
     });
 
     // Parse the content JSON for each job description
-    const parsedJDs = savedJDs.map((jd) => ({
-      id: jd.id,
-      ...JSON.parse(jd.content),
-    }));
+    const parsedJDs = savedJDs
+      .map((jd) => {
+        try {
+          const parsedContent = JSON.parse(jd.content);
+          // Double-check that this is not a template
+          if (parsedContent.metadata?.isTemplate === true) {
+            return null; // Skip this item
+          }
+          return {
+            id: jd.id,
+            ...parsedContent,
+          };
+        } catch (error) {
+          console.error(`Error parsing JD ${jd.id}:`, error);
+          return null;
+        }
+      })
+      .filter(Boolean); // Remove any null entries
 
     return NextResponse.json({ jobDescriptions: parsedJDs });
   } catch (error) {
