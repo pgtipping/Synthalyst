@@ -1242,3 +1242,64 @@ export default function SignUpPage() {
   );
 }
 ```
+
+# NextAuth Google OAuth Integration - 2024-03-01
+
+## PrismaAdapter Configuration - 2024-03-01
+
+When using NextAuth.js with Google OAuth, it's essential to configure the PrismaAdapter to ensure users are properly created in the database. Without this adapter, users can authenticate but won't have database records, causing foreign key constraint violations when trying to save related data.
+
+### Implementation Pattern
+
+```typescript
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "./prisma";
+
+export const authOptions: AuthOptions = {
+  adapter: PrismaAdapter(prisma),
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      // Other configuration...
+    }),
+    // Other providers...
+  ],
+  // Other NextAuth options...
+};
+```
+
+### Key Points
+
+1. **Required Packages**:
+
+   - `@auth/prisma-adapter`: Provides the PrismaAdapter
+   - `next-auth`: Core authentication library
+   - `@prisma/client`: Database ORM
+
+2. **Database Requirements**:
+
+   - The Prisma schema must include the necessary NextAuth models (User, Account, Session, etc.)
+   - The User model must have the fields required by NextAuth (id, email, name, etc.)
+
+3. **Common Issues**:
+
+   - Foreign key constraint violations when saving related data (e.g., JobDescription, Task, etc.)
+   - Session exists but user ID is not found in the database
+   - Authentication works but database operations fail
+
+4. **Testing Considerations**:
+   - Mock the PrismaAdapter in tests
+   - Ensure test users have proper database records
+   - Test both credential and OAuth authentication flows
+
+### Troubleshooting
+
+If you encounter foreign key constraint violations:
+
+1. Check if the user exists in the database
+2. Verify that the session contains the correct user ID
+3. Ensure the PrismaAdapter is properly configured
+4. Check that the database schema matches the NextAuth requirements
+
+This pattern is essential for any feature that requires saving user-related data to the database when using OAuth authentication.

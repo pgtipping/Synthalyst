@@ -24,6 +24,7 @@
     "apply-migrations": "node --experimental-modules scripts/apply-prod-migrations.mjs"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.8.0",
     "@botpress/client": "0.2.0",
     "@botpress/sdk": "0.4.0",
     "@hookform/resolvers": "^4.1.0",

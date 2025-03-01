@@ -2,6 +2,14 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed job description saving in production environment
+
+  - Added PrismaAdapter to NextAuth configuration
+  - Fixed foreign key constraint violation error when saving job descriptions
+  - Ensured Google OAuth users are properly created in the database
+  - Resolved error: "Foreign key constraint violated: `JobDescription_userId_fkey (index)`"
+  - Location: `src/lib/auth.ts`
+
 - ✅ Fixed Next.js client-side hooks in Suspense boundaries issue
 
   - Wrapped `useSearchParams()` in a Suspense boundary in the signup page
