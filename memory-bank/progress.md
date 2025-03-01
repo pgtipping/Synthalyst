@@ -11,6 +11,11 @@
   - Updated Babel configuration to support import attributes syntax:
     - Added @babel/plugin-syntax-import-attributes plugin to .babelrc
     - Installed the plugin as a dev dependency
+  - **Resolved Babel and SWC compiler conflict:**
+    - Moved Babel configuration from `.babelrc` to a test-specific `.babelrc.test.js` file
+    - Updated Jest configuration to use the test-specific Babel config
+    - Converted `next.config.ts` to `next.config.js` for better compatibility
+    - Removed the global `.babelrc` file to allow Next.js to use its SWC compiler
   - Location: Multiple files
 
 - Fixed linter errors in mock Prisma client implementation
@@ -205,9 +210,15 @@
    - NextAuth.js configuration needs review
 
 5. Performance
+
    - Initial page load time needs optimization
    - API response caching needed
    - Server component optimization required
+
+6. Deployment
+   - ✅ Babel configuration conflicts with Next.js SWC compiler (FIXED)
+   - ✅ Custom .babelrc file prevents Next.js from using its SWC compiler (FIXED)
+   - Need to ensure all components using React hooks have "use client" directive
 
 ## Next Priorities
 

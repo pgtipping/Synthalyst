@@ -14,12 +14,17 @@
   - Updated Babel configuration to support import attributes syntax:
     - Added @babel/plugin-syntax-import-attributes plugin to .babelrc
     - Installed the plugin as a dev dependency
+  - **Resolved Babel and SWC compiler conflict (2024-03-01):**
+    - Moved Babel configuration from `.babelrc` to a test-specific `.babelrc.test.js` file
+    - Updated Jest configuration to use the test-specific Babel config
+    - Converted `next.config.ts` to `next.config.js` for better compatibility
+    - Removed the global `.babelrc` file to allow Next.js to use its SWC compiler
 
 #### Current Issues
 
-- Babel configuration conflicts with Next.js SWC compiler
-  - Custom .babelrc file prevents Next.js from using its SWC compiler
-  - Need to consider migrating away from custom Babel config in the future
+- ~~Babel configuration conflicts with Next.js SWC compiler~~
+  - ~~Custom .babelrc file prevents Next.js from using its SWC compiler~~
+  - ~~Need to consider migrating away from custom Babel config in the future~~
 - Next.js 15.1.7 requires proper client/server component separation
   - Need to ensure all components using React hooks have "use client" directive
 
@@ -28,7 +33,7 @@
 ### Immediate Tasks
 
 1. Verify deployment success after the fixes
-2. Consider migrating away from custom Babel configuration to use Next.js SWC compiler
+2. ~~Consider migrating away from custom Babel configuration to use Next.js SWC compiler~~
 3. Audit all components to ensure proper "use client" directives are in place
 
 ## Current Focus: API Test Improvements (2024-02-28 23:15)
