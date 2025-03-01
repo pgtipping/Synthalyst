@@ -27,18 +27,12 @@ const generateSchema = z.object({
           description: z.string(),
         })
       )
-      .min(1, "At least one preferred skill is required"),
+      .default([]),
   }),
   qualifications: z.object({
-    education: z
-      .array(z.string())
-      .min(1, "At least one education requirement is required"),
-    experience: z
-      .array(z.string())
-      .min(1, "At least one experience requirement is required"),
-    certifications: z
-      .array(z.string())
-      .min(1, "At least one certification is required"),
+    education: z.array(z.string()).default([]),
+    experience: z.array(z.string()).default([]),
+    certifications: z.array(z.string()).default([]),
   }),
   salary: z.object({
     range: z.object({
@@ -76,6 +70,16 @@ export async function POST(request: Request) {
     const enhancedDescription = await generateJobDescription({
       ...validatedData,
       userEmail: session.user.email,
+      // Ensure arrays are always provided
+      requirements: {
+        required: validatedData.requirements.required || [],
+        preferred: validatedData.requirements.preferred || [],
+      },
+      qualifications: {
+        education: validatedData.qualifications.education || [],
+        experience: validatedData.qualifications.experience || [],
+        certifications: validatedData.qualifications.certifications || [],
+      },
     });
 
     if (!enhancedDescription) {
