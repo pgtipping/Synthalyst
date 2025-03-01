@@ -2,6 +2,14 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Added Vercel Analytics and Speed Insights
+
+  - Installed @vercel/analytics and @vercel/speed-insights packages
+  - Added Analytics and SpeedInsights components to the root layout
+  - Ensured all pages are tracked for analytics and performance metrics
+  - Set up the foundation for data-driven decision making
+  - Location: `nextjs-app/src/app/layout.tsx`
+
 - ✅ Successfully deployed the application to Vercel
 
   - Fixed the Vercel deployment error by converting the About page to a Client Component

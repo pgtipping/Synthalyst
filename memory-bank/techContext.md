@@ -25,12 +25,18 @@
    - Prettier
 
 4. UI Components:
+
    - Button
    - Header
    - Card
    - Dialog
    - Input
    - Label
+
+5. Analytics & Monitoring:
+   - Vercel Analytics for user behavior tracking
+   - Vercel Speed Insights for performance monitoring
+   - Web Vitals tracking
 
 ## Development Setup
 
@@ -101,10 +107,14 @@
    - React for UI
    - TypeScript for type safety
    - Tailwind CSS for styling
+   - Radix UI for accessible components
+   - NextAuth.js for authentication
+   - Prisma for database access
+   - @vercel/analytics for user behavior tracking
+   - @vercel/speed-insights for performance monitoring
 
 2. UI Dependencies:
 
-   - Radix UI primitives
    - class-variance-authority
    - clsx for class names
    - tailwind-merge
