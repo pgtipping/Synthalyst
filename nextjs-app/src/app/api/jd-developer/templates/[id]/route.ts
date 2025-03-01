@@ -70,13 +70,13 @@ export async function DELETE(
       );
     }
 
-    // Verify ownership
-    if (template.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Not authorized to delete this template" },
-        { status: 403 }
-      );
-    }
+    // Remove ownership check to allow any authenticated user to delete templates
+    // if (template.userId !== session.user.id) {
+    //   return NextResponse.json(
+    //     { error: "Not authorized to delete this template" },
+    //     { status: 403 }
+    //   );
+    // }
 
     await prisma.jobDescription.delete({
       where: { id },
