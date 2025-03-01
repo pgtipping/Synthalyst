@@ -136,7 +136,7 @@ export default function TemplateList({
               </h4>
               <ol className="list-decimal pl-5 space-y-3 text-left">
                 <li>
-                  Go to the <strong>JD Generator</strong> tab
+                  Go to the <strong>Create</strong> tab
                 </li>
                 <li>
                   Fill out the <strong>required fields</strong>:
@@ -195,13 +195,26 @@ export default function TemplateList({
                   Benefits of Templates
                 </h4>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li>
-                    Save time by reusing job descriptions for similar positions
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>
+                      Save time by reusing job descriptions for similar
+                      positions
+                    </span>
                   </li>
-                  <li>Maintain consistency across your job postings</li>
-                  <li>Quickly adapt existing templates for new roles</li>
-                  <li>
-                    Organize your job descriptions by department or job level
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Maintain consistency across your job postings</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Quickly adapt existing templates for new roles</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>
+                      Organize your job descriptions by department or job level
+                    </span>
                   </li>
                 </ul>
               </div>
