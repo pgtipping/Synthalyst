@@ -138,6 +138,42 @@ nextjs-app/
 - Custom form components
 - Type-safe forms
 
+## Testing Patterns
+
+### API Testing Pattern
+
+- Jest for test framework
+- Mock external dependencies
+- Test success and error cases
+- Validate response structure
+- Test pagination and filtering
+
+### Database Testing Pattern
+
+- Mock Prisma client for database tests
+- In-memory storage for mock data
+- Mock implementation of database methods
+- Proper error handling for database operations
+- Test transaction support
+- Clean database state between tests
+
+### Mock Implementation Pattern
+
+- Create mock storage for test data
+- Implement mock methods for database operations
+- Add proper error handling for database errors
+- Support filtering, pagination, and relationships
+- Reset mock storage between tests
+- Implement transaction support
+
+### Component Testing Pattern
+
+- React Testing Library for component tests
+- Test rendering and user interactions
+- Test form validation and submission
+- Test loading states and error handling
+- Test accessibility
+
 ## Security Patterns
 
 - NextAuth.js authentication

@@ -889,3 +889,189 @@ Before running ANY command:
 5. Validate response structure
 6. Test input validation
 7. Restore environment variables after tests
+
+## Mock Prisma Client Implementation - 2024-02-28 23:20
+
+### Mock Storage Pattern
+
+- Create in-memory storage for mock data:
+
+  ```typescript
+  const mockStorage: {
+    categories: Category[];
+    users: User[];
+    posts: Post[];
+    postCategories: PostCategory[];
+  } = {
+    categories: [],
+    users: [],
+    posts: [],
+    postCategories: [],
+  };
+  ```
+
+- Reset mock storage between tests:
+  ```typescript
+  export function resetMockStorage() {
+    mockStorage.categories = [];
+    mockStorage.users = [];
+    mockStorage.posts = [];
+    mockStorage.postCategories = [];
+  }
+  ```
+
+### Mock Method Implementation
+
+- Implement mock methods for database operations:
+
+  ```typescript
+  export const mockPrismaClient = {
+    category: {
+      findMany: jest.fn(async (args) => {
+        // Implementation that mimics Prisma behavior
+      }),
+      findFirst: jest.fn(async (args) => {
+        // Implementation that mimics Prisma behavior
+      }),
+      create: jest.fn(async (args) => {
+        // Implementation that mimics Prisma behavior
+      }),
+      // Other methods...
+    },
+    // Other models...
+  } as unknown as PrismaClient;
+  ```
+
+- Support filtering, pagination, and relationships:
+
+  ```typescript
+  // Apply where filter if provided
+  if (args.where) {
+    // Implement filtering logic
+  }
+
+  // Apply pagination
+  if (args.skip !== undefined && args.take !== undefined) {
+    result = result.slice(args.skip, args.skip + args.take);
+  }
+
+  // Apply include
+  if (args.include) {
+    // Implement relationship logic
+  }
+  ```
+
+### Error Handling
+
+- Mock Prisma error classes:
+
+  ```typescript
+  export const Prisma = {
+    PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error {
+      code: string;
+      meta?: Record<string, unknown>;
+      clientVersion: string;
+
+      constructor(
+        message: string,
+        {
+          code,
+          clientVersion,
+          meta,
+        }: {
+          code: string;
+          clientVersion: string;
+          meta?: Record<string, unknown>;
+        }
+      ) {
+        super(message);
+        this.name = "PrismaClientKnownRequestError";
+        this.code = code;
+        this.clientVersion = clientVersion;
+        this.meta = meta;
+      }
+    },
+    PrismaClientValidationError: class PrismaClientValidationError extends Error {
+      constructor(message: string) {
+        super(message);
+        this.name = "PrismaClientValidationError";
+      }
+    },
+  };
+  ```
+
+- Handle errors in the errorHandler middleware:
+  ```typescript
+  // Check by name instead of instanceof for Prisma errors
+  const err = error as Error & { name?: string; code?: string; meta?: unknown };
+  if (err?.name === "PrismaClientKnownRequestError" || err?.code) {
+    // Handle Prisma errors
+  }
+  ```
+
+### Setup in Jest
+
+- Set up mock in jest.config.js:
+
+  ```javascript
+  module.exports = {
+    setupFilesAfterEnv: [
+      "<rootDir>/jest.setup.js",
+      "<rootDir>/src/lib/test/setup-prisma-mock.js",
+    ],
+    // Other config...
+  };
+  ```
+
+- Mock the Prisma module:
+  ```javascript
+  jest.mock("@/lib/prisma", () => {
+    return {
+      prisma: global.__mockPrismaClient,
+      testPrismaConnection: jest.fn().mockResolvedValue(true),
+      reconnectPrisma: jest.fn().mockResolvedValue(true),
+      withRetry: jest.fn().mockImplementation((fn) => fn()),
+    };
+  });
+  ```
+
+### Test Implementation
+
+- Clean database between tests:
+
+  ```typescript
+  beforeEach(async () => {
+    await cleanupDatabase();
+    jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await logDatabaseState();
+  });
+  ```
+
+- Create test data:
+
+  ```typescript
+  await createTestCategory({
+    name: "Category 1",
+    description: "Description 1",
+  });
+  ```
+
+- Test API endpoints:
+
+  ```typescript
+  const request = new MockNextRequest(
+    "http://localhost:3000/api/categories?page=1&limit=2"
+  );
+  const response = await GET(request as unknown as NextRequest, {
+    params: Promise.resolve({}),
+  });
+  const data = await response.json();
+
+  expect(response.status).toBe(200);
+  expect(data.success).toBe(true);
+  expect(data.data.categories.length).toBe(2);
+  expect(data.data.pagination.total).toBe(3);
+  ```

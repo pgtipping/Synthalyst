@@ -341,70 +341,45 @@
 
 ## Testing Infrastructure
 
-### Test Framework
+### Testing Framework
 
-- Jest for test runner and assertions
+- Jest 29.7.0 for test runner
 - React Testing Library for component testing
-- User Event for simulating user interactions
-- MSW (Mock Service Worker) for API mocking
+- SWC for fast compilation
+- Custom test utilities
 
-### Testing Patterns
+### API Testing
 
-1. Component Tests
+- Mock external dependencies
+- Test success and error cases
+- Validate response structure
+- Test pagination and filtering
+- Custom request and response mocks
 
-   ```typescript
-   // Example pattern for form component tests
-   describe("FormComponent", () => {
-     it("renders required fields", () => {
-       render(<FormComponent />);
-       // Check for presence of fields
-     });
+### Database Testing
 
-     it("shows validation errors", async () => {
-       render(<FormComponent />);
-       // Submit empty form
-       // Check for error messages
-     });
+- Mock Prisma client for database tests
+- In-memory storage for mock data
+- Mock implementation of database methods
+- Proper error handling for database operations
+- Test transaction support
+- Clean database state between tests
 
-     it("handles successful submission", async () => {
-       // Mock API response
-       // Fill and submit form
-       // Verify success state
-     });
+### Test Setup Files
 
-     it("handles API errors", async () => {
-       // Mock API error
-       // Verify error handling
-     });
-   });
-   ```
+- `jest.setup.js`: Global test setup
+- `jest.config.js`: Jest configuration
+- `src/lib/test/setup-prisma-mock.js`: Prisma mock setup
+- `src/lib/test/prisma-mock.ts`: Mock Prisma client implementation
+- `src/lib/test/setup.ts`: Test utilities and helpers
 
-2. Mock Components
+### Mock Implementations
 
-   ```typescript
-   // Pattern for mocking UI components
-   jest.mock("@/components/ui/component", () => ({
-     Component: ({ children, ...props }) => (
-       <div data-testid="mocked-component" {...props}>
-         {children}
-       </div>
-     ),
-   }));
-   ```
-
-3. Accessibility Testing
-   - Using proper ARIA attributes
-   - Testing with screen reader considerations
-   - Ensuring keyboard navigation
-   - Following WAI-ARIA guidelines
-
-### Current Test Coverage Goals
-
-- Unit tests for all form components
-- Integration tests for form submissions
-- API interaction tests
-- Error handling coverage
-- Accessibility compliance
+- NextRequest and NextResponse mocks
+- Prisma client mock
+- External API client mocks (Groq, OpenAI, Botpress)
+- Error handler mocks
+- Form component mocks
 
 ## Form Architecture
 
