@@ -27,12 +27,20 @@ function JDDeveloperContent() {
   const fetchTemplates = async () => {
     try {
       setIsLoading(true);
+      const startTime = Date.now();
+
       const response = await fetch("/api/jd-developer/templates");
       if (!response.ok) {
         throw new Error("Failed to fetch templates");
       }
       const data = await response.json();
       setTemplates(data.templates);
+
+      // Ensure loading state is shown for at least 500ms for a smoother transition
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime < 500) {
+        await new Promise((resolve) => setTimeout(resolve, 500 - elapsedTime));
+      }
     } catch (error) {
       console.error("Error fetching templates:", error);
       setError("Failed to fetch templates");

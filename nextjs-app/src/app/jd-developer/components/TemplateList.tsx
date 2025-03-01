@@ -57,10 +57,13 @@ export default function TemplateList({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading templates...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground text-lg">Loading templates...</p>
+          <p className="text-sm text-muted-foreground">
+            This may take a moment
+          </p>
         </div>
       </div>
     );
