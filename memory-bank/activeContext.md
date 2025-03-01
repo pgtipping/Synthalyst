@@ -1,4 +1,35 @@
-# Active Development Context - 2024-02-28
+# Active Development Context - 2024-03-01
+
+## Current Focus: Vercel Deployment Fixes (2024-03-01)
+
+### Deployment Issues
+
+#### Recent Changes
+
+- Fixed Vercel deployment failures by addressing several critical issues:
+  - Added "use client" directive to components using React hooks:
+    - InterviewQuestionsForm.tsx
+    - TemplateSearch.tsx
+    - TemplateCategories.tsx
+  - Updated Babel configuration to support import attributes syntax:
+    - Added @babel/plugin-syntax-import-attributes plugin to .babelrc
+    - Installed the plugin as a dev dependency
+
+#### Current Issues
+
+- Babel configuration conflicts with Next.js SWC compiler
+  - Custom .babelrc file prevents Next.js from using its SWC compiler
+  - Need to consider migrating away from custom Babel config in the future
+- Next.js 15.1.7 requires proper client/server component separation
+  - Need to ensure all components using React hooks have "use client" directive
+
+## Next Steps
+
+### Immediate Tasks
+
+1. Verify deployment success after the fixes
+2. Consider migrating away from custom Babel configuration to use Next.js SWC compiler
+3. Audit all components to ensure proper "use client" directives are in place
 
 ## Current Focus: API Test Improvements (2024-02-28 23:15)
 

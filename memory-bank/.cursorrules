@@ -1075,3 +1075,16 @@ Before running ANY command:
   expect(data.data.categories.length).toBe(2);
   expect(data.data.pagination.total).toBe(3);
   ```
+
+# Next.js Client Components - 2024-03-01
+
+- All components that use React hooks (useState, useEffect, etc.) must have the "use client" directive at the top of the file
+- This is required for Next.js 15.1.7 and later
+- Without this directive, the build will fail with an error about hooks only working in client components
+
+# Babel Configuration - 2024-03-01
+
+- The project uses a custom Babel configuration (.babelrc)
+- This prevents Next.js from using its SWC compiler, which is more efficient
+- For Next.js 15.1.7, the Babel configuration must include @babel/plugin-syntax-import-attributes
+- Consider migrating away from custom Babel configuration in the future to use Next.js SWC compiler
