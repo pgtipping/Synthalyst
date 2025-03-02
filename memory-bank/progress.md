@@ -2,6 +2,14 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Integrated Interview Questions Generator into the main application
+
+  - Replaced the 2Do Task Manager card with the Interview Questions Generator card on the home page
+  - Updated the icon to use HelpCircle instead of Target
+  - Updated the card description to reflect the Interview Questions Generator functionality
+  - Made the feature more accessible to users directly from the home page
+  - Location: `nextjs-app/src/app/page.tsx`
+
 - ✅ Improved UI readability by changing grey/silver text to black
 
   - Updated global CSS file to modify default text colors

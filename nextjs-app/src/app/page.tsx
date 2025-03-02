@@ -7,8 +7,8 @@ import {
   FileText,
   MessageSquare,
   Sparkles,
-  Target,
   Users,
+  HelpCircle,
 } from "lucide-react";
 
 export default function Home() {
@@ -21,11 +21,11 @@ export default function Home() {
       link: "/jd-developer",
     },
     {
-      icon: <Target className="w-6 h-6" />,
-      title: "2Do Task Manager",
+      icon: <HelpCircle className="w-6 h-6" />,
+      title: "Interview Questions Generator",
       description:
-        "Smart task management with voice input and calendar integration.",
-      link: "/2do",
+        "Generate tailored interview questions based on job descriptions and competencies.",
+      link: "/interview-questions",
     },
     {
       icon: <FileText className="w-6 h-6" />,

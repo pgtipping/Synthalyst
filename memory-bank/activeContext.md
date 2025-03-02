@@ -2,7 +2,9 @@
 
 ## Current Focus (2024-03-01)
 
-The current focus is on improving the UI readability by changing all grey/silver text to black throughout the application. This change was implemented across multiple pages and components to ensure consistent readability and better user experience. We've updated the global CSS file to modify default text colors and then systematically updated individual components where specific grey text classes were used.
+The current focus is on integrating the Interview Questions Generator into the main application. We've replaced the 2Do Task Manager card on the home page with the Interview Questions Generator card, making this feature more accessible to users directly from the home page. This change helps highlight the new functionality and provides users with easier access to this tool.
+
+Previously, the focus was on improving the UI readability by changing all grey/silver text to black throughout the application. This change was implemented across multiple pages and components to ensure consistent readability and better user experience. We've updated the global CSS file to modify default text colors and then systematically updated individual components where specific grey text classes were used.
 
 Previously, the focus was on enhancing the application's analytics capabilities by adding Vercel Analytics and Speed Insights. This will help track user interactions, monitor performance metrics, and identify areas for improvement. We've successfully integrated both Vercel Analytics and Speed Insights into the application's root layout to ensure all pages are tracked. We've also fixed an import path issue with the SpeedInsights component, changing it from '@vercel/speed-insights/next' to '@vercel/speed-insights/react'.
 
@@ -150,6 +152,7 @@ Previous changes:
 - Using a standardized mock Prisma client pattern for all API tests
 - Ensuring consistent error handling across all API endpoints
 - Maintaining the mock Prisma client to stay in sync with the actual Prisma schema
+- Replaced the 2Do Task Manager card with the Interview Questions Generator card on the home page
 
 ## Considerations (2024-03-01)
 
