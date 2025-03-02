@@ -93,7 +93,7 @@ Also, create a comprehensive scoring rubric that can be used to evaluate all res
     ) {
       prompt += `
 
-Format your response as a JSON object with the following structure:
+Format your response as a valid JSON object with the following structure:
 {
   "questions": ["Question 1", "Question 2", ...],
   ${
@@ -106,7 +106,15 @@ Format your response as a JSON object with the following structure:
       ? `"scoringRubric": "HTML formatted rubric"`
       : ""
   }
-}`;
+}
+
+IMPORTANT: 
+1. Ensure each question is a separate string in the questions array.
+2. Ensure each evaluation tip is a separate string in the evaluationTips array.
+3. Make sure the evaluation tips are clearly separate from the questions.
+4. Do not include the question text in the evaluation tips.
+5. Return ONLY the JSON object without any additional text, markdown formatting, or code blocks.
+6. The JSON must be valid and parseable.`;
     } else {
       prompt += `
 
@@ -119,7 +127,7 @@ Please return only the numbered list of questions without any additional text or
           {
             role: "system",
             content:
-              "You are an expert interviewer who creates highly relevant and effective interview questions, evaluation guidelines, and scoring rubrics.",
+              "You are an expert interviewer who creates highly relevant and effective interview questions, evaluation guidelines, and scoring rubrics. When asked to return JSON, you always return valid, properly formatted JSON without any additional text, markdown formatting, or code blocks. You ensure that questions and evaluation tips are clearly separated in their respective arrays.",
           },
           {
             role: "user",
@@ -151,7 +159,7 @@ Please return only the numbered list of questions without any additional text or
 
         // First, try to find and extract a JSON object from the response
         // This handles cases where the LLM might add explanatory text before or after the JSON
-        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        const jsonMatch = response.match(/\{[\s\S]*?\}/);
         if (jsonMatch) {
           try {
             parsedResponse = JSON.parse(jsonMatch[0]);
@@ -164,7 +172,12 @@ Please return only the numbered list of questions without any additional text or
         // If the extracted JSON parsing failed, try parsing the whole response
         if (!parsedResponse) {
           try {
-            parsedResponse = JSON.parse(response);
+            // Try to clean up the response before parsing
+            const cleanedResponse = response
+              .replace(/```json/g, "")
+              .replace(/```/g, "")
+              .trim();
+            parsedResponse = JSON.parse(cleanedResponse);
           } catch (innerError) {
             console.error("Error parsing whole response as JSON:", innerError);
             // Fall through to the fallback
@@ -359,18 +372,19 @@ function extractQuestions(text: string): string[] {
 
 // Helper function to extract evaluation tips from text
 function extractEvaluationTips(text: string): string[] {
-  // Try to find a section that might contain evaluation tips
+  // First, try to find a dedicated "Evaluation Tips" section
   const tipsSection = text.match(
-    /evaluation tips:?[\s\S]*?(?=scoring rubric:|$)/i
+    /(?:evaluation tips|tips for evaluating responses|evaluation guidelines):?[\s\S]*?(?=scoring rubric:|$)/i
   );
 
   if (tipsSection) {
     // Extract numbered tips from the section
-    const numberedTips = tipsSection[0].match(/\d+\.\s*([^\n]+)/g) || [];
+    const numberedTips =
+      tipsSection[0].match(/(?:\d+\.|•|\*)\s*([^\n]+)/g) || [];
 
     // Clean up the tips
     const tips = numberedTips
-      .map((tip: string) => tip.replace(/^\d+\.\s*/, "").trim())
+      .map((tip: string) => tip.replace(/^(?:\d+\.|•|\*)\s*/, "").trim())
       .filter(
         (tip: string) =>
           tip.length > 0 &&
@@ -384,26 +398,46 @@ function extractEvaluationTips(text: string): string[] {
     }
   }
 
-  // If we couldn't find a dedicated tips section, look for lines that might be tips
-  // (this is a fallback and might not be accurate)
-  const potentialTips = text
+  // If we couldn't find a dedicated tips section, try to find tips associated with each question
+  // Look for patterns like "Question 1: ... Evaluation: ..." or "Q1: ... Tip: ..."
+  const questionBlocks = text.split(/(?:\d+\.|Q\d+:)/);
+
+  // Skip the first element as it's likely to be empty or introductory text
+  const potentialTips = questionBlocks
+    .slice(1)
+    .map((block) => {
+      // Look for evaluation/tip sections within each question block
+      const tipMatch = block.match(
+        /(?:evaluation|tip|how to evaluate|what to look for|assessment):?([^?]*?)(?=\d+\.|Q\d+:|$)/i
+      );
+      return tipMatch ? tipMatch[1].trim() : null;
+    })
+    .filter((tip): tip is string => tip !== null && tip.length > 20);
+
+  if (potentialTips.length > 0) {
+    return potentialTips;
+  }
+
+  // Last resort: look for lines that might be tips
+  return text
     .split("\n")
     .map((line: string) => line.trim())
     .filter(
       (line: string) =>
         line.length > 20 &&
+        !line.endsWith("?") && // Not a question
         (line.includes("look for") ||
           line.includes("strong response") ||
           line.includes("weak response") ||
           line.includes("red flag") ||
           line.includes("follow-up") ||
-          line.includes("evaluate")) &&
+          line.includes("evaluate") ||
+          line.includes("assessment") ||
+          line.includes("candidate should")) &&
         !line.includes('"questions":') &&
         !line.includes('"evaluationTips":') &&
         !line.includes('"scoringRubric":')
     );
-
-  return potentialTips;
 }
 
 // Helper function to extract scoring rubric from text

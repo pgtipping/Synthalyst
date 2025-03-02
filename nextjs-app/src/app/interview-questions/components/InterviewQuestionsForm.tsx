@@ -86,6 +86,7 @@ export default function InterviewQuestionsForm() {
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
+    setGeneratedQuestions([]);
     setEvaluationTips([]);
     setScoringRubric("");
     setActiveTab("questions");
@@ -104,14 +105,39 @@ export default function InterviewQuestionsForm() {
       }
 
       const result = await response.json();
-      setGeneratedQuestions(result.questions);
 
-      if (result.evaluationTips && result.evaluationTips.length > 0) {
-        setEvaluationTips(result.evaluationTips);
+      // Ensure questions are properly formatted
+      if (result.questions && Array.isArray(result.questions)) {
+        setGeneratedQuestions(result.questions.map((q: string) => q.trim()));
+      } else {
+        setGeneratedQuestions([]);
       }
 
-      if (result.scoringRubric) {
+      // Ensure evaluation tips are properly formatted and separate from questions
+      if (
+        data.includeEvaluationTips &&
+        result.evaluationTips &&
+        Array.isArray(result.evaluationTips)
+      ) {
+        // Filter out any tips that might actually be questions (ending with ?)
+        const filteredTips = result.evaluationTips
+          .map((tip: string) => tip.trim())
+          .filter(
+            (tip: string) =>
+              tip.length > 0 &&
+              !tip.endsWith("?") &&
+              !result.questions.includes(tip)
+          );
+        setEvaluationTips(filteredTips);
+      } else {
+        setEvaluationTips([]);
+      }
+
+      // Handle scoring rubric
+      if (data.includeScoringRubric && result.scoringRubric) {
         setScoringRubric(result.scoringRubric);
+      } else {
+        setScoringRubric("");
       }
 
       toast({
@@ -119,8 +145,14 @@ export default function InterviewQuestionsForm() {
         description: `Successfully generated ${
           result.questions.length
         } interview questions${
-          data.includeEvaluationTips ? ", evaluation tips" : ""
-        }${data.includeScoringRubric ? " and scoring rubric" : ""}.`,
+          data.includeEvaluationTips && result.evaluationTips?.length > 0
+            ? ", evaluation tips"
+            : ""
+        }${
+          data.includeScoringRubric && result.scoringRubric
+            ? " and scoring rubric"
+            : ""
+        }.`,
       });
     } catch (error) {
       console.error("Error generating content:", error);
