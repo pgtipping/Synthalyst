@@ -179,13 +179,13 @@ Please return only the numbered list of questions without any additional text or
               // Handle case where questions might be a string instead of an array
               parsedResponse.questions = parsedResponse.questions
                 .split("\n")
-                .filter((q) => q.trim())
-                .map((q) => q.replace(/^\d+\.\s*/, "").trim());
+                .filter((q: string) => q.trim())
+                .map((q: string) => q.replace(/^\d+\.\s*/, "").trim());
             } else if (Array.isArray(parsedResponse.questions)) {
               // Clean up each question in the array
               parsedResponse.questions = parsedResponse.questions
-                .filter((q) => q && typeof q === "string")
-                .map((q) => q.replace(/^\d+\.\s*/, "").trim());
+                .filter((q: unknown) => q && typeof q === "string")
+                .map((q: string) => q.replace(/^\d+\.\s*/, "").trim());
             } else {
               // Invalid questions format, set to empty array
               parsedResponse.questions = [];
@@ -205,8 +205,8 @@ Please return only the numbered list of questions without any additional text or
             } else {
               // Clean up each tip in the array
               parsedResponse.evaluationTips = parsedResponse.evaluationTips
-                .filter((tip) => tip && typeof tip === "string")
-                .map((tip) => tip.trim());
+                .filter((tip: unknown) => tip && typeof tip === "string")
+                .map((tip: string) => tip.trim());
             }
           }
 
@@ -334,9 +334,9 @@ function extractQuestions(text: string): string[] {
   // Otherwise, try to extract questions by looking for lines that end with a question mark
   const questionLines = text
     .split("\n")
-    .filter((line) => line.trim().endsWith("?"))
-    .map((line) => line.trim())
-    .filter((line) => line.length > 10); // Minimum length to be considered a question
+    .filter((line: string) => line.trim().endsWith("?"))
+    .map((line: string) => line.trim())
+    .filter((line: string) => line.length > 10); // Minimum length to be considered a question
 
   if (questionLines.length > 0) {
     return questionLines;
@@ -345,9 +345,9 @@ function extractQuestions(text: string): string[] {
   // Last resort: split by newlines and filter out short lines and obvious non-questions
   return text
     .split("\n")
-    .map((line) => line.trim())
+    .map((line: string) => line.trim())
     .filter(
-      (line) =>
+      (line: string) =>
         line.length > 15 &&
         !line.startsWith("{") &&
         !line.startsWith("}") &&
@@ -388,9 +388,9 @@ function extractEvaluationTips(text: string): string[] {
   // (this is a fallback and might not be accurate)
   const potentialTips = text
     .split("\n")
-    .map((line) => line.trim())
+    .map((line: string) => line.trim())
     .filter(
-      (line) =>
+      (line: string) =>
         line.length > 20 &&
         (line.includes("look for") ||
           line.includes("strong response") ||
@@ -431,7 +431,7 @@ function extractScoringRubric(text: string): string {
         "<h3>Scoring Rubric</h3>" +
         rubric
           .split("\n")
-          .map((line) => {
+          .map((line: string) => {
             line = line.trim();
             if (line.match(/^#+\s/)) {
               // Heading
