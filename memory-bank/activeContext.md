@@ -2,7 +2,9 @@
 
 ## Current Focus (2024-03-01)
 
-The current focus is on enhancing the Interview Questions Generator by redesigning the UI to clearly separate questions, evaluation tips, and scoring rubrics. We've implemented a tabbed interface that organizes the generated content into distinct sections, making it easier for users to navigate between different types of content. This redesign addresses the issue where the output was mixed up and not properly separated, providing a much better user experience.
+The current focus is on fixing a critical security issue where the Groq API key was being exposed to the client. We've replaced all instances of `NEXT_PUBLIC_GROQ_API_KEY` with the server-side only `GROQ_API_KEY` to ensure that API keys are never exposed to the client. This change affects multiple API routes including the llama.ts, learning-content, 2do/process-voice, competency-manager, and training-plan routes. We've also updated the .env.example files to remove any references to public API keys.
+
+Previously, the focus was on enhancing the Interview Questions Generator by redesigning the UI to clearly separate questions, evaluation tips, and scoring rubrics. We've implemented a tabbed interface that organizes the generated content into distinct sections, making it easier for users to navigate between different types of content. This redesign addresses the issue where the output was mixed up and not properly separated, providing a much better user experience.
 
 Previously, the focus was on enhancing the Interview Questions Generator by implementing two additional features: evaluation tips and scoring rubrics. These features were specified in the project brief but had not yet been implemented. The evaluation tips provide guidance on how to evaluate responses to each interview question, while the scoring rubric offers a comprehensive framework for scoring all responses. These additions make the Interview Questions Generator a more complete and valuable tool for users conducting interviews.
 

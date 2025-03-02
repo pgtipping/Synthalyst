@@ -2,6 +2,20 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed critical security issue with exposed API key
+
+  - Replaced all instances of `NEXT_PUBLIC_GROQ_API_KEY` with server-side only `GROQ_API_KEY`
+  - Updated 5 API routes to use the secure API key:
+    - nextjs-app/src/app/api/llama.ts
+    - nextjs-app/src/app/api/learning-content/route.ts
+    - nextjs-app/src/app/api/2do/process-voice/route.ts
+    - nextjs-app/src/app/api/competency-manager/route.ts
+    - nextjs-app/src/app/api/training-plan/route.ts
+  - Updated .env.example files to remove references to public API keys
+  - Created a separate branch for security fixes
+  - Merged changes into main branch after verification
+  - Location: Multiple files across the application
+
 - ✅ Redesigned the Interview Questions Generator UI with a tabbed interface
 
   - Implemented a tabbed interface to clearly separate questions, evaluation tips, and scoring rubric
