@@ -2,6 +2,18 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Upgraded Shadcn UI to the latest version
+
+  - Replaced outdated shadcn-ui and @shadcn/ui packages with the new shadcn package
+  - Updated all existing UI components to their latest versions
+  - Added new components: Carousel, Drawer, and Command
+  - Replaced deprecated toast component with the new sonner component
+  - Created a toast migration utility to ensure backward compatibility
+  - Updated the layout.tsx file to use the new Sonner Toaster component
+  - Updated the Header component to use the toast migration utility
+  - Created a separate branch for the upgrade process
+  - Location: Multiple files across the application
+
 - ✅ Fixed TypeScript errors in Interview Questions Generator
 
   - Added proper type annotations to callback parameters in filter and map functions
