@@ -147,28 +147,119 @@ Please return only the numbered list of questions without any additional text or
     ) {
       try {
         // Try to parse the response as JSON
-        const parsedResponse = JSON.parse(response);
+        let parsedResponse;
 
-        // Validate that we have questions
-        if (
-          !parsedResponse.questions ||
-          !Array.isArray(parsedResponse.questions) ||
-          parsedResponse.questions.length === 0
-        ) {
-          throw new Error("No valid questions in the response");
+        // First, try to find and extract a JSON object from the response
+        // This handles cases where the LLM might add explanatory text before or after the JSON
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsedResponse = JSON.parse(jsonMatch[0]);
+          } catch (innerError) {
+            console.error("Error parsing extracted JSON:", innerError);
+            // Fall through to the next parsing attempt
+          }
         }
 
-        // Return the parsed response
-        return NextResponse.json(parsedResponse);
+        // If the extracted JSON parsing failed, try parsing the whole response
+        if (!parsedResponse) {
+          try {
+            parsedResponse = JSON.parse(response);
+          } catch (innerError) {
+            console.error("Error parsing whole response as JSON:", innerError);
+            // Fall through to the fallback
+          }
+        }
+
+        // If we have a parsed response, validate and clean it
+        if (parsedResponse) {
+          // Ensure questions is an array of strings
+          if (parsedResponse.questions) {
+            if (typeof parsedResponse.questions === "string") {
+              // Handle case where questions might be a string instead of an array
+              parsedResponse.questions = parsedResponse.questions
+                .split("\n")
+                .filter((q) => q.trim())
+                .map((q) => q.replace(/^\d+\.\s*/, "").trim());
+            } else if (Array.isArray(parsedResponse.questions)) {
+              // Clean up each question in the array
+              parsedResponse.questions = parsedResponse.questions
+                .filter((q) => q && typeof q === "string")
+                .map((q) => q.replace(/^\d+\.\s*/, "").trim());
+            } else {
+              // Invalid questions format, set to empty array
+              parsedResponse.questions = [];
+            }
+          } else {
+            parsedResponse.questions = [];
+          }
+
+          // Ensure evaluationTips is an array of strings if requested
+          if (validatedData.includeEvaluationTips) {
+            if (
+              !parsedResponse.evaluationTips ||
+              !Array.isArray(parsedResponse.evaluationTips)
+            ) {
+              // Try to extract tips from the response if not properly formatted
+              parsedResponse.evaluationTips = extractEvaluationTips(response);
+            } else {
+              // Clean up each tip in the array
+              parsedResponse.evaluationTips = parsedResponse.evaluationTips
+                .filter((tip) => tip && typeof tip === "string")
+                .map((tip) => tip.trim());
+            }
+          }
+
+          // Ensure scoringRubric is a string if requested
+          if (validatedData.includeScoringRubric) {
+            if (
+              !parsedResponse.scoringRubric ||
+              typeof parsedResponse.scoringRubric !== "string"
+            ) {
+              // Try to extract rubric from the response if not properly formatted
+              parsedResponse.scoringRubric = extractScoringRubric(response);
+            }
+          }
+
+          // Validate that we have questions
+          if (parsedResponse.questions.length === 0) {
+            // If no questions were found in the JSON, try to extract them from the text
+            parsedResponse.questions = extractQuestions(response);
+            if (parsedResponse.questions.length === 0) {
+              throw new Error("No valid questions in the response");
+            }
+          }
+
+          // Return the cleaned parsed response
+          return NextResponse.json(parsedResponse);
+        }
+
+        // If we couldn't parse the JSON, fall back to extracting content manually
+        const questions = extractQuestions(response);
+        const result: {
+          questions: string[];
+          evaluationTips?: string[];
+          scoringRubric?: string;
+        } = { questions };
+
+        if (validatedData.includeEvaluationTips) {
+          result.evaluationTips = extractEvaluationTips(response);
+        }
+
+        if (validatedData.includeScoringRubric) {
+          result.scoringRubric = extractScoringRubric(response);
+        }
+
+        if (questions.length === 0) {
+          throw new Error("No valid questions generated");
+        }
+
+        return NextResponse.json(result);
       } catch (parseError) {
-        console.error("Error parsing LLM response as JSON:", parseError);
+        console.error("Error processing LLM response:", parseError);
 
         // Fallback to extracting questions only
-        const questions = response
-          .split("\n")
-          .filter((line) => line.trim())
-          .map((line) => line.replace(/^\d+\.\s*/, "").trim())
-          .filter((question) => question.length > 0);
+        const questions = extractQuestions(response);
 
         if (questions.length === 0) {
           throw new Error("No valid questions generated");
@@ -178,11 +269,7 @@ Please return only the numbered list of questions without any additional text or
       }
     } else {
       // Split the response into individual questions and clean them up
-      const questions = response
-        .split("\n")
-        .filter((line) => line.trim())
-        .map((line) => line.replace(/^\d+\.\s*/, "").trim())
-        .filter((question) => question.length > 0);
+      const questions = extractQuestions(response);
 
       if (questions.length === 0) {
         throw new Error("No valid questions generated");
@@ -221,4 +308,164 @@ Please return only the numbered list of questions without any additional text or
       { status: 500 }
     );
   }
+}
+
+// Helper function to extract questions from text
+function extractQuestions(text: string): string[] {
+  // Look for numbered questions (e.g., "1. Question text")
+  const numberedQuestions = text.match(/\d+\.\s*([^\n]+)/g) || [];
+
+  // Clean up the questions
+  const questions = numberedQuestions
+    .map((q: string) => q.replace(/^\d+\.\s*/, "").trim())
+    .filter(
+      (q: string) =>
+        q.length > 0 &&
+        !q.includes('"questions":') &&
+        !q.includes('"evaluationTips":') &&
+        !q.includes('"scoringRubric":')
+    );
+
+  // If we found questions, return them
+  if (questions.length > 0) {
+    return questions;
+  }
+
+  // Otherwise, try to extract questions by looking for lines that end with a question mark
+  const questionLines = text
+    .split("\n")
+    .filter((line) => line.trim().endsWith("?"))
+    .map((line) => line.trim())
+    .filter((line) => line.length > 10); // Minimum length to be considered a question
+
+  if (questionLines.length > 0) {
+    return questionLines;
+  }
+
+  // Last resort: split by newlines and filter out short lines and obvious non-questions
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line.length > 15 &&
+        !line.startsWith("{") &&
+        !line.startsWith("}") &&
+        !line.includes('"questions":') &&
+        !line.includes('"evaluationTips":') &&
+        !line.includes('"scoringRubric":')
+    );
+}
+
+// Helper function to extract evaluation tips from text
+function extractEvaluationTips(text: string): string[] {
+  // Try to find a section that might contain evaluation tips
+  const tipsSection = text.match(
+    /evaluation tips:?[\s\S]*?(?=scoring rubric:|$)/i
+  );
+
+  if (tipsSection) {
+    // Extract numbered tips from the section
+    const numberedTips = tipsSection[0].match(/\d+\.\s*([^\n]+)/g) || [];
+
+    // Clean up the tips
+    const tips = numberedTips
+      .map((tip: string) => tip.replace(/^\d+\.\s*/, "").trim())
+      .filter(
+        (tip: string) =>
+          tip.length > 0 &&
+          !tip.includes('"questions":') &&
+          !tip.includes('"evaluationTips":') &&
+          !tip.includes('"scoringRubric":')
+      );
+
+    if (tips.length > 0) {
+      return tips;
+    }
+  }
+
+  // If we couldn't find a dedicated tips section, look for lines that might be tips
+  // (this is a fallback and might not be accurate)
+  const potentialTips = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line.length > 20 &&
+        (line.includes("look for") ||
+          line.includes("strong response") ||
+          line.includes("weak response") ||
+          line.includes("red flag") ||
+          line.includes("follow-up") ||
+          line.includes("evaluate")) &&
+        !line.includes('"questions":') &&
+        !line.includes('"evaluationTips":') &&
+        !line.includes('"scoringRubric":')
+    );
+
+  return potentialTips;
+}
+
+// Helper function to extract scoring rubric from text
+function extractScoringRubric(text: string): string {
+  // Try to find a section that might contain a scoring rubric
+  const rubricSection = text.match(/scoring rubric:?[\s\S]*?(?=$)/i);
+
+  if (rubricSection) {
+    // Clean up the rubric text
+    let rubric = rubricSection[0].trim();
+
+    // If it's just the heading, try to get more content
+    if (rubric.length < 30) {
+      // Take everything after the rubric heading
+      const index = text.indexOf(rubric);
+      if (index !== -1) {
+        rubric = text.substring(index).trim();
+      }
+    }
+
+    // Convert the rubric to HTML format if it's not already
+    if (!rubric.includes("<")) {
+      // Simple conversion of plain text to HTML
+      rubric =
+        "<h3>Scoring Rubric</h3>" +
+        rubric
+          .split("\n")
+          .map((line) => {
+            line = line.trim();
+            if (line.match(/^#+\s/)) {
+              // Heading
+              return `<h4>${line.replace(/^#+\s/, "")}</h4>`;
+            } else if (line.match(/^\d+\.\s/)) {
+              // Numbered list item
+              return `<p>${line}</p>`;
+            } else if (line.match(/^[A-Z][a-z]+:/)) {
+              // Category
+              return `<h5>${line}</h5>`;
+            } else if (line.length > 0) {
+              // Regular paragraph
+              return `<p>${line}</p>`;
+            }
+            return "";
+          })
+          .join("");
+    }
+
+    return rubric;
+  }
+
+  // If we couldn't find a dedicated rubric section, create a basic one
+  return `
+    <h3>Scoring Rubric</h3>
+    <h4>Excellent (5)</h4>
+    <p>Response fully addresses the question, demonstrates deep understanding, and provides specific examples.</p>
+    <h4>Good (4)</h4>
+    <p>Response addresses the question well, shows good understanding, and includes some specific details.</p>
+    <h4>Satisfactory (3)</h4>
+    <p>Response addresses the basic requirements of the question with adequate understanding.</p>
+    <h4>Needs Improvement (2)</h4>
+    <p>Response partially addresses the question with limited understanding or lacks specificity.</p>
+    <h4>Poor (1)</h4>
+    <p>Response fails to address the question or shows significant misunderstanding.</p>
+  `;
 }

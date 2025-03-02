@@ -24,8 +24,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, HelpCircle, Award, CheckSquare, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   industry: z.string().min(2, "Industry is required"),
@@ -59,6 +68,7 @@ export default function InterviewQuestionsForm() {
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
   const [evaluationTips, setEvaluationTips] = useState<string[]>([]);
   const [scoringRubric, setScoringRubric] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("questions");
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
@@ -78,6 +88,7 @@ export default function InterviewQuestionsForm() {
     setIsLoading(true);
     setEvaluationTips([]);
     setScoringRubric("");
+    setActiveTab("questions");
 
     try {
       const response = await fetch("/api/interview-questions/generate", {
@@ -95,7 +106,7 @@ export default function InterviewQuestionsForm() {
       const result = await response.json();
       setGeneratedQuestions(result.questions);
 
-      if (result.evaluationTips) {
+      if (result.evaluationTips && result.evaluationTips.length > 0) {
         setEvaluationTips(result.evaluationTips);
       }
 
@@ -104,15 +115,18 @@ export default function InterviewQuestionsForm() {
       }
 
       toast({
-        title: "Questions Generated",
-        description: `Successfully generated ${result.questions.length} interview questions.`,
+        title: "Content Generated",
+        description: `Successfully generated ${
+          result.questions.length
+        } interview questions${
+          data.includeEvaluationTips ? ", evaluation tips" : ""
+        }${data.includeScoringRubric ? " and scoring rubric" : ""}.`,
       });
     } catch (error) {
-      console.error("Error generating questions:", error);
+      console.error("Error generating content:", error);
       toast({
         title: "Error",
-        description:
-          "Failed to generate interview questions. Please try again.",
+        description: "Failed to generate interview content. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -120,315 +134,418 @@ export default function InterviewQuestionsForm() {
     }
   };
 
+  const clearAll = () => {
+    setGeneratedQuestions([]);
+    setEvaluationTips([]);
+    setScoringRubric("");
+    setActiveTab("questions");
+  };
+
+  const hasResults = generatedQuestions.length > 0;
+  const hasTips = evaluationTips.length > 0;
+  const hasRubric = scoringRubric.length > 0;
+
   return (
-    <div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="industry"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="industry">Industry</FormLabel>
-                <FormControl>
-                  <Input
-                    id="industry"
-                    placeholder="e.g., Technology, Healthcare, Finance"
-                    aria-describedby="industry-description"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription id="industry-description">
-                  Specify the industry for targeted questions
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className="space-y-8">
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">
+          Generate Interview Questions
+        </h2>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="industry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="industry">Industry</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="industry"
+                        placeholder="e.g., Technology, Healthcare, Finance"
+                        aria-describedby="industry-description"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription id="industry-description">
+                      Specify the industry for targeted questions
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="jobLevel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="jobLevel">Job Level</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger
-                      id="jobLevel"
-                      aria-describedby="jobLevel-description"
+              <FormField
+                control={form.control}
+                name="jobLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="jobLevel">Job Level</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
                     >
-                      <SelectValue placeholder="Select job level" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {jobLevels.map((level) => (
-                      <SelectItem
-                        key={level}
-                        value={level}
-                        role="option"
-                        aria-selected={field.value === level}
-                      >
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription id="jobLevel-description">
-                  Choose the seniority level of the position
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                      <FormControl>
+                        <SelectTrigger
+                          id="jobLevel"
+                          aria-describedby="jobLevel-description"
+                        >
+                          <SelectValue placeholder="Select job level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {jobLevels.map((level) => (
+                          <SelectItem
+                            key={level}
+                            value={level}
+                            role="option"
+                            aria-selected={field.value === level}
+                          >
+                            {level}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription id="jobLevel-description">
+                      Choose the seniority level of the position
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          <FormField
-            control={form.control}
-            name="roleDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="roleDescription">
-                  Role Description
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    id="roleDescription"
-                    placeholder="Describe the role, responsibilities, and key requirements"
-                    className="h-32"
-                    aria-describedby="roleDescription-description"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription id="roleDescription-description">
-                  Provide details about the position to generate relevant
-                  questions
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="coreCompetencies"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="coreCompetencies">
-                  Core Competencies
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    id="coreCompetencies"
-                    placeholder="List key competencies, separated by commas"
-                    className="h-24"
-                    aria-describedby="coreCompetencies-description"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription id="coreCompetencies-description">
-                  Specify competencies to evaluate (e.g., Leadership,
-                  Communication, Problem Solving)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="numberOfQuestions"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="numberOfQuestions">
-                  Number of Questions
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger
-                      id="numberOfQuestions"
-                      aria-describedby="numberOfQuestions-description"
-                    >
-                      <SelectValue placeholder="Select number of questions" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {[5, 10, 15, 20].map((num) => (
-                      <SelectItem
-                        key={num}
-                        value={num.toString()}
-                        role="option"
-                        aria-selected={field.value === num.toString()}
-                      >
-                        {num} questions
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription id="numberOfQuestions-description">
-                  Choose how many questions to generate
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="space-y-4">
             <FormField
               control={form.control}
-              name="includeEvaluationTips"
+              name="roleDescription"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem>
+                  <FormLabel htmlFor="roleDescription">
+                    Role Description
+                  </FormLabel>
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      id="includeEvaluationTips"
-                      aria-describedby="includeEvaluationTips-description"
+                    <Textarea
+                      id="roleDescription"
+                      placeholder="Describe the role, responsibilities, and key requirements"
+                      className="h-32"
+                      aria-describedby="roleDescription-description"
+                      {...field}
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel htmlFor="includeEvaluationTips">
-                      Include Evaluation Tips
-                    </FormLabel>
-                    <FormDescription id="includeEvaluationTips-description">
-                      Generate tips on how to evaluate responses to each
-                      question
-                    </FormDescription>
-                  </div>
+                  <FormDescription id="roleDescription-description">
+                    Provide details about the position to generate relevant
+                    questions
+                  </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
             <FormField
               control={form.control}
-              name="includeScoringRubric"
+              name="coreCompetencies"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem>
+                  <FormLabel htmlFor="coreCompetencies">
+                    Core Competencies
+                  </FormLabel>
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      id="includeScoringRubric"
-                      aria-describedby="includeScoringRubric-description"
+                    <Textarea
+                      id="coreCompetencies"
+                      placeholder="List key competencies, separated by commas"
+                      className="h-24"
+                      aria-describedby="coreCompetencies-description"
+                      {...field}
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel htmlFor="includeScoringRubric">
-                      Include Scoring Rubric
-                    </FormLabel>
-                    <FormDescription id="includeScoringRubric-description">
-                      Generate a rubric for scoring responses to the questions
-                    </FormDescription>
-                  </div>
+                  <FormDescription id="coreCompetencies-description">
+                    Specify competencies to evaluate (e.g., Leadership,
+                    Communication, Problem Solving)
+                  </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating Questions...
-              </>
-            ) : (
-              "Generate Questions"
-            )}
-          </Button>
-        </form>
-      </Form>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FormField
+                control={form.control}
+                name="numberOfQuestions"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="numberOfQuestions">
+                      Number of Questions
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger
+                          id="numberOfQuestions"
+                          aria-describedby="numberOfQuestions-description"
+                        >
+                          <SelectValue placeholder="Select number of questions" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[5, 10, 15, 20].map((num) => (
+                          <SelectItem
+                            key={num}
+                            value={num.toString()}
+                            role="option"
+                            aria-selected={field.value === num.toString()}
+                          >
+                            {num} questions
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription id="numberOfQuestions-description">
+                      Choose how many questions to generate
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      {generatedQuestions.length > 0 && (
-        <div className="mt-8" role="region" aria-label="Generated Questions">
-          <h2 className="text-xl font-semibold mb-4">Generated Questions</h2>
-          <div className="space-y-4">
-            {generatedQuestions.map((question, index) => (
-              <div
-                key={index}
-                className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-                role="article"
-                aria-label={`Question ${index + 1}`}
-              >
-                <p className="font-medium text-gray-900">Q{index + 1}:</p>
-                <p className="mt-1 text-gray-700">{question}</p>
-              </div>
-            ))}
-          </div>
+              <FormField
+                control={form.control}
+                name="includeEvaluationTips"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        id="includeEvaluationTips"
+                        aria-describedby="includeEvaluationTips-description"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel htmlFor="includeEvaluationTips">
+                        Include Evaluation Tips
+                      </FormLabel>
+                      <FormDescription id="includeEvaluationTips-description">
+                        Generate tips on how to evaluate responses
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
 
-          {evaluationTips.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-xl font-semibold mb-4">Evaluation Tips</h2>
-              <div className="space-y-4">
-                {evaluationTips.map((tip, index) => (
-                  <div
-                    key={index}
-                    className="p-4 bg-blue-50 rounded-lg border border-blue-200"
-                    role="article"
-                    aria-label={`Evaluation Tip ${index + 1}`}
-                  >
-                    <p className="font-medium text-blue-900">
-                      Tip {index + 1}:
-                    </p>
-                    <p className="mt-1 text-blue-700">{tip}</p>
-                  </div>
-                ))}
-              </div>
+              <FormField
+                control={form.control}
+                name="includeScoringRubric"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        id="includeScoringRubric"
+                        aria-describedby="includeScoringRubric-description"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel htmlFor="includeScoringRubric">
+                        Include Scoring Rubric
+                      </FormLabel>
+                      <FormDescription id="includeScoringRubric-description">
+                        Generate a rubric for scoring responses
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
             </div>
-          )}
 
-          {scoringRubric && (
-            <div className="mt-6">
-              <h2 className="text-xl font-semibold mb-4">Scoring Rubric</h2>
-              <div
-                className="p-4 bg-green-50 rounded-lg border border-green-200"
-                role="article"
-                aria-label="Scoring Rubric"
-              >
-                <div
-                  className="prose max-w-none text-green-700"
-                  dangerouslySetInnerHTML={{ __html: scoringRubric }}
-                />
-              </div>
-            </div>
-          )}
-
-          <Button
-            onClick={() => {
-              setGeneratedQuestions([]);
-              setEvaluationTips([]);
-              setScoringRubric("");
-            }}
-            variant="outline"
-            className="mt-4"
-            aria-label="Clear all generated content"
-          >
-            Clear All
-          </Button>
-        </div>
-      )}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating Content...
+                </>
+              ) : (
+                "Generate Interview Content"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </div>
 
       {isLoading && (
+        <Card className="border border-gray-200">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center py-8">
+              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <h3 className="text-xl font-medium text-gray-900 mb-2">
+                Generating your interview content...
+              </h3>
+              <p className="text-gray-500 text-center max-w-md">
+                This may take a few moments as we craft relevant questions and
+                resources based on your input.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {hasResults && !isLoading && (
         <div
-          className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200"
-          role="status"
-          aria-label="Generating questions"
+          className="bg-white rounded-lg shadow-md"
+          role="region"
+          aria-label="Generated Content"
         >
-          <div className="flex items-center justify-center space-x-3">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <p className="text-lg text-gray-600">
-              Generating your interview questions...
-            </p>
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Interview Resources
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAll}
+              className="text-gray-500 hover:text-red-500"
+              aria-label="Clear all generated content"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Clear All
+            </Button>
           </div>
-          <p className="mt-2 text-sm text-gray-500 text-center">
-            This may take a few moments as we craft relevant questions based on
-            your input.
-          </p>
+
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <div className="px-6 pt-4">
+              <TabsList className="w-full grid grid-cols-1 md:grid-cols-3">
+                <TabsTrigger
+                  value="questions"
+                  className="flex items-center justify-center"
+                  disabled={!hasResults}
+                >
+                  <HelpCircle className="h-4 w-4 mr-2" />
+                  Questions
+                </TabsTrigger>
+                <TabsTrigger
+                  value="tips"
+                  className="flex items-center justify-center"
+                  disabled={!hasTips}
+                >
+                  <CheckSquare className="h-4 w-4 mr-2" />
+                  Evaluation Tips
+                </TabsTrigger>
+                <TabsTrigger
+                  value="rubric"
+                  className="flex items-center justify-center"
+                  disabled={!hasRubric}
+                >
+                  <Award className="h-4 w-4 mr-2" />
+                  Scoring Rubric
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="questions" className="p-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Interview Questions</CardTitle>
+                  <CardDescription>
+                    Use these questions to evaluate candidates for the position
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px] pr-4">
+                    <div className="space-y-4">
+                      {generatedQuestions.map((question, index) => (
+                        <div
+                          key={index}
+                          className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                          role="article"
+                          aria-label={`Question ${index + 1}`}
+                        >
+                          <p className="font-semibold text-gray-900 text-lg">
+                            Q{index + 1}:
+                          </p>
+                          <p className="mt-2 text-gray-700">{question}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="tips" className="p-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Evaluation Tips</CardTitle>
+                  <CardDescription>
+                    Guidelines for evaluating candidate responses
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px] pr-4">
+                    <div className="space-y-4">
+                      {evaluationTips.map((tip, index) => (
+                        <div
+                          key={index}
+                          className="p-4 bg-blue-50 rounded-lg border border-blue-200"
+                          role="article"
+                          aria-label={`Evaluation Tip ${index + 1}`}
+                        >
+                          <p className="font-semibold text-blue-900 text-lg">
+                            Tip {index + 1}:
+                          </p>
+                          <p className="mt-2 text-blue-700">{tip}</p>
+                        </div>
+                      ))}
+                      {evaluationTips.length === 0 && (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">
+                            No evaluation tips were generated. Enable the
+                            &quot;Include Evaluation Tips&quot; option to
+                            generate tips.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="rubric" className="p-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Scoring Rubric</CardTitle>
+                  <CardDescription>
+                    Framework for scoring candidate responses
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px] pr-4">
+                    {scoringRubric ? (
+                      <div
+                        className="prose max-w-none text-green-800 bg-green-50 p-6 rounded-lg border border-green-200"
+                        dangerouslySetInnerHTML={{ __html: scoringRubric }}
+                      />
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">
+                          No scoring rubric was generated. Enable the
+                          &quot;Include Scoring Rubric&quot; option to generate
+                          a rubric.
+                        </p>
+                      </div>
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       )}
     </div>
