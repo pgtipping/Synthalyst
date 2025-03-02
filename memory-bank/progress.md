@@ -45,7 +45,7 @@
   - Added new components: Carousel, Drawer, and Command
   - Replaced deprecated toast component with the new sonner component
   - Created a toast migration utility to ensure backward compatibility
-  - Updated the layout.tsx file to use the new Sonner Toaster component
+  - Updated the layout.tsx file to use the custom UI Toaster component from @/components/ui/sonner instead of importing directly from sonner
   - Fixed the toast implementation by updating the use-toast.ts file to use sonner directly instead of the old UI toast component
   - Updated the Header component to use the toast migration utility
   - Created a separate branch for the upgrade process
