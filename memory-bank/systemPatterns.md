@@ -273,6 +273,52 @@ The application uses a component-based architecture with shadcn UI components as
   - Tailwind animations and keyframes are centralized in the tailwind.config.ts file with no duplications
   - Fixed and verified that there are no duplicate keyframe definitions in tailwind.config.ts
 
+## Interview Questions Generator UI Pattern (2024-03-02)
+
+The Interview Questions Generator implements a consistent UI pattern across all its tabs:
+
+1. **Card-Based Layout**:
+
+   - Each item (question, tip, or scoring level) is displayed in its own card
+   - Cards have a consistent structure with a header and content section
+   - Cards use subtle hover effects (shadow and slight upward movement)
+   - All cards have rounded corners and a clean white background for content
+
+2. **Color Scheme**:
+
+   - Questions tab: Indigo color scheme
+   - Evaluation Tips tab: Blue color scheme
+   - Scoring Rubric tab: Indigo color scheme (matching Questions tab)
+   - Professional appearance with consistent colors throughout
+
+3. **Header Design**:
+
+   - Headers have a colored background (indigo-50 or blue-50)
+   - Headers include a title on the left and a badge on the right
+   - Headers use a 2px colored bottom border (indigo-400 or blue-400)
+   - Text is semibold with appropriate color contrast
+
+4. **Content Design**:
+
+   - Clean white background for all content sections
+   - Consistent text styling with proper spacing
+   - Numbered items have the number as semibold with appropriate spacing
+   - Text is gray-800 for good readability
+
+5. **Tab Navigation**:
+
+   - Tabs use a rounded container with a light gray background
+   - Active tab has a white background with subtle shadow
+   - Each tab includes an icon, label, and count badge when appropriate
+   - Tab icons use colors that match their respective content (indigo, blue)
+
+6. **Responsive Design**:
+   - All elements adapt properly to different screen sizes
+   - On mobile, headers may switch to a column layout
+   - Proper spacing is maintained across all device sizes
+
+This pattern ensures a consistent, professional appearance across the entire Interview Questions Generator feature and serves as a model for other features in the application.
+
 ## Toast Migration Pattern (2024-03-02)
 
 The application uses a migration utility pattern to handle the transition from the old UI toast system to the new sonner toast system:

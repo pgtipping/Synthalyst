@@ -492,30 +492,45 @@ export default function InterviewQuestionsForm() {
             className="w-full"
           >
             <div className="px-6 pt-4">
-              <TabsList className="w-full grid grid-cols-1 md:grid-cols-3">
+              <TabsList className="w-full grid grid-cols-1 md:grid-cols-3 p-1 bg-gray-100 rounded-xl overflow-hidden">
                 <TabsTrigger
                   value="questions"
-                  className="flex items-center justify-center"
+                  className="flex items-center justify-center py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10"
                   disabled={!hasResults}
                 >
-                  <HelpCircle className="h-4 w-4 mr-2" />
-                  Questions
+                  <HelpCircle className="h-5 w-5 mr-2 text-indigo-600" />
+                  <span className="font-medium">Questions</span>
+                  {generatedQuestions.length > 0 && (
+                    <span className="ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                      {generatedQuestions.length}
+                    </span>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="tips"
-                  className="flex items-center justify-center"
+                  className="flex items-center justify-center py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10"
                   disabled={!hasTips}
                 >
-                  <CheckSquare className="h-4 w-4 mr-2" />
-                  Evaluation Tips
+                  <CheckSquare className="h-5 w-5 mr-2 text-blue-600" />
+                  <span className="font-medium">Evaluation Tips</span>
+                  {evaluationTips.length > 0 && (
+                    <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                      {evaluationTips.length}
+                    </span>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="rubric"
-                  className="flex items-center justify-center"
+                  className="flex items-center justify-center py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10"
                   disabled={!hasRubric}
                 >
-                  <Award className="h-4 w-4 mr-2" />
-                  Scoring Rubric
+                  <Award className="h-5 w-5 mr-2 text-emerald-600" />
+                  <span className="font-medium">Scoring Rubric</span>
+                  {hasRubric && (
+                    <span className="ml-2 bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                      4 levels
+                    </span>
+                  )}
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -535,14 +550,21 @@ export default function InterviewQuestionsForm() {
                         generatedQuestions.map((question, index) => (
                           <div
                             key={index}
-                            className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                            className="mb-4 overflow-hidden rounded-lg shadow-sm border border-gray-200 transition-all hover:shadow-md hover:translate-y-[-2px]"
                             role="article"
                             aria-label={`Question ${index + 1}`}
                           >
-                            <p className="font-semibold text-gray-900 text-lg">
-                              Q{index + 1}:
-                            </p>
-                            <p className="mt-2 text-gray-700">{question}</p>
+                            <div className="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+                              <p className="font-semibold text-indigo-900 text-lg">
+                                Question {index + 1}
+                              </p>
+                              <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                Core
+                              </span>
+                            </div>
+                            <div className="p-4 bg-white">
+                              <p className="text-gray-800">{question}</p>
+                            </div>
                           </div>
                         ))
                       ) : (
@@ -573,14 +595,21 @@ export default function InterviewQuestionsForm() {
                         evaluationTips.map((tip, index) => (
                           <div
                             key={index}
-                            className="p-4 bg-blue-50 rounded-lg border border-blue-200"
+                            className="mb-4 overflow-hidden rounded-lg shadow-sm border border-blue-200 transition-all hover:shadow-md hover:translate-y-[-2px]"
                             role="article"
                             aria-label={`Evaluation Tip ${index + 1}`}
                           >
-                            <p className="font-semibold text-blue-900 text-lg">
-                              Tip {index + 1}:
-                            </p>
-                            <p className="mt-2 text-blue-700">{tip}</p>
+                            <div className="bg-blue-50 px-4 py-3 border-b-2 border-blue-400 flex justify-between items-center">
+                              <p className="font-semibold text-blue-900 text-lg">
+                                Evaluation Tip {index + 1}
+                              </p>
+                              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                Guidance
+                              </span>
+                            </div>
+                            <div className="p-4 bg-white">
+                              <p className="text-gray-800">{tip}</p>
+                            </div>
                           </div>
                         ))
                       ) : (
@@ -609,10 +638,162 @@ export default function InterviewQuestionsForm() {
                 <CardContent>
                   <ScrollArea className="h-[500px] pr-4">
                     {scoringRubric ? (
-                      <div
-                        className="prose max-w-none text-green-800 bg-green-50 p-6 rounded-lg border border-green-200"
-                        dangerouslySetInnerHTML={{ __html: scoringRubric }}
-                      />
+                      <div className="max-w-none">
+                        <style jsx global>{`
+                          .scoring-rubric {
+                            font-family: ui-sans-serif, system-ui, sans-serif;
+                          }
+
+                          .rubric-level {
+                            border-radius: 0.5rem;
+                            overflow: hidden;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                            transition: transform 0.2s ease,
+                              box-shadow 0.2s ease;
+                            margin-bottom: 1.5rem;
+                          }
+
+                          .rubric-level:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                          }
+
+                          .level-header {
+                            padding: 0.75rem 1rem;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                          }
+
+                          .excellent .level-header {
+                            background-color: #d1fae5;
+                            border-bottom: 2px solid #10b981;
+                          }
+
+                          .good .level-header {
+                            background-color: #e0f2fe;
+                            border-bottom: 2px solid #0ea5e9;
+                          }
+
+                          .average .level-header {
+                            background-color: #fef3c7;
+                            border-bottom: 2px solid #f59e0b;
+                          }
+
+                          .poor .level-header {
+                            background-color: #fee2e2;
+                            border-bottom: 2px solid #ef4444;
+                          }
+
+                          .level-title {
+                            font-size: 1.25rem;
+                            font-weight: 700;
+                            margin: 0;
+                            letter-spacing: 0.05em;
+                          }
+
+                          .excellent .level-title {
+                            color: #047857;
+                          }
+
+                          .good .level-title {
+                            color: #0369a1;
+                          }
+
+                          .average .level-title {
+                            color: #b45309;
+                          }
+
+                          .poor .level-title {
+                            color: #b91c1c;
+                          }
+
+                          .level-rating {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                          }
+
+                          .stars {
+                            font-size: 1.25rem;
+                            line-height: 1;
+                          }
+
+                          .excellent .stars {
+                            color: #10b981;
+                          }
+
+                          .good .stars {
+                            color: #0ea5e9;
+                          }
+
+                          .average .stars {
+                            color: #f59e0b;
+                          }
+
+                          .poor .stars {
+                            color: #ef4444;
+                          }
+
+                          .score {
+                            font-size: 0.875rem;
+                            font-weight: 600;
+                            margin-top: 0.25rem;
+                          }
+
+                          .level-criteria {
+                            padding: 1rem;
+                            background-color: white;
+                          }
+
+                          .criterion {
+                            margin: 0.5rem 0;
+                            padding-left: 1.5rem;
+                            position: relative;
+                            line-height: 1.5;
+                          }
+
+                          .criterion-number {
+                            position: absolute;
+                            left: 0;
+                            font-weight: 600;
+                          }
+
+                          @media (max-width: 640px) {
+                            .level-header {
+                              flex-direction: column;
+                              gap: 0.5rem;
+                            }
+
+                            .level-rating {
+                              flex-direction: row;
+                              gap: 0.5rem;
+                            }
+                          }
+                        `}</style>
+
+                        <style jsx global>{`
+                          /* The scoring-rubric styles are now handled by Tailwind classes directly in the HTML */
+                          /* This ensures consistent styling with the rest of the application */
+
+                          /* Add any additional styles needed for mobile responsiveness */
+                          @media (max-width: 640px) {
+                            .scoring-rubric .bg-indigo-50 {
+                              flex-direction: column;
+                              align-items: flex-start;
+                            }
+
+                            .scoring-rubric .bg-indigo-50 span {
+                              margin-top: 0.25rem;
+                            }
+                          }
+                        `}</style>
+
+                        <div
+                          className="max-w-none"
+                          dangerouslySetInnerHTML={{ __html: scoringRubric }}
+                        />
+                      </div>
                     ) : (
                       <div className="text-center py-8">
                         <p className="text-gray-500">

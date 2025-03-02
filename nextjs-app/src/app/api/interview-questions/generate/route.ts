@@ -41,23 +41,62 @@ const getFallbackQuestions = (industry: string, jobLevel: string) => {
       "Check for familiarity with industry-standard methodologies appropriate for the job level.",
       "Assess time management and prioritization skills.",
     ],
-    scoringRubric: `<div class="scoring-rubric">
-      <h4 class="rubric-category">EXCELLENT (4-5):</h4>
-      <p class="rubric-point">1. Provides specific, relevant examples from experience</p>
-      <p class="rubric-point">2. Demonstrates deep industry knowledge</p>
-      <p class="rubric-point">3. Shows clear problem-solving methodology</p>
-      <h4 class="rubric-category">GOOD (3-4):</h4>
-      <p class="rubric-point">1. Provides relevant examples but may lack specificity</p>
-      <p class="rubric-point">2. Shows good industry knowledge</p>
-      <p class="rubric-point">3. Has reasonable problem-solving approach</p>
-      <h4 class="rubric-category">AVERAGE (2-3):</h4>
-      <p class="rubric-point">1. Provides generic examples</p>
-      <p class="rubric-point">2. Shows basic industry knowledge</p>
-      <p class="rubric-point">3. Problem-solving approach needs development</p>
-      <h4 class="rubric-category">POOR (1-2):</h4>
-      <p class="rubric-point">1. Unable to provide relevant examples</p>
-      <p class="rubric-point">2. Limited industry knowledge</p>
-      <p class="rubric-point">3. Unclear problem-solving approach</p>
+    scoringRubric: `<div class="scoring-rubric space-y-4">
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">Excellent</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            4-5 points
+          </span>
+        </div>
+        <div class="p-4 bg-white">
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Provides specific, relevant examples from experience</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Demonstrates deep industry knowledge</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Shows clear problem-solving methodology</p>
+        </div>
+      </div>
+      
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">Good</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            3-4 points
+          </span>
+        </div>
+        <div class="p-4 bg-white">
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Provides relevant examples but may lack specificity</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Shows good industry knowledge</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Has reasonable problem-solving approach</p>
+        </div>
+      </div>
+      
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">Average</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            2-3 points
+          </span>
+        </div>
+        <div class="p-4 bg-white">
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Provides generic examples</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Shows basic industry knowledge</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Problem-solving approach needs development</p>
+        </div>
+      </div>
+      
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">Poor</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            1-2 points
+          </span>
+        </div>
+        <div class="p-4 bg-white">
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Unable to provide relevant examples</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Limited industry knowledge</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Unclear problem-solving approach</p>
+        </div>
+      </div>
     </div>`,
   };
 };
@@ -282,41 +321,79 @@ IMPORTANT:
     if (validatedData.includeScoringRubric) {
       const rubricMatch = response.match(/SCORING RUBRIC:([\s\S]*?)$/i);
       if (rubricMatch && rubricMatch[1]) {
-        // Convert the plain text rubric to simple HTML
+        // Convert the plain text rubric to our enhanced HTML structure
         const rubricText = rubricMatch[1].trim();
 
-        // Simple HTML conversion
-        let htmlRubric = '<div class="scoring-rubric">';
+        // Parse the rubric text to identify different scoring levels
+        const levels = [];
+        let currentLevel = null;
+        let currentPoints = null;
+        let currentCriteria = [];
 
         // Process each line
         const lines = rubricText
           .split("\n")
-          .filter((line) => line.trim().length > 0);
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0);
 
         for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
+          const line = lines[i];
 
-          // Check if it's a heading (category)
-          if (
-            /^[A-Z][\w\s]+:$/.test(line) ||
-            /^[A-Z][\w\s]+\(\d+(-\d+)?\):$/.test(line)
-          ) {
-            htmlRubric += `<h4 class="rubric-category">${line}</h4>`;
+          // Check if it's a heading (category) like "Excellent (4-5):" or "Good (3):"
+          const levelMatch = line.match(
+            /^([A-Za-z]+)(?:\s*\((\d+(?:-\d+)?)\s*(?:points?|)\))?:?$/i
+          );
+
+          if (levelMatch) {
+            // If we were processing a previous level, save it
+            if (currentLevel && currentCriteria.length > 0) {
+              levels.push({
+                level: currentLevel,
+                points: currentPoints,
+                criteria: [...currentCriteria],
+              });
+            }
+
+            // Start a new level
+            currentLevel = levelMatch[1];
+            currentPoints = levelMatch[2] || "";
+            currentCriteria = [];
           }
-          // Check if it's a numbered point
-          else if (/^\d+\./.test(line)) {
-            htmlRubric += `<p class="rubric-point">${line}</p>`;
+          // Check if it's a bullet point or numbered item
+          else if (/^[-•*]|\d+\./.test(line)) {
+            // Clean up the line by removing the bullet or number
+            const cleanedLine = line.replace(/^[-•*]|\d+\.\s*/, "").trim();
+            if (cleanedLine && currentLevel) {
+              currentCriteria.push(cleanedLine);
+            }
           }
-          // Otherwise, treat as regular text
-          else {
-            htmlRubric += `<p>${line}</p>`;
+          // If it's a continuation of the previous line or a non-bullet point
+          else if (currentLevel && !line.match(/^[A-Za-z]+:/)) {
+            // If it doesn't look like a new section, add it to criteria
+            currentCriteria.push(line);
           }
         }
 
-        htmlRubric += "</div>";
-        result.scoringRubric = htmlRubric;
+        // Add the last level if there is one
+        if (currentLevel && currentCriteria.length > 0) {
+          levels.push({
+            level: currentLevel,
+            points: currentPoints,
+            criteria: [...currentCriteria],
+          });
+        }
+
+        // Generate professional-looking HTML for the scoring rubric
+        result.scoringRubric = generateProfessionalRubricHtml(
+          levels,
+          rubricText
+        );
       } else {
-        result.scoringRubric = "";
+        // If no rubric was found, use the fallback
+        result.scoringRubric = getFallbackQuestions(
+          validatedData.industry,
+          validatedData.jobLevel
+        ).scoringRubric;
       }
     }
 
@@ -400,4 +477,64 @@ IMPORTANT:
       { status: 500 }
     );
   }
+}
+
+// Function to generate professional-looking HTML for the scoring rubric
+function generateProfessionalRubricHtml(
+  levels: Array<{ level: string; points: string | null; criteria: string[] }>,
+  fallbackText: string
+): string {
+  // If no levels were found, create a fallback structure
+  if (levels.length === 0) {
+    return `<div class="scoring-rubric space-y-4">
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400">
+          <p class="font-semibold text-indigo-900 text-lg">Scoring Criteria</p>
+        </div>
+        <div class="p-4 bg-white">
+          <p class="mb-2 text-gray-800">${fallbackText}</p>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Build the HTML with a professional style
+  let htmlRubric = '<div class="scoring-rubric space-y-4">';
+
+  levels.forEach(({ level, points, criteria }) => {
+    const displayPoints =
+      points ||
+      (level.toLowerCase().includes("excellent")
+        ? "4-5"
+        : level.toLowerCase().includes("good")
+        ? "3-4"
+        : level.toLowerCase().includes("average")
+        ? "2-3"
+        : level.toLowerCase().includes("poor")
+        ? "1-2"
+        : "");
+
+    htmlRubric += `
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">${level}</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            ${displayPoints} points
+          </span>
+        </div>
+        <div class="p-4 bg-white">`;
+
+    criteria.forEach((criterion, index) => {
+      htmlRubric += `<p class="mb-2 text-gray-800"><span class="font-semibold mr-2">${
+        index + 1
+      }.</span> ${criterion}</p>`;
+    });
+
+    htmlRubric += `
+        </div>
+      </div>`;
+  });
+
+  htmlRubric += "</div>";
+  return htmlRubric;
 }

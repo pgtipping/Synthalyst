@@ -622,6 +622,71 @@ This approach ensures that templates only appear in the templates list and saved
 
 # Technical Context (2024-03-02)
 
+## UI Implementation Patterns (2024-03-02)
+
+### Interview Questions Generator UI Implementation
+
+The Interview Questions Generator implements a consistent UI pattern with the following technical details:
+
+1. **API Response Processing**:
+
+   - The API route (`nextjs-app/src/app/api/interview-questions/generate/route.ts`) processes LLM responses and converts them to structured HTML
+   - A dedicated `generateProfessionalRubricHtml` function ensures consistent styling regardless of LLM output format
+   - The function parses text responses to identify scoring levels and criteria
+   - Fallback mechanisms handle cases where the LLM doesn't return the expected format
+
+2. **HTML Generation**:
+
+   - HTML is generated with Tailwind CSS classes directly in the template strings
+   - This approach ensures consistent styling without relying on custom CSS
+   - Example structure:
+     ```html
+     <div
+       class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]"
+     >
+       <div
+         class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center"
+       >
+         <p class="font-semibold text-indigo-900 text-lg">Excellent</p>
+         <span
+           class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+         >
+           4-5 points
+         </span>
+       </div>
+       <div class="p-4 bg-white">
+         <p class="mb-2 text-gray-800">
+           <span class="font-semibold mr-2">1.</span> Criterion text
+         </p>
+       </div>
+     </div>
+     ```
+
+3. **Component Implementation**:
+
+   - The component (`nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`) uses `dangerouslySetInnerHTML` to render the HTML
+   - Minimal CSS is added via `<style jsx global>` for responsive behavior
+   - The component uses shadcn UI components (Card, Tabs, ScrollArea) for the overall structure
+
+4. **Responsive Design**:
+   - Media queries handle layout changes on smaller screens
+   - Flexbox properties adjust for different screen sizes
+   - Example:
+     ```css
+     @media (max-width: 640px) {
+       .scoring-rubric .bg-indigo-50 {
+         flex-direction: column;
+         align-items: flex-start;
+       }
+
+       .scoring-rubric .bg-indigo-50 span {
+         margin-top: 0.25rem;
+       }
+     }
+     ```
+
+This implementation ensures a consistent, professional appearance while maintaining good performance and accessibility.
+
 ## Technologies Used (2024-03-02)
 
 The project uses the following technologies:
