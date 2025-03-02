@@ -48,6 +48,7 @@
   - Updated the layout.tsx file to use the custom UI Toaster component from @/components/ui/sonner instead of importing directly from sonner
   - Fixed the toast implementation by updating the use-toast.ts file to use sonner directly instead of the old UI toast component
   - Updated the Header component to use the toast migration utility
+  - Added new shadcn UI components: accordion, aspect-ratio, avatar, hover-card, menubar, navigation-menu, pagination, progress, radio-group, resizable, separator, sheet, skeleton, slider, table, toggle, tooltip
   - Created a separate branch for the upgrade process
   - Location: Multiple files across the application
 

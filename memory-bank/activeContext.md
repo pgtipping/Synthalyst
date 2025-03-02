@@ -84,6 +84,7 @@ We've successfully implemented and fixed tests for these endpoints using a stand
   - Updated the layout.tsx file to use the new Sonner Toaster component
   - Updated the layout.tsx file to use the custom UI Toaster component from @/components/ui/sonner instead of importing directly from sonner
   - Updated the Header component to use the toast migration utility
+  - Added new shadcn UI components: accordion, aspect-ratio, avatar, hover-card, menubar, navigation-menu, pagination, progress, radio-group, resizable, separator, sheet, skeleton, slider, table, toggle, tooltip
   - Location: Multiple files across the application
 
 - Redesigned the Interview Questions Generator UI with a tabbed interface:
