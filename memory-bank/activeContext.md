@@ -2,7 +2,9 @@
 
 ## Current Focus (2024-03-01)
 
-The current focus is on upgrading Shadcn UI to the latest version. We've replaced the outdated shadcn-ui and @shadcn/ui packages with the new shadcn package. We've updated all existing UI components to their latest versions and added new components like Carousel, Drawer, and Command. We've also replaced the deprecated toast component with the new sonner component and created a migration utility to ensure backward compatibility with existing code.
+The current focus is on fixing display issues in the Interview Questions Generator, specifically addressing a problem where evaluation tips were showing after the questions instead of in their dedicated tab. We've improved the JSON parsing in the API route to better handle malformed responses from the LLM, enhanced the extraction function to better separate tips from questions, updated the prompt to ensure the LLM returns properly formatted JSON, and added filtering in the UI component to ensure tips don't appear in the questions tab.
+
+Previously, the focus was on upgrading Shadcn UI to the latest version. We've replaced the outdated shadcn-ui and @shadcn/ui packages with the new shadcn package. We've updated all existing UI components to their latest versions and added new components like Carousel, Drawer, and Command. We've also replaced the deprecated toast component with the new sonner component and created a migration utility to ensure backward compatibility with existing code.
 
 Previously, the focus was on fixing TypeScript errors in the Interview Questions Generator that were causing build failures in Vercel deployment. We've added proper type annotations to callback parameters in filter and map functions throughout the file, replacing implicit 'any' types with explicit string and unknown types where appropriate. This ensures type safety and prevents build failures in production.
 
@@ -25,6 +27,15 @@ We've also enhanced the authentication system by adding Google OAuth integration
 We've successfully implemented and fixed tests for these endpoints using a standardized mock Prisma client pattern. The mock Prisma client has been enhanced to support all required models, including JobDescription, Task, and User.
 
 ## Recent Changes (2024-03-01)
+
+- Fixed evaluation tips display in Interview Questions Generator:
+
+  - Improved JSON parsing in the API route to better handle malformed responses
+  - Enhanced the extraction function to better separate tips from questions
+  - Updated the prompt to ensure the LLM returns properly formatted JSON
+  - Added filtering in the UI component to ensure tips don't appear in the questions tab
+  - Fixed the issue where evaluation tips were showing after questions instead of in their own tab
+  - Location: `nextjs-app/src/app/api/interview-questions/generate/route.ts`, `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
 
 - Upgraded Shadcn UI to the latest version:
 

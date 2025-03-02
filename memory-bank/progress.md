@@ -2,6 +2,15 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed evaluation tips display in Interview Questions Generator
+
+  - Improved JSON parsing in the API route to better handle malformed responses
+  - Enhanced the extraction function to better separate tips from questions
+  - Updated the prompt to ensure the LLM returns properly formatted JSON
+  - Added filtering in the UI component to ensure tips don't appear in the questions tab
+  - Fixed the issue where evaluation tips were showing after questions instead of in their own tab
+  - Location: `nextjs-app/src/app/api/interview-questions/generate/route.ts`, `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
+
 - ✅ Upgraded Shadcn UI to the latest version
 
   - Replaced outdated shadcn-ui and @shadcn/ui packages with the new shadcn package
