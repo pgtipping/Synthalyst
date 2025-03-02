@@ -1,8 +1,45 @@
-# Active Context (2024-03-01)
+# Active Context (2024-03-02)
 
-## Current Focus (2024-03-01)
+## Current Focus (2024-03-02)
 
-The current focus is on fixing display issues in the Interview Questions Generator, specifically addressing a problem where evaluation tips were showing after the questions instead of in their dedicated tab. We've improved the JSON parsing in the API route to better handle malformed responses from the LLM, enhanced the extraction function to better separate tips from questions, updated the prompt to ensure the LLM returns properly formatted JSON, and added filtering in the UI component to ensure tips don't appear in the questions tab.
+The current focus is on fixing a Vercel deployment failure caused by a missing GROQ_API_KEY environment variable. The build was failing with the error: "The GROQ_API_KEY environment variable is missing or empty". We've implemented the following fixes:
+
+1. Improved error handling in the Interview Questions Generator API route:
+
+   - Added conditional initialization of the Groq client only when the API key is available
+   - Implemented a fallback mechanism to provide sample questions when the LLM service is unavailable
+   - Enhanced error responses to be more user-friendly and informative
+
+2. Updated the client-side component to handle API configuration errors gracefully:
+
+   - Added specific handling for 503 Service Unavailable responses
+   - Improved error message display to provide better guidance to users
+
+3. Updated documentation:
+   - Enhanced the .env.example file with clearer instructions about the GROQ_API_KEY requirement
+   - Added notes about setting this variable in the Vercel environment
+
+These changes ensure that the application can build successfully even when environment variables are missing, and provides a better user experience when services are unavailable.
+
+Previously, the focus was on fixing the Interview Questions Generator to properly display questions, evaluation tips, and scoring rubrics. We've identified and resolved issues with JSON parsing and display in the Interview Questions Generator. The main problems were:
+
+1. Complex JSON parsing logic in the API route with multiple fallback mechanisms that were causing confusion
+2. Multiple extraction methods that weren't working together consistently
+3. Inconsistent response handling in the component
+4. Complex HTML handling in the scoring rubric
+
+We've simplified the solution by:
+
+1. Changing the LLM prompt to request a clearly structured response with section headers (QUESTIONS:, EVALUATION TIPS:, SCORING RUBRIC:) instead of JSON
+2. Implementing a simpler section-based extraction approach in the API route
+3. Removing unnecessary filtering in the component that might have been filtering out valid content
+4. Simplifying the HTML generation for the scoring rubric
+5. Improving error handling to show more specific error messages
+6. Adding better empty state handling in the UI
+
+Previously, the focus was on fixing accessibility and linter errors in the test files, specifically addressing ARIA role issues in the InterviewQuestionsForm.test.tsx file. We've fixed a linter error related to ARIA roles where a `<li>` element with `role="option"` needed to be contained within a parent element that has either the "group" or "listbox" role. The solution was to remove both the `role="option"` and `aria-selected` attributes from the `<li>` element in the SelectItem mock component, as these attributes were causing accessibility violations in the test environment.
+
+Previously, the focus was on fixing display issues in the Interview Questions Generator, specifically addressing a problem where evaluation tips were showing after the questions instead of in their dedicated tab. We've improved the JSON parsing in the API route to better handle malformed responses from the LLM, enhanced the extraction function to better separate tips from questions, updated the prompt to ensure the LLM returns properly formatted JSON, and added filtering in the UI component to ensure tips don't appear in the questions tab.
 
 Previously, the focus was on upgrading Shadcn UI to the latest version. We've replaced the outdated shadcn-ui and @shadcn/ui packages with the new shadcn package. We've updated all existing UI components to their latest versions and added new components like Carousel, Drawer, and Command. We've also replaced the deprecated toast component with the new sonner component and created a migration utility to ensure backward compatibility with existing code.
 
@@ -26,7 +63,7 @@ We've also enhanced the authentication system by adding Google OAuth integration
 
 We've successfully implemented and fixed tests for these endpoints using a standardized mock Prisma client pattern. The mock Prisma client has been enhanced to support all required models, including JobDescription, Task, and User.
 
-## Recent Changes (2024-03-01)
+## Recent Changes (2024-03-02)
 
 - Fixed evaluation tips display in Interview Questions Generator:
 
@@ -45,6 +82,7 @@ We've successfully implemented and fixed tests for these endpoints using a stand
   - Replaced deprecated toast component with the new sonner component
   - Created a toast migration utility to ensure backward compatibility
   - Updated the layout.tsx file to use the new Sonner Toaster component
+  - Fixed the toast implementation by updating the use-toast.ts file to use sonner directly instead of the old UI toast component
   - Updated the Header component to use the toast migration utility
   - Location: Multiple files across the application
 
@@ -168,7 +206,7 @@ Previous changes:
 - Fixed Jest configuration to handle ESM modules and browser-specific APIs
 - Updated test assertions to match the actual API response format
 
-## Next Steps (2024-03-01)
+## Next Steps (2024-03-02)
 
 1. Gradually migrate all components using the old toast to the new sonner toast
 2. Explore using the new Carousel component for showcasing features on the home page
@@ -187,7 +225,7 @@ Previous changes:
 15. Monitor the Vercel deployment to ensure all fixes are working properly
 16. Test the JD Developer form to ensure it works without education, experience, and certifications
 
-## Active Decisions (2024-03-01)
+## Active Decisions (2024-03-02)
 
 - Upgraded to the latest version of Shadcn UI to access new components and improvements
 - Created a toast migration utility to ensure backward compatibility with existing code
@@ -214,7 +252,7 @@ Previous changes:
 - Maintaining the mock Prisma client to stay in sync with the actual Prisma schema
 - Replaced the 2Do Task Manager card with the Interview Questions Generator card on the home page
 
-## Considerations (2024-03-01)
+## Considerations (2024-03-02)
 
 - The toast migration utility provides a bridge to gradually migrate to the new sonner toast API
 - New components like Carousel and Drawer offer opportunities for UI enhancements

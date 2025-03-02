@@ -1,6 +1,33 @@
-# Progress Report - 2024-03-01
+# Progress Report - 2024-03-02
 
 ## Recent Updates (Last 24 Hours)
+
+- ✅ Fixed Vercel deployment failure due to missing GROQ_API_KEY
+
+  - Added conditional initialization of the Groq client only when the API key is available
+  - Implemented a fallback mechanism to provide sample questions when the LLM service is unavailable
+  - Enhanced error responses to be more user-friendly and informative
+  - Updated client-side component to handle API configuration errors gracefully
+  - Enhanced the .env.example file with clearer instructions about the GROQ_API_KEY requirement
+  - Location: `nextjs-app/src/app/api/interview-questions/generate/route.ts`, `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`, `nextjs-app/.env.example`
+
+- ✅ Fixed Interview Questions Generator JSON parsing and display issues
+
+  - Simplified the LLM prompt to request a clearly structured response with section headers instead of JSON
+  - Implemented a simpler section-based extraction approach in the API route
+  - Removed unnecessary filtering in the component that might have been filtering out valid content
+  - Simplified the HTML generation for the scoring rubric
+  - Improved error handling to show more specific error messages
+  - Added better empty state handling in the UI
+  - Location: `nextjs-app/src/app/api/interview-questions/generate/route.ts`, `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
+
+- ✅ Fixed ARIA role issue in InterviewQuestionsForm.test.tsx
+
+  - Resolved linter error related to ARIA roles in the SelectItem mock component
+  - Removed `role="option"` attribute from the `<li>` element in the SelectItem mock
+  - Removed `aria-selected` attribute that was causing accessibility violations
+  - Ensured tests continue to work correctly after the changes
+  - Location: `nextjs-app/src/app/interview-questions/__tests__/InterviewQuestionsForm.test.tsx`
 
 - ✅ Fixed evaluation tips display in Interview Questions Generator
 
@@ -19,6 +46,7 @@
   - Replaced deprecated toast component with the new sonner component
   - Created a toast migration utility to ensure backward compatibility
   - Updated the layout.tsx file to use the new Sonner Toaster component
+  - Fixed the toast implementation by updating the use-toast.ts file to use sonner directly instead of the old UI toast component
   - Updated the Header component to use the toast migration utility
   - Created a separate branch for the upgrade process
   - Location: Multiple files across the application
