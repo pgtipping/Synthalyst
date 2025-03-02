@@ -119,7 +119,13 @@ export async function POST(req: Request) {
 
     // Create a clear, structured prompt for the LLM
     const systemPrompt = `You are an expert interviewer who creates highly relevant and effective interview questions, evaluation guidelines, and scoring rubrics. 
-Your responses will be used directly in an interview preparation tool.`;
+Your responses will be used directly in an interview preparation tool.
+
+IMPORTANT INSTRUCTIONS:
+1. Generate EXACTLY ${validatedData.numberOfQuestions} DISTINCT, STANDALONE interview questions
+2. Do NOT include additional questions in the evaluation tips or as follow-up questions
+3. Evaluation tips should focus on how to evaluate responses, not introduce new questions
+4. Each question should be complete and self-contained`;
 
     // Base prompt for generating questions
     let userPrompt = `Generate ${validatedData.numberOfQuestions} interview questions for a ${validatedData.jobLevel} position in the ${validatedData.industry} industry.
@@ -135,7 +141,9 @@ For each question:
 2. Ensure questions are specific to the industry and job level
 3. Include a mix of behavioral and situational questions
 4. Consider the role description when crafting questions
-5. Make questions challenging but appropriate for the level`;
+5. Make questions challenging but appropriate for the level
+
+IMPORTANT: Generate EXACTLY ${validatedData.numberOfQuestions} distinct questions. Do not include additional questions as follow-up questions in the evaluation tips.`;
 
     // Add instructions for evaluation tips if requested
     if (validatedData.includeEvaluationTips) {
@@ -144,8 +152,10 @@ For each question:
 Additionally, for each question, provide tips on how to evaluate the responses. These tips should:
 1. Highlight what to look for in strong responses
 2. Identify red flags or weak responses
-3. Suggest follow-up questions if needed
-4. Relate back to the core competencies being evaluated`;
+3. Provide guidance on what constitutes a good answer
+4. Relate back to the core competencies being evaluated
+
+NOTE: Evaluation tips should NOT contain new interview questions. They should only provide guidance on evaluating responses to the main questions.`;
     }
 
     // Add instructions for scoring rubric if requested
@@ -239,6 +249,14 @@ IMPORTANT:
         .filter((line) => /^\d+\./.test(line))
         .map((line) => line.replace(/^\d+\.\s*/, "").trim())
         .filter((line) => line.length > 0);
+
+      // Check if we have the requested number of questions
+      const requestedCount = parseInt(validatedData.numberOfQuestions);
+      if (result.questions.length < requestedCount) {
+        console.warn(
+          `LLM returned fewer questions than requested: ${result.questions.length} vs ${requestedCount}`
+        );
+      }
     }
 
     // Extract evaluation tips if requested
@@ -252,7 +270,9 @@ IMPORTANT:
           .map((line) => line.trim())
           .filter((line) => /^\d+\./.test(line))
           .map((line) => line.replace(/^\d+\.\s*/, "").trim())
-          .filter((line) => line.length > 0);
+          .filter((line) => line.length > 0)
+          // Filter out tips that look like questions (ending with question mark)
+          .filter((tip) => !tip.trim().endsWith("?"));
       } else {
         result.evaluationTips = [];
       }
@@ -314,6 +334,37 @@ IMPORTANT:
         result.questions = fallbackQuestions;
       } else {
         throw new Error("No valid questions generated");
+      }
+    }
+
+    // Ensure we have the requested number of questions
+    const requestedCount = parseInt(validatedData.numberOfQuestions);
+    if (result.questions.length < requestedCount) {
+      // Generate generic questions to fill the gap
+      const industry = validatedData.industry;
+      const jobLevel = validatedData.jobLevel;
+      const genericQuestions = [
+        `Tell me about your experience in the ${industry} industry and how it relates to this ${jobLevel} position.`,
+        `Describe a challenging situation you faced in a previous role and how you resolved it.`,
+        `How do you stay updated with the latest trends and developments in the ${industry} industry?`,
+        `What methodologies or frameworks do you typically use in your work?`,
+        `How do you handle tight deadlines and competing priorities?`,
+        `Can you describe a project where you had to collaborate with cross-functional teams?`,
+        `What's your approach to problem-solving in a fast-paced environment?`,
+        `How do you handle feedback and criticism?`,
+        `Describe a situation where you had to learn a new skill or technology quickly.`,
+        `How do you ensure the quality of your work?`,
+      ];
+
+      // Add generic questions until we reach the requested count
+      while (
+        result.questions.length < requestedCount &&
+        genericQuestions.length > 0
+      ) {
+        const genericQuestion = genericQuestions.shift();
+        if (genericQuestion && !result.questions.includes(genericQuestion)) {
+          result.questions.push(genericQuestion);
+        }
       }
     }
 

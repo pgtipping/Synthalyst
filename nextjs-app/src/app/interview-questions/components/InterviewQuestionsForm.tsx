@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -69,7 +69,15 @@ export default function InterviewQuestionsForm() {
   const [evaluationTips, setEvaluationTips] = useState<string[]>([]);
   const [scoringRubric, setScoringRubric] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("questions");
+  const [isMounted, setIsMounted] = useState(true);
   const { toast } = useToast();
+
+  // Set isMounted to false when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -85,13 +93,18 @@ export default function InterviewQuestionsForm() {
   });
 
   const onSubmit = async (data: FormValues) => {
-    setIsLoading(true);
-    setGeneratedQuestions([]);
-    setEvaluationTips([]);
-    setScoringRubric("");
-    setActiveTab("questions");
-
     try {
+      // Validate form data before proceeding
+      formSchema.parse(data);
+
+      if (!isMounted) return;
+
+      setIsLoading(true);
+      setGeneratedQuestions([]);
+      setEvaluationTips([]);
+      setScoringRubric("");
+      setActiveTab("questions");
+
       const response = await fetch("/api/interview-questions/generate", {
         method: "POST",
         headers: {
@@ -123,9 +136,9 @@ export default function InterviewQuestionsForm() {
       const result = await response.json();
 
       // Handle questions
-      if (result.questions && Array.isArray(result.questions)) {
+      if (result.questions && Array.isArray(result.questions) && isMounted) {
         setGeneratedQuestions(result.questions);
-      } else {
+      } else if (isMounted) {
         setGeneratedQuestions([]);
       }
 
@@ -133,26 +146,31 @@ export default function InterviewQuestionsForm() {
       if (
         data.includeEvaluationTips &&
         result.evaluationTips &&
-        Array.isArray(result.evaluationTips)
+        Array.isArray(result.evaluationTips) &&
+        isMounted
       ) {
         setEvaluationTips(result.evaluationTips);
-      } else {
+      } else if (isMounted) {
         setEvaluationTips([]);
       }
 
       // Handle scoring rubric
-      if (data.includeScoringRubric && result.scoringRubric) {
+      if (data.includeScoringRubric && result.scoringRubric && isMounted) {
         setScoringRubric(result.scoringRubric);
-      } else {
+      } else if (isMounted) {
         setScoringRubric("");
       }
 
       // Set the active tab based on what was generated
-      if (generatedQuestions.length > 0) {
+      if (result.questions && result.questions.length > 0 && isMounted) {
         setActiveTab("questions");
-      } else if (evaluationTips.length > 0) {
+      } else if (
+        result.evaluationTips &&
+        result.evaluationTips.length > 0 &&
+        isMounted
+      ) {
         setActiveTab("tips");
-      } else if (scoringRubric) {
+      } else if (result.scoringRubric && isMounted) {
         setActiveTab("rubric");
       }
 
@@ -172,16 +190,29 @@ export default function InterviewQuestionsForm() {
       });
     } catch (error) {
       console.error("Error generating content:", error);
+
+      // Clear any partial results
+      setGeneratedQuestions([]);
+      setEvaluationTips([]);
+      setScoringRubric("");
+
+      // Provide more specific error message
+      let errorMessage =
+        "Failed to generate interview content. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        console.error("Error details:", error);
+      }
+
       toast({
         title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to generate interview content. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      if (isMounted) {
+        setIsLoading(false);
+      }
     }
   };
 

@@ -23,6 +23,35 @@
 
 ## Testing Patterns - 2024-02-27 14:30
 
+### ARIA Roles in Test Mocks - 2024-03-02 10:15
+
+- When mocking UI components that use ARIA roles, ensure proper parent-child relationships
+- Certain ARIA roles require specific parent roles to be valid:
+  - `role="option"` elements must be contained within elements with `role="listbox"` or `role="group"`
+  - `role="menuitem"` elements must be contained within elements with `role="menu"`
+  - `role="tab"` elements must be contained within elements with `role="tablist"`
+- If maintaining these relationships is difficult in test mocks, consider:
+  1. Removing the role attributes entirely if they're not essential for the test
+  2. Ensuring the parent-child relationship is properly established in the mock
+  3. Using data attributes instead of ARIA roles for test selection
+- Example of fixing ARIA role issues in mocks:
+
+  ```typescript
+  // Before (causes linter error)
+  SelectItem: ({ children, value }) => (
+    <li role="option" aria-selected="false" data-value={value}>
+      {children}
+    </li>
+  ),
+
+  // After (fixed)
+  SelectItem: ({ children, value }) => (
+    <li data-value={value}>
+      {children}
+    </li>
+  ),
+  ```
+
 ### Testing Radix UI Components - 2024-02-27 14:30
 
 - Radix UI components use ARIA roles for accessibility
@@ -775,9 +804,7 @@ Before running ANY command:
        </div>
      ),
      SelectItem: ({ children, value }) => (
-       <li role="option" aria-selected="false" data-value={value}>
-         {children}
-       </li>
+       <li data-value={value}>{children}</li>
      ),
      SelectTrigger: ({ children, id, "aria-describedby": ariaDescribedby }) => (
        <button
@@ -1469,3 +1496,75 @@ This pattern is essential for any feature that requires saving user-related data
 - Avoid using anchor tags directly for internal links
 - Prefetching happens automatically with Link component
 - For programmatic navigation, use the useRouter hook from next/navigation
+
+## LLM Integration Patterns - 2024-03-02 11:30
+
+### Structured Text Response Pattern - 2024-03-02 11:30
+
+- When working with LLM responses that need to be parsed into structured data, prefer using clear section headers over JSON
+- Benefits of section-based extraction:
+  - More reliable parsing with less complex code
+  - Easier to debug and maintain
+  - Less prone to JSON formatting errors from the LLM
+  - Simpler extraction logic
+- Implementation pattern:
+  1. In the prompt, specify exact section headers (e.g., "QUESTIONS:", "EVALUATION TIPS:")
+  2. Request numbered items within each section for easier parsing
+  3. Use regex to extract content between section headers
+  4. Process each section's content separately
+- Example prompt structure:
+
+  ```
+  Format your response as follows:
+
+  SECTION_1:
+  1. First item
+  2. Second item
+  ...
+
+  SECTION_2:
+  1. First item
+  2. Second item
+  ...
+  ```
+
+- Example extraction code:
+  ```typescript
+  const section1Match = response.match(/SECTION_1:([\s\S]*?)(?=SECTION_2:|$)/i);
+  if (section1Match && section1Match[1]) {
+    const items = section1Match[1]
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => /^\d+\./.test(line))
+      .map((line) => line.replace(/^\d+\.\s*/, "").trim())
+      .filter((line) => line.length > 0);
+    // Process items
+  }
+  ```
+- Always include fallback mechanisms for when the LLM doesn't follow the format exactly
+- For HTML content, use simple text-to-HTML conversion rather than asking the LLM to generate HTML directly
+
+## Deployment Patterns - 2024-03-02 12:15
+
+### Environment Variables in Vercel - 2024-03-02 12:15
+
+- Always ensure all required environment variables are properly set in Vercel's project settings
+- For API keys and sensitive information:
+  1. Never use `NEXT_PUBLIC_` prefix for API keys that should be kept secret
+  2. Server-side API keys should be accessed only in API routes or Server Components
+  3. Add fallback mechanisms for build-time access to prevent deployment failures
+  4. Document all required environment variables in .env.example with clear instructions
+- Implement graceful degradation when environment variables are missing:
+  1. Check for the existence of environment variables before using them
+  2. Provide meaningful error messages to users when services are unavailable
+  3. Use fallback content or functionality when possible
+  4. Return appropriate HTTP status codes (e.g., 503 Service Unavailable)
+- For local development:
+  1. Use .env.local for local environment variables
+  2. Never commit actual .env files to the repository
+  3. Keep .env.example updated with all required variables
+- Common environment variables needed:
+  1. API keys for external services (GROQ_API_KEY, etc.)
+  2. Database connection strings
+  3. Authentication secrets
+  4. Feature flags
