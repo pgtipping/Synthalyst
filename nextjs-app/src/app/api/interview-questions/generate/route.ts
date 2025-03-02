@@ -16,14 +16,84 @@ const requestSchema = z.object({
   includeScoringRubric: z.boolean().default(false),
 });
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+// Initialize Groq client only if API key is available
+let groq: Groq | null = null;
+if (process.env.GROQ_API_KEY) {
+  groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
+}
+
+// Fallback sample questions for when the LLM service is unavailable
+const getFallbackQuestions = (industry: string, jobLevel: string) => {
+  return {
+    questions: [
+      `Tell me about your experience in the ${industry} industry and how it relates to this ${jobLevel} position.`,
+      `Describe a challenging situation you faced in a previous role and how you resolved it.`,
+      `How do you stay updated with the latest trends and developments in the ${industry} industry?`,
+      `What methodologies or frameworks do you typically use in your work?`,
+      `How do you handle tight deadlines and competing priorities?`,
+    ],
+    evaluationTips: [
+      "Look for specific examples that demonstrate relevant experience in the industry.",
+      "Assess problem-solving abilities and approach to challenges.",
+      "Evaluate commitment to professional development and industry knowledge.",
+      "Check for familiarity with industry-standard methodologies appropriate for the job level.",
+      "Assess time management and prioritization skills.",
+    ],
+    scoringRubric: `<div class="scoring-rubric">
+      <h4 class="rubric-category">EXCELLENT (4-5):</h4>
+      <p class="rubric-point">1. Provides specific, relevant examples from experience</p>
+      <p class="rubric-point">2. Demonstrates deep industry knowledge</p>
+      <p class="rubric-point">3. Shows clear problem-solving methodology</p>
+      <h4 class="rubric-category">GOOD (3-4):</h4>
+      <p class="rubric-point">1. Provides relevant examples but may lack specificity</p>
+      <p class="rubric-point">2. Shows good industry knowledge</p>
+      <p class="rubric-point">3. Has reasonable problem-solving approach</p>
+      <h4 class="rubric-category">AVERAGE (2-3):</h4>
+      <p class="rubric-point">1. Provides generic examples</p>
+      <p class="rubric-point">2. Shows basic industry knowledge</p>
+      <p class="rubric-point">3. Problem-solving approach needs development</p>
+      <h4 class="rubric-category">POOR (1-2):</h4>
+      <p class="rubric-point">1. Unable to provide relevant examples</p>
+      <p class="rubric-point">2. Limited industry knowledge</p>
+      <p class="rubric-point">3. Unclear problem-solving approach</p>
+    </div>`,
+  };
+};
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
-      throw new Error("GROQ_API_KEY is not configured");
+    // Check for API key before processing request
+    if (!process.env.GROQ_API_KEY || !groq) {
+      console.error("GROQ_API_KEY is not configured");
+
+      // During build time or when API key is missing, try to parse the request
+      // and return fallback content instead of failing
+      try {
+        const body = await req.json().catch(() => null);
+        if (body) {
+          const { industry = "general", jobLevel = "professional" } = body;
+          const fallbackContent = getFallbackQuestions(industry, jobLevel);
+
+          console.log("Using fallback content due to missing API key");
+          return NextResponse.json(fallbackContent);
+        }
+      } catch (parseError) {
+        console.error(
+          "Failed to parse request for fallback content:",
+          parseError
+        );
+      }
+
+      return NextResponse.json(
+        {
+          error: "Service temporarily unavailable",
+          message:
+            "The LLM service is not properly configured. Please try again later or contact support.",
+        },
+        { status: 503 }
+      );
     }
 
     const body = await req.json().catch(() => null);

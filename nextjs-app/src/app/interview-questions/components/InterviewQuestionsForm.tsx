@@ -102,7 +102,22 @@ export default function InterviewQuestionsForm() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to generate questions");
+
+        // Handle specific error cases
+        if (response.status === 503) {
+          toast({
+            title: "Service Unavailable",
+            description:
+              errorData.message ||
+              "The interview questions service is temporarily unavailable. Please try again later.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        throw new Error(
+          errorData.error || errorData.message || "Failed to generate questions"
+        );
       }
 
       const result = await response.json();
