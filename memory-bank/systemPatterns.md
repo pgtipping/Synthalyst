@@ -249,3 +249,22 @@ nextjs-app/
 - Image optimization
 - Static generation
 - API route caching
+
+# System Patterns (2024-03-02)
+
+## Component Architecture (2024-03-02)
+
+The application uses a component-based architecture with shadcn UI components as the foundation. Recent updates include:
+
+- **Toast System Migration**:
+
+  - Created a toast migration utility at `@/lib/toast-migration.ts` to handle the transition from the old UI toast system to sonner
+  - The utility provides backward compatibility while allowing the use of new sonner features
+  - Direct imports from sonner are used in the layout.tsx file for the Toaster component
+  - Components that need toast functionality now use the migration utility to ensure consistent behavior
+
+- **UI Component Organization**:
+  - All shadcn UI components are located in `@/components/ui/`
+  - Recently added 16 new components to enhance the UI capabilities
+  - Components follow a consistent pattern with proper TypeScript typing
+  - Tailwind animations and keyframes are centralized in the tailwind.config.ts file to avoid duplication

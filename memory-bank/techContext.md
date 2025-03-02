@@ -619,3 +619,47 @@ The JD Developer component uses a two-layer filtering approach to ensure templat
    ```
 
 This approach ensures that templates only appear in the templates list and saved job descriptions only appear in the saved JDs list, even if there are inconsistencies in the database.
+
+# Technical Context (2024-03-02)
+
+## Technologies Used (2024-03-02)
+
+The project uses the following technologies:
+
+- **Frontend Framework**: Next.js 14 with App Router
+- **UI Components**:
+  - shadcn UI (updated with 16 new components)
+  - sonner for toast notifications (replacing the old UI toast system)
+- **Styling**: Tailwind CSS with custom animations and keyframes
+- **State Management**: React Context API and React Query
+- **API Integration**:
+  - GROQ API for AI-powered features
+  - Custom API routes for backend functionality
+- **Authentication**: NextAuth.js
+- **Database**: Prisma ORM with PostgreSQL
+- **Deployment**: Vercel
+
+## Development Setup (2024-03-02)
+
+To set up the development environment:
+
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Create a `.env.local` file with the required environment variables:
+   - `GROQ_API_KEY` (with a fallback in the code for development)
+   - Other environment variables as needed
+4. Run the development server with `npm run dev`
+   - The server runs on port 3001 by default
+   - Make sure no other process is using port 3001 before starting
+
+## Technical Constraints (2024-03-02)
+
+- **Environment Variables**:
+  - Must be properly configured in Vercel for production deployment
+  - Local development can use fallbacks for some variables
+- **UI Components**:
+  - All shadcn UI components must follow the established patterns
+  - Toast notifications must use the migration utility for consistency
+- **Tailwind Configuration**:
+  - Avoid duplicate keyframes and animation definitions
+  - Test builds after adding new components with animations

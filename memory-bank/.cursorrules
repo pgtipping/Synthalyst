@@ -1568,3 +1568,41 @@ This pattern is essential for any feature that requires saving user-related data
   2. Database connection strings
   3. Authentication secrets
   4. Feature flags
+
+# Toast Implementation Pattern (2024-03-02)
+
+When working with toast notifications in this project:
+
+1. For components that need to display toast notifications:
+
+   - Import from `@/lib/toast-migration` instead of `@/hooks/use-toast`
+   - This ensures compatibility with the new sonner toast system
+   - Example: `import { toast } from "@/lib/toast-migration";`
+
+2. The toast migration utility supports all variants including "destructive"
+
+   - Use `toast({ variant: "destructive", title: "Error", description: "Error message" })`
+   - This pattern works across all components
+
+3. The main Toaster component is imported directly from sonner in layout.tsx:
+   - `import { Toaster } from "sonner";`
+   - This is the only place where direct import from sonner is used
+
+# Tailwind Configuration Pattern (2024-03-02)
+
+When working with Tailwind animations and keyframes:
+
+1. All keyframes must be defined only once in the tailwind.config.ts file
+
+   - Avoid duplicate definitions of keyframes like 'accordion-down' and 'accordion-up'
+   - Check for existing definitions before adding new ones
+
+2. All animation definitions must also be unique
+
+   - The same animation name cannot be defined multiple times
+   - This prevents the "object literal cannot have multiple properties with the same name" error
+
+3. When adding new shadcn UI components:
+   - Check if they require new keyframes or animations
+   - Add them to the existing configuration without duplication
+   - Test the build to ensure no conflicts
