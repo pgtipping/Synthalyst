@@ -2,6 +2,18 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Redesigned the Interview Questions Generator UI with a tabbed interface
+
+  - Implemented a tabbed interface to clearly separate questions, evaluation tips, and scoring rubric
+  - Added distinct visual styling for each type of content (questions, tips, rubric)
+  - Improved the organization and navigation of generated content
+  - Enhanced the loading state UI with better messaging and visual feedback
+  - Added clear empty states for when tips or rubric are not generated
+  - Implemented a scroll area for better handling of large amounts of content
+  - Added icons to tab headers for better visual distinction
+  - Fixed issues with mixed-up output display
+  - Location: `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
+
 - ✅ Enhanced the Interview Questions Generator with evaluation tips and scoring rubric features
 
   - Added checkboxes to the form for users to request evaluation tips and scoring rubrics

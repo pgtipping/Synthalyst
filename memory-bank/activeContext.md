@@ -2,7 +2,9 @@
 
 ## Current Focus (2024-03-01)
 
-The current focus is on enhancing the Interview Questions Generator by implementing two additional features: evaluation tips and scoring rubrics. These features were specified in the project brief but had not yet been implemented. The evaluation tips provide guidance on how to evaluate responses to each interview question, while the scoring rubric offers a comprehensive framework for scoring all responses. These additions make the Interview Questions Generator a more complete and valuable tool for users conducting interviews.
+The current focus is on enhancing the Interview Questions Generator by redesigning the UI to clearly separate questions, evaluation tips, and scoring rubrics. We've implemented a tabbed interface that organizes the generated content into distinct sections, making it easier for users to navigate between different types of content. This redesign addresses the issue where the output was mixed up and not properly separated, providing a much better user experience.
+
+Previously, the focus was on enhancing the Interview Questions Generator by implementing two additional features: evaluation tips and scoring rubrics. These features were specified in the project brief but had not yet been implemented. The evaluation tips provide guidance on how to evaluate responses to each interview question, while the scoring rubric offers a comprehensive framework for scoring all responses. These additions make the Interview Questions Generator a more complete and valuable tool for users conducting interviews.
 
 Previously, the focus was on integrating the Interview Questions Generator into the main application. We've replaced the 2Do Task Manager card on the home page with the Interview Questions Generator card, making this feature more accessible to users directly from the home page. This change helps highlight the new functionality and provides users with easier access to this tool.
 
@@ -17,6 +19,17 @@ We've also enhanced the authentication system by adding Google OAuth integration
 We've successfully implemented and fixed tests for these endpoints using a standardized mock Prisma client pattern. The mock Prisma client has been enhanced to support all required models, including JobDescription, Task, and User.
 
 ## Recent Changes (2024-03-01)
+
+- Redesigned the Interview Questions Generator UI with a tabbed interface:
+
+  - Implemented a tabbed interface to clearly separate questions, evaluation tips, and scoring rubric
+  - Added distinct visual styling for each type of content (questions, tips, rubric)
+  - Improved the organization and navigation of generated content
+  - Enhanced the loading state UI with better messaging and visual feedback
+  - Added clear empty states for when tips or rubric are not generated
+  - Implemented a scroll area for better handling of large amounts of content
+  - Added icons to tab headers for better visual distinction
+  - Location: `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
 
 - Enhanced the Interview Questions Generator with evaluation tips and scoring rubric features:
 
