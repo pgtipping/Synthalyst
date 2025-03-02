@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast-migration";
 import type { TrainingPlan } from "@/types/trainingPlan";
 
 interface PlanListProps {

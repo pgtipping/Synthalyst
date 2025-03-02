@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast-migration";
 import PlanForm from "./components/PlanForm";
 import PlanList from "./components/PlanList";
 import TemplateList from "./components/TemplateList";

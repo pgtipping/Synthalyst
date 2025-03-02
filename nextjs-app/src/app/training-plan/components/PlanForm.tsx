@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/toast-migration";
 import type { TrainingPlan } from "@/types/trainingPlan";
 
 const formSchema = z.object({

@@ -1,21 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast-migration";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { JobDescription } from "@/types/jobDescription";
 import { TemplateVersionHistory } from "./templates/TemplateVersionHistory";
 import { TemplateVersionComparison } from "./templates/TemplateVersionComparison";
 import { Loader2 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { TemplateCategories } from "./templates/TemplateCategories";
 
 interface Category {
   id: string;

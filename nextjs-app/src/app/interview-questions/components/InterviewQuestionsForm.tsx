@@ -23,7 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/lib/toast-migration";
 import { Loader2, HelpCircle, Award, CheckSquare, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -101,34 +101,26 @@ export default function InterviewQuestionsForm() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate questions");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate questions");
       }
 
       const result = await response.json();
 
-      // Ensure questions are properly formatted
+      // Handle questions
       if (result.questions && Array.isArray(result.questions)) {
-        setGeneratedQuestions(result.questions.map((q: string) => q.trim()));
+        setGeneratedQuestions(result.questions);
       } else {
         setGeneratedQuestions([]);
       }
 
-      // Ensure evaluation tips are properly formatted and separate from questions
+      // Handle evaluation tips
       if (
         data.includeEvaluationTips &&
         result.evaluationTips &&
         Array.isArray(result.evaluationTips)
       ) {
-        // Filter out any tips that might actually be questions (ending with ?)
-        const filteredTips = result.evaluationTips
-          .map((tip: string) => tip.trim())
-          .filter(
-            (tip: string) =>
-              tip.length > 0 &&
-              !tip.endsWith("?") &&
-              !result.questions.includes(tip)
-          );
-        setEvaluationTips(filteredTips);
+        setEvaluationTips(result.evaluationTips);
       } else {
         setEvaluationTips([]);
       }
@@ -138,6 +130,15 @@ export default function InterviewQuestionsForm() {
         setScoringRubric(result.scoringRubric);
       } else {
         setScoringRubric("");
+      }
+
+      // Set the active tab based on what was generated
+      if (generatedQuestions.length > 0) {
+        setActiveTab("questions");
+      } else if (evaluationTips.length > 0) {
+        setActiveTab("tips");
+      } else if (scoringRubric) {
+        setActiveTab("rubric");
       }
 
       toast({
@@ -158,7 +159,10 @@ export default function InterviewQuestionsForm() {
       console.error("Error generating content:", error);
       toast({
         title: "Error",
-        description: "Failed to generate interview content. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate interview content. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -228,12 +232,7 @@ export default function InterviewQuestionsForm() {
                       </FormControl>
                       <SelectContent>
                         {jobLevels.map((level) => (
-                          <SelectItem
-                            key={level}
-                            value={level}
-                            role="option"
-                            aria-selected={field.value === level}
-                          >
+                          <SelectItem key={level} value={level}>
                             {level}
                           </SelectItem>
                         ))}
@@ -323,12 +322,7 @@ export default function InterviewQuestionsForm() {
                       </FormControl>
                       <SelectContent>
                         {[5, 10, 15, 20].map((num) => (
-                          <SelectItem
-                            key={num}
-                            value={num.toString()}
-                            role="option"
-                            aria-selected={field.value === num.toString()}
-                          >
+                          <SelectItem key={num} value={num.toString()}>
                             {num} questions
                           </SelectItem>
                         ))}
@@ -491,19 +485,27 @@ export default function InterviewQuestionsForm() {
                 <CardContent>
                   <ScrollArea className="h-[500px] pr-4">
                     <div className="space-y-4">
-                      {generatedQuestions.map((question, index) => (
-                        <div
-                          key={index}
-                          className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-                          role="article"
-                          aria-label={`Question ${index + 1}`}
-                        >
-                          <p className="font-semibold text-gray-900 text-lg">
-                            Q{index + 1}:
+                      {generatedQuestions.length > 0 ? (
+                        generatedQuestions.map((question, index) => (
+                          <div
+                            key={index}
+                            className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                            role="article"
+                            aria-label={`Question ${index + 1}`}
+                          >
+                            <p className="font-semibold text-gray-900 text-lg">
+                              Q{index + 1}:
+                            </p>
+                            <p className="mt-2 text-gray-700">{question}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">
+                            No questions were generated. Please try again.
                           </p>
-                          <p className="mt-2 text-gray-700">{question}</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </ScrollArea>
                 </CardContent>
@@ -521,20 +523,21 @@ export default function InterviewQuestionsForm() {
                 <CardContent>
                   <ScrollArea className="h-[500px] pr-4">
                     <div className="space-y-4">
-                      {evaluationTips.map((tip, index) => (
-                        <div
-                          key={index}
-                          className="p-4 bg-blue-50 rounded-lg border border-blue-200"
-                          role="article"
-                          aria-label={`Evaluation Tip ${index + 1}`}
-                        >
-                          <p className="font-semibold text-blue-900 text-lg">
-                            Tip {index + 1}:
-                          </p>
-                          <p className="mt-2 text-blue-700">{tip}</p>
-                        </div>
-                      ))}
-                      {evaluationTips.length === 0 && (
+                      {evaluationTips.length > 0 ? (
+                        evaluationTips.map((tip, index) => (
+                          <div
+                            key={index}
+                            className="p-4 bg-blue-50 rounded-lg border border-blue-200"
+                            role="article"
+                            aria-label={`Evaluation Tip ${index + 1}`}
+                          >
+                            <p className="font-semibold text-blue-900 text-lg">
+                              Tip {index + 1}:
+                            </p>
+                            <p className="mt-2 text-blue-700">{tip}</p>
+                          </div>
+                        ))
+                      ) : (
                         <div className="text-center py-8">
                           <p className="text-gray-500">
                             No evaluation tips were generated. Enable the

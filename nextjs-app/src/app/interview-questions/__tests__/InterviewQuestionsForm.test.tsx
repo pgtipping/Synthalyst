@@ -126,11 +126,7 @@ jest.mock("@/components/ui/select", () => ({
   }: {
     children: React.ReactNode;
     value: string;
-  }) => (
-    <li role="option" aria-selected="false" data-value={value}>
-      {children}
-    </li>
-  ),
+  }) => <li data-value={value}>{children}</li>,
   SelectTrigger: ({
     children,
     id,

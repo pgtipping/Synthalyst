@@ -11,7 +11,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, X, Edit2 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast-migration";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface Category {
   id: string;
