@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   industry: z.string().min(2, "Industry is required"),
@@ -36,6 +37,8 @@ const formSchema = z.object({
     .string()
     .min(10, "Please specify at least one core competency"),
   numberOfQuestions: z.string().min(1, "Number of questions is required"),
+  includeEvaluationTips: z.boolean().default(false),
+  includeScoringRubric: z.boolean().default(false),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -54,6 +57,8 @@ const jobLevels = [
 export default function InterviewQuestionsForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
+  const [evaluationTips, setEvaluationTips] = useState<string[]>([]);
+  const [scoringRubric, setScoringRubric] = useState<string>("");
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
@@ -64,11 +69,16 @@ export default function InterviewQuestionsForm() {
       roleDescription: "",
       coreCompetencies: "",
       numberOfQuestions: "5",
+      includeEvaluationTips: false,
+      includeScoringRubric: false,
     },
   });
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
+    setEvaluationTips([]);
+    setScoringRubric("");
+
     try {
       const response = await fetch("/api/interview-questions/generate", {
         method: "POST",
@@ -84,6 +94,14 @@ export default function InterviewQuestionsForm() {
 
       const result = await response.json();
       setGeneratedQuestions(result.questions);
+
+      if (result.evaluationTips) {
+        setEvaluationTips(result.evaluationTips);
+      }
+
+      if (result.scoringRubric) {
+        setScoringRubric(result.scoringRubric);
+      }
 
       toast({
         title: "Questions Generated",
@@ -260,6 +278,59 @@ export default function InterviewQuestionsForm() {
             )}
           />
 
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="includeEvaluationTips"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      id="includeEvaluationTips"
+                      aria-describedby="includeEvaluationTips-description"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel htmlFor="includeEvaluationTips">
+                      Include Evaluation Tips
+                    </FormLabel>
+                    <FormDescription id="includeEvaluationTips-description">
+                      Generate tips on how to evaluate responses to each
+                      question
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="includeScoringRubric"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      id="includeScoringRubric"
+                      aria-describedby="includeScoringRubric-description"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel htmlFor="includeScoringRubric">
+                      Include Scoring Rubric
+                    </FormLabel>
+                    <FormDescription id="includeScoringRubric-description">
+                      Generate a rubric for scoring responses to the questions
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+          </div>
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
@@ -289,13 +360,55 @@ export default function InterviewQuestionsForm() {
               </div>
             ))}
           </div>
+
+          {evaluationTips.length > 0 && (
+            <div className="mt-6">
+              <h2 className="text-xl font-semibold mb-4">Evaluation Tips</h2>
+              <div className="space-y-4">
+                {evaluationTips.map((tip, index) => (
+                  <div
+                    key={index}
+                    className="p-4 bg-blue-50 rounded-lg border border-blue-200"
+                    role="article"
+                    aria-label={`Evaluation Tip ${index + 1}`}
+                  >
+                    <p className="font-medium text-blue-900">
+                      Tip {index + 1}:
+                    </p>
+                    <p className="mt-1 text-blue-700">{tip}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {scoringRubric && (
+            <div className="mt-6">
+              <h2 className="text-xl font-semibold mb-4">Scoring Rubric</h2>
+              <div
+                className="p-4 bg-green-50 rounded-lg border border-green-200"
+                role="article"
+                aria-label="Scoring Rubric"
+              >
+                <div
+                  className="prose max-w-none text-green-700"
+                  dangerouslySetInnerHTML={{ __html: scoringRubric }}
+                />
+              </div>
+            </div>
+          )}
+
           <Button
-            onClick={() => setGeneratedQuestions([])}
+            onClick={() => {
+              setGeneratedQuestions([]);
+              setEvaluationTips([]);
+              setScoringRubric("");
+            }}
             variant="outline"
             className="mt-4"
-            aria-label="Clear all generated questions"
+            aria-label="Clear all generated content"
           >
-            Clear Questions
+            Clear All
           </Button>
         </div>
       )}

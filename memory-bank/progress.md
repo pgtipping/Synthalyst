@@ -2,6 +2,17 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Enhanced the Interview Questions Generator with evaluation tips and scoring rubric features
+
+  - Added checkboxes to the form for users to request evaluation tips and scoring rubrics
+  - Updated the API route to generate these additional resources when requested
+  - Modified the UI to display the generated tips and rubric in a user-friendly format
+  - Increased the max tokens limit for the LLM to accommodate the additional content
+  - Enhanced the system prompt to specify expertise in creating evaluation guidelines and scoring rubrics
+  - Implemented proper error handling for JSON parsing of LLM responses
+  - Added clear UI sections for questions, evaluation tips, and scoring rubric
+  - Location: `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`, `nextjs-app/src/app/api/interview-questions/generate/route.ts`
+
 - ✅ Integrated Interview Questions Generator into the main application
 
   - Replaced the 2Do Task Manager card with the Interview Questions Generator card on the home page

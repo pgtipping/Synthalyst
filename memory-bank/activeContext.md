@@ -2,7 +2,9 @@
 
 ## Current Focus (2024-03-01)
 
-The current focus is on integrating the Interview Questions Generator into the main application. We've replaced the 2Do Task Manager card on the home page with the Interview Questions Generator card, making this feature more accessible to users directly from the home page. This change helps highlight the new functionality and provides users with easier access to this tool.
+The current focus is on enhancing the Interview Questions Generator by implementing two additional features: evaluation tips and scoring rubrics. These features were specified in the project brief but had not yet been implemented. The evaluation tips provide guidance on how to evaluate responses to each interview question, while the scoring rubric offers a comprehensive framework for scoring all responses. These additions make the Interview Questions Generator a more complete and valuable tool for users conducting interviews.
+
+Previously, the focus was on integrating the Interview Questions Generator into the main application. We've replaced the 2Do Task Manager card on the home page with the Interview Questions Generator card, making this feature more accessible to users directly from the home page. This change helps highlight the new functionality and provides users with easier access to this tool.
 
 Previously, the focus was on improving the UI readability by changing all grey/silver text to black throughout the application. This change was implemented across multiple pages and components to ensure consistent readability and better user experience. We've updated the global CSS file to modify default text colors and then systematically updated individual components where specific grey text classes were used.
 
@@ -15,6 +17,15 @@ We've also enhanced the authentication system by adding Google OAuth integration
 We've successfully implemented and fixed tests for these endpoints using a standardized mock Prisma client pattern. The mock Prisma client has been enhanced to support all required models, including JobDescription, Task, and User.
 
 ## Recent Changes (2024-03-01)
+
+- Enhanced the Interview Questions Generator with evaluation tips and scoring rubric features:
+
+  - Added checkboxes to the form for users to request evaluation tips and scoring rubrics
+  - Updated the API route to generate these additional resources when requested
+  - Modified the UI to display the generated tips and rubric in a user-friendly format
+  - Increased the max tokens limit for the LLM to accommodate the additional content
+  - Enhanced the system prompt to specify expertise in creating evaluation guidelines and scoring rubrics
+  - Location: `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`, `nextjs-app/src/app/api/interview-questions/generate/route.ts`
 
 - Improved UI readability by changing grey/silver text to black:
 
