@@ -17,7 +17,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/toast-migration";
 import {
   DropdownMenu,
   DropdownMenuContent,
