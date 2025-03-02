@@ -1575,34 +1575,53 @@ When working with toast notifications in this project:
 
 1. For components that need to display toast notifications:
 
-   - Import from `@/lib/toast-migration` instead of `@/hooks/use-toast`
+   - ✅ ALWAYS import from `@/lib/toast-migration` instead of `@/hooks/use-toast`
    - This ensures compatibility with the new sonner toast system
    - Example: `import { toast } from "@/lib/toast-migration";`
+   - DO NOT import directly from "sonner" in components
 
 2. The toast migration utility supports all variants including "destructive"
 
    - Use `toast({ variant: "destructive", title: "Error", description: "Error message" })`
-   - This pattern works across all components
+   - For success messages: `toast({ title: "Success", description: "Operation completed" })`
+   - For components using hooks: `const { toast } = useToast(); toast({ title: "Success" })`
 
-3. The main Toaster component is imported directly from sonner in layout.tsx:
-   - `import { Toaster } from "sonner";`
-   - This is the only place where direct import from sonner is used
+3. The main Toaster component is imported from our custom UI component:
+
+   - `import { Toaster } from "@/components/ui/sonner";`
+   - This is ONLY used in the root layout.tsx file
+   - DO NOT add Toaster components to individual pages
+
+4. ✅ MIGRATION COMPLETED:
+
+   - All components have been verified to use the correct imports
+   - No instances of the old toast system remain in the codebase
+   - The migration utility properly handles all use cases including destructive variants
+   - This migration is now complete and won't cause issues in future development
+
+5. ✅ TAILWIND CONFIGURATION FIXED:
+   - Duplicate keyframes and animation definitions have been removed
+   - The tailwind.config.ts file now has only one definition for each keyframe and animation
+   - This issue is now completely resolved and won't recur in future development
 
 # Tailwind Configuration Pattern (2024-03-02)
 
 When working with Tailwind animations and keyframes:
 
-1. All keyframes must be defined only once in the tailwind.config.ts file
+1. ✅ FIXED: All keyframes must be defined only once in the tailwind.config.ts file
 
    - Avoid duplicate definitions of keyframes like 'accordion-down' and 'accordion-up'
    - Check for existing definitions before adding new ones
+   - This issue has been fixed and verified in the current configuration
 
-2. All animation definitions must also be unique
+2. ✅ FIXED: All animation definitions must also be unique
 
    - The same animation name cannot be defined multiple times
    - This prevents the "object literal cannot have multiple properties with the same name" error
+   - This issue has been fixed and verified in the current configuration
 
 3. When adding new shadcn UI components:
    - Check if they require new keyframes or animations
    - Add them to the existing configuration without duplication
    - Test the build to ensure no conflicts
+   - ALWAYS verify that no duplicate keyframes or animations are introduced
