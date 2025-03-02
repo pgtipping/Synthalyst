@@ -3,12 +3,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import OpenAI from "openai";
-import type { TrainingPlanContent } from "@/types/trainingPlan";
+import { Groq } from "groq-sdk";
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// Initialize Groq client
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 // Updated schema to match our simplified form
@@ -49,7 +48,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = generatePlanSchema.parse(body);
 
-    // Generate sections using OpenAI
+    // Generate sections using Groq with Mixtral
     const sections = await generateSectionsWithAI(validatedData);
 
     // Create the content object that will be stored as JSON
@@ -106,7 +105,7 @@ export async function POST(req: Request) {
           validatedData.description ||
           `Training plan for ${validatedData.title}`,
         objectives: validatedData.objectives,
-        content: content as TrainingPlanContent,
+        content: JSON.stringify(content),
         userId: session.user.id,
       },
     });
@@ -204,9 +203,9 @@ async function generateSectionsWithAI(
       }
     `;
 
-    // Call OpenAI API
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    // Call Groq API with Mixtral model
+    const response = await groq.chat.completions.create({
+      model: "mixtral-8x7b-32768",
       messages: [
         {
           role: "system",
@@ -220,20 +219,19 @@ async function generateSectionsWithAI(
       ],
       temperature: 0.7,
       max_tokens: 4000,
-      response_format: { type: "json_object" },
     });
 
     // Parse the response
     const content = response.choices[0].message.content;
     if (!content) {
-      throw new Error("No content returned from OpenAI");
+      throw new Error("No content returned from Groq");
     }
 
     try {
       const parsedContent = JSON.parse(content);
       return parsedContent.sections || [];
     } catch (error) {
-      console.error("Failed to parse OpenAI response:", error);
+      console.error("Failed to parse Groq response:", error);
       // Fallback to the original generation method
       return generateSectionsFallback(
         data.objectives,
@@ -241,7 +239,7 @@ async function generateSectionsWithAI(
       );
     }
   } catch (error) {
-    console.error("Error calling OpenAI:", error);
+    console.error("Error calling Groq:", error);
     // Fallback to the original generation method
     return generateSectionsFallback(
       data.objectives,
