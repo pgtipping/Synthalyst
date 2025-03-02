@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
