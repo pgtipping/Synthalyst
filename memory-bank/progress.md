@@ -2,6 +2,13 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed TypeScript errors in Interview Questions Generator
+
+  - Added proper type annotations to callback parameters in filter and map functions
+  - Fixed implicit 'any' type errors that were causing build failures in Vercel deployment
+  - Replaced 'any' type with more specific 'unknown' type where appropriate
+  - Location: `nextjs-app/src/app/api/interview-questions/generate/route.ts`
+
 - ✅ Fixed critical security issue with exposed API key
 
   - Replaced all instances of `NEXT_PUBLIC_GROQ_API_KEY` with server-side only `GROQ_API_KEY`
