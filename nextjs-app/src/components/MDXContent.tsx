@@ -5,9 +5,8 @@ interface MDXContentProps {
 }
 
 const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
-  // Extract the title from the first H1 heading
+  // Extract the title from the first H1 heading and remove it from content
   const titleMatch = content.match(/^# (.*$)/m);
-  const title = titleMatch ? titleMatch[1] : "Training Plan Creator Guide";
 
   // Remove the first H1 heading from the content
   let processedContent = content;
@@ -123,7 +122,6 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
 
   return (
     <>
-      <h1 className="text-4xl font-bold mt-8 mb-4">{title}</h1>
       <div className="my-8">
         <img
           src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"
