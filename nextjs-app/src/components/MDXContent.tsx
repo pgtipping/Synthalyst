@@ -62,6 +62,23 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
 
     // Process images - convert to proper HTML
     .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
+      // Special handling for team images
+      if (
+        src.includes("synthalyst-team.jpg") ||
+        src.includes("team/synthalyst-team")
+      ) {
+        return `<div class="my-8">
+          <img src="/images/synthalyst-team.png" alt="${
+            alt || "Synthalyst Team"
+          }" class="rounded-lg shadow-md mx-auto max-w-full" />
+          ${
+            alt
+              ? `<p class="text-center text-sm text-gray-500 mt-2">${alt}</p>`
+              : ""
+          }
+        </div>`;
+      }
+
       return `<div class="my-8">
         <img src="${src}" alt="${alt}" class="rounded-lg shadow-md mx-auto max-w-full" />
         ${
@@ -94,30 +111,51 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
     // Process horizontal rules
     .replace(/^---$/gm, '<hr class="my-8 border-t border-gray-300" />')
 
-    // Process tables
-    .replace(/\n\|(.*)\|\n\|([-:| ]+)\|\n/g, (match, headers) => {
-      const headerCells = headers
+    // Improved table processing
+    // First, process the entire table structure
+    .replace(/^\|(.*\|)+\n\|([-:\| ]+\|)+\n(\|(.*\|)+\n)+/gm, (match) => {
+      // Split the table into rows
+      const rows = match.trim().split("\n");
+
+      // Extract header row and separator row
+      const headerRow = rows[0];
+      // Separator row is at index 1, but we don't need to use it
+      const bodyRows = rows.slice(2);
+
+      // Process header cells
+      const headerCells = headerRow
         .split("|")
+        .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
         .map(
-          (cell: string) =>
-            `<th class="border p-2 bg-gray-100">${cell.trim()}</th>`
+          (cell) =>
+            `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`
         )
         .join("");
-      return `<table class="w-full my-6 border-collapse"><thead><tr>${headerCells}</tr></thead><tbody>`;
-    })
-    .replace(/\|(.*)\|\n(?!\|[-:| ]+\|)/g, (match, cells) => {
-      const tableCells = cells
-        .split("|")
-        .map((cell: string) => `<td class="border p-2">${cell.trim()}</td>`)
+
+      // Process body rows
+      const bodyRowsHtml = bodyRows
+        .map((row) => {
+          const cells = row
+            .split("|")
+            .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
+            .map((cell) => `<td class="border p-2">${cell.trim()}</td>`)
+            .join("");
+
+          return `<tr>${cells}</tr>`;
+        })
         .join("");
-      return `<tr>${tableCells}</tr>`;
-    })
-    .replace(/\|(.*)\|\n\n/g, (match, cells) => {
-      const tableCells = cells
-        .split("|")
-        .map((cell: string) => `<td class="border p-2">${cell.trim()}</td>`)
-        .join("");
-      return `<tr>${tableCells}</tr></tbody></table>\n\n`;
+
+      // Construct the complete table
+      return `<div class="overflow-x-auto my-6">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>${headerCells}</tr>
+          </thead>
+          <tbody>
+            ${bodyRowsHtml}
+          </tbody>
+        </table>
+      </div>`;
     });
 
   return (
