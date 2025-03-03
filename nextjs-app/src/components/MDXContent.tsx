@@ -138,6 +138,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
       return `<tr>${tableCells}</tr></tbody></table>\n\n`;
     });
 
+  // Return the processed content without the placeholder image
   return (
     <>
       <div
