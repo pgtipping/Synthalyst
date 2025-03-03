@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 const config: Config = {
   darkMode: ["class"],
@@ -98,9 +99,58 @@ const config: Config = {
         "collapsible-down": "collapsible-down 0.2s ease-out",
         "collapsible-up": "collapsible-up 0.2s ease-out",
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: "100%",
+            color: "var(--tw-prose-body)",
+            lineHeight: "1.75",
+            a: {
+              color: "var(--tw-prose-links)",
+              textDecoration: "underline",
+              fontWeight: "500",
+            },
+            h1: {
+              marginTop: "1.5em",
+              marginBottom: "0.5em",
+            },
+            h2: {
+              marginTop: "1.25em",
+              marginBottom: "0.5em",
+            },
+            h3: {
+              marginTop: "1em",
+              marginBottom: "0.5em",
+            },
+            p: {
+              marginTop: "1em",
+              marginBottom: "1em",
+            },
+            img: {
+              marginTop: "1.5em",
+              marginBottom: "1.5em",
+            },
+            table: {
+              width: "100%",
+              marginTop: "1.5em",
+              marginBottom: "1.5em",
+              borderCollapse: "collapse",
+            },
+            "thead th": {
+              borderBottom: "1px solid var(--tw-prose-th-borders)",
+              padding: "0.5em",
+              textAlign: "left",
+            },
+            "tbody td": {
+              padding: "0.5em",
+              borderBottom: "1px solid var(--tw-prose-td-borders)",
+            },
+          },
+        },
+      },
     },
   },
-  plugins: [animate],
+  plugins: [animate, typography],
 };
 
 export default config;

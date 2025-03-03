@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import MDXContent from "@/components/MDXContent";
 
 interface Post {
   id: string;
@@ -227,7 +228,7 @@ export default function BlogPostPage() {
             </div>
           </div>
 
-          <div className="prose max-w-none mb-8">{post.content}</div>
+          <MDXContent content={post.content} />
 
           <div className="flex flex-wrap gap-2 mb-8">
             {post.categories.map((category) => (
