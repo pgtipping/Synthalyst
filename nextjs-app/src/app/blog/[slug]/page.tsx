@@ -195,9 +195,9 @@ export default function BlogPostPage() {
                 height={40}
                 className="rounded-full"
               />
-              <div>
-                <p className="font-medium">{post.author.name}</p>
-                <p className="text-sm text-gray-500">
+              <div className="flex flex-col">
+                <p className="font-medium leading-tight">{post.author.name}</p>
+                <p className="text-sm text-gray-500 mt-1">
                   {new Date(post.createdAt).toLocaleDateString()}
                 </p>
               </div>
