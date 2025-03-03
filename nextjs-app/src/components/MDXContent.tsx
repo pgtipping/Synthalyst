@@ -14,8 +14,76 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
     processedContent = content.replace(titleMatch[0], "");
   }
 
-  // Process content to properly render markdown
-  processedContent = processedContent
+  // Function to process tables
+  const processTable = (tableContent: string) => {
+    const rows = tableContent.trim().split("\n");
+
+    if (rows.length < 3) return tableContent; // Not a valid table
+
+    // Extract header row and separator row
+    const headerRow = rows[0];
+    // Separator row is at index 1, but we don't need to use it
+    const bodyRows = rows.slice(2);
+
+    // Process header cells
+    const headerCells = headerRow
+      .split("|")
+      .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
+      .map(
+        (cell) =>
+          `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`
+      )
+      .join("");
+
+    // Process body rows
+    const bodyRowsHtml = bodyRows
+      .map((row) => {
+        const cells = row
+          .split("|")
+          .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
+          .map((cell) => `<td class="border p-2">${cell.trim()}</td>`)
+          .join("");
+
+        return `<tr>${cells}</tr>`;
+      })
+      .join("");
+
+    // Construct the complete table
+    return `<div class="overflow-x-auto my-6">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr>${headerCells}</tr>
+        </thead>
+        <tbody>
+          ${bodyRowsHtml}
+        </tbody>
+      </table>
+    </div>`;
+  };
+
+  // Find and process all tables in the content
+  const tableRegex = /\n\|(.*\|)\n\|([-:\| ]+\|)\n(\|(.*\|)\n)+/g;
+  let match;
+  let lastIndex = 0;
+  let result = "";
+
+  // Process content in chunks, handling tables separately
+  while ((match = tableRegex.exec(processedContent)) !== null) {
+    // Add everything up to the table
+    result += processedContent.slice(lastIndex, match.index);
+
+    // Process and add the table
+    result += processTable(match[0]);
+
+    // Update the last index
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add any remaining content after the last table
+  result += processedContent.slice(lastIndex);
+
+  // Now process the rest of the markdown in the result
+  result = result
     // Process headings (# Heading 1, ## Heading 2, etc.)
     .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mt-8 mb-4">$1</h1>')
     .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-bold mt-8 mb-4">$1</h2>')
@@ -109,54 +177,64 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
     )
 
     // Process horizontal rules
-    .replace(/^---$/gm, '<hr class="my-8 border-t border-gray-300" />')
+    .replace(/^---$/gm, '<hr class="my-8 border-t border-gray-300" />');
 
-    // Improved table processing
-    // First, process the entire table structure
-    .replace(/^\|(.*\|)+\n\|([-:\| ]+\|)+\n(\|(.*\|)+\n)+/gm, (match) => {
-      // Split the table into rows
-      const rows = match.trim().split("\n");
+  // Direct approach for the specific table format in the blog post
+  // This is a fallback in case the table wasn't caught by the regex above
+  if (
+    result.includes("| Weak Objective") &&
+    result.includes("| Strong Objective")
+  ) {
+    const tableStart = result.indexOf("| Weak Objective");
+    const tableEnd = result.indexOf("## Using Templates", tableStart);
 
-      // Extract header row and separator row
-      const headerRow = rows[0];
-      // Separator row is at index 1, but we don't need to use it
-      const bodyRows = rows.slice(2);
+    if (tableStart !== -1 && tableEnd !== -1) {
+      const tableContent = result.substring(tableStart, tableEnd).trim();
+      const tableRows = tableContent.split("\n");
 
-      // Process header cells
-      const headerCells = headerRow
-        .split("|")
-        .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
-        .map(
-          (cell) =>
-            `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`
-        )
-        .join("");
+      if (tableRows.length >= 3) {
+        // Create HTML table
+        const headerCells = tableRows[0]
+          .split("|")
+          .filter((cell) => cell.trim() !== "")
+          .map(
+            (cell) =>
+              `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`
+          )
+          .join("");
 
-      // Process body rows
-      const bodyRowsHtml = bodyRows
-        .map((row) => {
-          const cells = row
-            .split("|")
-            .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
-            .map((cell) => `<td class="border p-2">${cell.trim()}</td>`)
-            .join("");
+        const bodyRowsHtml = tableRows
+          .slice(2)
+          .map((row) => {
+            const cells = row
+              .split("|")
+              .filter((cell) => cell.trim() !== "")
+              .map((cell) => `<td class="border p-2">${cell.trim()}</td>`)
+              .join("");
 
-          return `<tr>${cells}</tr>`;
-        })
-        .join("");
+            return `<tr>${cells}</tr>`;
+          })
+          .join("");
 
-      // Construct the complete table
-      return `<div class="overflow-x-auto my-6">
-        <table class="w-full border-collapse">
-          <thead>
-            <tr>${headerCells}</tr>
-          </thead>
-          <tbody>
-            ${bodyRowsHtml}
-          </tbody>
-        </table>
-      </div>`;
-    });
+        const htmlTable = `<div class="overflow-x-auto my-6">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr>${headerCells}</tr>
+            </thead>
+            <tbody>
+              ${bodyRowsHtml}
+            </tbody>
+          </table>
+        </div>`;
+
+        // Replace the markdown table with the HTML table
+        result =
+          result.substring(0, tableStart) +
+          htmlTable +
+          result.substring(tableEnd);
+      }
+    }
+  }
 
   return (
     <>
@@ -176,7 +254,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
                   prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
                   prose-ul:list-disc prose-ol:list-decimal prose-li:my-2
                   prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic"
-        dangerouslySetInnerHTML={{ __html: processedContent }}
+        dangerouslySetInnerHTML={{ __html: result }}
       />
     </>
   );
