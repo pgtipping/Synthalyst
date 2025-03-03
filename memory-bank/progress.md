@@ -2,6 +2,19 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Enhanced Training Plan Creator with improved UX and LLM integration
+
+  - Simplified the form structure with a focus on essential inputs
+  - Implemented a progressive disclosure pattern for advanced options
+  - Added tooltips with helpful guidance for each field
+  - Enhanced LLM integration with a two-stage approach (Gemini + Llama)
+  - Added premium resource recommendations for premium users
+  - Enhanced the Llama prompt for free users to provide better resource recommendations
+  - Added visual distinction for premium resources with badges and styling
+  - Added a help icon linking to the comprehensive guide
+  - Improved the resource display with a grid layout and clear visual hierarchy
+  - Location: `nextjs-app/src/app/training-plan/components/PlanForm.tsx`, `nextjs-app/src/lib/llama.ts`, `nextjs-app/src/app/api/training-plan/enhanced-generate/route.ts`, `nextjs-app/src/app/training-plan/client-component.tsx`
+
 - ✅ Fixed session handling in Training Plan components
 
   - Fixed an issue where user email in the form didn't match the session email
