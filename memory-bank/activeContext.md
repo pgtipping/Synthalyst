@@ -12,6 +12,8 @@ We're currently working on improving the blog post display and enhancing the use
    - Ensured the author name is at the same level as the author image
    - Positioned the date directly below the author name
    - Enhanced the visual hierarchy with proper spacing and typography
+   - Changed paragraph text color from gray to black for better readability
+   - Updated dark mode text color from gray-300 to gray-100 for better contrast
    - Replaced emoji icons with professional Radix UI icons for views and likes
    - Added transition effect to the like button for better interactivity
    - Improved icon alignment and spacing for a more polished look
