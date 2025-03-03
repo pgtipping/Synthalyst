@@ -5,8 +5,18 @@ interface MDXContentProps {
 }
 
 const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
+  // Extract the title from the first H1 heading
+  const titleMatch = content.match(/^# (.*$)/m);
+  const title = titleMatch ? titleMatch[1] : "Training Plan Creator Guide";
+
+  // Remove the first H1 heading from the content
+  let processedContent = content;
+  if (titleMatch) {
+    processedContent = content.replace(titleMatch[0], "");
+  }
+
   // Process content to properly render markdown
-  const processedContent = content
+  processedContent = processedContent
     // Process headings (# Heading 1, ## Heading 2, etc.)
     .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mt-8 mb-4">$1</h1>')
     .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-bold mt-8 mb-4">$1</h2>')
@@ -113,6 +123,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
 
   return (
     <>
+      <h1 className="text-4xl font-bold mt-8 mb-4">{title}</h1>
       <div className="my-8">
         <img
           src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"
