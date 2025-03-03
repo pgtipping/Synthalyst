@@ -5,11 +5,8 @@ interface MDXContentProps {
 }
 
 const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
-  // Add a single main image at the top of the content
-  const enhancedContent = addMainImage(content);
-
   // Process content to properly render markdown
-  const processedContent = enhancedContent
+  const processedContent = content
     // Process headings (# Heading 1, ## Heading 2, etc.)
     .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mt-8 mb-4">$1</h1>')
     .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-bold mt-8 mb-4">$1</h2>')
@@ -54,12 +51,8 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
       '<a href="$2" class="text-blue-600 hover:underline">$1</a>'
     )
 
-    // Process images - but we'll handle our main image separately
+    // Process images - convert to proper HTML
     .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
-      // Skip processing our main image which is already properly formatted
-      if (src.includes("training-plan-creator-hero.jpg")) {
-        return match;
-      }
       return `<div class="my-8">
         <img src="${src}" alt="${alt}" class="rounded-lg shadow-md mx-auto max-w-full" />
         ${
@@ -119,43 +112,27 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
     });
 
   return (
-    <div
-      className="prose prose-lg max-w-none mb-8 
-                prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
-                prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-4 prose-p:leading-relaxed
-                prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
-                prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto
-                prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
-                prose-ul:list-disc prose-ol:list-decimal prose-li:my-2
-                prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic"
-      dangerouslySetInnerHTML={{ __html: processedContent }}
-    />
+    <>
+      <div className="my-8">
+        <img
+          src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"
+          alt="Training Plan Creator Overview"
+          className="rounded-lg shadow-md mx-auto max-w-full"
+        />
+      </div>
+      <div
+        className="prose prose-lg max-w-none mb-8 
+                  prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
+                  prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-4 prose-p:leading-relaxed
+                  prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
+                  prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto
+                  prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
+                  prose-ul:list-disc prose-ol:list-decimal prose-li:my-2
+                  prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic"
+        dangerouslySetInnerHTML={{ __html: processedContent }}
+      />
+    </>
   );
 };
-
-// Function to add a single main image at the top of the content
-function addMainImage(content: string): string {
-  // Find the first heading (# Heading)
-  const firstHeadingMatch = content.match(/^# (.*$)/m);
-
-  if (!firstHeadingMatch) return content;
-
-  // Get the position of the first heading
-  const headingPosition = content.indexOf(firstHeadingMatch[0]);
-
-  // Split the content at the heading
-  const beforeHeading = content.substring(0, headingPosition);
-  const headingAndAfter = content.substring(headingPosition);
-
-  // Insert the main image HTML directly (not as markdown) before the first heading
-  const mainImageHtml = `<div class="my-8">
-  <img src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" 
-       alt="Training Plan Creator Overview" 
-       class="rounded-lg shadow-md mx-auto max-w-full" />
-</div>`;
-
-  // Combine everything
-  return beforeHeading + mainImageHtml + headingAndAfter;
-}
 
 export default MDXContent;
