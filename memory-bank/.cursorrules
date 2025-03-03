@@ -1864,7 +1864,7 @@ When implementing changes to the Training Plan Creator, follow the approach outl
          .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
          .map(
            (cell) =>
-             `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`
+             `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
          )
          .join("");
 
@@ -1874,10 +1874,15 @@ When implementing changes to the Training Plan Creator, follow the approach outl
            const cells = row
              .split("|")
              .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
-             .map((cell) => `<td class="border p-2">${cell.trim()}</td>`)
+             .map(
+               (cell) =>
+                 `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
+             )
              .join("");
 
-           return `<tr>${cells}</tr>`;
+           // Add zebra striping for better readability
+           const rowClass = rowIndex % 2 === 0 ? "" : "bg-gray-50";
+           return `<tr class="${rowClass}">${cells}</tr>`;
          })
          .join("");
 
@@ -1896,6 +1901,7 @@ When implementing changes to the Training Plan Creator, follow the approach outl
      ```
 
   3. **Implement a direct content-specific fallback**:
+
      ```jsx
      // Direct approach for the specific table format in the blog post
      if (
@@ -1916,7 +1922,7 @@ When implementing changes to the Training Plan Creator, follow the approach outl
              .filter((cell) => cell.trim() !== "")
              .map(
                (cell) =>
-                 `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`
+                 `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
              )
              .join("");
 
@@ -1926,10 +1932,15 @@ When implementing changes to the Training Plan Creator, follow the approach outl
                const cells = row
                  .split("|")
                  .filter((cell) => cell.trim() !== "")
-                 .map((cell) => `<td class="border p-2">${cell.trim()}</td>`)
+                 .map(
+                   (cell) =>
+                     `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
+                 )
                  .join("");
 
-               return `<tr>${cells}</tr>`;
+               // Add zebra striping for better readability
+               const rowClass = rowIndex % 2 === 0 ? "" : "bg-gray-50";
+               return `<tr class="${rowClass}">${cells}</tr>`;
              })
              .join("");
 
@@ -1961,3 +1972,52 @@ When implementing changes to the Training Plan Creator, follow the approach outl
   - Filter out empty cells from the start/end of rows
   - Use proper semantic HTML with `thead` and `tbody` elements
   - Apply consistent styling to headers and cells
+
+### Table Styling in MDX Content - 2024-03-05 16:45
+
+- Tables should be styled using a modern, professional design that enhances readability:
+
+  ```jsx
+  // Enhanced table styling
+  return `<div class="my-8 overflow-hidden rounded-lg shadow-sm border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>${headerCells}</tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          ${bodyRowsHtml}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+  ```
+
+- Header cells should use this styling:
+
+  ```jsx
+  `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`;
+  ```
+
+- Body cells should use this styling:
+
+  ```jsx
+  `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`;
+  ```
+
+- Implement zebra striping for better row distinction:
+
+  ```jsx
+  // Add zebra striping for better readability
+  const rowClass = rowIndex % 2 === 0 ? "" : "bg-gray-50";
+  return `<tr class="${rowClass}">${cells}</tr>`;
+  ```
+
+- Key aspects of this styling:
+  - Rounded corners and subtle shadow for the table container
+  - Proper spacing with padding (px-6 py-4)
+  - Consistent typography with text-sm
+  - Semantic color scheme (text-gray-900 for headers, text-gray-700 for body)
+  - Zebra striping for alternate rows (bg-gray-50)
+  - Subtle borders between rows (divide-y divide-gray-100)
+  - Overflow handling for mobile responsiveness (overflow-x-auto)
