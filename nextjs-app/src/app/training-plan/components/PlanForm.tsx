@@ -41,12 +41,7 @@ import {
 } from "@/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import {
-  Badge,
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import {
   Sparkles,
   Download,
@@ -80,6 +75,39 @@ interface GeneratedPlan {
   isPremiumUser: boolean;
   resourceCount: number;
 }
+
+// Now, let's create our own Alert components since the import is missing
+const Alert = ({
+  children,
+  className,
+  variant,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  variant?: "default" | "destructive";
+}) => {
+  return (
+    <div
+      className={`p-4 rounded-md border ${
+        variant === "destructive"
+          ? "bg-red-50 border-red-200 text-red-800"
+          : "bg-gray-50 border-gray-200"
+      } ${className || ""}`}
+    >
+      {children}
+    </div>
+  );
+};
+
+const AlertTitle = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <h5 className="font-medium mb-1 flex items-center gap-2">{children}</h5>
+  );
+};
+
+const AlertDescription = ({ children }: { children: React.ReactNode }) => {
+  return <div className="text-sm">{children}</div>;
+};
 
 export default function PlanForm() {
   const router = useRouter();
@@ -356,12 +384,9 @@ export default function PlanForm() {
             size="sm"
             onClick={() => {
               navigator.clipboard.writeText(plan.content);
-              toast({
-                title: "Copied to clipboard",
-                description:
-                  "The training plan has been copied to your clipboard.",
-                duration: 3000,
-              });
+              toast.success(
+                "The training plan has been copied to your clipboard."
+              );
             }}
           >
             <Copy className="h-4 w-4 mr-2" />
