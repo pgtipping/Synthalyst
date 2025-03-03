@@ -184,17 +184,6 @@ export default function BlogPostPage() {
         />
 
         <article className="prose prose-lg max-w-none">
-          {post.coverImage && (
-            <div className="relative h-96 mb-8">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                fill
-                className="object-cover rounded-lg"
-              />
-            </div>
-          )}
-
           <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
 
           <div className="flex items-center justify-between mb-8">
