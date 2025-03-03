@@ -11,7 +11,11 @@
   - Positioned the date directly below the author name
   - Enhanced the visual hierarchy with proper spacing and typography
   - Fixed image rendering issues in MDX content
-  - Fixed table rendering in markdown content with a more robust regex pattern
+  - Completely revised table rendering with a multi-strategy approach:
+    - Pre-process tables before other markdown elements
+    - Use a dedicated function to handle table conversion
+    - Implement a direct content-specific fallback for the learning objectives table
+    - Process tables in chunks to maintain context
   - Improved table styling with proper header and cell formatting
   - Added overflow handling for tables on mobile devices
   - Location: `nextjs-app/src/app/blog/[slug]/page.tsx`, `nextjs-app/src/components/MDXContent.tsx`
