@@ -12,7 +12,10 @@ We're currently working on improving the blog post display and enhancing the use
    - Ensured the author name is at the same level as the author image
    - Positioned the date directly below the author name
    - Enhanced the visual hierarchy with proper spacing and typography
-   - Location: `nextjs-app/src/app/blog/[slug]/page.tsx`
+   - Adjusted blog post content width to match the comment section width (max-w-4xl)
+   - Added more white space on the sides for better readability
+   - Removed max-w-none from prose container to respect parent width constraints
+   - Location: `nextjs-app/src/app/blog/[slug]/page.tsx`, `nextjs-app/src/components/MDXContent.tsx`
 
 2. ✅ FIXED: MDX Content Rendering:
 

@@ -2022,3 +2022,36 @@ When implementing changes to the Training Plan Creator, follow the approach outl
   - Zebra striping for alternate rows (bg-gray-50)
   - Subtle borders between rows (divide-y divide-gray-100)
   - Overflow handling for mobile responsiveness (overflow-x-auto)
+
+### Blog Post Layout Pattern - 2024-03-05 18:30
+
+- Blog post content should use a constrained width to improve readability:
+
+  ```jsx
+  <article className="prose prose-lg max-w-4xl mx-auto">
+    {/* Blog post content */}
+  </article>
+  ```
+
+- The MDXContent component should respect parent width constraints:
+
+  ```jsx
+  <div
+    className="prose prose-lg mb-8 
+              prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
+              prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-4 prose-p:leading-relaxed
+              prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
+              prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto
+              prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
+              prose-ul:list-disc prose-ol:list-decimal prose-li:my-2
+              prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic"
+    dangerouslySetInnerHTML={{ __html: result }}
+  />
+  ```
+
+- Key aspects of this pattern:
+  - Use `max-w-4xl` for blog post content to match comment section width
+  - Avoid using `max-w-none` which would override parent width constraints
+  - Center content with `mx-auto` for balanced white space on both sides
+  - Maintain consistent width between article content and comments section
+  - This width provides optimal readability while adding sufficient white space

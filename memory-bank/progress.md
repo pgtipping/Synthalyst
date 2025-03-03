@@ -10,6 +10,9 @@
   - Ensured the author name is at the same level as the author image
   - Positioned the date directly below the author name
   - Enhanced the visual hierarchy with proper spacing and typography
+  - Adjusted blog post content width to match the comment section width (max-w-4xl)
+  - Added more white space on the sides for better readability
+  - Removed max-w-none from prose container to respect parent width constraints
   - Fixed image rendering issues in MDX content
   - Completely revised table rendering with a multi-strategy approach:
     - Pre-process tables before other markdown elements
