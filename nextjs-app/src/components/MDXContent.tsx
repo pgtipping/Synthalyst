@@ -60,8 +60,26 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
       '<a href="$2" class="text-blue-600 hover:underline">$1</a>'
     )
 
-    // Process images - convert to proper HTML
+    // Process images - convert to proper HTML and handle special cases
     .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
+      // Handle special case for team image
+      if (
+        src.includes("synthalyst-team.jpg") ||
+        src.includes("team/synthalyst-team")
+      ) {
+        return `<div class="my-8">
+          <img src="/images/synthalyst-team.png" alt="${
+            alt || "Synthalyst Team"
+          }" class="rounded-lg shadow-md mx-auto max-w-full" />
+          ${
+            alt
+              ? `<p class="text-center text-sm text-gray-500 mt-2">${alt}</p>`
+              : ""
+          }
+        </div>`;
+      }
+
+      // Handle other images
       return `<div class="my-8">
         <img src="${src}" alt="${alt}" class="rounded-lg shadow-md mx-auto max-w-full" />
         ${
@@ -121,26 +139,17 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
     });
 
   return (
-    <>
-      <div className="my-8">
-        <img
-          src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"
-          alt="Training Plan Creator Overview"
-          className="rounded-lg shadow-md mx-auto max-w-full"
-        />
-      </div>
-      <div
-        className="prose prose-lg max-w-none mb-8 
-                  prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
-                  prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-4 prose-p:leading-relaxed
-                  prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
-                  prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto
-                  prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
-                  prose-ul:list-disc prose-ol:list-decimal prose-li:my-2
-                  prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic"
-        dangerouslySetInnerHTML={{ __html: processedContent }}
-      />
-    </>
+    <div
+      className="prose prose-lg max-w-none mb-8 
+                prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
+                prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-4 prose-p:leading-relaxed
+                prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
+                prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto
+                prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
+                prose-ul:list-disc prose-ol:list-decimal prose-li:my-2
+                prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic"
+      dangerouslySetInnerHTML={{ __html: processedContent }}
+    />
   );
 };
 
