@@ -5,8 +5,11 @@ interface MDXContentProps {
 }
 
 const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
+  // Add images to specific sections
+  const enhancedContent = addImagesToContent(content);
+
   // Process content to properly render markdown
-  const processedContent = content
+  const processedContent = enhancedContent
     // Process headings (# Heading 1, ## Heading 2, etc.)
     .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mt-8 mb-4">$1</h1>')
     .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-bold mt-8 mb-4">$1</h2>')
@@ -125,5 +128,92 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
     />
   );
 };
+
+// Function to add images to specific sections of the content
+function addImagesToContent(content: string): string {
+  // Split content by sections to insert images at appropriate locations
+  const sections = content.split(/^## /gm);
+
+  if (sections.length <= 1) return content;
+
+  // Add hero image after the main title
+  let result =
+    sections[0] +
+    `
+
+![Training Plan Creator Overview](https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80)
+
+`;
+
+  // Add image for "What is the Training Plan Creator?" section
+  if (sections.length > 1) {
+    result += `## ${sections[1]}
+
+![AI-powered training plan creation](https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80)
+
+`;
+  }
+
+  // Add image for "Creating Your First Training Plan" section
+  if (sections.length > 2) {
+    result += `## ${sections[2]}
+
+![Step-by-step guide to creating a training plan](https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80)
+
+`;
+  }
+
+  // Add image for "Writing Effective Learning Objectives" section
+  if (sections.length > 3) {
+    result += `## ${sections[3]}
+
+![SMART learning objectives framework](https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80)
+
+`;
+  }
+
+  // Add image for "Using Templates" section
+  if (sections.length > 4) {
+    result += `## ${sections[4]}
+
+![Training plan templates](https://images.unsplash.com/photo-1572021335469-31706a17aaef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80)
+
+`;
+  }
+
+  // Add image for "Getting the Best Results" section
+  if (sections.length > 5) {
+    result += `## ${sections[5]}
+
+![Optimizing your training plan](https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80)
+
+`;
+  }
+
+  // Add image for "Combining Multiple Plans" section
+  if (sections.length > 6) {
+    result += `## ${sections[6]}
+
+![Creating learning paths with multiple plans](https://images.unsplash.com/photo-1531403009284-440f080d1e12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80)
+
+`;
+  }
+
+  // Add image for "Best Practices for Training Plan Implementation" section
+  if (sections.length > 7) {
+    result += `## ${sections[7]}
+
+![Implementing your training plan effectively](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1171&q=80)
+
+`;
+  }
+
+  // Add remaining sections if any
+  for (let i = 8; i < sections.length; i++) {
+    result += `## ${sections[i]}`;
+  }
+
+  return result;
+}
 
 export default MDXContent;
