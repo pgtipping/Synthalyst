@@ -69,5 +69,6 @@ export interface TrainingPlan {
     tags?: string[];
     difficulty?: string;
     version?: string;
+    premiumResources?: boolean;
   };
 }

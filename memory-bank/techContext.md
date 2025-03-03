@@ -42,7 +42,7 @@
 
 1. Directory Structure:
 
-   ```
+   ```tree
    nextjs-app/
    ├── src/
    │   ├── app/
@@ -65,6 +65,7 @@
    - next.config.ts: Next.js configuration
 
 3. Required Dependencies:
+
    ```json
    {
      "dependencies": {
@@ -179,7 +180,7 @@
    - Type checking
    - Code reviews
 
-# Technical Context - 2024-02-27
+## Technical Context - 2024-02-27
 
 ## Development Environment
 
@@ -231,7 +232,8 @@
   "@botpress/sdk": "0.4.0",
   "groq-sdk": "^0.15.0",
   "openai": "^4.85.1",
-  "@xenova/transformers": "^2.17.2"
+  "@xenova/transformers": "^2.17.2",
+  "@google/generative-ai": "^0.2.0"
 }
 ```
 
@@ -669,9 +671,11 @@ The Interview Questions Generator implements a consistent UI pattern with the fo
    - The component uses shadcn UI components (Card, Tabs, ScrollArea) for the overall structure
 
 4. **Responsive Design**:
+
    - Media queries handle layout changes on smaller screens
    - Flexbox properties adjust for different screen sizes
    - Example:
+
      ```css
      @media (max-width: 640px) {
        .scoring-rubric .bg-indigo-50 {
@@ -784,3 +788,15 @@ The application has successfully migrated from the old shadcn UI toast system to
    - Fixed: Removed duplicate keyframes and animation definitions
    - Verified: No duplicate properties in the configuration
    - This issue is now completely resolved and won't recur in future development
+
+## AI Models Configuration
+
+### Gemini Model
+
+- Current version: "gemini-2.0-flash"
+- Implementation: Centralized in `nextjs-app/src/lib/gemini.ts`
+- Access method: Use `getGeminiModel()` function to get the latest model version
+- Environment variable: `GEMINI_API_KEY` (server-side only)
+- Used in:
+  - Model comparison tool (`nextjs-app/src/app/model-comparison/modelComparison.ts`)
+  - Enhanced training plan generator (`nextjs-app/src/app/api/training-plan/enhanced-generate/route.ts`)

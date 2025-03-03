@@ -23,6 +23,7 @@ The current focus is on maintaining the stability of the application after succe
    - This issue is now completely resolved and won't recur in future development
 
 3. ✅ ENHANCED: Interview Questions Generator UI improvements:
+
    - Redesigned the scoring rubric display with a more professional and consistent look
    - Replaced the green color scheme and star ratings with a clean, indigo-based design that matches the other tabs
    - Created a new `generateProfessionalRubricHtml` function in the API route to ensure consistent styling
@@ -31,6 +32,15 @@ The current focus is on maintaining the stability of the application after succe
    - Enhanced the visual hierarchy and readability of the scoring rubric
    - Ensured a consistent design language across all tabs (Questions, Evaluation Tips, Scoring Rubric)
    - Location: `nextjs-app/src/app/api/interview-questions/generate/route.ts`, `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
+
+4. ✅ UPDATED: Gemini model version in model comparison tool:
+   - Updated the Gemini model to use the latest "gemini-2.0-flash" version in `gemini.ts`
+   - Verified that the model comparison tool in `modelComparison.ts` is correctly using the updated model
+   - Confirmed that all other references to Gemini in the codebase are using the `getGeminiModel()` function
+   - Checked that the enhanced training plan generator in `enhanced-generate/route.ts` is using the updated model
+   - Ensured that environment variables are correctly set up to use the `GEMINI_API_KEY`
+   - This update ensures that all components using Gemini are using the latest model version
+   - Location: `nextjs-app/src/lib/gemini.ts`, `nextjs-app/src/app/model-comparison/modelComparison.ts`, `nextjs-app/src/app/api/training-plan/enhanced-generate/route.ts`
 
 These changes have successfully fixed the Vercel deployment issues, and the application is now building and deploying correctly with all the new shadcn UI components. A thorough code review has confirmed that all components are using the correct imports and there are no remaining instances of the old toast system.
 
@@ -311,3 +321,17 @@ Previous changes:
 - Environment variables need to be set correctly for both development and production
 - The mock Prisma client should be kept in sync with the actual Prisma schema
 - We should consider adding more comprehensive validation tests for API endpoints
+
+## Training Plan Creator Implementation Guide
+
+The current focus is on enhancing the Training Plan Creator app with improved LLM integration, simplified user interface, and better resource recommendations. We've created a comprehensive implementation guide that outlines the approach for these enhancements:
+
+1. ✅ CREATED: Training Plan Creator Implementation Guide:
+   - Created a detailed guide at `guides/trainingPlanCreator.md` outlining the implementation approach
+   - Documented the current implementation status with two separate approaches to plan generation
+   - Outlined a form redesign with mandatory vs. optional fields and tooltips
+   - Proposed a two-stage LLM approach using Gemini + Search API and Llama 3.2 3b
+   - Included implementation steps for API endpoints, form components, and UI improvements
+   - Provided code examples for the enhanced LLM integration and form redesign
+   - Outlined a user guide creation plan and testing strategy
+   - This guide will serve as the reference for all future work on the Training Plan Creator

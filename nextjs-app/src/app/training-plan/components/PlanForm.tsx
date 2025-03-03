@@ -45,6 +45,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { InfoIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/lib/toast-migration";
 import type { TrainingPlan } from "@/types/trainingPlan";
+import { Badge } from "@/components/ui/badge";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
 // Updated schema with only essential fields required
 const formSchema = z.object({
@@ -147,6 +149,7 @@ export default function PlanForm({
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<PreviewPlan | null>(null);
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -275,7 +278,8 @@ export default function PlanForm({
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/training-plan/generate", {
+      // Use the enhanced API endpoint instead of the original one
+      const response = await fetch("/api/training-plan/enhanced-generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -349,6 +353,26 @@ export default function PlanForm({
               Guide
             </Link>
           </Button>
+        </div>
+
+        {/* Premium Features Banner */}
+        <div className="bg-muted p-4 rounded-lg mb-6">
+          <div className="flex items-center">
+            <Badge variant={isPremium ? "default" : "outline"}>
+              {isPremium ? "Premium" : "Premium Only"}
+            </Badge>
+            <h3 className="text-lg font-medium ml-2">Enhanced Resources</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {isPremium
+              ? "Your plan will include up-to-date resources from across the web."
+              : "Upgrade to premium to include curated, up-to-date resources in your training plans."}
+          </p>
+          {!isPremium && !premiumLoading && (
+            <Button variant="outline" size="sm" className="mt-2" asChild>
+              <Link href="/pricing">Upgrade</Link>
+            </Button>
+          )}
         </div>
 
         {/* Essential Fields Section */}

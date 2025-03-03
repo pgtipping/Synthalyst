@@ -21,6 +21,37 @@
 - Use smaller spinners (h-4 w-4) for inline or button loading states
 - Include appropriate text feedback based on the context
 
+## AI Integration Patterns - 2024-03-02 16:45
+
+### Gemini Model Usage Pattern - 2024-03-02 16:45
+
+- Always use the centralized `getGeminiModel()` function from `nextjs-app/src/lib/gemini.ts` to access the Gemini model
+- Never hardcode the model name in individual components or API routes
+- The current model version is "gemini-2.0-flash"
+- Environment variable: `GEMINI_API_KEY` (server-side only)
+- Example usage:
+
+  ```typescript
+  import { getGeminiModel } from "@/lib/gemini";
+
+  const generateContent = async (prompt: string) => {
+    try {
+      const model = getGeminiModel();
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (error) {
+      console.error("Error generating content with Gemini:", error);
+      throw error;
+    }
+  };
+  ```
+
+- Key components using Gemini:
+  - Model comparison tool (`nextjs-app/src/app/model-comparison/modelComparison.ts`)
+  - Enhanced training plan generator (`nextjs-app/src/app/api/training-plan/enhanced-generate/route.ts`)
+- Always implement proper error handling for API calls
+- Consider implementing fallback mechanisms for when the API is unavailable
+
 ## Testing Patterns - 2024-02-27 14:30
 
 ### ARIA Roles in Test Mocks - 2024-03-02 10:15
@@ -1673,3 +1704,15 @@ The Interview Questions Generator follows a consistent UI pattern across all its
    - Proper spacing is maintained across all device sizes
 
 This pattern ensures a consistent, professional appearance across the entire Interview Questions Generator feature.
+
+## Training Plan Creator Implementation Guide (2024-03-02)
+
+The Training Plan Creator implementation guide is located at `guides/trainingPlanCreator.md`. This guide should be referenced for all future work on the Training Plan Creator app. It contains:
+
+1. Current implementation status
+2. Form redesign with mandatory vs. optional fields
+3. Enhanced LLM integration using a two-stage approach (Gemini + Search API and Llama 3.2 3b)
+4. Implementation steps for API endpoints, form components, and UI improvements
+5. User guide creation plan and testing strategy
+
+When implementing changes to the Training Plan Creator, follow the approach outlined in this guide to ensure consistency and alignment with the project goals.
