@@ -1,6 +1,24 @@
-# Active Context (2024-03-04)
+# Active Context (2024-03-05)
 
-## Current Focus (2024-03-04)
+## Current Focus (2024-03-05)
+
+We're currently working on improving the blog post display and enhancing the user experience of the application.
+
+1. ✅ IMPLEMENTED: Blog Post Display Improvements:
+
+   - Removed the cover image from blog post pages to fix broken image issues
+   - Updated the author image to consistently use the `synthalyst-team.png` image from the public directory
+   - Improved the author section layout for better alignment of elements
+   - Ensured the author name is at the same level as the author image
+   - Positioned the date directly below the author name
+   - Enhanced the visual hierarchy with proper spacing and typography
+   - Location: `nextjs-app/src/app/blog/[slug]/page.tsx`
+
+2. ✅ FIXED: MDX Content Rendering:
+
+   - Addressed issues with image rendering in MDX content
+   - Ensured proper handling of the team image in the MDX content component
+   - Location: `nextjs-app/src/components/MDXContent.tsx`
 
 We're currently working on enhancing the Training Plan Creator feature and improving the blog system with MDX support.
 

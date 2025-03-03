@@ -1759,3 +1759,59 @@ The Training Plan Creator implementation guide is located at `guides/trainingPla
 5. User guide creation plan and testing strategy
 
 When implementing changes to the Training Plan Creator, follow the approach outlined in this guide to ensure consistency and alignment with the project goals.
+
+## Blog Post Display Patterns - 2024-03-05 10:45
+
+### Author Section Layout Pattern - 2024-03-05 10:45
+
+- The author section in blog posts should follow this layout pattern:
+  ```jsx
+  <div className="flex items-center justify-between mb-8">
+    <div className="flex items-center">
+      <div className="flex-shrink-0 mr-3">
+        <Image
+          src="/images/synthalyst-team.png"
+          alt={post.author.name || "Synthalyst Team"}
+          width={40}
+          height={40}
+          className="rounded-full"
+        />
+      </div>
+      <div className="flex flex-col justify-center">
+        <span className="text-base font-medium block">{post.author.name}</span>
+        <span className="text-sm text-gray-500 block">
+          {new Date(post.createdAt).toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+  </div>
+  ```
+- Key aspects of this pattern:
+  - Use `flex-shrink-0` on the image container to prevent it from resizing
+  - Use `mr-3` for precise spacing between image and text
+  - Use `flex flex-col justify-center` for the text container to vertically center content
+  - Use `block` display on text elements for proper stacking
+  - Use `text-base` for author name and `text-sm text-gray-500` for date
+
+### Image Handling in Blog Posts - 2024-03-05 10:45
+
+- Team images should always use the consistent path: `/images/synthalyst-team.png`
+- Cover images have been removed from blog post pages to prevent broken image issues
+- For MDX content, special handling is needed for team images:
+  ```jsx
+  if (
+    src.includes("synthalyst-team.jpg") ||
+    src.includes("team/synthalyst-team")
+  ) {
+    return `<div class="my-8">
+      <img src="/images/synthalyst-team.png" alt="${
+        alt || "Synthalyst Team"
+      }" class="rounded-lg shadow-md mx-auto max-w-full" />
+      ${
+        alt
+          ? `<p class="text-center text-sm text-gray-500 mt-2">${alt}</p>`
+          : ""
+      }
+    </div>`;
+  }
+  ```

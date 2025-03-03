@@ -1,4 +1,17 @@
-# Progress Report - 2024-03-04
+# Progress Report - 2024-03-05
+
+## Recent Updates (Last 24 Hours)
+
+- ✅ Improved Blog Post Display
+
+  - Removed the cover image from blog post pages to fix broken image issues
+  - Updated the author image to consistently use the `synthalyst-team.png` image from the public directory
+  - Improved the author section layout for better alignment of elements
+  - Ensured the author name is at the same level as the author image
+  - Positioned the date directly below the author name
+  - Enhanced the visual hierarchy with proper spacing and typography
+  - Fixed image rendering issues in MDX content
+  - Location: `nextjs-app/src/app/blog/[slug]/page.tsx`, `nextjs-app/src/components/MDXContent.tsx`
 
 ## Recent Updates (Last 24 Hours)
 
