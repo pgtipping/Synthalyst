@@ -14,7 +14,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
     processedContent = content.replace(titleMatch[0], "");
   }
 
-  // Function to process tables
+  // Function to process tables with enhanced styling
   const processTable = (tableContent: string) => {
     const rows = tableContent.trim().split("\n");
 
@@ -31,33 +31,41 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
       .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
       .map(
         (cell) =>
-          `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`
+          `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
       )
       .join("");
 
     // Process body rows
     const bodyRowsHtml = bodyRows
-      .map((row) => {
+      .map((row, rowIndex) => {
         const cells = row
           .split("|")
           .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
-          .map((cell) => `<td class="border p-2">${cell.trim()}</td>`)
+          .map(
+            (cell) =>
+              `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
+          )
           .join("");
 
-        return `<tr>${cells}</tr>`;
+        // Add zebra striping for better readability
+        const rowClass = rowIndex % 2 === 0 ? "" : "bg-gray-50";
+
+        return `<tr class="${rowClass}">${cells}</tr>`;
       })
       .join("");
 
-    // Construct the complete table
-    return `<div class="overflow-x-auto my-6">
-      <table class="w-full border-collapse">
-        <thead>
-          <tr>${headerCells}</tr>
-        </thead>
-        <tbody>
-          ${bodyRowsHtml}
-        </tbody>
-      </table>
+    // Construct the complete table with enhanced styling
+    return `<div class="my-8 overflow-hidden rounded-lg shadow-sm border border-gray-200">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>${headerCells}</tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            ${bodyRowsHtml}
+          </tbody>
+        </table>
+      </div>
     </div>`;
   };
 
@@ -193,38 +201,46 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
       const tableRows = tableContent.split("\n");
 
       if (tableRows.length >= 3) {
-        // Create HTML table
+        // Create HTML table with enhanced styling
         const headerCells = tableRows[0]
           .split("|")
           .filter((cell) => cell.trim() !== "")
           .map(
             (cell) =>
-              `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`
+              `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
           )
           .join("");
 
         const bodyRowsHtml = tableRows
           .slice(2)
-          .map((row) => {
+          .map((row, rowIndex) => {
             const cells = row
               .split("|")
               .filter((cell) => cell.trim() !== "")
-              .map((cell) => `<td class="border p-2">${cell.trim()}</td>`)
+              .map(
+                (cell) =>
+                  `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
+              )
               .join("");
 
-            return `<tr>${cells}</tr>`;
+            // Add zebra striping for better readability
+            const rowClass = rowIndex % 2 === 0 ? "" : "bg-gray-50";
+
+            return `<tr class="${rowClass}">${cells}</tr>`;
           })
           .join("");
 
-        const htmlTable = `<div class="overflow-x-auto my-6">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr>${headerCells}</tr>
-            </thead>
-            <tbody>
-              ${bodyRowsHtml}
-            </tbody>
-          </table>
+        const htmlTable = `<div class="my-8 overflow-hidden rounded-lg shadow-sm border border-gray-200">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>${headerCells}</tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-100">
+                ${bodyRowsHtml}
+              </tbody>
+            </table>
+          </div>
         </div>`;
 
         // Replace the markdown table with the HTML table
