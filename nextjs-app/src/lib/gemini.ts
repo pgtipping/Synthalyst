@@ -1,107 +1,107 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { z } from "zod";
 
-// Ensure API key is defined
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  console.error("GEMINI_API_KEY is not defined in environment variables");
-}
+// Initialize the Google Generative AI with the API key
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || "");
 
-export const geminiApi = new GoogleGenerativeAI(apiKey || "");
+// Define the schema for a resource
+const resourceSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  author: z.string().optional(),
+  type: z.enum(["book", "article", "course", "tool", "community"]),
+  url: z.string().optional(),
+  publicationDate: z.string().optional(),
+  description: z.string(),
+  relevanceScore: z.number().min(1).max(10),
+});
 
-export const getGeminiModel = () => {
-  return geminiApi.getGenerativeModel({ model: "gemini-2.0-flash" });
-};
+// Define the schema for the resources array
+const resourcesSchema = z.array(resourceSchema);
 
-interface ResourceQueryParams {
-  objectives: string[];
-  targetAudienceLevel: string;
-  industry: string;
-}
-
-interface Resource {
-  id: string;
-  title: string;
-  author?: string;
-  type: "book" | "article" | "course" | "tool" | "community";
-  url?: string;
-  publicationDate?: string;
-  description: string;
-  relevanceScore: number;
-}
+// Type for the resources
+export type Resource = z.infer<typeof resourceSchema>;
 
 /**
- * Fetches relevant resources using Gemini model with search capabilities
+ * Generates resources for a training plan using Google's Gemini API
  */
-export async function fetchResourcesWithGemini(
-  data: ResourceQueryParams
+export async function generateResourcesWithGemini(
+  title: string,
+  objectives: string[],
+  targetAudienceLevel: string,
+  industry?: string,
+  learningStyle?: string
 ): Promise<Resource[]> {
   try {
-    const gemini = getGeminiModel();
+    // Get the Gemini Pro model
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     // Create a prompt for Gemini
     const prompt = `
-      Find current and relevant learning resources for a training plan with these objectives:
+      As an expert instructional designer and educational resource curator, recommend high-quality, current resources for a training plan with the following details:
       
-      Objectives: ${data.objectives.join("\n- ")}
-      Target Audience Level: ${data.targetAudienceLevel}
-      ${data.industry ? `Industry: ${data.industry}` : ""}
+      Title: ${title}
+      Learning Objectives: 
+      ${objectives.map((obj) => `- ${obj}`).join("\n")}
+      Target Audience Level: ${targetAudienceLevel}
+      ${industry ? `Industry/Domain: ${industry}` : ""}
+      ${learningStyle ? `Primary Learning Style: ${learningStyle}` : ""}
       
-      Please provide a structured list of resources including:
-      1. Books and articles (with publication dates)
-      2. Online courses and tutorials
-      3. Tools and software
-      4. Communities and forums
+      Provide 8-10 diverse, high-quality resources that directly support the learning objectives. Include a mix of:
       
-      For each resource, include:
-      - Title
-      - Author/Creator
-      - Publication date (if applicable)
-      - URL (if available)
-      - Brief description of relevance
+      1. Books (2-3): Focus on authoritative, well-reviewed books published within the last 5 years when possible. Include classic texts if they remain definitive resources in the field.
       
-      Format your response as a JSON array with the following structure:
-      [
-        {
-          "id": "resource-1",
-          "title": "Resource Title",
-          "author": "Author Name",
-          "type": "book|article|course|tool|community",
-          "url": "https://example.com",
-          "publicationDate": "YYYY-MM-DD",
-          "description": "Brief description of relevance",
-          "relevanceScore": 85
-        }
-      ]
+      2. Online Courses (2-3): Include courses from reputable platforms like Coursera, edX, LinkedIn Learning, or specialized industry platforms. Prioritize courses with strong reviews, expert instructors, and hands-on components.
       
-      Ensure all resources are current, relevant, and appropriate for the target audience level.
-      Organize resources by difficulty level (beginner, intermediate, advanced) and relevance to specific learning objectives.
+      3. Articles/Guides (1-2): Include comprehensive guides, white papers, or research articles from respected sources that provide deep insights on specific topics.
+      
+      4. Tools/Software (1-2): If applicable, recommend tools or software that learners can use to practice skills or implement concepts from the training.
+      
+      5. Communities/Forums (1): Suggest active professional communities, forums, or discussion groups where learners can ask questions and continue learning.
+      
+      For each resource:
+      - Ensure it directly supports at least one specific learning objective
+      - Match the difficulty level to the target audience
+      - Prioritize resources with practical, actionable content over purely theoretical materials
+      - Include resources that reflect current best practices and methodologies
+      - Consider the industry/domain context in your recommendations
+      
+      Format your response as a JSON array of resources with the following structure for each resource:
+      {
+        "id": "unique-id-1", // Generate a unique ID for each resource
+        "title": "Resource Title",
+        "author": "Author Name", // Optional, include if available
+        "type": "book", // One of: "book", "article", "course", "tool", "community"
+        "url": "https://example.com/resource", // Optional, include if available
+        "publicationDate": "2023", // Optional, include if available (year is sufficient)
+        "description": "A concise description of the resource and how it supports specific learning objectives.",
+        "relevanceScore": 9 // A number from 1-10 indicating how relevant this resource is to the learning objectives
+      }
+      
+      Return ONLY the JSON array with no additional text or explanation.
     `;
 
-    // Call Gemini API
-    const result = await gemini.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens: 2048,
-      },
-    });
-
-    const response = await result.response;
+    // Generate content with Gemini
+    const result = await model.generateContent(prompt);
+    const response = result.response;
     const text = response.text();
 
-    // Extract JSON from the response
+    // Extract the JSON array from the response
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
-      throw new Error("No valid JSON found in Gemini response");
+      throw new Error("Failed to extract JSON from Gemini response");
     }
 
-    // Parse the JSON
-    const resources = JSON.parse(jsonMatch[0]) as Resource[];
+    const jsonString = jsonMatch[0];
 
-    return resources;
+    // Parse the JSON and validate with Zod
+    const parsedResources = JSON.parse(jsonString);
+    const validatedResources = resourcesSchema.parse(parsedResources);
+
+    return validatedResources;
   } catch (error) {
-    console.error("Error parsing Gemini response:", error);
-    // Return empty array if there's an error
+    console.error("Error generating resources with Gemini:", error);
+    // Return an empty array if there's an error
     return [];
   }
 }

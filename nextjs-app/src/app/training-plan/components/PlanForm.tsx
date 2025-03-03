@@ -41,20 +41,30 @@ import {
 } from "@/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Badge,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import {
+  Sparkles,
+  Download,
+  Copy,
+  InfoIcon,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 
 // Updated schema with mandatory and optional fields
 const formSchema = z.object({
-  // Mandatory fields
-  title: z.string().min(3, "Title must be at least 3 characters"),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
   objectives: z
     .array(z.string())
     .min(1, "At least one learning objective is required"),
   targetAudienceLevel: z.string().min(1, "Target audience level is required"),
   duration: z.string().min(1, "Duration is required"),
-
-  // Optional fields
-  description: z.string().optional(),
   prerequisites: z.string().optional(),
   learningStylePrimary: z.string().optional(),
   industry: z.string().optional(),
@@ -63,33 +73,12 @@ const formSchema = z.object({
   additionalNotes: z.string().optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
+// Define the type for the generated plan
 interface GeneratedPlan {
-  id: string;
-  title: string;
   content: string;
-  objectives?: string[];
-  targetAudienceLevel?: string;
-  duration?: string;
-  description?: string;
-  prerequisites?: string;
-  learningStylePrimary?: string;
-  industry?: string;
-  materialsRequired?: string[];
-  certificationDetails?: string;
-  additionalNotes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  isPremium?: boolean;
-  resources?: {
-    id: string;
-    title: string;
-    type: string;
-    author?: string;
-    description: string;
-    url?: string;
-  }[];
+  model: string;
+  isPremiumUser: boolean;
+  resourceCount: number;
 }
 
 export default function PlanForm() {
@@ -101,15 +90,16 @@ export default function PlanForm() {
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedPlan | null>(
     null
   );
+  const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<FormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
+      description: "",
       objectives: [""],
       targetAudienceLevel: "",
       duration: "",
-      description: "",
       prerequisites: "",
       learningStylePrimary: "",
       industry: "",
@@ -119,7 +109,7 @@ export default function PlanForm() {
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!session?.user?.email) {
       toast.error("You must be logged in to generate a training plan");
       return;
@@ -127,21 +117,15 @@ export default function PlanForm() {
 
     setIsGenerating(true);
     setGeneratedPlan(null);
+    setError(null);
 
     try {
-      // Add user email to the form data
-      const formData = {
-        ...values,
-        userEmail: session.user.email,
-      };
-
-      // Call the enhanced-generate endpoint
-      const response = await fetch("/api/training-plan/enhanced-generate", {
+      const response = await fetch("/api/training-plan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(values),
       });
 
       if (!response.ok) {
@@ -150,19 +134,33 @@ export default function PlanForm() {
       }
 
       const data = await response.json();
+      setGeneratedPlan({
+        content: data.plan,
+        model: data.model,
+        isPremiumUser: data.isPremiumUser,
+        resourceCount: data.resourceCount,
+      });
 
-      if (data.success && data.data) {
-        setGeneratedPlan(data.data);
-        toast.success("Training plan generated successfully!");
-      } else {
-        throw new Error("Invalid response format");
-      }
+      // Save the plan to local storage
+      const savedPlans = JSON.parse(localStorage.getItem("savedPlans") || "[]");
+      const newPlan = {
+        id: Date.now().toString(),
+        title: values.title,
+        createdAt: new Date().toISOString(),
+        content: data.plan,
+        model: data.model,
+        isPremiumUser: data.isPremiumUser,
+        resourceCount: data.resourceCount,
+      };
+
+      localStorage.setItem(
+        "savedPlans",
+        JSON.stringify([...savedPlans, newPlan])
+      );
     } catch (error) {
-      console.error("Error generating training plan:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to generate training plan"
+      console.error("Error generating plan:", error);
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
       );
     } finally {
       setIsGenerating(false);
@@ -180,6 +178,9 @@ export default function PlanForm() {
         throw new Error("You must be logged in to save a training plan");
       }
 
+      // Get the title from the form
+      const title = form.getValues("title");
+
       // Save the generated plan
       const response = await fetch("/api/training-plan/saved", {
         method: "POST",
@@ -187,8 +188,7 @@ export default function PlanForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: generatedPlan.id,
-          title: generatedPlan.title,
+          title,
           content: JSON.stringify(generatedPlan),
         }),
       });
@@ -292,16 +292,88 @@ export default function PlanForm() {
     );
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold">Create a Training Plan</h2>
-        <p className="text-muted-foreground">
-          Fill in the essential information below to generate a detailed
-          training plan.
-        </p>
-      </div>
+  // Update the GeneratedPlanDisplay component
+  const GeneratedPlanDisplay = ({ plan }: { plan: GeneratedPlan }) => {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Sparkles className="h-5 w-5 text-yellow-500" />
+            <h3 className="text-lg font-semibold">Generated Training Plan</h3>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="text-xs">
+              {plan.model}
+            </Badge>
+            {plan.isPremiumUser && (
+              <Badge
+                variant="default"
+                className="bg-gradient-to-r from-amber-500 to-amber-300 text-xs"
+              >
+                Premium
+              </Badge>
+            )}
+          </div>
+        </div>
 
+        {plan.isPremiumUser && plan.resourceCount > 0 && (
+          <Alert className="bg-amber-50 border-amber-200">
+            <InfoIcon className="h-4 w-4 text-amber-500" />
+            <AlertTitle>Premium Resources</AlertTitle>
+            <AlertDescription>
+              Your plan includes {plan.resourceCount} premium AI-curated
+              resources tailored to your objectives.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div
+          className="prose prose-sm max-w-none dark:prose-invert mt-4 border rounded-md p-4 bg-white dark:bg-gray-950"
+          dangerouslySetInnerHTML={{ __html: plan.content }}
+        />
+
+        <div className="flex justify-end space-x-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const blob = new Blob([plan.content], { type: "text/html" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "training-plan.html";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Download HTML
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              navigator.clipboard.writeText(plan.content);
+              toast({
+                title: "Copied to clipboard",
+                description:
+                  "The training plan has been copied to your clipboard.",
+                duration: 3000,
+              });
+            }}
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copy to Clipboard
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
@@ -672,78 +744,26 @@ export default function PlanForm() {
             <Button type="submit" disabled={isGenerating}>
               {isGenerating ? (
                 <>
-                  <Spinner className="mr-2 h-4 w-4" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Generating...
                 </>
               ) : (
-                "Generate Plan"
+                "Generate Training Plan"
               )}
             </Button>
           </div>
         </form>
       </Form>
 
-      {/* Generated Plan Display */}
-      {generatedPlan && (
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold">{generatedPlan.title}</h3>
-              {generatedPlan.isPremium && (
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs px-3 py-1 rounded-full flex items-center">
-                  <span className="mr-1">✨</span>
-                  Premium
-                </div>
-              )}
-            </div>
-            <div
-              className="prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: generatedPlan.content }}
-            />
-
-            {/* Premium Resources Section */}
-            {generatedPlan.resources && generatedPlan.resources.length > 0 && (
-              <div className="mt-8 border-t pt-6">
-                <h4 className="text-lg font-semibold mb-4 flex items-center">
-                  <span className="mr-2">✨</span>
-                  AI-Curated Resources
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {generatedPlan.resources.map((resource) => (
-                    <div
-                      key={resource.id}
-                      className="border rounded-lg p-4 bg-slate-50"
-                    >
-                      <div className="flex justify-between items-start">
-                        <h5 className="font-medium">{resource.title}</h5>
-                        <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
-                          {resource.type}
-                        </span>
-                      </div>
-                      {resource.author && (
-                        <p className="text-sm text-muted-foreground">
-                          by {resource.author}
-                        </p>
-                      )}
-                      <p className="text-sm mt-2">{resource.description}</p>
-                      {resource.url && (
-                        <a
-                          href={resource.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-indigo-600 hover:text-indigo-800 mt-2 inline-block"
-                        >
-                          Visit Resource →
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
+
+      {generatedPlan && <GeneratedPlanDisplay plan={generatedPlan} />}
     </div>
   );
 }
