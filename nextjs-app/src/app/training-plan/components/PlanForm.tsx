@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -84,6 +85,7 @@ interface GeneratedPlan {
 
 export default function PlanForm() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
@@ -112,6 +114,11 @@ export default function PlanForm() {
     setIsGenerating(true);
 
     try {
+      // Check if user is logged in
+      if (!session?.user?.email) {
+        throw new Error("You must be logged in to generate a training plan");
+      }
+
       // Clean up empty values in arrays
       const cleanedValues = { ...values };
 
@@ -135,7 +142,7 @@ export default function PlanForm() {
         },
         body: JSON.stringify({
           ...cleanedValues,
-          userEmail: "user@example.com", // This should be replaced with the actual user email from auth
+          userEmail: session.user.email,
         }),
       });
 
@@ -168,6 +175,11 @@ export default function PlanForm() {
     setIsSubmitting(true);
 
     try {
+      // Check if user is logged in
+      if (!session?.user?.email) {
+        throw new Error("You must be logged in to save a training plan");
+      }
+
       // Save the generated plan
       const response = await fetch("/api/training-plan/saved", {
         method: "POST",

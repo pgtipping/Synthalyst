@@ -1,5 +1,48 @@
 # Project Intelligence - 2024-02-27
 
+## Next.js Development Patterns - 2024-03-04 08:15
+
+### Layout Error Prevention Pattern - 2024-03-04 08:15
+
+- The application has experienced recurring `ChunkLoadError` issues related to `layout.js`
+- Use React 18.2.0 instead of React 19.0.0 to maintain compatibility with dependencies
+- Always clear Next.js cache completely when experiencing build issues: `rm -rf .next`
+- Follow these troubleshooting steps when layout errors occur:
+  1. Check React version and downgrade if needed: `npm install react@18.2.0 react-dom@18.2.0`
+  2. Clear Next.js cache thoroughly: `rm -rf .next`
+  3. Inspect client components in layout for SessionProvider issues
+  4. Incrementally rebuild by simplifying components and gradually adding functionality
+  5. Test thoroughly after each significant change
+- Ensure all components using `useSession` are properly wrapped in a `SessionProvider`
+- Watch for these warning signs:
+  - Error: `[next-auth]: useSession must be wrapped in a <SessionProvider />`
+  - Error: `ChunkLoadError: Loading chunk app/layout failed`
+  - SyntaxError messages in the browser console
+- Client components that need session data:
+  - `nextjs-app/src/components/Header.tsx`
+  - Other components using `useSession` hook
+- The ClientLayout component must be used directly in the RootLayout to provide session data:
+  ```tsx
+  // In layout.tsx
+  export default function RootLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return (
+      <html lang="en">
+        <body>
+          <ClientLayout>
+            <Header />
+            {children}
+            <Toaster />
+          </ClientLayout>
+        </body>
+      </html>
+    );
+  }
+  ```
+
 ## UI Patterns - 2024-03-01 15:30
 
 ### Loading State Pattern - 2024-03-01 15:30

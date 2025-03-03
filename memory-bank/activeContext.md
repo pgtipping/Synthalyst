@@ -1,3 +1,61 @@
+# Active Context (2024-03-04)
+
+## Current Focus (2024-03-04)
+
+We're currently working on enhancing the Training Plan Creator feature and improving the blog system with MDX support.
+
+1. ✅ IMPLEMENTED: MDX Blog Post Processor:
+
+   - Created a script to process MDX files and add them to the database
+   - Implemented frontmatter extraction with support for metadata like title, description, author, tags, etc.
+   - Added proper error handling and type safety
+   - Created a comprehensive README for the script
+   - Added a new npm script to run the processor: `npm run process-mdx`
+   - Successfully processed the "Mastering the Training Plan Creator" blog post
+   - Location: `nextjs-app/scripts/process-mdx-posts.ts`, `nextjs-app/scripts/README.md`
+
+2. ✅ CREATED: Training Plan Creator Guide Blog Post:
+
+   - Created a comprehensive guide for using the Training Plan Creator
+   - Implemented as an MDX file with proper frontmatter
+   - Set as a featured post to increase visibility
+   - Includes sections on overview, step-by-step usage, best practices, and examples
+   - Location: `nextjs-app/src/app/blog/posts/mastering-the-training-plan-creator.mdx`
+
+3. ⚠️ RECURRING ISSUE: `layout.js` SyntaxError causing ChunkLoadError:
+
+   - Error message: "ChunkLoadError: Loading chunk app/layout failed"
+   - Browser console indicates a SyntaxError at line 434, character 29
+   - Multiple attempts to fix this issue have been made, with temporary success
+   - Identified potential causes:
+     - React version mismatch with dependencies (React 19.0.0 vs 18.2.0)
+     - Syntax errors or invisible characters in layout components
+     - Next.js cache corruption
+     - Issues with the SessionProvider in ClientLayout component
+   - Successfully addressed by:
+     - Downgrading React to version 18.2.0
+     - Clearing the Next.js cache thoroughly (rm -rf .next)
+     - Methodically restoring components one by one to isolate the issue
+     - Fixed issues with SessionProvider in the Header component
+   - Current status: Fixed but requires monitoring as the error tends to recur
+   - Location: `nextjs-app/src/app/layout.tsx`, `nextjs-app/src/components/ClientLayout.tsx`, `nextjs-app/src/components/Header.tsx`
+
+4. ✅ RECREATION: Training Plan client component:
+
+   - Successfully recreated the original client-component.tsx that was deleted during troubleshooting
+   - Implemented proper tab navigation between "Saved Plans" and "Create New Plan"
+   - Ensured proper imports for the PlanForm and PlanList components
+   - Updated page.tsx to use the recreated client component
+   - Verified that the component is rendering correctly
+   - Location: `nextjs-app/src/app/training-plan/client-component.tsx`, `nextjs-app/src/app/training-plan/page.tsx`
+
+5. ⚠️ NEXT STEPS: Better error handling and prevention:
+   - Implement more robust error boundaries in layout components
+   - Consider adding explicit TypeScript prop validations to prevent errors
+   - Add comprehensive comments to warn about potential version compatibility issues
+   - Establish a better testing process for component changes
+   - Consider creating a more streamlined development workflow that better preserves cache integrity
+
 # Active Context (2024-03-02)
 
 ## Current Focus (2024-03-02)
@@ -139,199 +197,3 @@ We've successfully implemented and fixed tests for these endpoints using a stand
   - Implemented a scroll area for better handling of large amounts of content
   - Added icons to tab headers for better visual distinction
   - Location: `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
-
-- Enhanced the Interview Questions Generator with evaluation tips and scoring rubric features:
-
-  - Added checkboxes to the form for users to request evaluation tips and scoring rubrics
-  - Updated the API route to generate these additional resources when requested
-  - Modified the UI to display the generated tips and rubric in a user-friendly format
-  - Increased the max tokens limit for the LLM to accommodate the additional content
-  - Enhanced the system prompt to specify expertise in creating evaluation guidelines and scoring rubrics
-  - Location: `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`, `nextjs-app/src/app/api/interview-questions/generate/route.ts`
-
-- Improved UI readability by changing grey/silver text to black:
-
-  - Updated global CSS file to modify default text colors
-  - Changed text-gray-600, text-gray-700, text-gray-800, and text-muted-foreground classes to text-black
-  - Updated multiple pages including Home, About, Services, Tools, Training Plan, and The Synth
-  - Updated components including PlanForm, PlanList, TemplateList, and ChatBot
-  - Changed loading animation dots from grey to black in the ChatBot component
-  - Location: Multiple files across the application
-
-- Fixed SpeedInsights import path:
-
-  - Changed import from '@vercel/speed-insights/next' to '@vercel/speed-insights/react'
-  - Resolved "Module not found: Can't resolve '@vercel/speed-insights/next'" error
-  - Location: `nextjs-app/src/app/layout.tsx`
-
-- Added Vercel Analytics and Speed Insights:
-
-  - Installed @vercel/analytics and @vercel/speed-insights packages
-  - Added Analytics and SpeedInsights components to the root layout
-  - Ensured all pages are tracked for analytics and performance metrics
-  - Location: `nextjs-app/src/app/layout.tsx`
-
-- Successfully deployed the application to Vercel:
-
-  - Fixed the Vercel deployment error by converting the About page to a Client Component
-  - Verified that all pages are properly generated and optimized
-  - Confirmed that the application is now running in production
-  - Deployment logs show successful build and deployment
-  - Location: `memory-bank/vercelLogs.md`
-
-- Fixed Vercel deployment error:
-
-  - Converted the About page to a Client Component by adding "use client" directive
-  - Fixed error: "Event handlers cannot be passed to Client Component props"
-  - Resolved issue with onError handler in Image component
-  - Location: `nextjs-app/src/app/about/page.tsx`
-
-- Fixed 404 errors in navigation links:
-
-  - Restructured pages to follow Next.js App Router conventions
-  - Created proper directory structure for About, Services, and Contact pages
-  - Moved content from flat files to proper page.tsx files in their respective directories
-  - Cleaned up old page files that were no longer needed
-  - Location: `nextjs-app/src/app/about/page.tsx`, `nextjs-app/src/app/services/page.tsx`, `nextjs-app/src/app/contact/page.tsx`
-
-- Improved loading state UI for templates tab:
-
-  - Added a minimum loading time of 500ms to ensure a smoother transition
-  - Enhanced the loading UI with a larger spinner and better messaging
-  - Made the loading state more consistent with the Saved JDs tab
-  - Fixed the issue of brief loading state flashes
-  - Location: `nextjs-app/src/app/jd-developer/page.tsx`, `nextjs-app/src/app/jd-developer/components/TemplateList.tsx`
-
-- Fixed template filtering in JD Developer:
-
-  - Updated the saved JDs API endpoint to properly filter out templates
-  - Enhanced the templates API endpoint to ensure only valid templates are returned
-  - Added double-checking of parsed content to verify template status
-  - Improved error handling for JSON parsing
-  - Location: `nextjs-app/src/app/api/jd-developer/saved/route.ts`, `nextjs-app/src/app/api/jd-developer/templates/route.ts`
-
-- Enhanced JD Developer template guide:
-  - Improved UI with better styling and visual hierarchy
-  - Added clear instructions about required fields (Job Title, Employment Type, Position Level, Industry)
-  - Added information about optional fields (Department, Location)
-  - Organized content into sections with proper spacing and icons
-  - Added Pro Tips section with helpful guidance
-  - Fixed tab name reference (changed from "JD Generator" to "Create")
-  - Improved bullet list alignment for better readability
-  - Location: `nextjs-app/src/app/jd-developer/components/TemplateList.tsx`
-
-Previous changes:
-
-- Fixed Vercel deployment issues:
-
-  - Wrapped `useSearchParams()` in a Suspense boundary in the signup page
-  - Refactored the signup page to follow the same pattern as the signin page
-  - Location: `nextjs-app/src/app/auth/signup/page.tsx`
-
-- Fixed JD Developer validation requirements:
-
-  - Removed mandatory education requirements from the API validation schema
-  - Removed mandatory experience requirements from the API validation schema
-  - Removed mandatory certifications requirements from the API validation schema
-  - Ensured proper data handling in the API route for optional fields
-  - Location: `nextjs-app/src/app/api/jd-developer/generate/route.ts`
-
-- Added Google sign-in buttons to both sign-in and sign-up pages
-- Implemented loading states and error handling for Google authentication
-- Fixed duplicate NEXTAUTH_URL entries in the .env file
-- Added clear comments in the .env file to distinguish between local and production URLs
-- Ensured consistent UI design between traditional and Google authentication options
-
-Previous changes:
-
-- Updated the mock Prisma client to support JobDescription, Task, and User models
-- Created comprehensive test files for JD Developer, 2Do, and Auth APIs
-- Fixed Jest configuration to handle ESM modules and browser-specific APIs
-- Updated test assertions to match the actual API response format
-
-## Next Steps (2024-03-02)
-
-1. Gradually migrate all components using the old toast to the new sonner toast
-2. Explore using the new Carousel component for showcasing features on the home page
-3. Consider implementing the Command component for a command palette feature
-4. Test the application thoroughly to ensure the UI component upgrades don't cause any issues
-5. Verify the text readability improvements across all pages in different screen sizes
-6. Consider further UI enhancements for better contrast and accessibility
-7. Monitor analytics data in the Vercel dashboard to gain insights into user behavior
-8. Use Speed Insights data to identify and fix performance bottlenecks
-9. Consider adding custom events tracking for specific user interactions
-10. Verify that all navigation links work correctly throughout the application
-11. Consider enhancing the UI of the About, Services, and Contact pages
-12. Test the template filtering to ensure templates only appear in the templates list
-13. Verify that saved job descriptions don't include templates
-14. Consider adding sample templates for new users to get started quickly
-15. Monitor the Vercel deployment to ensure all fixes are working properly
-16. Test the JD Developer form to ensure it works without education, experience, and certifications
-
-## Active Decisions (2024-03-02)
-
-- Upgraded to the latest version of Shadcn UI to access new components and improvements
-- Created a toast migration utility to ensure backward compatibility with existing code
-- Replaced the deprecated toast component with the new sonner component
-- Added new components (Carousel, Drawer, Command) for future feature enhancements
-- Changed all grey/silver text to black to improve readability throughout the application
-- Updated both global CSS variables and specific component styles to ensure consistent text colors
-- Maintained the existing color scheme for backgrounds and other UI elements
-- Added Vercel Analytics and Speed Insights to track user interactions and performance metrics
-- Integrated analytics components in the root layout to ensure all pages are tracked
-- Restructured pages to follow Next.js App Router conventions for better maintainability and to fix 404 errors
-- Cleaned up old page files to keep the codebase clean and avoid confusion
-- Implemented a minimum loading time for the templates tab to ensure a smoother user experience
-- Enhanced the loading UI to be more consistent with the Saved JDs tab
-- Decided against including sample templates in the codebase, instead providing a comprehensive guide for users to create their own templates
-- Using double-checking of parsed content to ensure proper filtering of templates vs. saved JDs
-- Enhancing the template guide with clear instructions and better UI to improve user experience
-- Making education, experience, and certifications optional in the JD Developer form
-- Using Google OAuth as an additional authentication method alongside email/password
-- Maintaining consistent UI patterns across authentication methods
-- Ensuring clear environment configuration with proper comments
-- Using a standardized mock Prisma client pattern for all API tests
-- Ensuring consistent error handling across all API endpoints
-- Maintaining the mock Prisma client to stay in sync with the actual Prisma schema
-- Replaced the 2Do Task Manager card with the Interview Questions Generator card on the home page
-
-## Considerations (2024-03-02)
-
-- The toast migration utility provides a bridge to gradually migrate to the new sonner toast API
-- New components like Carousel and Drawer offer opportunities for UI enhancements
-- The Command component could be used to implement a command palette for power users
-- We should consider a comprehensive audit of all UI components to ensure consistency
-- Text readability is a critical aspect of user experience and should be prioritized
-- Consistent text colors across the application create a more cohesive user experience
-- Further accessibility improvements could be considered, such as increasing contrast ratios
-- Vercel Analytics provides valuable insights into user behavior and can help identify areas for improvement
-- Speed Insights helps track Web Vitals and other performance metrics to ensure a good user experience
-- Analytics data should be regularly monitored to identify trends and make data-driven decisions
-- Next.js App Router requires a specific directory structure with page.tsx files in their respective directories
-- Proper page structure is essential for navigation to work correctly
-- Loading states should be consistent across the application for a better user experience
-- Minimum loading times can improve perceived performance by preventing brief flashes of loading states
-- The template guide should clearly indicate which fields are required vs. optional
-- The filtering logic for templates vs. saved JDs should be robust and handle edge cases
-- We should consider adding more comprehensive validation tests for API endpoints
-- Error handling should be thoroughly tested for all API endpoints
-- The LLM prompt for job description generation may need adjustments to handle missing fields
-- The Google OAuth configuration needs to be properly set up in the Google Cloud Console
-- Authorized JavaScript origins and redirect URIs need to be configured correctly
-- Environment variables need to be set correctly for both development and production
-- The mock Prisma client should be kept in sync with the actual Prisma schema
-- We should consider adding more comprehensive validation tests for API endpoints
-
-## Training Plan Creator Implementation Guide
-
-The current focus is on enhancing the Training Plan Creator app with improved LLM integration, simplified user interface, and better resource recommendations. We've created a comprehensive implementation guide that outlines the approach for these enhancements:
-
-1. ✅ CREATED: Training Plan Creator Implementation Guide:
-   - Created a detailed guide at `guides/trainingPlanCreator.md` outlining the implementation approach
-   - Documented the current implementation status with two separate approaches to plan generation
-   - Outlined a form redesign with mandatory vs. optional fields and tooltips
-   - Proposed a two-stage LLM approach using Gemini + Search API and Llama 3.2 3b
-   - Included implementation steps for API endpoints, form components, and UI improvements
-   - Provided code examples for the enhanced LLM integration and form redesign
-   - Outlined a user guide creation plan and testing strategy
-   - This guide will serve as the reference for all future work on the Training Plan Creator

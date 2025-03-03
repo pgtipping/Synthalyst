@@ -115,11 +115,11 @@ Basic Information:
 
 1. **Gemini + Search API Stage (Premium Users Only):**
 
-   - Use Google's Gemini model with the Search API to fetch current, relevant resources
+   - Use Google's Gemini-2.0-flash model with the Search API to fetch current, relevant resources
    - Generate a structured list of up-to-date resources
 
-2. **Llama 3.2 3b Preview Stage (All Users):**
-   - Pass the core training plan parameters to Llama 3.2 3b
+2. **Llama 3.2 3b Instruct Model (All Users):**
+   - Pass the core training plan parameters to meta-llama/Llama-3.2-3b-instruct model via the OpenRouter API
    - For premium users: Include the resource recommendations from Gemini as context
    - For free users: Use an enhanced prompt to request detailed resource recommendations
    - Generate the complete training plan with sections, activities, and assessments
@@ -274,7 +274,7 @@ Basic Information:
        `;
      }
 
-     // Call Llama API
+     // Call openrouter API
      // Process and structure the response
      // Return formatted training plan
    }
@@ -305,7 +305,7 @@ Basic Information:
 
 ## User Guide Creation
 
-Create a comprehensive user guide for the Training Plan Creator to be published as a blog post. The guide should include:
+Create a comprehensive user guide for the Training Plan Creator to be published as a blog post. Blog post should be published on the Synth Blog as a featured post. The guide should include:
 
 ### Overview Section
 
@@ -350,17 +350,10 @@ Create a comprehensive user guide for the Training Plan Creator to be published 
    </div>
    ```
 
-2. Implement a preview mode before saving:
+2. Enhance the display of generated plans with better formatting and organization
 
-   ```tsx
-   <Button type="button" onClick={handlePreview} disabled={isLoading}>
-     Preview Plan
-   </Button>
-   ```
+3. Add clear visual distinction for premium resources:
 
-3. Enhance the display of generated plans with better formatting and organization
-
-4. Add clear visual distinction for premium resources:
    ```tsx
    <div
      className={`resource-card ${resource.isPremium ? "premium-resource" : ""}`}

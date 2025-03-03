@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -36,12 +37,19 @@ interface SavedPlan {
 
 export default function SavedPlans() {
   const router = useRouter();
+  const { status } = useSession();
   const [plans, setPlans] = useState<SavedPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSavedPlans = async () => {
+      // Don't fetch if not authenticated
+      if (status !== "authenticated") {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch("/api/training-plan/saved");
 
@@ -60,7 +68,7 @@ export default function SavedPlans() {
     };
 
     fetchSavedPlans();
-  }, []);
+  }, [status]);
 
   const handleDelete = async (id: string) => {
     setIsDeleting(id);
