@@ -28,7 +28,7 @@ export default function TrainingPlanClient() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Training Plan Creator</h1>
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/blog/posts/mastering-the-training-plan-creator">
+          <Link href="/blog/mastering-the-training-plan-creator">
             <HelpCircle className="mr-2 h-4 w-4" />
             Guide
           </Link>
