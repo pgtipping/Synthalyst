@@ -183,7 +183,7 @@ export default function BlogPostPage() {
           ]}
         />
 
-        <article className="prose prose-lg max-w-none">
+        <article className="prose prose-lg max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
 
           <div className="flex items-center justify-between mb-8">

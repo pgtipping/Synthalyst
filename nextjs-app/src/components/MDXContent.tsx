@@ -262,7 +262,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
         />
       </div>
       <div
-        className="prose prose-lg max-w-none mb-8 
+        className="prose prose-lg mb-8 
                   prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
                   prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-4 prose-p:leading-relaxed
                   prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
