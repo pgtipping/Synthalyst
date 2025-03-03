@@ -54,27 +54,26 @@ export async function POST(req: Request) {
     }
 
     // Check subscription status
-    const isPro = await subscription.isPremium(validatedData.userEmail);
+    const isPremiumUser = await subscription.isPremium(validatedData.userEmail);
 
-    if (!isPro) {
-      return NextResponse.json(
-        {
-          error:
-            "Pro subscription required to generate enhanced training plans",
-        },
-        { status: 403 }
-      );
+    let resources = null;
+
+    // For premium users only: Fetch resources using Gemini + Search API
+    if (isPremiumUser) {
+      try {
+        resources = await fetchResourcesWithGemini({
+          objectives: validatedData.objectives,
+          targetAudienceLevel: validatedData.targetAudienceLevel,
+          industry: validatedData.industry || "",
+        });
+      } catch (error) {
+        console.error("Error fetching resources with Gemini:", error);
+        // Continue even if resource fetching fails
+      }
     }
 
-    // Fetch relevant resources based on objectives and audience level
-    const resourcesPromise = fetchResourcesWithGemini({
-      objectives: validatedData.objectives,
-      targetAudienceLevel: validatedData.targetAudienceLevel,
-      industry: validatedData.industry || "",
-    });
-
-    // Generate the training plan with Llama
-    const planPromise = generatePlanWithLlama({
+    // Prepare the plan generation parameters
+    const planParams = {
       title: validatedData.title,
       description: validatedData.description || "",
       objectives: validatedData.objectives,
@@ -86,13 +85,12 @@ export async function POST(req: Request) {
       materialsRequired: validatedData.materialsRequired || [],
       certificationDetails: validatedData.certificationDetails || "",
       additionalNotes: validatedData.additionalNotes || "",
-    });
+      isPremiumUser: isPremiumUser,
+      resources: resources,
+    };
 
-    // Wait for both promises to resolve
-    const [resources, planResponse] = await Promise.all([
-      resourcesPromise,
-      planPromise,
-    ]);
+    // Generate the training plan with Llama
+    const planResponse = await generatePlanWithLlama(planParams);
 
     // Check if plan generation was successful
     if (!planResponse.text) {
@@ -122,7 +120,7 @@ export async function POST(req: Request) {
       additionalNotes: validatedData.additionalNotes || "",
       resources: resources,
       generatedAt: new Date().toISOString(),
-      isPro: isPro,
+      isPremium: isPremiumUser,
     };
 
     // Return the generated plan
