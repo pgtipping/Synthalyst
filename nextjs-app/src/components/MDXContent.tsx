@@ -31,7 +31,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
       .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
       .map(
         (cell) =>
-          `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
+          `<th class="px-4 py-4 bg-gray-50 text-left text-base font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
       )
       .join("");
 
@@ -43,7 +43,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
           .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
           .map(
             (cell) =>
-              `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
+              `<td class="px-4 py-4 whitespace-normal text-base text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
           )
           .join("");
 
@@ -57,7 +57,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
     // Construct the complete table with enhanced styling
     return `<div class="my-8 overflow-hidden rounded-lg shadow-sm border border-gray-200">
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="w-auto min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>${headerCells}</tr>
           </thead>
@@ -207,7 +207,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
           .filter((cell) => cell.trim() !== "")
           .map(
             (cell) =>
-              `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
+              `<th class="px-4 py-4 bg-gray-50 text-left text-base font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
           )
           .join("");
 
@@ -219,7 +219,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
               .filter((cell) => cell.trim() !== "")
               .map(
                 (cell) =>
-                  `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
+                  `<td class="px-4 py-4 whitespace-normal text-base text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
               )
               .join("");
 
@@ -232,7 +232,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
 
         const htmlTable = `<div class="my-8 overflow-hidden rounded-lg shadow-sm border border-gray-200">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="w-auto min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>${headerCells}</tr>
               </thead>
