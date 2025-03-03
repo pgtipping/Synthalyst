@@ -187,19 +187,25 @@ export default function BlogPostPage() {
           <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
 
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-4">
-              <Image
-                src="/images/synthalyst-team.png"
-                alt={post.author.name || "Synthalyst Team"}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="flex flex-col">
-                <p className="font-medium leading-tight">{post.author.name}</p>
-                <p className="text-sm text-gray-500 mt-1">
+            <div className="flex items-center">
+              {/* Author image */}
+              <div className="flex-shrink-0 mr-3">
+                <Image
+                  src="/images/synthalyst-team.png"
+                  alt={post.author.name || "Synthalyst Team"}
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+              </div>
+              {/* Author info with completely revised layout */}
+              <div className="flex flex-col justify-center">
+                <span className="text-base font-medium block">
+                  {post.author.name}
+                </span>
+                <span className="text-sm text-gray-500 block">
                   {new Date(post.createdAt).toLocaleDateString()}
-                </p>
+                </span>
               </div>
             </div>
 
