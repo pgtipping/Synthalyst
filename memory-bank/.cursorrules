@@ -1815,3 +1815,55 @@ When implementing changes to the Training Plan Creator, follow the approach outl
     </div>`;
   }
   ```
+
+### Table Rendering in MDX Content - 2024-03-05 14:30
+
+- Tables in MDX content should be processed using a comprehensive regex pattern that handles the entire table structure:
+  ```jsx
+  .replace(/^\|(.*\|)+\n\|([-:\| ]+\|)+\n(\|(.*\|)+\n)+/gm, (match) => {
+    // Split the table into rows
+    const rows = match.trim().split('\n');
+
+    // Extract header row and separator row
+    const headerRow = rows[0];
+    // Separator row is at index 1, but we don't need to use it
+    const bodyRows = rows.slice(2);
+
+    // Process header cells
+    const headerCells = headerRow
+      .split('|')
+      .filter(cell => cell.trim() !== '') // Remove empty cells from start/end
+      .map(cell => `<th class="border p-2 bg-gray-100 font-semibold">${cell.trim()}</th>`)
+      .join('');
+
+    // Process body rows
+    const bodyRowsHtml = bodyRows
+      .map(row => {
+        const cells = row
+          .split('|')
+          .filter(cell => cell.trim() !== '') // Remove empty cells from start/end
+          .map(cell => `<td class="border p-2">${cell.trim()}</td>`)
+          .join('');
+
+        return `<tr>${cells}</tr>`;
+      })
+      .join('');
+
+    // Construct the complete table
+    return `<div class="overflow-x-auto my-6">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr>${headerCells}</tr>
+        </thead>
+        <tbody>
+          ${bodyRowsHtml}
+        </tbody>
+      </table>
+    </div>`;
+  });
+  ```
+- Key aspects of this pattern:
+  - Wrap tables in an `overflow-x-auto` div to handle mobile responsiveness
+  - Filter out empty cells from the start/end of rows
+  - Use proper semantic HTML with `thead` and `tbody` elements
+  - Apply consistent styling to headers and cells
