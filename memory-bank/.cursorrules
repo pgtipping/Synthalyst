@@ -2055,3 +2055,26 @@ When implementing changes to the Training Plan Creator, follow the approach outl
   - Center content with `mx-auto` for balanced white space on both sides
   - Maintain consistent width between article content and comments section
   - This width provides optimal readability while adding sufficient white space
+
+### Icon Usage Pattern - 2024-03-05 19:15
+
+- Use Radix UI icons for a professional and consistent look:
+
+  ```jsx
+  import { EyeOpenIcon, HeartFilledIcon } from "@radix-ui/react-icons";
+
+  // Usage example
+  <span className="flex items-center text-gray-500">
+    <EyeOpenIcon className="w-5 h-5 mr-1" />
+    <span>{post.views}</span>
+  </span>;
+  ```
+
+- Key aspects of this pattern:
+  - Import icons from `@radix-ui/react-icons` library
+  - Use consistent sizing with `w-5 h-5` for most icons
+  - Add appropriate spacing with `mr-1` between icon and text
+  - Use `flex items-center` to align icons with text
+  - Apply `transition-colors` for hover effects on interactive elements
+  - Avoid using emoji icons (👁️, ❤️) in favor of professional SVG icons
+  - Maintain consistent color schemes with the rest of the UI

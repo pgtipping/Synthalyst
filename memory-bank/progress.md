@@ -10,6 +10,9 @@
   - Ensured the author name is at the same level as the author image
   - Positioned the date directly below the author name
   - Enhanced the visual hierarchy with proper spacing and typography
+  - Replaced emoji icons with professional Radix UI icons for views and likes
+  - Added transition effect to the like button for better interactivity
+  - Improved icon alignment and spacing for a more polished look
   - Adjusted blog post content width to match the comment section width (max-w-4xl)
   - Added more white space on the sides for better readability
   - Removed max-w-none from prose container to respect parent width constraints
