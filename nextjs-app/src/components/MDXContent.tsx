@@ -5,24 +5,94 @@ interface MDXContentProps {
 }
 
 const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
-  // Process content to enhance HTML structure if needed
-  // This is a simple implementation - for a more robust solution,
-  // consider using a proper MDX library like next-mdx-remote
-
-  // Convert markdown tables to proper HTML tables with styling
+  // Process content to properly render markdown
   const processedContent = content
-    // Add proper paragraph tags if missing
+    // Process headings (# Heading 1, ## Heading 2, etc.)
+    .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mt-8 mb-4">$1</h1>')
+    .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-bold mt-8 mb-4">$1</h2>')
+    .replace(/^### (.*$)/gm, '<h3 class="text-2xl font-bold mt-6 mb-3">$1</h3>')
+    .replace(/^#### (.*$)/gm, '<h4 class="text-xl font-bold mt-6 mb-2">$1</h4>')
     .replace(
-      /(?<!\n\n)^(?!<h|<p|<ul|<ol|<li|<blockquote|<pre|<table|<div|<img|#)(.+)$/gm,
-      "<p>$2</p>"
+      /^##### (.*$)/gm,
+      '<h5 class="text-lg font-bold mt-4 mb-2">$1</h5>'
     )
-    // Ensure headers have proper spacing
-    .replace(/<h([1-6])>/g, '<h$1 class="mt-8 mb-4">')
-    // Process markdown tables (basic implementation)
+
+    // Process paragraphs - ensure text blocks are wrapped in paragraph tags
+    // This regex looks for text blocks that aren't already HTML elements
+    .replace(
+      /^(?!(#|<h|<p|<ul|<ol|<li|<blockquote|<pre|<table|<div|<img))(.+)$/gm,
+      '<p class="my-4">$2</p>'
+    )
+
+    // Process lists
+    .replace(/^\* (.*)$/gm, '<li class="ml-6 list-disc">$1</li>') // Unordered lists
+    .replace(/^- (.*)$/gm, '<li class="ml-6 list-disc">$1</li>') // Unordered lists with dash
+    .replace(/^(\d+)\. (.*)$/gm, '<li class="ml-6 list-decimal">$2</li>') // Ordered lists
+
+    // Wrap adjacent list items in ul/ol tags
+    .replace(
+      /(<li class="ml-6 list-disc">.*<\/li>\n)+/g,
+      (match) => `<ul class="my-4">${match}</ul>`
+    )
+    .replace(
+      /(<li class="ml-6 list-decimal">.*<\/li>\n)+/g,
+      (match) => `<ol class="my-4">${match}</ol>`
+    )
+
+    // Process emphasis and strong
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
+    .replace(/__(.*?)__/g, "<strong>$1</strong>") // Bold with underscore
+    .replace(/\*(.*?)\*/g, "<em>$1</em>") // Italic
+    .replace(/_(.*?)_/g, "<em>$1</em>") // Italic with underscore
+
+    // Process links
+    .replace(
+      /\[(.*?)\]\((.*?)\)/g,
+      '<a href="$2" class="text-blue-600 hover:underline">$1</a>'
+    )
+
+    // Process images
+    .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
+      return `<div class="my-8">
+        <img src="${src}" alt="${alt}" class="rounded-lg shadow-md mx-auto max-w-full" />
+        ${
+          alt
+            ? `<p class="text-center text-sm text-gray-500 mt-2">${alt}</p>`
+            : ""
+        }
+      </div>`;
+    })
+
+    // Process blockquotes
+    .replace(
+      /^> (.*$)/gm,
+      '<blockquote class="pl-4 border-l-4 border-gray-300 italic my-4">$1</blockquote>'
+    )
+
+    // Process code blocks
+    .replace(/```(.*?)\n([\s\S]*?)```/g, (match, language, code) => {
+      return `<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-md my-6 overflow-x-auto"><code class="language-${
+        language || "text"
+      }">${code.trim()}</code></pre>`;
+    })
+
+    // Process inline code
+    .replace(
+      /`([^`]+)`/g,
+      '<code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm">$1</code>'
+    )
+
+    // Process horizontal rules
+    .replace(/^---$/gm, '<hr class="my-8 border-t border-gray-300" />')
+
+    // Process tables
     .replace(/\n\|(.*)\|\n\|([-:| ]+)\|\n/g, (match, headers) => {
       const headerCells = headers
         .split("|")
-        .map((cell: string) => `<th>${cell.trim()}</th>`)
+        .map(
+          (cell: string) =>
+            `<th class="border p-2 bg-gray-100">${cell.trim()}</th>`
+        )
         .join("");
       return `<table class="w-full my-6 border-collapse"><thead><tr>${headerCells}</tr></thead><tbody>`;
     })
@@ -39,17 +109,6 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
         .map((cell: string) => `<td class="border p-2">${cell.trim()}</td>`)
         .join("");
       return `<tr>${tableCells}</tr></tbody></table>\n\n`;
-    })
-    // Enhance image rendering
-    .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
-      return `<div class="my-8">
-        <img src="${src}" alt="${alt}" class="rounded-lg shadow-md mx-auto max-w-full" />
-        ${
-          alt
-            ? `<p class="text-center text-sm text-gray-500 mt-2">${alt}</p>`
-            : ""
-        }
-      </div>`;
     });
 
   return (
