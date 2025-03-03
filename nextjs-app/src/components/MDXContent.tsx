@@ -264,7 +264,7 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
       <div
         className="prose prose-lg mb-8 
                   prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
-                  prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-4 prose-p:leading-relaxed
+                  prose-p:text-black dark:prose-p:text-gray-100 prose-p:my-4 prose-p:leading-relaxed
                   prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
                   prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto
                   prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
