@@ -168,7 +168,7 @@ export default function Header() {
 
             {/* Tools Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
+              <DropdownMenuTrigger className="flex items-center text-muted-foreground hover:text-foreground transition-colors dropdown-tools-trigger">
                 Tools
                 <ChevronDown className="ml-1 h-4 w-4" />
               </DropdownMenuTrigger>

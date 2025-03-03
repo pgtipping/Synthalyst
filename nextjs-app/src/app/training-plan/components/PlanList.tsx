@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,56 +12,72 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "@/lib/toast-migration";
-import type { TrainingPlan } from "@/types/trainingPlan";
-import { Sparkles, ChevronUp, ChevronDown } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { MoreHorizontal, FileEdit, Trash, Copy } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-interface PlanListProps {
-  onUseAsTemplate: (plan: TrainingPlan) => void;
+// Define the TrainingPlan type
+interface TrainingPlan {
+  id: string;
+  title: string;
+  description?: string;
+  content: string | Record<string, unknown>;
+  updatedAt: string;
+  createdAt: string;
 }
 
-export default function PlanList({ onUseAsTemplate }: PlanListProps) {
-  const { data: session } = useSession();
+export default function PlanList() {
+  const router = useRouter();
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<string[]>([]);
+  const [planToDelete, setPlanToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPlans = async () => {
-      if (!session?.user?.email) return;
-
       try {
         const response = await fetch("/api/training-plan/saved");
         if (!response.ok) {
-          throw new Error("Failed to fetch saved plans");
+          throw new Error("Failed to fetch training plans");
         }
         const data = await response.json();
-        setPlans(data.plans);
+        setPlans(data.data || []);
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch saved plans";
-        setError(errorMessage);
-        toast({
-          title: "Error",
-          description: "Failed to load saved plans. Please try again.",
-          variant: "destructive",
-        });
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch training plans"
+        );
+        toast.error("Failed to load training plans");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPlans();
-  }, [session?.user?.email]);
+  }, []);
 
-  const handleDelete = async (planId: string) => {
-    if (!session?.user?.email) return;
+  const handleEdit = (id: string) => {
+    router.push(`/training-plan/edit/${id}`);
+  };
 
+  const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`/api/training-plan/${planId}`, {
+      const response = await fetch(`/api/training-plan/${id}`, {
         method: "DELETE",
       });
 
@@ -68,217 +85,174 @@ export default function PlanList({ onUseAsTemplate }: PlanListProps) {
         throw new Error("Failed to delete training plan");
       }
 
-      setPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== planId));
-      toast({
-        title: "Success",
-        description: "Training plan deleted successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to delete training plan",
-        variant: "destructive",
-      });
+      setPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== id));
+      toast.success("Training plan deleted successfully");
+    } catch (err) {
+      toast.error("Failed to delete training plan");
+      console.error(err);
+    } finally {
+      setPlanToDelete(null);
     }
   };
 
-  const toggleExpanded = (planId: string) => {
-    if (expanded.includes(planId)) {
-      setExpanded(expanded.filter((id) => id !== planId));
-    } else {
-      setExpanded([...expanded, planId]);
+  const handleDuplicate = async (id: string) => {
+    try {
+      const response = await fetch(`/api/training-plan/${id}/duplicate`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to duplicate training plan");
+      }
+
+      const data = await response.json();
+      setPlans((prevPlans) => [data.plan, ...prevPlans]);
+      toast.success("Training plan duplicated successfully");
+    } catch (err) {
+      toast.error("Failed to duplicate training plan");
+      console.error(err);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <div className="text-center py-8">Loading your training plans...</div>
     );
   }
 
   if (error) {
-    return <div className="p-4 bg-red-50 text-red-700 rounded-md">{error}</div>;
+    return (
+      <div className="text-center py-8">
+        <h2 className="text-xl font-semibold mb-2">Error</h2>
+        <p className="text-red-500 mb-4">{error}</p>
+        <Button onClick={() => window.location.reload()}>Try Again</Button>
+      </div>
+    );
+  }
+
+  if (!plans || plans.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <h2 className="text-xl font-semibold mb-2">No Training Plans</h2>
+        <p className="text-gray-500 mb-4">
+          You haven&apos;t created any training plans yet.
+        </p>
+        <Button onClick={() => router.push("/training-plan?tab=create")}>
+          Create Your First Plan
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <ScrollArea className="h-[600px] pr-4">
-      <div className="space-y-4">
-        {plans.map((plan) => (
-          <Card key={plan.id} className="mb-4">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>{plan.title}</span>
-                <div className="flex items-center">
-                  {plan.metadata?.premiumResources && (
-                    <Badge
-                      variant="outline"
-                      className="ml-2 bg-indigo-100 text-indigo-800"
-                    >
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Premium
-                    </Badge>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleExpanded(plan.id)}
-                    aria-label={
-                      expanded.includes(plan.id) ? "Collapse" : "Expand"
-                    }
-                  >
-                    {expanded.includes(plan.id) ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </CardTitle>
-              <CardDescription>
-                {plan.description || `Training plan for ${plan.title}`}
-              </CardDescription>
-            </CardHeader>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {plans.map((plan) => {
+          const content =
+            typeof plan.content === "string"
+              ? JSON.parse(plan.content)
+              : plan.content;
 
-            {expanded.includes(plan.id) && (
-              <CardContent>
-                <div className="space-y-4">
+          const isDraft = content?.metadata?.isDraft || false;
+
+          return (
+            <Card key={plan.id} className="overflow-hidden">
+              <CardHeader>
+                <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-medium mb-2">Learning Objectives</h4>
-                    <ul className="list-disc list-inside space-y-1">
-                      {plan.objectives
-                        .slice(0, expanded.includes(plan.id) ? undefined : 3)
-                        .map((objective, index) => (
-                          <li key={index} className="text-sm text-black">
-                            {objective}
-                          </li>
-                        ))}
-                    </ul>
-                    {plan.objectives.length > 3 && (
-                      <Button
-                        variant="link"
-                        className="p-0 h-auto mt-2"
-                        onClick={() => toggleExpanded(plan.id)}
-                      >
-                        {expanded.includes(plan.id)
-                          ? "Show less"
-                          : `Show ${plan.objectives.length - 3} more`}
+                    <CardTitle className="line-clamp-1">{plan.title}</CardTitle>
+                    <CardDescription className="line-clamp-1">
+                      {formatDistanceToNow(new Date(plan.updatedAt), {
+                        addSuffix: true,
+                      })}
+                    </CardDescription>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Actions</span>
                       </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(plan.id)}>
+                        <FileEdit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDuplicate(plan.id)}
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        Duplicate
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => setPlanToDelete(plan.id)}
+                      >
+                        <Trash className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm line-clamp-2">
+                    {plan.description || "No description provided."}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {isDraft && (
+                      <Badge variant="outline" className="bg-yellow-50">
+                        Draft
+                      </Badge>
                     )}
+                    <Badge variant="outline">
+                      {content?.targetAudience?.level || "All Levels"}
+                    </Badge>
+                    <Badge variant="outline">
+                      {content?.duration?.total || "Flexible"}
+                    </Badge>
                   </div>
-
-                  {plan.metadata?.premiumResources && (
-                    <div className="mt-4 p-4 bg-indigo-50 rounded-md border border-indigo-200">
-                      <h3 className="text-sm font-medium flex items-center text-indigo-800 mb-2">
-                        <Sparkles className="w-4 h-4 mr-1" />
-                        Premium Resources
-                      </h3>
-                      <p className="text-sm text-indigo-700">
-                        This plan includes AI-curated resources with up-to-date
-                        publications, courses, and tools specifically selected
-                        for your learning objectives.
-                      </p>
-                    </div>
-                  )}
-
-                  <div>
-                    <h4 className="font-medium mb-2">Learning Style</h4>
-                    <p className="text-sm text-black">
-                      Primary: {plan.learningStyle.primary}
-                      {plan.learningStyle.ratio && (
-                        <span className="ml-2">
-                          (Theory: {plan.learningStyle.ratio.theory}%,
-                          Practical: {plan.learningStyle.ratio.practical}%)
-                        </span>
-                      )}
-                    </p>
-                    <div className="mt-2">
-                      <h5 className="text-sm font-medium">Methods:</h5>
-                      <ul className="list-disc list-inside">
-                        {plan.learningStyle.methods.map((method, index) => (
-                          <li key={index} className="text-sm text-black">
-                            {method}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  {plan.materials && (
-                    <div>
-                      <h4 className="font-medium mb-2">Materials</h4>
-                      {plan.materials.required.length > 0 && (
-                        <div className="mt-2">
-                          <h5 className="text-sm font-medium">Required:</h5>
-                          <ul className="list-disc list-inside">
-                            {plan.materials.required.map((material, index) => (
-                              <li key={index} className="text-sm text-black">
-                                {material}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {plan.certification && (
-                    <div>
-                      <h4 className="font-medium mb-2">Certification</h4>
-                      <p className="text-sm text-black">
-                        Type: {plan.certification.type}
-                        {plan.certification.validityPeriod && (
-                          <span className="ml-2">
-                            (Valid for: {plan.certification.validityPeriod})
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </CardContent>
-            )}
-
-            <CardFooter className="flex justify-between">
-              <div className="text-sm text-black">
-                Created:{" "}
-                {new Date(plan.metadata.createdAt).toLocaleDateString()}
-              </div>
-              <div className="flex space-x-2">
+              <CardFooter>
                 <Button
                   variant="outline"
-                  size="sm"
-                  onClick={() => onUseAsTemplate(plan)}
+                  className="w-full"
+                  onClick={() => handleEdit(plan.id)}
                 >
-                  Use as Template
+                  {isDraft ? "Continue Editing" : "View & Edit"}
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(plan.id)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
-    </ScrollArea>
+
+      <AlertDialog
+        open={!!planToDelete}
+        onOpenChange={(open) => !open && setPlanToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this training plan. This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => planToDelete && handleDelete(planToDelete)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

@@ -1,44 +1,109 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+// Schema for validating the request body
+const saveSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, "Title is required"),
+  content: z.string().min(1, "Content is required"),
+});
+
+export async function POST(req: Request) {
   try {
+    // Get user session
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+
+    if (!session?.user) {
       return NextResponse.json(
-        { error: "Authentication required" },
+        { error: "You must be logged in to save a training plan" },
         { status: 401 }
       );
     }
 
+    // Extract and validate the request body
+    const body = await req.json();
+    const validatedData = saveSchema.parse(body);
+
+    // Save the training plan to the database
+    const savedPlan = await prisma.trainingPlan.create({
+      data: {
+        title: validatedData.title,
+        content: validatedData.content,
+        user: {
+          connectOrCreate: {
+            where: { email: session.user.email as string },
+            create: { email: session.user.email as string },
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        id: savedPlan.id,
+        title: savedPlan.title,
+      },
+    });
+  } catch (error) {
+    console.error("Error saving training plan:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Failed to save training plan" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    // Get user session
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "You must be logged in to view saved training plans" },
+        { status: 401 }
+      );
+    }
+
+    // Get all saved training plans for the user
     const savedPlans = await prisma.trainingPlan.findMany({
       where: {
-        userId: session.user.id,
+        user: {
+          email: session.user.email as string,
+        },
       },
       orderBy: {
         createdAt: "desc",
       },
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-    // Filter and transform the plans to include parsed content
-    const transformedPlans = savedPlans
-      .map((plan) => ({
-        ...plan,
-        content: plan.content as unknown as Record<string, unknown>,
-      }))
-      .filter((plan) => {
-        const content = plan.content as Record<string, unknown>;
-        const metadata = content.metadata as Record<string, unknown>;
-        return metadata?.isTemplate !== true;
-      });
-
-    return NextResponse.json({ plans: transformedPlans });
+    return NextResponse.json({
+      success: true,
+      data: savedPlans,
+    });
   } catch (error) {
-    console.error("Error fetching saved plans:", error);
+    console.error("Error fetching saved training plans:", error);
+
     return NextResponse.json(
-      { error: "Failed to fetch saved plans" },
+      { error: "Failed to fetch saved training plans" },
       { status: 500 }
     );
   }

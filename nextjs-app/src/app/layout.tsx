@@ -5,6 +5,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
+// Import original components
+import ClientLayout from "@/components/ClientLayout";
+import Header from "@/components/Header";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -19,10 +23,6 @@ export const metadata: Metadata = {
   title: "Synthalyst - Digital HR Solutions",
   description: "Digital Human Resources",
 };
-
-// Client component for session provider
-import ClientLayout from "@/components/ClientLayout";
-import Header from "@/components/Header";
 
 export default function RootLayout({
   children,

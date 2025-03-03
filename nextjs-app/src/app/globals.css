@@ -171,3 +171,22 @@ button.bg-gray-200,
 .bg-brand-black {
   @apply bg-gray-900;
 }
+
+/* Custom focus styles for dropdown triggers */
+.dropdown-tools-trigger:focus-visible,
+[role="combobox"]:focus-visible,
+[data-state="open"]:focus-visible,
+.dropdown-trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(24, 24, 27, 0.05), 0 0 0 1px rgba(24, 24, 27, 0.1);
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease;
+}
+
+.dropdown-tools-trigger:focus:not(:focus-visible),
+[role="combobox"]:focus:not(:focus-visible),
+[data-state="open"]:focus:not(:focus-visible),
+.dropdown-trigger:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}

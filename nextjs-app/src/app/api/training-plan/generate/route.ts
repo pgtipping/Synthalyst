@@ -36,22 +36,195 @@ const generatePlanSchema = z.object({
   category: z.string().optional(),
   tags: z.array(z.string()).optional(),
   difficulty: z.string().optional(),
+  isDraft: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
     const validatedData = generatePlanSchema.parse(body);
+    const isDraft = validatedData.isDraft || false;
 
-    // Generate sections using Groq with Mixtral
-    const sections = await generateSectionsWithAI(validatedData);
+    // If it's a draft, we'll just save the form data without generating content
+    if (isDraft) {
+      // Create a basic structure for the draft plan
+      const content = {
+        targetAudience: {
+          level: validatedData.targetAudienceLevel,
+          prerequisites: validatedData.prerequisites || [],
+          idealFor: validatedData.idealFor || [],
+        },
+        duration: {
+          total: validatedData.duration,
+          breakdown: {
+            sections: 0, // Will be populated when the plan is generated
+            hoursPerSection: validatedData.hoursPerSection || 2,
+            weeksToComplete: validatedData.weeksToComplete || 12,
+          },
+        },
+        content: {
+          sections: [], // Empty sections for draft
+        },
+        learningStyle: {
+          primary: validatedData.learningStylePrimary || "visual",
+          methods: validatedData.learningMethods || [],
+          ratio: {
+            theory: validatedData.theoryRatio || 50,
+            practical: validatedData.practicalRatio || 50,
+          },
+        },
+        materials: {
+          required: validatedData.requiredMaterials || [],
+          optional: validatedData.optionalMaterials || [],
+          provided: validatedData.providedMaterials || [],
+        },
+        certification: validatedData.certificationType
+          ? {
+              type: validatedData.certificationType,
+              requirements: validatedData.certificationRequirements || [],
+              validityPeriod: validatedData.certificationValidity || "",
+            }
+          : undefined,
+        metadata: {
+          createdBy: session.user.email,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          industry: validatedData.industry || "technology",
+          category: validatedData.category || "technical",
+          tags: validatedData.tags || [],
+          difficulty: validatedData.difficulty || "moderate",
+          isTemplate: false,
+          isDraft: true,
+        },
+      };
 
-    // Create the content object that will be stored as JSON
+      const trainingPlan = await prisma.trainingPlan.create({
+        data: {
+          title: validatedData.title,
+          description:
+            validatedData.description ||
+            `Training plan for ${validatedData.title}`,
+          objectives: validatedData.objectives,
+          content: JSON.stringify(content),
+          userId: session.user.id,
+        },
+      });
+
+      // Transform the response to include parsed content
+      const transformedPlan = {
+        ...trainingPlan,
+        content,
+      };
+
+      return NextResponse.json(transformedPlan);
+    }
+
+    // If not a draft, generate a full training plan
+    // Create a prompt for the LLM
+    const prompt = `
+    Create a detailed training plan based on the following information:
+
+    Title: ${validatedData.title}
+    Description: ${validatedData.description || ""}
+    Learning Objectives: ${validatedData.objectives.join(", ")}
+    Target Audience Level: ${validatedData.targetAudienceLevel}
+    Duration: ${validatedData.duration}
+    ${
+      validatedData.prerequisites?.length
+        ? `Prerequisites: ${validatedData.prerequisites.join(", ")}`
+        : ""
+    }
+    ${
+      validatedData.idealFor?.length
+        ? `Ideal For: ${validatedData.idealFor.join(", ")}`
+        : ""
+    }
+    ${
+      validatedData.learningStylePrimary
+        ? `Primary Learning Style: ${validatedData.learningStylePrimary}`
+        : ""
+    }
+    ${
+      validatedData.learningMethods?.length
+        ? `Learning Methods: ${validatedData.learningMethods.join(", ")}`
+        : ""
+    }
+    ${
+      validatedData.requiredMaterials?.length
+        ? `Required Materials: ${validatedData.requiredMaterials.join(", ")}`
+        : ""
+    }
+    ${validatedData.industry ? `Industry: ${validatedData.industry}` : ""}
+    ${validatedData.category ? `Category: ${validatedData.category}` : ""}
+    ${validatedData.difficulty ? `Difficulty: ${validatedData.difficulty}` : ""}
+
+    Please create a comprehensive training plan with the following structure:
+    1. 3-5 sections that cover the learning objectives
+    2. Each section should have:
+       - A clear title
+       - A detailed description
+       - A list of topics covered
+       - 2-4 learning activities with descriptions and durations
+       - 1-3 resources (articles, videos, books, etc.)
+
+    Return the response as a JSON object with the following structure:
+    {
+      "sections": [
+        {
+          "id": "section-1",
+          "title": "Section Title",
+          "description": "Detailed description of the section",
+          "topics": ["Topic 1", "Topic 2", "Topic 3"],
+          "activities": [
+            {
+              "type": "Activity Type (e.g., Exercise, Discussion, Project)",
+              "description": "Detailed description of the activity",
+              "duration": "Estimated duration (e.g., 30 minutes, 1 hour)"
+            }
+          ],
+          "resources": [
+            {
+              "type": "Resource Type (e.g., Article, Video, Book)",
+              "title": "Resource Title",
+              "url": "URL if applicable",
+              "description": "Brief description of the resource"
+            }
+          ]
+        }
+      ]
+    }
+    `;
+
+    // Call the LLM to generate the plan
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert curriculum designer and instructional specialist.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: "llama-3.2-3b-preview",
+      temperature: 0.7,
+      max_tokens: 2000,
+      response_format: { type: "json_object" },
+    });
+
+    const generatedContent = JSON.parse(completion.choices[0].message.content);
+
+    // Create the full content object
     const content = {
       targetAudience: {
         level: validatedData.targetAudienceLevel,
@@ -61,11 +234,14 @@ export async function POST(req: Request) {
       duration: {
         total: validatedData.duration,
         breakdown: {
+          sections: generatedContent.sections.length,
           hoursPerSection: validatedData.hoursPerSection || 2,
           weeksToComplete: validatedData.weeksToComplete || 12,
         },
       },
-      sections,
+      content: {
+        sections: generatedContent.sections,
+      },
       learningStyle: {
         primary: validatedData.learningStylePrimary || "visual",
         methods: validatedData.learningMethods || [],
@@ -95,6 +271,7 @@ export async function POST(req: Request) {
         tags: validatedData.tags || [],
         difficulty: validatedData.difficulty || "moderate",
         isTemplate: false,
+        isDraft: false,
       },
     };
 
@@ -124,266 +301,4 @@ export async function POST(req: Request) {
     }
     return new NextResponse("Internal error", { status: 500 });
   }
-}
-
-async function generateSectionsWithAI(
-  data: z.infer<typeof generatePlanSchema>
-) {
-  try {
-    // Create a prompt for the AI
-    const prompt = `
-      Create a detailed training plan with the following information:
-      
-      Title: ${data.title}
-      Objectives: ${data.objectives.join(", ")}
-      Target Audience Level: ${data.targetAudienceLevel}
-      Duration: ${data.duration}
-      ${data.description ? `Description: ${data.description}` : ""}
-      ${
-        data.prerequisites?.length
-          ? `Prerequisites: ${data.prerequisites.join(", ")}`
-          : ""
-      }
-      ${
-        data.learningStylePrimary
-          ? `Learning Style: ${data.learningStylePrimary}`
-          : ""
-      }
-      ${data.industry ? `Industry: ${data.industry}` : ""}
-      
-      For each objective, create a section with:
-      1. A clear title and description
-      2. 3-5 relevant topics with descriptions and durations
-      3. 2-3 engaging activities with descriptions, types, and durations
-      4. 2-3 helpful resources with titles, types, and formats
-      5. 1-2 appropriate assessments with descriptions and criteria
-      
-      Format the response as a JSON array of sections, where each section has:
-      {
-        "id": "unique-id",
-        "title": "Section Title",
-        "description": "Section description",
-        "topics": [
-          {
-            "id": "topic-id",
-            "title": "Topic Title",
-            "description": "Topic description",
-            "duration": "Duration (e.g., 1 hour)"
-          }
-        ],
-        "activities": [
-          {
-            "id": "activity-id",
-            "title": "Activity Title",
-            "description": "Activity description",
-            "type": "Activity type (e.g., Exercise, Discussion)",
-            "duration": "Duration (e.g., 30 minutes)",
-            "groupSize": "Group size (e.g., individual, pairs, small groups)"
-          }
-        ],
-        "resources": [
-          {
-            "id": "resource-id",
-            "title": "Resource Title",
-            "type": "Resource type (e.g., Video, Reading)",
-            "url": "#",
-            "format": "Resource format (e.g., video, document)"
-          }
-        ],
-        "assessments": [
-          {
-            "id": "assessment-id",
-            "title": "Assessment Title",
-            "type": "Assessment type (e.g., Quiz, Project)",
-            "description": "Assessment description",
-            "criteria": ["Criterion 1", "Criterion 2", "Criterion 3"],
-            "weight": 25
-          }
-        ]
-      }
-    `;
-
-    // Call Groq API with Mixtral model
-    const response = await groq.chat.completions.create({
-      model: "mixtral-8x7b-32768",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert instructional designer who creates detailed, structured training plans. Respond only with valid JSON.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 4000,
-    });
-
-    // Parse the response
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("No content returned from Groq");
-    }
-
-    try {
-      const parsedContent = JSON.parse(content);
-      return parsedContent.sections || [];
-    } catch (error) {
-      console.error("Failed to parse Groq response:", error);
-      // Fallback to the original generation method
-      return generateSectionsFallback(
-        data.objectives,
-        data.learningMethods || []
-      );
-    }
-  } catch (error) {
-    console.error("Error calling Groq:", error);
-    // Fallback to the original generation method
-    return generateSectionsFallback(
-      data.objectives,
-      data.learningMethods || []
-    );
-  }
-}
-
-// Fallback method if AI generation fails
-function generateSectionsFallback(
-  objectives: string[],
-  learningMethods: string[]
-) {
-  // Initialize sections array
-  const sections = [];
-
-  // Generate a section for each objective
-  for (let i = 0; i < objectives.length; i++) {
-    const section = {
-      id: `section-${i + 1}`,
-      title: `Section ${i + 1}: ${objectives[i].split(":")[0]}`,
-      description: objectives[i],
-      topics: generateTopics(objectives[i]),
-      activities: generateActivities(learningMethods),
-      resources: generateResources(),
-      assessments: generateAssessments(learningMethods),
-    };
-    sections.push(section);
-  }
-
-  return sections;
-}
-
-function generateTopics(objective: string) {
-  // Split the objective into key concepts
-  const concepts = objective
-    .toLowerCase()
-    .split(/[,.]/)
-    .map((concept) => concept.trim())
-    .filter(Boolean);
-
-  // Generate 3-5 topics based on the concepts
-  return concepts.slice(0, Math.min(5, concepts.length)).map((concept) => ({
-    id: `topic-${Math.random().toString(36).substr(2, 9)}`,
-    title: concept.charAt(0).toUpperCase() + concept.slice(1),
-    description: `Understanding ${concept}`,
-    duration: "1 hour",
-  }));
-}
-
-function generateActivities(learningMethods: string[]) {
-  const activities = [];
-  const activityTypes = [
-    "Individual Exercise",
-    "Group Discussion",
-    "Case Study",
-    "Project Work",
-    "Hands-on Practice",
-  ];
-
-  // Generate 2-3 activities using the learning methods
-  for (let i = 0; i < Math.floor(Math.random() * 2) + 2; i++) {
-    const method =
-      learningMethods.length > 0
-        ? learningMethods[Math.floor(Math.random() * learningMethods.length)]
-        : "Self-paced learning";
-    const type =
-      activityTypes[Math.floor(Math.random() * activityTypes.length)];
-
-    activities.push({
-      id: `activity-${Math.random().toString(36).substr(2, 9)}`,
-      title: `${type}: ${method}`,
-      description: `Apply your knowledge through ${method.toLowerCase()} using ${type.toLowerCase()}`,
-      type,
-      duration: "30 minutes",
-      groupSize: type.includes("Group") ? "3-5 participants" : "individual",
-    });
-  }
-
-  return activities;
-}
-
-function generateResources() {
-  const resourceTypes = [
-    "Video Tutorial",
-    "Reading Material",
-    "Interactive Demo",
-    "Reference Guide",
-    "Worksheet",
-  ];
-
-  // Generate 2-3 resources
-  const resources = [];
-  const numResources = Math.floor(Math.random() * 2) + 2;
-
-  for (let i = 0; i < numResources; i++) {
-    const type =
-      resourceTypes[Math.floor(Math.random() * resourceTypes.length)];
-    resources.push({
-      id: `resource-${Math.random().toString(36).substr(2, 9)}`,
-      title: `${type} ${i + 1}`,
-      type,
-      url: "#",
-      format: type.toLowerCase().includes("video") ? "video" : "document",
-    });
-  }
-
-  return resources;
-}
-
-function generateAssessments(learningMethods: string[]) {
-  const assessmentTypes = [
-    "Quiz",
-    "Project",
-    "Presentation",
-    "Written Assignment",
-    "Practical Test",
-  ];
-
-  // Generate 1-2 assessments
-  const assessments = [];
-  const numAssessments = Math.floor(Math.random() * 2) + 1;
-
-  for (let i = 0; i < numAssessments; i++) {
-    const type =
-      assessmentTypes[Math.floor(Math.random() * assessmentTypes.length)];
-    const method =
-      learningMethods.length > 0
-        ? learningMethods[Math.floor(Math.random() * learningMethods.length)]
-        : "Self-assessment";
-
-    assessments.push({
-      id: `assessment-${Math.random().toString(36).substr(2, 9)}`,
-      title: `${type}: ${method}`,
-      type,
-      description: `Demonstrate your understanding through a ${type.toLowerCase()} focusing on ${method.toLowerCase()}`,
-      criteria: [
-        "Understanding of key concepts",
-        "Application of learning",
-        "Quality of work",
-      ],
-      weight: Math.floor(Math.random() * 30) + 20, // Random weight between 20-50
-    });
-  }
-
-  return assessments;
 }
