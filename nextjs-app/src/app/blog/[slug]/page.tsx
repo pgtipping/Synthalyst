@@ -188,15 +188,13 @@ export default function BlogPostPage() {
 
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              {post.author.image && (
-                <Image
-                  src={post.author.image}
-                  alt={post.author.name || ""}
-                  width={40}
-                  height={40}
-                  className="rounded-full"
-                />
-              )}
+              <Image
+                src="/images/synthalyst-team.png"
+                alt={post.author.name || "Synthalyst Team"}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
               <div>
                 <p className="font-medium">{post.author.name}</p>
                 <p className="text-sm text-gray-500">
