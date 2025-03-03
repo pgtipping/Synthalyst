@@ -1981,7 +1981,7 @@ When implementing changes to the Training Plan Creator, follow the approach outl
   // Enhanced table styling
   return `<div class="my-8 overflow-hidden rounded-lg shadow-sm border border-gray-200">
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table class="w-auto min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>${headerCells}</tr>
         </thead>
@@ -1996,13 +1996,13 @@ When implementing changes to the Training Plan Creator, follow the approach outl
 - Header cells should use this styling:
 
   ```jsx
-  `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`;
+  `<th class="px-4 py-4 bg-gray-50 text-left text-base font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`;
   ```
 
 - Body cells should use this styling:
 
   ```jsx
-  `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`;
+  `<td class="px-4 py-4 whitespace-normal text-base text-gray-700 border-b border-gray-100">${cell.trim()}</td>`;
   ```
 
 - Implement zebra striping for better row distinction:
@@ -2015,8 +2015,9 @@ When implementing changes to the Training Plan Creator, follow the approach outl
 
 - Key aspects of this styling:
   - Rounded corners and subtle shadow for the table container
-  - Proper spacing with padding (px-6 py-4)
-  - Consistent typography with text-sm
+  - Proper spacing with moderate padding (px-4 py-4)
+  - Content-fitting width with `w-auto` combined with `min-w-full`
+  - Larger text size with text-base for better readability
   - Semantic color scheme (text-gray-900 for headers, text-gray-700 for body)
   - Zebra striping for alternate rows (bg-gray-50)
   - Subtle borders between rows (divide-y divide-gray-100)

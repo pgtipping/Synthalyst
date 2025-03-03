@@ -22,6 +22,9 @@
     - Used proper spacing and padding for better readability
     - Applied consistent typography and color scheme
     - Added proper borders and dividers between rows
+    - Reduced horizontal padding from px-6 to px-4 for better content fit
+    - Increased font size from text-sm to text-base for improved readability
+    - Added w-auto to make tables fit their content better
   - Improved table styling with proper header and cell formatting
   - Added overflow handling for tables on mobile devices
   - Location: `nextjs-app/src/app/blog/[slug]/page.tsx`, `nextjs-app/src/components/MDXContent.tsx`
