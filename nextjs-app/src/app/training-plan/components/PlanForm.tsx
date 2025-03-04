@@ -132,7 +132,7 @@ export default function PlanForm() {
       const data = await response.json();
       setGeneratedPlan({
         content: data.plan,
-        model: data.model,
+        model: "",
         isPremiumUser: data.isPremiumUser,
         resourceCount: data.resourceCount,
         resources: data.resources || [],
@@ -145,7 +145,6 @@ export default function PlanForm() {
         title: values.title,
         createdAt: new Date().toISOString(),
         content: data.plan,
-        model: data.model,
         isPremiumUser: data.isPremiumUser,
         resourceCount: data.resourceCount,
         resources: data.resources || [],
@@ -300,17 +299,14 @@ export default function PlanForm() {
 
   // Update the GeneratedPlanDisplay component
   const GeneratedPlanDisplay = ({ plan }: { plan: GeneratedPlan }) => {
-  return (
-    <div className="space-y-6">
+    return (
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Sparkles className="h-5 w-5 text-yellow-500" />
             <h3 className="text-lg font-semibold">Generated Training Plan</h3>
           </div>
           <div className="flex items-center space-x-2">
-            <Badge variant="outline" className="text-xs">
-              {plan.model}
-            </Badge>
             {plan.isPremiumUser && (
               <Badge
                 variant="default"
@@ -323,7 +319,13 @@ export default function PlanForm() {
         </div>
 
         <div
-          className="prose prose-sm max-w-none dark:prose-invert border rounded-md p-4 bg-white dark:bg-gray-950"
+          className="prose prose-lg max-w-none dark:prose-invert border rounded-md p-6 bg-white dark:bg-gray-950
+                    prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
+                    prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-4 prose-h2:text-indigo-700 dark:prose-h2:text-indigo-400
+                    prose-h3:text-lg prose-h3:mt-5 prose-h3:mb-3 prose-h3:text-indigo-600 dark:prose-h3:text-indigo-500
+                    prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-3 prose-p:leading-relaxed
+                    prose-ul:my-3 prose-li:my-1 prose-li:text-gray-700 dark:prose-li:text-gray-300
+                    prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100"
           dangerouslySetInnerHTML={{ __html: plan.content }}
         />
 

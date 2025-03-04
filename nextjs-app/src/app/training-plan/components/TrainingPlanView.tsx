@@ -157,7 +157,15 @@ export default function TrainingPlanView({ plan }: TrainingPlanViewProps) {
 
         <Card>
           <CardContent className="pt-6">
-            <div className="prose max-w-none">
+            <div
+              className="prose prose-lg max-w-none dark:prose-invert
+                          prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
+                          prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-4 prose-h2:text-indigo-700 dark:prose-h2:text-indigo-400
+                          prose-h3:text-lg prose-h3:mt-5 prose-h3:mb-3 prose-h3:text-indigo-600 dark:prose-h3:text-indigo-500
+                          prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-3 prose-p:leading-relaxed
+                          prose-ul:my-3 prose-li:my-1 prose-li:text-gray-700 dark:prose-li:text-gray-300
+                          prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100"
+            >
               <div dangerouslySetInnerHTML={{ __html: parsedContent }} />
             </div>
           </CardContent>

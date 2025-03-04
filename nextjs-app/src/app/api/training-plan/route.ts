@@ -83,9 +83,9 @@ export async function POST(request: NextRequest) {
     // Return the generated plan
     return NextResponse.json({
       plan: planResponse.text,
-      model: planResponse.model,
       isPremiumUser,
       resourceCount: resources?.length || 0,
+      resources: resources || [],
     });
   } catch (error) {
     console.error("Error generating training plan:", error);
