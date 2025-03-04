@@ -37,7 +37,7 @@ interface Section {
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -48,7 +48,7 @@ export async function POST(
       );
     }
 
-    const planId = params.id;
+    const planId = context.params.id;
     const body = await req.json();
     const { sectionId } = regenerateSectionSchema.parse(body);
 

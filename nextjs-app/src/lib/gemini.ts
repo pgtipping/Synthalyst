@@ -4,6 +4,13 @@ import { z } from "zod";
 // Initialize the Google Generative AI with the API key
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || "");
 
+/**
+ * Gets the Gemini model instance
+ */
+export function getGeminiModel(modelName = "gemini-2.0-flash") {
+  return genAI.getGenerativeModel({ model: modelName });
+}
+
 // Define the schema for a resource
 const resourceSchema = z.object({
   id: z.string(),
@@ -23,6 +30,29 @@ const resourcesSchema = z.array(resourceSchema);
 export type Resource = z.infer<typeof resourceSchema>;
 
 /**
+ * Fetches resources with Gemini based on training plan parameters
+ */
+export async function fetchResourcesWithGemini({
+  objectives,
+  targetAudienceLevel,
+  industry,
+  learningStyle,
+}: {
+  objectives: string[];
+  targetAudienceLevel: string;
+  industry?: string;
+  learningStyle?: string;
+}): Promise<Resource[]> {
+  return generateResourcesWithGemini(
+    "Training Plan",
+    objectives,
+    targetAudienceLevel,
+    industry,
+    learningStyle
+  );
+}
+
+/**
  * Generates resources for a training plan using Google's Gemini API
  */
 export async function generateResourcesWithGemini(
@@ -34,7 +64,7 @@ export async function generateResourcesWithGemini(
 ): Promise<Resource[]> {
   try {
     // Get the Gemini Pro model
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = getGeminiModel("gemini-pro");
 
     // Create a prompt for Gemini
     const prompt = `
