@@ -9,6 +9,14 @@ const nextConfig = {
   },
   webpack: (config) => {
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
+
+    // Add fallbacks for node modules that aren't available in the browser
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+    };
+
     return config;
   },
   eslint: {
