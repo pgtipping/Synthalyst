@@ -1,7 +1,7 @@
 ---
 description: project folder management and package installation guide
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 
 # project specific rules

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function TrainingPlanCreatorGuide() {
   return (
     <div className="min-h-screen bg-white py-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[850px]">
+      <div className="guide-content mx-auto px-4 sm:px-6 lg:px-8 max-w-[850px]">
         <div className="bg-[#f5f5f7] rounded-xl shadow-sm p-8 sm:p-10">
           <div className="space-y-10">
             <div className="text-center pb-6 border-b border-gray-200">
@@ -267,7 +267,7 @@ export default function TrainingPlanCreatorGuide() {
             <div className="mt-10 flex justify-center pt-6 border-t border-gray-200">
               <Link
                 href="/training-plan"
-                className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-4 text-lg font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-4 text-lg font-medium text-primary-foreground shadow-sm transition-colors border border-transparent hover:bg-transparent hover:text-blue-800 hover:border-blue-800"
               >
                 Create Your Training Plan
               </Link>

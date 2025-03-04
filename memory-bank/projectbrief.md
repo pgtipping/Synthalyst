@@ -1,14 +1,20 @@
 # Project Brief - Synthalyst Web App
 
-This app can be described as a Comprehensive Business and Productivity Platform designed to offer a blend of content, digital tools, and AI-powered services to individuals and businesses. It serves as a hub for professional development, productivity enhancement, and business solutions.
+This app is a Comprehensive Business and Productivity Platform designed to offer a blend of content, digital tools, and AI-powered services to individuals and businesses. It serves as a hub for professional development, productivity enhancement, and business solutions.
+
+It is a mobile first web app that is built with Next.js, Tailwind CSS, and Shadcn UI.
+
+Though it currently contains HR focused tools, it is NOT a HR focused app. It is a general purpose app that can be used by anyone in any industry.
+
+It is therefore important to design the app with a focus on usability and user experience, and grouping tools by functionality and purpose.
 
 ## Purpose & Value Proposition
 
 This app aims to be a one-stop platform for professionals and businesses seeking:
 
-- Expert content and on-demand consulting.
+- Expert content and on-demand AI consulting services.
 - Custom document and task management solutions.
-- AI-powered learning and competency development tools.
+- AI-powered productivity tools.
 - End-to-end digital support from job description drafting to upskilling and productivity optimization.
 
 The platform's fusion of content, commerce, AI-powered tools, and advisory services distinguishes it as a next-generation professional ecosystem.
