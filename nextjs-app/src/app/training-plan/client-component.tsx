@@ -23,8 +23,11 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/lib/toast-migration";
 import { Loader2, InfoIcon } from "lucide-react";
+import { ResourceList } from "./components/ResourceList";
+import { Resource } from "./components/ResourceCard";
 
 // Define the plan type
 interface SavedPlan {
@@ -35,6 +38,7 @@ interface SavedPlan {
   model: string;
   isPremiumUser: boolean;
   resourceCount: number;
+  resources?: Resource[];
 }
 
 export default function TrainingPlanClient() {
@@ -158,10 +162,17 @@ const SavedPlansTab = ({ setActiveTab }: SavedPlansTabProps) => {
         setSelectedPlan(null);
       }
 
-      toast.success("The training plan has been deleted.");
+      toast({
+        title: "Plan deleted",
+        description: "The training plan has been deleted.",
+      });
     } catch (error) {
       console.error("Error deleting plan:", error);
-      toast.error("Failed to delete the training plan.");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete the training plan.",
+      });
     }
   };
 
@@ -275,22 +286,33 @@ const SavedPlansTab = ({ setActiveTab }: SavedPlansTabProps) => {
             </CardHeader>
             <CardContent>
               {selectedPlan.isPremiumUser && selectedPlan.resourceCount > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4 flex items-start">
-                  <InfoIcon className="h-4 w-4 text-amber-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-sm">Premium Resources</h4>
-                    <p className="text-sm text-muted-foreground">
-                      This plan includes {selectedPlan.resourceCount} premium
-                      AI-curated resources tailored to your objectives.
-                    </p>
-                  </div>
-                </div>
+                <Alert
+                  variant="default"
+                  className="bg-amber-50 border-amber-200 mb-4"
+                >
+                  <InfoIcon className="h-4 w-4 text-amber-500" />
+                  <AlertTitle>Premium Resources</AlertTitle>
+                  <AlertDescription>
+                    This plan includes {selectedPlan.resourceCount} premium
+                    AI-curated resources tailored to your objectives.
+                  </AlertDescription>
+                </Alert>
               )}
 
               <div
                 className="prose prose-sm max-w-none dark:prose-invert border rounded-md p-4 bg-white dark:bg-gray-950"
                 dangerouslySetInnerHTML={{ __html: selectedPlan.content }}
               />
+
+              {/* Display resources if available */}
+              {selectedPlan.resources && selectedPlan.resources.length > 0 && (
+                <div className="mt-6">
+                  <ResourceList
+                    resources={selectedPlan.resources}
+                    isPremiumUser={selectedPlan.isPremiumUser}
+                  />
+                </div>
+              )}
             </CardContent>
             <CardFooter className="flex justify-end space-x-2">
               <Button
@@ -321,9 +343,11 @@ const SavedPlansTab = ({ setActiveTab }: SavedPlansTabProps) => {
                 size="sm"
                 onClick={() => {
                   navigator.clipboard.writeText(selectedPlan.content);
-                  toast.success(
-                    "The training plan has been copied to your clipboard."
-                  );
+                  toast({
+                    title: "Copied to clipboard",
+                    description:
+                      "The training plan has been copied to your clipboard.",
+                  });
                 }}
               >
                 <Copy className="h-4 w-4 mr-2" />

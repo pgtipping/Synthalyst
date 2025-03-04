@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast-migration";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,14 +42,10 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Sparkles,
-  Download,
-  Copy,
-  InfoIcon,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Sparkles, Download, Copy, Loader2, AlertCircle } from "lucide-react";
+import { ResourceList } from "./ResourceList";
+import { Resource } from "./ResourceCard";
 
 // Updated schema with mandatory and optional fields
 const formSchema = z.object({
@@ -74,40 +70,8 @@ interface GeneratedPlan {
   model: string;
   isPremiumUser: boolean;
   resourceCount: number;
+  resources?: Resource[];
 }
-
-// Now, let's create our own Alert components since the import is missing
-const Alert = ({
-  children,
-  className,
-  variant,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  variant?: "default" | "destructive";
-}) => {
-  return (
-    <div
-      className={`p-4 rounded-md border ${
-        variant === "destructive"
-          ? "bg-red-50 border-red-200 text-red-800"
-          : "bg-gray-50 border-gray-200"
-      } ${className || ""}`}
-    >
-      {children}
-    </div>
-  );
-};
-
-const AlertTitle = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <h5 className="font-medium mb-1 flex items-center gap-2">{children}</h5>
-  );
-};
-
-const AlertDescription = ({ children }: { children: React.ReactNode }) => {
-  return <div className="text-sm">{children}</div>;
-};
 
 export default function PlanForm() {
   const router = useRouter();
@@ -139,7 +103,11 @@ export default function PlanForm() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!session?.user?.email) {
-      toast.error("You must be logged in to generate a training plan");
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "You must be logged in to generate a training plan",
+      });
       return;
     }
 
@@ -167,6 +135,7 @@ export default function PlanForm() {
         model: data.model,
         isPremiumUser: data.isPremiumUser,
         resourceCount: data.resourceCount,
+        resources: data.resources || [],
       });
 
       // Save the plan to local storage
@@ -179,6 +148,7 @@ export default function PlanForm() {
         model: data.model,
         isPremiumUser: data.isPremiumUser,
         resourceCount: data.resourceCount,
+        resources: data.resources || [],
       };
 
       localStorage.setItem(
@@ -226,15 +196,23 @@ export default function PlanForm() {
         throw new Error(errorData.error || "Failed to save training plan");
       }
 
-      toast.success("Training plan saved successfully!");
+      toast({
+        title: "Success",
+        description: "Training plan saved successfully!",
+      });
 
       // Redirect to the saved plans tab
       router.push("/training-plan?tab=saved");
     } catch (error) {
       console.error("Error saving plan:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to save training plan"
-      );
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to save training plan",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -323,7 +301,7 @@ export default function PlanForm() {
   // Update the GeneratedPlanDisplay component
   const GeneratedPlanDisplay = ({ plan }: { plan: GeneratedPlan }) => {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Sparkles className="h-5 w-5 text-yellow-500" />
@@ -344,21 +322,18 @@ export default function PlanForm() {
           </div>
         </div>
 
-        {plan.isPremiumUser && plan.resourceCount > 0 && (
-          <Alert className="bg-amber-50 border-amber-200">
-            <InfoIcon className="h-4 w-4 text-amber-500" />
-            <AlertTitle>Premium Resources</AlertTitle>
-            <AlertDescription>
-              Your plan includes {plan.resourceCount} premium AI-curated
-              resources tailored to your objectives.
-            </AlertDescription>
-          </Alert>
-        )}
-
         <div
-          className="prose prose-sm max-w-none dark:prose-invert mt-4 border rounded-md p-4 bg-white dark:bg-gray-950"
+          className="prose prose-sm max-w-none dark:prose-invert border rounded-md p-4 bg-white dark:bg-gray-950"
           dangerouslySetInnerHTML={{ __html: plan.content }}
         />
+
+        {/* Display resources if available */}
+        {plan.resources && plan.resources.length > 0 && (
+          <ResourceList
+            resources={plan.resources}
+            isPremiumUser={plan.isPremiumUser}
+          />
+        )}
 
         <div className="flex justify-end space-x-2 mt-4">
           <Button
@@ -384,9 +359,11 @@ export default function PlanForm() {
             size="sm"
             onClick={() => {
               navigator.clipboard.writeText(plan.content);
-              toast.success(
-                "The training plan has been copied to your clipboard."
-              );
+              toast({
+                title: "Copied to clipboard",
+                description:
+                  "The training plan has been copied to your clipboard.",
+              });
             }}
           >
             <Copy className="h-4 w-4 mr-2" />
