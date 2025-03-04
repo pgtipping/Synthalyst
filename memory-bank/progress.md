@@ -873,3 +873,21 @@ Enhanced the visual presentation and readability of the Training Plan PDF export
 - Enhanced resource section presentation
 
 These improvements make the PDF output more professional and better suited for printing or sharing with stakeholders.
+
+## Recent Updates (Last 24 Hours)
+
+### Training Plan PDF Export Improvements (2023-07-10)
+
+- **Complete Redesign**: Replaced manual HTML parsing with `react-pdf-html` library for proper HTML rendering in PDFs
+- **New Features**:
+  - Direct HTML rendering with custom CSS styling
+  - Proper handling of lists, headings, and paragraphs
+  - Consistent formatting and spacing
+  - Maintained premium resource highlighting with blue border
+  - Page numbering in footer
+- **Technical Improvements**:
+  - Installed `react-pdf-html` package
+  - Simplified code by removing complex regex parsing
+  - Added custom CSS for HTML content styling
+  - More maintainable and robust solution
+- **Location**: `nextjs-app/src/components/TrainingPlanPDF.tsx`

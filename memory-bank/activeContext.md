@@ -457,3 +457,21 @@ We've successfully implemented and fixed tests for these endpoints using a stand
   - **Fullscreen**: Full-screen overlay with backdrop blur, ideal for initial page loads
   - **Skeleton**: Content placeholder with pulse animation, best for content-heavy sections
 - Created a higher-order component (HOC) version called `withClientComponent`
+
+## Current Work Focus (2023-07-10)
+
+### Training Plan PDF Export Improvements (2023-07-10)
+
+We've completely redesigned the Training Plan PDF export functionality to use the `react-pdf-html` library for better HTML rendering. This is a significant improvement over the previous approach that manually parsed HTML content.
+
+Key improvements:
+
+- Installed `react-pdf-html` library to properly render HTML content in PDFs
+- Replaced manual HTML parsing with direct HTML rendering through the `<Html>` component
+- Added custom CSS styling for HTML content to ensure consistent formatting
+- Maintained the existing resource section formatting with premium resource highlighting
+- Improved overall readability with proper spacing, indentation, and font styling
+- Ensured proper rendering of lists, headings, and paragraphs
+- Added page numbering in the footer
+
+The component is now much more maintainable and produces better-formatted PDFs with proper HTML rendering. The location of the component is `nextjs-app/src/components/TrainingPlanPDF.tsx`.

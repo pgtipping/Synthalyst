@@ -1,4 +1,5 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Html } from "react-pdf-html";
 import React from "react";
 
 // Create styles
@@ -152,6 +153,79 @@ const styles = StyleSheet.create({
   },
 });
 
+// Custom CSS for HTML content
+const htmlStyles = `
+  body {
+    font-family: Helvetica;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #000000;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #000000;
+  }
+  
+  h1 {
+    font-size: 18px;
+    border-bottom: 1px solid #eeeeee;
+    padding-bottom: 5px;
+  }
+  
+  h2 {
+    font-size: 16px;
+  }
+  
+  h3 {
+    font-size: 14px;
+  }
+  
+  p {
+    margin-bottom: 8px;
+  }
+  
+  ul, ol {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding-left: 20px;
+  }
+  
+  li {
+    margin-bottom: 4px;
+  }
+  
+  .section-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eeeeee;
+    padding-bottom: 5px;
+  }
+  
+  .section-content {
+    margin-left: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .duration {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .objectives-title, .outline-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .module-details {
+    margin-bottom: 15px;
+    margin-left: 5px;
+  }
+`;
+
 interface Resource {
   id: string;
   title: string;
@@ -171,18 +245,6 @@ interface Resource {
   isPremium?: boolean;
 }
 
-interface Section {
-  heading: string;
-  content: string;
-  subsections?: Subsection[];
-  listItems?: string[];
-}
-
-interface Subsection {
-  title: string;
-  content: string;
-}
-
 interface TrainingPlanPDFProps {
   title: string;
   content: string;
@@ -196,132 +258,6 @@ export default function TrainingPlanPDF({
   resources,
   createdAt,
 }: TrainingPlanPDFProps) {
-  // Improved HTML content cleaning to better preserve structure
-  const cleanContent = content
-    .replace(/<div[^>]*>/g, "") // Remove div tags but keep content
-    .replace(/<\/div>/g, "") // Remove closing div tags
-    .replace(/<br\s*\/?>/g, "\n") // Convert <br> to newlines
-    .replace(/<p[^>]*>(.*?)<\/p>/g, "$1\n\n") // Convert paragraphs to text with double newlines
-    .replace(/<h1[^>]*>(.*?)<\/h1>/g, "$1\n") // Convert h1 to text with newline
-    .replace(/<h2[^>]*>(.*?)<\/h2>/g, "$1\n") // Convert h2 to text with newline
-    .replace(/<h3[^>]*>(.*?)<\/h3>/g, "$1\n") // Convert h3 to text with newline
-    .replace(/<h4[^>]*>(.*?)<\/h4>/g, "$1\n") // Convert h4 to text with newline
-    .replace(/<strong>(.*?)<\/strong>/g, "$1") // Keep text from strong tags
-    .replace(/<em>(.*?)<\/em>/g, "$1") // Keep text from em tags
-    .replace(/<ul[^>]*>|<\/ul>/g, "") // Remove ul tags
-    .replace(/<ol[^>]*>|<\/ol>/g, "") // Remove ol tags
-    .replace(/<li[^>]*>(.*?)<\/li>/g, "• $1\n") // Convert li to bullet points
-    .replace(/<[^>]*>/g, " ") // Remove any remaining HTML tags
-    .replace(/\s+/g, " ") // Replace multiple spaces with a single space
-    .replace(/\n\s+/g, "\n") // Clean up spaces after newlines
-    .replace(/\n{3,}/g, "\n\n") // Replace 3+ consecutive newlines with just 2
-    .replace(/##/g, "") // Remove markdown-style heading markers
-    .replace(/\s*##+\s*$/gm, "") // Remove hash symbols at the end of lines
-    .trim();
-
-  // Extract sections based on numbered headings (e.g., "1. Overview", "2. Learning Objectives")
-  const sections: Section[] = [];
-
-  // Split content by main section numbers with improved regex
-  const mainSections = cleanContent.split(/(?=\d+\.\s+[A-Z][a-z]+)/);
-
-  // Process each main section
-  mainSections.forEach((section) => {
-    if (!section.trim()) return;
-
-    // Extract heading and content with improved regex - removed 's' flag
-    const match = section.match(/^(\d+\.\s*[^:\.]+)[:\.]?([\s\S]*)/);
-    if (match) {
-      const [, heading, sectionContent] = match;
-      const trimmedContent = sectionContent.trim();
-
-      // Check if this is a module section (e.g., "6. Detailed Content Module 1:")
-      if (
-        heading.includes("Detailed Content Module") ||
-        heading.includes("Module")
-      ) {
-        // Process module content with improved regex - removed 's' flag and used [\s\S]* instead
-        const moduleMatch = trimmedContent.match(
-          /Duration:\s*([\s\S]*?)(?:Learning objectives:|Learning Objectives:)\s*([\s\S]*?)(?=(?:Content outline:|Content Outline:|Additional Resources:|$))([\s\S]*)/i
-        );
-
-        if (moduleMatch) {
-          const [, duration, objectives, contentOutline] = moduleMatch;
-
-          // Process learning objectives with improved handling of bullet points
-          const processedObjectives = objectives
-            .replace(/•/g, "- ") // Replace bullet points with dashes for consistency
-            .replace(/\n+/g, " ") // Replace multiple newlines with a single space
-            .trim();
-
-          // Process content outline with improved handling of structure
-          const processedContentOutline = contentOutline
-            ? contentOutline
-                .replace(/Content outline:|Content Outline:/i, "") // Remove the heading
-                .replace(/\n+/g, " ") // Replace multiple newlines with a single space
-                .trim()
-            : "";
-
-          sections.push({
-            heading: heading.trim(),
-            content: "",
-            subsections: [
-              {
-                title: "Duration",
-                content: duration.trim(),
-              },
-              {
-                title: "Learning objectives",
-                content: processedObjectives,
-              },
-              {
-                title: "Content outline",
-                content: processedContentOutline,
-              },
-            ],
-          });
-        } else {
-          // Fallback if the module content doesn't match the expected format
-          sections.push({
-            heading: heading.trim(),
-            content: trimmedContent,
-          });
-        }
-      } else {
-        // Regular section - check if it contains bullet points - removed 's' flag and used [\s\S]* instead
-        const listItems = trimmedContent.match(/•\s*([\s\S]*?)(?=\n•|\n\n|$)/g);
-
-        if (listItems && listItems.length > 0) {
-          // This section contains list items
-          const cleanedListItems = listItems.map((item) =>
-            item.replace(/^•\s*/, "").replace(/##$/, "").trim()
-          );
-
-          // Removed 's' flag and used [\s\S]* instead
-          sections.push({
-            heading: heading.trim(),
-            content: trimmedContent
-              .split(/•\s*[\s\S]*?(?=\n•|\n\n|$)/)[0]
-              .trim(),
-            listItems: cleanedListItems,
-          });
-        } else {
-          // Regular section without list items
-          sections.push({
-            heading: heading.trim(),
-            content: trimmedContent,
-          });
-        }
-      }
-    } else {
-      // If no heading pattern found, add as raw content
-      sections.push({
-        heading: "",
-        content: section.trim(),
-      });
-    }
-  });
-
   // Process resources to group them by type
   const resourcesByType: Record<string, Resource[]> = {};
   if (resources && resources.length > 0) {
@@ -353,6 +289,12 @@ export default function TrainingPlanPDF({
     }
   };
 
+  // Prepare HTML content with proper styling
+  const htmlContent = `
+    <style>${htmlStyles}</style>
+    <div>${content}</div>
+  `;
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -365,86 +307,9 @@ export default function TrainingPlanPDF({
           )}
         </View>
 
-        {sections.length > 0 ? (
-          sections.map((section, index) => (
-            <View key={index} style={styles.section}>
-              {section.heading && (
-                <Text style={styles.sectionTitle}>{section.heading}</Text>
-              )}
-
-              {section.subsections ? (
-                // Render module content with subsections
-                section.subsections.map((subsection, subIndex) => (
-                  <View
-                    key={`${index}-${subIndex}`}
-                    style={styles.moduleDetails}
-                  >
-                    {subsection.title === "Duration" ? (
-                      <Text style={styles.duration}>{subsection.content}</Text>
-                    ) : subsection.title === "Learning objectives" ? (
-                      <View style={styles.contentBlock}>
-                        <Text style={styles.objectivesTitle}>
-                          Learning Objectives:
-                        </Text>
-                        {/* Split objectives by bullet points or dashes with improved regex */}
-                        {subsection.content
-                          .split(/(?:- |\• |\d+\.\s+)/)
-                          .filter(Boolean)
-                          .map((objective, i) => (
-                            <View key={i} style={styles.listItem}>
-                              <Text style={styles.listItemBullet}>•</Text>
-                              <Text style={styles.listItemText}>
-                                {objective.trim()}
-                              </Text>
-                            </View>
-                          ))}
-                      </View>
-                    ) : (
-                      <View style={styles.contentBlock}>
-                        <Text style={styles.objectivesTitle}>
-                          Content Outline:
-                        </Text>
-                        {/* Process content outline with improved regex for structure */}
-                        {subsection.content
-                          .split(/(?:\d+\.\s+|\-\s+|\•\s+)/)
-                          .filter(Boolean)
-                          .map((item, i) => (
-                            <View
-                              key={i}
-                              style={[styles.listItem, { marginTop: 2 }]}
-                            >
-                              <Text style={styles.listItemBullet}>•</Text>
-                              <Text style={styles.listItemText}>
-                                {item.trim()}
-                              </Text>
-                            </View>
-                          ))}
-                      </View>
-                    )}
-                  </View>
-                ))
-              ) : (
-                // Render regular section content with improved paragraph and list handling
-                <View style={styles.sectionContent}>
-                  {section.content && section.content.length > 0 && (
-                    <Text style={styles.paragraph}>{section.content}</Text>
-                  )}
-
-                  {section.listItems &&
-                    section.listItems.length > 0 &&
-                    section.listItems.map((item, i) => (
-                      <View key={i} style={styles.listItem}>
-                        <Text style={styles.listItemBullet}>•</Text>
-                        <Text style={styles.listItemText}>{item}</Text>
-                      </View>
-                    ))}
-                </View>
-              )}
-            </View>
-          ))
-        ) : (
-          <Text style={styles.paragraph}>{cleanContent}</Text>
-        )}
+        <View style={styles.section}>
+          <Html>{htmlContent}</Html>
+        </View>
 
         {resources && resources.length > 0 && (
           <View style={styles.resourceSection}>
