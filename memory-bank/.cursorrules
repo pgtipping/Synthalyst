@@ -2301,3 +2301,51 @@ toast({
 ```
 
 // ... existing content ...
+
+# Next.js 15 Type Requirements (2024-03-07)
+
+In Next.js 15, there are important type requirements for route handlers and page components that use dynamic route parameters:
+
+1. **Route Handler Parameters**: In Next.js App Router route handlers, the `params` object must be typed as a Promise:
+
+   ```typescript
+   export async function GET(
+     req: Request,
+     { params }: { params: Promise<{ id: string }> }
+   ) {
+     const { id } = await params;
+     // Use id here
+   }
+   ```
+
+2. **Page Component Parameters**: Similarly, in page components that use dynamic route parameters, the `params` object must be typed as a Promise:
+
+   ```typescript
+   interface PageProps {
+     params: Promise<{ id: string }>;
+   }
+
+   export default async function Page(props: PageProps) {
+     const params = await props.params;
+     const { id } = params;
+     // Use id here
+   }
+   ```
+
+3. **Awaiting Params**: Always remember to await the params object before accessing its properties:
+
+   ```typescript
+   const { id } = await params;
+   ```
+
+4. **LLM Response Content**: When working with LLM responses, always add null checks to prevent potential null reference errors:
+   ```typescript
+   const responseContent = completion.choices[0].message.content as string;
+   const generatedContent = JSON.parse(responseContent || "{}");
+   ```
+
+These type requirements are critical for successful builds in Next.js 15, especially for Vercel deployments.
+
+# Project Structure (2024-03-05)
+
+// ... existing code ...

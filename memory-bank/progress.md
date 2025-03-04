@@ -2,6 +2,21 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed Next.js 15 Type Errors in Route Handlers (2024-03-07)
+
+  - Fixed type errors in multiple route handlers and page components to support Next.js 15's new requirement for params to be a Promise
+  - Updated the following files to use `Promise<{ id: string }>` for params:
+    - `nextjs-app/src/app/api/training-plan/[id]/regenerate-section/route.ts`
+    - `nextjs-app/src/app/api/training-plan/saved/[id]/route.ts`
+    - `nextjs-app/src/app/training-plan/edit/[id]/page.tsx`
+    - `nextjs-app/src/app/training-plan/view/[id]/page.tsx`
+  - Added proper awaiting of params in all route handlers and page components
+  - Added null checks for LLM response content to prevent potential null reference errors
+  - Fixed subscription utility to use the correct field names from the Subscription model schema
+  - Created error handling pages (not-found.tsx, error.tsx, global-error.tsx)
+  - This resolves the type error: "Type '{ params: { id: string; }; }' does not satisfy the constraint 'PageProps'"
+  - Location: Multiple files across the codebase
+
 - ✅ Improved Training Plan formatting and styling (2024-03-07)
 
   - Enhanced the Llama prompt to generate better HTML structure for training plans
