@@ -527,3 +527,58 @@ We've further improved the visual hierarchy of the Training Plan PDF to create a
   - Consistent use of background colors to group related content
 
 These improvements create a clear visual hierarchy that guides the reader through the document, making it easier to scan and understand the training plan content. The component is now producing professional-quality PDFs suitable for enterprise use.
+
+# Active Context (2024-03-09)
+
+## Current Focus (2024-03-09)
+
+We've just fixed the "Create New Plan" button in the Saved Plans component that wasn't working:
+
+1. ✅ FIXED: "Create New Plan" Button in Saved Plans (2024-03-09):
+
+   - Identified that there were two different implementations of the Saved Plans functionality:
+     - `SavedPlans.tsx` component that uses the API to fetch plans from the database
+     - `SavedPlansTab` component in `client-component.tsx` that loads plans from localStorage
+   - Fixed the issue by:
+     - Adding a proper `handleCreateNew` function in the `SavedPlans.tsx` component that uses the router to navigate to `/training-plan?tab=create`
+     - Updating the `client-component.tsx` to use the `SavedPlans` component instead of the `SavedPlansTab` component
+     - Adding proper URL handling in the `TrainingPlanClient` component to update the URL when tabs change
+     - Adding a "Create New Plan" button at the top of the Saved Plans list for better UX
+   - This ensures that users can easily navigate between creating new plans and viewing saved plans
+   - The tab state is now properly managed and synchronized with the URL
+
+We've just fixed a TypeScript error in the Vercel deployment related to the react-pdf-html package:
+
+1. ✅ FIXED: react-pdf-html TypeScript Declaration Error (2024-03-09):
+
+   - Created a custom type declaration file for the react-pdf-html package at `nextjs-app/src/types/react-pdf-html.d.ts`
+   - The error was occurring because TypeScript couldn't find the declaration file for the module, even though types existed in the package
+   - The issue was related to the package.json "exports" field in the react-pdf-html package not correctly exposing the type definitions
+   - Our custom type declaration file provides the necessary type information for the Html component used in TrainingPlanPDF.tsx
+   - This resolves the Vercel deployment error: "Could not find a declaration file for module 'react-pdf-html'"
+   - The build now completes successfully without any type errors
+
+# Active Context (2024-03-10)
+
+## Current Focus (2024-03-10)
+
+We've improved the UI of the Training Plan Creator Guide page:
+
+1. ✅ IMPROVED: Training Plan Creator Guide UI (2024-03-10):
+
+   - Enhanced the readability and visual appeal of the guide page by:
+     - Limiting the content width to 850px for better readability
+     - Setting the page background to white and content container to #f5f5f7
+     - Adding a subtle shadow to create a card-like effect for the content
+     - Increasing white space between elements for better visual separation
+     - Improving typography with better line height and text sizing
+     - Adding proper spacing between sections and list items
+     - Adding decorative borders to separate content sections
+     - Centering the title and adding a bottom border for emphasis
+     - Making the CTA button larger and more prominent
+   - These changes improve the user experience by:
+     - Making the content easier to read and scan
+     - Creating a clearer visual hierarchy
+     - Providing a more modern and professional appearance
+     - Ensuring the guide is accessible on different screen sizes
+   - Location: `nextjs-app/src/app/blog/training-plan-creator-guide/page.tsx`
