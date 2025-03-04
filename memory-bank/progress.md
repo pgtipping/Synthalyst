@@ -876,6 +876,30 @@ These improvements make the PDF output more professional and better suited for p
 
 ## Recent Updates (Last 24 Hours)
 
+### Training Plan PDF Visual Hierarchy Enhancements (2023-07-12)
+
+- **Visual Structure Improvements**:
+  - Added color differentiation for headings (navy blue #000066) to create better visual hierarchy
+  - Enhanced document structure with consistent border styling throughout
+  - Added border-bottom to document header and section titles for clear visual separation
+  - Improved resource section with thicker top border (2px) for better section distinction
+- **Content Type Differentiation**:
+  - Added background colors to section titles (#f5f5f5) and resource categories (#f0f0f0)
+  - Enhanced resource items with subtle border styling
+  - Created styled tags for resource types with background colors and rounded corners
+  - Added border-left to module details for better visual grouping
+- **Readability Enhancements**:
+  - Styled duration display with background color and rounded corners
+  - Added styling for blockquotes with left border and background color
+  - Improved list styling with proper indentation and bullet types
+  - Enhanced footer with top border for better page definition
+- **Consistent Visual Language**:
+  - Implemented a cohesive color scheme throughout the document
+  - Used consistent border styles and background colors for related elements
+  - Applied rounded corners consistently to create a modern look
+  - Created clear visual patterns that guide the reader through the content
+- **Location**: `nextjs-app/src/components/TrainingPlanPDF.tsx`
+
 ### Training Plan PDF Export Final Polish (2023-07-11)
 
 - **Professional Layout Enhancements**:

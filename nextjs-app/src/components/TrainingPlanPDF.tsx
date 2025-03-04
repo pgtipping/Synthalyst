@@ -12,6 +12,8 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 30,
+    borderBottom: "1 solid #dddddd",
+    paddingBottom: 10,
   },
   title: {
     fontSize: 24,
@@ -29,7 +31,7 @@ const styles = StyleSheet.create({
   },
   resourceSection: {
     marginTop: 30,
-    borderTop: "1 solid #cccccc",
+    borderTop: "2 solid #cccccc",
     paddingTop: 20,
   },
   resourceTitle: {
@@ -37,17 +39,23 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15,
     color: "#000000",
+    backgroundColor: "#f5f5f5",
+    padding: 8,
+    borderRadius: 4,
   },
   resource: {
     marginBottom: 15,
     padding: 12,
     backgroundColor: "#f9f9f9",
     borderRadius: 4,
+    border: "1 solid #eeeeee",
   },
   resourceHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 5,
+    borderBottom: "1 solid #eeeeee",
+    paddingBottom: 5,
   },
   resourceName: {
     fontSize: 12,
@@ -59,6 +67,9 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "#444444",
     textTransform: "uppercase",
+    backgroundColor: "#eeeeee",
+    padding: "3 6",
+    borderRadius: 3,
   },
   resourceAuthor: {
     fontSize: 10,
@@ -79,6 +90,8 @@ const styles = StyleSheet.create({
     fontSize: 10,
     textAlign: "center",
     color: "#666666",
+    borderTop: "1 solid #eeeeee",
+    paddingTop: 10,
   },
   premiumResource: {
     backgroundColor: "#f0f7ff",
@@ -93,6 +106,9 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 8,
     color: "#000000",
+    backgroundColor: "#f0f0f0",
+    padding: "5 8",
+    borderRadius: 3,
   },
 });
 
@@ -115,17 +131,23 @@ const htmlStyles = `
   
   h1 {
     font-size: 20px;
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid #dddddd;
     padding-bottom: 8px;
+    margin-top: 25px;
+    color: #000066;
   }
   
   h2 {
     font-size: 18px;
     margin-top: 25px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eeeeee;
+    color: #000066;
   }
   
   h3 {
     font-size: 16px;
+    color: #000066;
   }
   
   p {
@@ -147,8 +169,9 @@ const htmlStyles = `
     font-weight: bold;
     font-size: 18px;
     margin-bottom: 12px;
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid #dddddd;
     padding-bottom: 8px;
+    color: #000066;
   }
   
   .section-content {
@@ -159,19 +182,26 @@ const htmlStyles = `
   .duration {
     font-weight: bold;
     margin-bottom: 12px;
+    background-color: #f5f5f5;
+    padding: 5px 8px;
+    border-radius: 4px;
+    display: inline-block;
   }
   
   .objectives-title, .outline-title {
     font-weight: bold;
     margin-bottom: 8px;
+    margin-top: 15px;
+    color: #000066;
   }
   
   .module-details {
     margin-bottom: 20px;
     margin-left: 8px;
-    padding: 10px;
+    padding: 15px;
     background-color: #f9f9f9;
     border-radius: 4px;
+    border-left: 3px solid #dddddd;
   }
   
   table {
@@ -206,6 +236,42 @@ const htmlStyles = `
   /* Ensure resources start on a new page if needed */
   .resources-section {
     page-break-before: auto;
+  }
+  
+  /* Numbered sections styling */
+  [id^="section-"] {
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
+  
+  /* Highlight important information */
+  strong, b {
+    color: #000000;
+  }
+  
+  /* Add visual separation between major sections */
+  h1 + p, h2 + p {
+    margin-top: 10px;
+  }
+  
+  /* Improve list appearance */
+  ul li {
+    list-style-type: disc;
+    margin-left: 5px;
+  }
+  
+  ol li {
+    list-style-type: decimal;
+    margin-left: 5px;
+  }
+  
+  /* Add styling for blockquotes or callouts */
+  blockquote {
+    margin: 15px 0;
+    padding: 10px 15px;
+    border-left: 3px solid #3b82f6;
+    background-color: #f0f7ff;
+    font-style: italic;
   }
 `;
 

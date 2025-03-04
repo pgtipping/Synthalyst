@@ -490,4 +490,27 @@ We've applied final polish to the Training Plan PDF export to make it more profe
 - Improved list styling with better indentation and spacing
 - Added support for proper page breaks to avoid cutting headings across pages
 
-The component is now much more maintainable and produces professional-quality PDFs with proper HTML rendering. The location of the component is `nextjs-app/src/components/TrainingPlanPDF.tsx`.
+### Visual Hierarchy Enhancements for Training Plan PDF (2023-07-12)
+
+We've further improved the visual hierarchy of the Training Plan PDF to create a more professional and structured document:
+
+- Added color differentiation for headings (navy blue) to make them stand out
+- Enhanced section separation with consistent border styling:
+  - Added border-bottom to the document header
+  - Improved section title styling with bottom borders
+  - Enhanced resource section with thicker top border
+- Added visual cues for different content types:
+  - Background colors for section titles and resource categories
+  - Borders for resource items and module details
+  - Styled tags for resource types with background colors
+- Improved content organization:
+  - Added border-left to module details for better visual grouping
+  - Enhanced duration display with background color and rounded corners
+  - Added styling for blockquotes and callouts
+  - Improved list styling with proper indentation and bullet types
+- Added subtle visual enhancements:
+  - Border styling for the footer
+  - Better spacing between related elements
+  - Consistent use of background colors to group related content
+
+These improvements create a clear visual hierarchy that guides the reader through the document, making it easier to scan and understand the training plan content. The component is now producing professional-quality PDFs suitable for enterprise use.
