@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { ClientComponentWrapper } from "@/components/wrappers/ClientComponentWrapper";
 
 function SignUpForm() {
   const router = useRouter();
@@ -304,8 +305,8 @@ function SignUpForm() {
 
 export default function SignUpPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <ClientComponentWrapper loadingText="Loading sign up page...">
       <SignUpForm />
-    </Suspense>
+    </ClientComponentWrapper>
   );
 }

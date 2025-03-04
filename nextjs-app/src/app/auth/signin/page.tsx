@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { ClientComponentWrapper } from "@/components/wrappers/ClientComponentWrapper";
 
 function SignInForm() {
   const router = useRouter();
@@ -216,8 +217,8 @@ function SignInForm() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <ClientComponentWrapper loadingText="Loading sign in page...">
       <SignInForm />
-    </Suspense>
+    </ClientComponentWrapper>
   );
 }

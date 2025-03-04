@@ -2349,3 +2349,50 @@ These type requirements are critical for successful builds in Next.js 15, especi
 # Project Structure (2024-03-05)
 
 // ... existing code ...
+
+### ClientComponentWrapper Pattern - 2024-03-04 02:45
+
+This pattern standardizes how we wrap client components that use Next.js navigation hooks in Suspense boundaries.
+
+#### Implementation
+
+We've created a reusable wrapper component at `nextjs-app/src/components/wrappers/ClientComponentWrapper.tsx` that:
+
+1. Provides a consistent Suspense boundary for client components
+2. Implements a standardized loading UI with spinner and customizable text
+3. Simplifies the implementation of proper Suspense boundaries
+
+#### Usage
+
+```tsx
+// In a page.tsx file
+import { ClientComponentWrapper } from "@/components/wrappers/ClientComponentWrapper";
+import { MyClientComponent } from "@/components/MyClientComponent";
+
+export default function Page() {
+  return (
+    <ClientComponentWrapper loadingText="Loading page...">
+      <MyClientComponent />
+    </ClientComponentWrapper>
+  );
+}
+```
+
+#### When to Use
+
+Use this wrapper for any client component that uses:
+
+- useSearchParams()
+- usePathname()
+- useRouter()
+
+This ensures compliance with Next.js 15.2.0+ requirements for client-side navigation hooks.
+
+#### Benefits
+
+1. Consistent loading UI across the application
+2. Simplified implementation of Suspense boundaries
+3. Prevents Vercel build errors related to missing Suspense boundaries
+4. Improves user experience during loading states
+
+// ... existing code ...
