@@ -1,3 +1,24 @@
+# Active Context (2024-03-08)
+
+## Current Focus (2024-03-08)
+
+We've just fixed inconsistencies in the Gemini API integration for the Training Plan Creator:
+
+1. ✅ FIXED: Gemini API Integration Inconsistencies (2024-03-08):
+
+   - Standardized the environment variable name from `GOOGLE_GEMINI_API_KEY` to `GEMINI_API_KEY` in the gemini.ts file
+   - Updated the `generateResourcesWithGemini` function to consistently use the "gemini-2.0-flash" model instead of "gemini-pro"
+   - Ensured the model selection is done through the `getGeminiModel()` utility function without explicitly specifying the model name
+   - Added clear comments to indicate we're using the default "gemini-2.0-flash" model
+   - Verified that no other files were using the old environment variable name or explicitly using the "gemini-pro" model
+   - Confirmed that all .env.example files were already using the correct environment variable name
+   - Location: `nextjs-app/src/lib/gemini.ts`
+
+2. ✅ COMMITTED: Changes pushed to main branch:
+   - Committed the fixes with a descriptive message: "Fix inconsistencies in Gemini API integration: standardize environment variable name and use gemini-2.0-flash model consistently"
+   - Pushed the changes to the main branch on GitHub
+   - This ensures consistent API usage across the application
+
 # Active Context (2024-03-05)
 
 ## Current Focus (2024-03-05)
@@ -420,3 +441,53 @@ We've successfully implemented and fixed tests for these endpoints using a stand
 - Explore creating specialized variants for specific sections of the application
 - Implement automated detection of navigation hooks to suggest wrapping with ClientComponentWrapper
 - Add the pattern to the project's ESLint rules to enforce proper usage
+
+## Current Focus - 2024-03-08 16:00
+
+The current focus is on ensuring consistent and correct LLM API integration across the application, particularly for the Training Plan Creator feature. Recent work has involved:
+
+1. Standardizing the Gemini API integration:
+
+   - Updated the environment variable from `GOOGLE_GEMINI_API_KEY` to `GEMINI_API_KEY`
+   - Ensured the default model is set to "gemini-2.0-flash" instead of "gemini-pro"
+   - Verified that all code using the Gemini API follows the established patterns
+
+2. Verifying the OpenRouter API integration for the Llama 3.2 3b model:
+
+   - Confirmed the correct usage of the OpenRouter API for accessing the Llama model
+   - Ensured the model name "meta-llama/llama-3.2-3b-instruct" is used consistently
+
+3. Documenting the two-stage LLM approach for the Training Plan Creator:
+   - Premium users: Gemini 2.0 Flash for resource recommendations + Llama 3.2 3b for plan generation
+   - Free users: Enhanced prompt with Llama 3.2 3b only
+
+## Recent Changes - 2024-03-08 16:05
+
+- Fixed inconsistencies in the Gemini API integration in `nextjs-app/src/lib/gemini.ts`
+- Updated Memory Bank documentation to reflect the correct API usage patterns
+- Added detailed examples and guidelines to `.cursorrules` for future reference
+
+## Next Steps - 2024-03-08 16:10
+
+1. Continue monitoring the performance of the Gemini 2.0 Flash model for resource recommendations
+2. Consider implementing additional validation for the resources returned by the Gemini API
+3. Explore opportunities to further optimize the prompts for both Gemini and Llama models
+4. Ensure all environment variables are properly documented in `.env.example` files
+
+## Active Decisions - 2024-03-08 16:15
+
+1. **LLM Selection Strategy**:
+
+   - Use Gemini 2.0 Flash for resource recommendations due to its knowledge of current resources and ability to follow structured output formats
+   - Use Llama 3.2 3b for plan generation due to its strong reasoning capabilities and cost-effectiveness
+
+2. **API Integration Pattern**:
+
+   - Maintain utility functions (`getGeminiModel()`, `openRouter` instance) for consistent API access
+   - Use Zod schemas for validating structured outputs from LLMs
+   - Implement robust error handling for all LLM API calls
+
+3. **Environment Variable Naming**:
+   - Standardize on `GEMINI_API_KEY` for the Google Generative AI API
+   - Maintain `OPENROUTER_API_KEY` for the OpenRouter API
+   - Ensure all `.env.example` files reflect the current naming conventions

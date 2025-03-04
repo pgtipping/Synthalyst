@@ -470,3 +470,48 @@ toast({
   description: "Something went wrong.",
 });
 ```
+
+# System Patterns (2024-03-08)
+
+## LLM Integration Pattern (2024-03-08)
+
+- **Two-Stage LLM Approach for Training Plan Creator**:
+
+  - Stage 1: Gemini 2.0 Flash for premium resource recommendations
+    - Direct integration with Google's Generative AI API
+    - Uses the official `@google/generative-ai` package
+    - Environment variable: `GEMINI_API_KEY`
+    - Implementation in `nextjs-app/src/lib/gemini.ts`
+  - Stage 2: Llama 3.2 3b for plan generation
+    - Integration via OpenRouter API
+    - Uses OpenAI SDK with custom baseURL
+    - Environment variable: `OPENROUTER_API_KEY`
+    - Implementation in `nextjs-app/src/lib/openrouter.ts` and `nextjs-app/src/lib/llama.ts`
+
+- **Centralized Model Access**:
+
+  - Utility functions for accessing models:
+    - `getGeminiModel()` for Gemini models (defaults to "gemini-2.0-flash")
+    - `openRouter` instance for Llama models
+  - Consistent error handling and response processing
+  - Type-safe interfaces for LLM responses
+
+- **Prompt Engineering Patterns**:
+
+  - Structured prompts with clear sections
+  - JSON output formatting for structured data
+  - HTML output formatting for rich content
+  - Fallback mechanisms for handling unexpected responses
+
+- **Resource Generation Pattern**:
+  - Premium users: AI-curated resources from Gemini
+  - Free users: Enhanced prompt for better resource recommendations
+  - Zod schema validation for consistent resource structure
+  - JSON extraction and parsing with error handling
+
+### API Integration Pattern
+
+- RESTful API endpoints
+- Multiple LLM service integrations
+- Error handling middleware
+- Type-safe API routes

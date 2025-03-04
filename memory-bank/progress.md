@@ -1,3 +1,30 @@
+# Progress Report - 2024-03-08
+
+## Recent Updates (Last 24 Hours)
+
+- ✅ Fixed Gemini API Integration Inconsistencies (2024-03-08)
+
+  - Standardized the environment variable name from `GOOGLE_GEMINI_API_KEY` to `GEMINI_API_KEY` in the gemini.ts file
+  - Updated the `generateResourcesWithGemini` function to consistently use the "gemini-2.0-flash" model instead of "gemini-pro"
+  - Ensured the model selection is done through the `getGeminiModel()` utility function without explicitly specifying the model name
+  - Added clear comments to indicate we're using the default "gemini-2.0-flash" model
+  - Verified that no other files were using the old environment variable name or explicitly using the "gemini-pro" model
+  - Confirmed that all .env.example files were already using the correct environment variable name
+  - This ensures consistent API usage across the application and maintains the use of the latest Gemini model
+  - Location: `nextjs-app/src/lib/gemini.ts`
+
+- ✅ Verified LLM API Integration Correctness (2024-03-08)
+
+  - Confirmed that the Training Plan Creator is correctly using:
+    - OpenRouter API for the Llama 3.2 3b model as specified in the plan
+    - Google's official Generative AI API with the gemini-2.0-flash model for premium resource recommendations
+  - Verified that the two-stage approach for premium users is working as intended:
+    1. Gemini 2.0 Flash for resource recommendations
+    2. Llama 3.2 3b via OpenRouter for plan generation
+  - Ensured that all API keys are properly documented in the .env.example files
+  - This verification ensures that the application is using the correct APIs for each LLM integration
+  - Location: `nextjs-app/src/lib/gemini.ts`, `nextjs-app/src/lib/llama.ts`, `nextjs-app/src/lib/openrouter.ts`
+
 # Progress Report - 2024-03-05
 
 ## Recent Updates (Last 24 Hours)

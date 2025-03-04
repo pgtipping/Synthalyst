@@ -237,6 +237,33 @@
 }
 ```
 
+#### LLM API Integration Details (2024-03-08)
+
+1. **Google Gemini API**:
+
+   - Used for: Premium resource recommendations in the Training Plan Creator
+   - Model: "gemini-2.0-flash" (default in `getGeminiModel()`)
+   - Package: `@google/generative-ai`
+   - Environment variable: `GEMINI_API_KEY` (server-side only)
+   - Implementation: Direct API integration with Google's official SDK
+   - Location: `nextjs-app/src/lib/gemini.ts`
+
+2. **OpenRouter API**:
+
+   - Used for: Llama 3.2 3b model access in the Training Plan Creator
+   - Model: "meta-llama/llama-3.2-3b-instruct"
+   - Package: Uses OpenAI SDK with custom baseURL
+   - Environment variable: `OPENROUTER_API_KEY`
+   - Implementation: OpenAI-compatible API with custom headers
+   - Location: `nextjs-app/src/lib/openrouter.ts`, `nextjs-app/src/lib/llama.ts`
+
+3. **Groq API**:
+   - Used for: Interview Questions Generator and other features
+   - Package: `groq-sdk`
+   - Environment variable: `GROQ_API_KEY`
+   - Implementation: Direct API integration with Groq's official SDK
+   - Location: Various API route handlers
+
 #### Form Handling & Validation
 
 ```json
@@ -707,197 +734,4 @@ This script modifies a shadcn/ui component to add a new variant.
 
 ### Toast System
 
-The project has migrated from the old toast system to the new sonner toast system. A toast migration utility has been created at `@/lib/toast-migration.ts` that provides backward compatibility.
-
-```typescript
-// Old way (deprecated)
-import { useToast } from "@/hooks/use-toast";
-const { toast } = useToast();
-toast({ description: "Something happened" });
-
-// New way
-import { toast } from "@/lib/toast-migration";
-toast({
-  title: "Success",
-  description: "Operation completed successfully.",
-});
-```
-
-The toast migration utility ensures that all toast calls are consistent and follow the new sonner API.
-
-## UI Implementation Patterns (2024-03-02)
-
-### Interview Questions Generator UI Implementation
-
-The Interview Questions Generator implements a consistent UI pattern with the following technical details:
-
-1. **API Response Processing**:
-
-   - The API route (`nextjs-app/src/app/api/interview-questions/generate/route.ts`) processes LLM responses and converts them to structured HTML
-   - A dedicated `generateProfessionalRubricHtml` function ensures consistent styling regardless of LLM output format
-   - The function parses text responses to identify scoring levels and criteria
-   - Fallback mechanisms handle cases where the LLM doesn't return the expected format
-
-2. **HTML Generation**:
-
-   - HTML is generated with Tailwind CSS classes directly in the template strings
-   - This approach ensures consistent styling without relying on custom CSS
-   - Example structure:
-     ```html
-     <div
-       class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]"
-     >
-       <div
-         class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center"
-       >
-         <p class="font-semibold text-indigo-900 text-lg">Excellent</p>
-         <span
-           class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
-         >
-           4-5 points
-         </span>
-       </div>
-       <div class="p-4 bg-white">
-         <p class="mb-2 text-gray-800">
-           <span class="font-semibold mr-2">1.</span> Criterion text
-         </p>
-       </div>
-     </div>
-     ```
-
-3. **Component Implementation**:
-
-   - The component (`nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`) uses `dangerouslySetInnerHTML` to render the HTML
-   - Minimal CSS is added via `<style jsx global>` for responsive behavior
-   - The component uses shadcn UI components (Card, Tabs, ScrollArea) for the overall structure
-
-4. **Responsive Design**:
-
-   - Media queries handle layout changes on smaller screens
-   - Flexbox properties adjust for different screen sizes
-   - Example:
-
-     ```css
-     @media (max-width: 640px) {
-       .scoring-rubric .bg-indigo-50 {
-         flex-direction: column;
-         align-items: flex-start;
-       }
-
-       .scoring-rubric .bg-indigo-50 span {
-         margin-top: 0.25rem;
-       }
-     }
-     ```
-
-This implementation ensures a consistent, professional appearance while maintaining good performance and accessibility.
-
-## Technologies Used (2024-03-02)
-
-The project uses the following technologies:
-
-- **Frontend Framework**: Next.js 14 with App Router
-- **UI Components**:
-  - shadcn UI (updated with 16 new components)
-  - sonner for toast notifications (replacing the old UI toast system)
-- **Styling**: Tailwind CSS with custom animations and keyframes
-- **State Management**: React Context API and React Query
-- **API Integration**:
-  - GROQ API for AI-powered features
-  - Custom API routes for backend functionality
-- **Authentication**: NextAuth.js
-- **Database**: Prisma ORM with PostgreSQL
-- **Deployment**: Vercel
-
-## Development Setup (2024-03-02)
-
-To set up the development environment:
-
-1. Clone the repository
-2. Install dependencies with `npm install`
-3. Create a `.env.local` file with the required environment variables:
-   - `GROQ_API_KEY` (with a fallback in the code for development)
-   - Other environment variables as needed
-4. Run the development server with `npm run dev`
-   - The server runs on port 3001 by default
-   - Make sure no other process is using port 3001 before starting
-
-## Technical Constraints (2024-03-02)
-
-- **Environment Variables**:
-  - Must be properly configured in Vercel for production deployment
-  - Local development can use fallbacks for some variables
-- **UI Components**:
-  - All shadcn UI components must follow the established patterns
-  - Toast notifications must use the migration utility for consistency
-- **Tailwind Configuration**:
-  - Avoid duplicate keyframes and animation definitions
-  - Test builds after adding new components with animations
-
-## Toast System Implementation (2024-03-02)
-
-The application has successfully migrated from the old shadcn UI toast system to the new sonner toast system:
-
-1. **Migration Utility**:
-
-   - File: `nextjs-app/src/lib/toast-migration.ts`
-   - Purpose: Provides backward compatibility with the old toast API
-   - Implementation: Maps old toast API calls to the new sonner toast API
-   - Key functions:
-
-     ```typescript
-     // Maps old toast API to sonner
-     export function toast(props: ToastProps) {
-       const { title, description, variant, action } = props;
-       if (variant === "destructive") {
-         return sonnerToast.error(title || description || "");
-       }
-       return sonnerToast(title || description || "");
-     }
-
-     // Compatibility hook
-     export function useToast() {
-       return {
-         toast,
-         dismiss: sonnerToast.dismiss,
-       };
-     }
-     ```
-
-2. **Toaster Component**:
-
-   - File: `nextjs-app/src/components/ui/sonner.tsx`
-   - Purpose: Provides the Toaster component for rendering toast notifications
-   - Implementation: Wraps the sonner Toaster component with theme support
-   - Usage: Imported in the root layout.tsx file
-
-3. **Import Patterns**:
-
-   - For components: `import { toast } from "@/lib/toast-migration";`
-   - For hooks: `import { useToast } from "@/lib/toast-migration";`
-   - For layout: `import { Toaster } from "@/components/ui/sonner";`
-
-4. **Verification**:
-
-   - All components have been verified to use the correct imports
-   - No instances of the old toast system remain in the codebase
-   - The migration utility properly handles all use cases including destructive variants
-   - This migration is now complete and won't cause issues in future development
-
-5. **Tailwind Configuration**:
-   - File: `nextjs-app/tailwind.config.ts`
-   - Fixed: Removed duplicate keyframes and animation definitions
-   - Verified: No duplicate properties in the configuration
-   - This issue is now completely resolved and won't recur in future development
-
-## AI Models Configuration
-
-### Gemini Model
-
-- Current version: "gemini-2.0-flash"
-- Implementation: Centralized in `nextjs-app/src/lib/gemini.ts`
-- Access method: Use `getGeminiModel()` function to get the latest model version
-- Environment variable: `GEMINI_API_KEY` (server-side only)
-- Used in:
-  - Model comparison tool (`nextjs-app/src/app/model-comparison/modelComparison.ts`)
-  - Enhanced training plan generator (`nextjs-app/src/app/api/training-plan/enhanced-generate/route.ts`)
+The project has migrated from the old toast system to the new sonner toast system. A toast migration utility has been created at `@/lib/toast-migration.ts`
