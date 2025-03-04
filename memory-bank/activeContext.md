@@ -19,6 +19,30 @@ We've just fixed inconsistencies in the Gemini API integration for the Training 
    - Pushed the changes to the main branch on GitHub
    - This ensures consistent API usage across the application
 
+We've just improved the TrainingPlanPDF component to fix formatting issues:
+
+1. ✅ FIXED: Training Plan PDF Export Formatting (2024-03-08):
+
+   - Enhanced HTML content cleaning to better preserve structure when converting to PDF
+   - Improved regex patterns for extracting sections, headings, and content
+   - Enhanced styling for better readability:
+     - Increased line height for better text spacing
+     - Added border-bottom to section titles for visual separation
+     - Improved spacing between elements
+     - Standardized capitalization for section titles
+   - Added special styling for premium resources with blue left border and light blue background
+   - Fixed list item rendering to properly handle various bullet point formats
+   - Improved handling of HTML tags in content:
+     - Better conversion of paragraphs, headings, and lists
+     - Proper handling of nested content
+     - Preservation of content structure
+   - Location: `nextjs-app/src/components/TrainingPlanPDF.tsx`
+
+2. ✅ COMMITTED: Changes pushed to main branch:
+   - Committed the fixes with a descriptive message: "Fix Training Plan PDF export formatting issues"
+   - Pushed the changes to the main branch on GitHub
+   - This ensures consistent and professional PDF output for training plans
+
 # Active Context (2024-03-05)
 
 ## Current Focus (2024-03-05)

@@ -23,25 +23,27 @@ const styles = StyleSheet.create({
     color: "#444444",
   },
   section: {
-    marginBottom: 15,
+    marginBottom: 20,
     paddingTop: 5,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 10,
     color: "#000000",
+    borderBottom: "1 solid #eeeeee",
+    paddingBottom: 5,
   },
   moduleDetails: {
-    marginBottom: 10,
+    marginBottom: 15,
     marginLeft: 5,
   },
   contentBlock: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
   duration: {
     fontSize: 12,
-    marginBottom: 8,
+    marginBottom: 10,
     fontWeight: "bold",
     color: "#000000",
   },
@@ -53,16 +55,17 @@ const styles = StyleSheet.create({
   objectivesTitle: {
     fontWeight: "bold",
     color: "#000000",
+    marginBottom: 5,
   },
   paragraph: {
     fontSize: 12,
-    marginBottom: 5,
-    lineHeight: 1.4,
+    marginBottom: 8,
+    lineHeight: 1.5,
     color: "#000000",
   },
   listItem: {
     flexDirection: "row",
-    marginBottom: 3,
+    marginBottom: 5,
     paddingLeft: 5,
   },
   listItemBullet: {
@@ -74,23 +77,24 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     color: "#000000",
-    lineHeight: 1.4,
+    lineHeight: 1.5,
   },
   resourceSection: {
-    marginTop: 15,
+    marginTop: 20,
     borderTop: "1 solid #cccccc",
-    paddingTop: 10,
+    paddingTop: 15,
   },
   resourceTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 12,
     color: "#000000",
   },
   resource: {
-    marginBottom: 10,
-    padding: 8,
+    marginBottom: 12,
+    padding: 10,
     backgroundColor: "#f9f9f9",
+    borderRadius: 4,
   },
   resourceHeader: {
     flexDirection: "row",
@@ -106,6 +110,7 @@ const styles = StyleSheet.create({
   resourceType: {
     fontSize: 10,
     color: "#444444",
+    textTransform: "uppercase",
   },
   resourceAuthor: {
     fontSize: 10,
@@ -116,6 +121,7 @@ const styles = StyleSheet.create({
   resourceDescription: {
     fontSize: 10,
     color: "#000000",
+    lineHeight: 1.4,
   },
   footer: {
     position: "absolute",
@@ -125,6 +131,10 @@ const styles = StyleSheet.create({
     fontSize: 10,
     textAlign: "center",
     color: "#666666",
+  },
+  premiumResource: {
+    backgroundColor: "#f0f7ff",
+    borderLeft: "3 solid #3b82f6",
   },
 });
 
@@ -171,24 +181,39 @@ export default function TrainingPlanPDF({
   resources,
   createdAt,
 }: TrainingPlanPDFProps) {
-  // Clean HTML content to extract text
+  // Improved HTML content cleaning to better preserve structure
   const cleanContent = content
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/<div[^>]*>/g, "") // Remove div tags but keep content
+    .replace(/<\/div>/g, "") // Remove closing div tags
+    .replace(/<br\s*\/?>/g, "\n") // Convert <br> to newlines
+    .replace(/<p[^>]*>(.*?)<\/p>/g, "$1\n\n") // Convert paragraphs to text with double newlines
+    .replace(/<h1[^>]*>(.*?)<\/h1>/g, "# $1\n") // Convert h1 to markdown-style heading
+    .replace(/<h2[^>]*>(.*?)<\/h2>/g, "## $1\n") // Convert h2 to markdown-style heading
+    .replace(/<h3[^>]*>(.*?)<\/h3>/g, "### $1\n") // Convert h3 to markdown-style heading
+    .replace(/<h4[^>]*>(.*?)<\/h4>/g, "#### $1\n") // Convert h4 to markdown-style heading
+    .replace(/<strong>(.*?)<\/strong>/g, "$1") // Keep text from strong tags
+    .replace(/<em>(.*?)<\/em>/g, "$1") // Keep text from em tags
+    .replace(/<ul[^>]*>|<\/ul>/g, "") // Remove ul tags
+    .replace(/<ol[^>]*>|<\/ol>/g, "") // Remove ol tags
+    .replace(/<li[^>]*>(.*?)<\/li>/g, "• $1\n") // Convert li to bullet points
+    .replace(/<[^>]*>/g, " ") // Remove any remaining HTML tags
+    .replace(/\s+/g, " ") // Replace multiple spaces with a single space
+    .replace(/\n\s+/g, "\n") // Clean up spaces after newlines
+    .replace(/\n{3,}/g, "\n\n") // Replace 3+ consecutive newlines with just 2
     .trim();
 
   // Extract sections based on numbered headings (e.g., "1. Overview", "2. Learning Objectives")
   const sections: Section[] = [];
 
-  // Split content by main section numbers
-  const mainSections = cleanContent.split(/(?=\d+\.\s+[A-Z])/);
+  // Split content by main section numbers with improved regex
+  const mainSections = cleanContent.split(/(?=\d+\.\s+[A-Z][a-z]+)/);
 
   // Process each main section
   mainSections.forEach((section) => {
     if (!section.trim()) return;
 
-    // Extract heading and content
-    const match = section.match(/^(\d+\.\s*[^\.]+)(.*)/);
+    // Extract heading and content with improved regex
+    const match = section.match(/^(\d+\.\s*[^:\.]+)[:\.]?(.*)/);
     if (match) {
       const [, heading, content] = match;
 
@@ -197,11 +222,7 @@ export default function TrainingPlanPDF({
         heading.includes("Detailed Content Module") ||
         heading.includes("Module")
       ) {
-        // Process module content differently
-        // Enhanced regex pattern to better handle variations in the module content format
-        // - Makes the "Content outline:" part optional
-        // - Handles cases where there might be additional subsections
-        // - Improves capturing of learning objectives that might span multiple lines
+        // Process module content with improved regex
         const moduleMatch = content.match(
           /Duration:\s*(.*?)(?:Learning objectives:|Learning Objectives:)\s*(.*?)(?=(?:Content outline:|Content Outline:|Additional Resources:|$))(.*)/i
         );
@@ -209,13 +230,13 @@ export default function TrainingPlanPDF({
         if (moduleMatch) {
           const [, duration, objectives, contentOutline] = moduleMatch;
 
-          // Process learning objectives to handle bullet points
+          // Process learning objectives with improved handling of bullet points
           const processedObjectives = objectives
             .replace(/•/g, "- ") // Replace bullet points with dashes for consistency
             .replace(/\n+/g, " ") // Replace multiple newlines with a single space
             .trim();
 
-          // Process content outline to handle nested content
+          // Process content outline with improved handling of structure
           const processedContentOutline = contentOutline
             ? contentOutline
                 .replace(/Content outline:|Content Outline:/i, "") // Remove the heading
@@ -295,11 +316,11 @@ export default function TrainingPlanPDF({
                     ) : subsection.title === "Learning objectives" ? (
                       <View style={styles.contentBlock}>
                         <Text style={styles.objectivesTitle}>
-                          Learning objectives:
+                          Learning Objectives:
                         </Text>
-                        {/* Split objectives by bullet points or dashes and render as a list */}
+                        {/* Split objectives by bullet points or dashes with improved regex */}
                         {subsection.content
-                          .split(/(?:- |\• )/)
+                          .split(/(?:- |\• |\d+\.\s+)/)
                           .filter(Boolean)
                           .map((objective, i) => (
                             <View key={i} style={styles.listItem}>
@@ -313,9 +334,9 @@ export default function TrainingPlanPDF({
                     ) : (
                       <View style={styles.contentBlock}>
                         <Text style={styles.objectivesTitle}>
-                          Content outline:
+                          Content Outline:
                         </Text>
-                        {/* Process content outline to handle potential structure */}
+                        {/* Process content outline with improved regex for structure */}
                         {subsection.content
                           .split(/(?:\d+\.\s+|\-\s+|\•\s+)/)
                           .filter(Boolean)
@@ -335,7 +356,7 @@ export default function TrainingPlanPDF({
                   </View>
                 ))
               ) : (
-                // Render regular section content
+                // Render regular section content with improved paragraph handling
                 <Text style={styles.paragraph}>{section.content}</Text>
               )}
             </View>
@@ -348,7 +369,14 @@ export default function TrainingPlanPDF({
           <View style={styles.resourceSection}>
             <Text style={styles.resourceTitle}>Recommended Resources</Text>
             {resources.map((resource) => (
-              <View key={resource.id} style={styles.resource}>
+              <View
+                key={resource.id}
+                style={
+                  resource.isPremium
+                    ? [styles.resource, styles.premiumResource]
+                    : styles.resource
+                }
+              >
                 <View style={styles.resourceHeader}>
                   <Text style={styles.resourceName}>{resource.title}</Text>
                   <Text style={styles.resourceType}>{resource.type}</Text>
