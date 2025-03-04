@@ -32,20 +32,28 @@ export const subscription = {
         where: { email },
         select: {
           id: true,
-          subscriptionTier: true,
-          subscriptionExpiresAt: true,
+          subscriptions: {
+            where: {
+              status: "active",
+              OR: [
+                { endDate: null }, // Ongoing subscription
+                { endDate: { gt: new Date() } }, // Not expired
+              ],
+            },
+            select: {
+              type: true,
+              endDate: true,
+            },
+          },
         },
       });
 
       // If user doesn't exist, they don't have premium access
       if (!user) return false;
 
-      // Check if user has a premium subscription that hasn't expired
-      if (
-        user.subscriptionTier === "premium" &&
-        user.subscriptionExpiresAt &&
-        new Date(user.subscriptionExpiresAt) > new Date()
-      ) {
+      // Check if user has an active premium subscription
+      const activeSubscription = user.subscriptions[0];
+      if (activeSubscription && activeSubscription.type === "premium") {
         return true;
       }
 
@@ -67,10 +75,27 @@ export const subscription = {
     try {
       const user = await prisma.user.findUnique({
         where: { email },
-        select: { subscriptionTier: true },
+        select: {
+          subscriptions: {
+            where: {
+              status: "active",
+              OR: [
+                { endDate: null }, // Ongoing subscription
+                { endDate: { gt: new Date() } }, // Not expired
+              ],
+            },
+            select: {
+              type: true,
+            },
+          },
+        },
       });
 
-      return user?.subscriptionTier || null;
+      if (!user || user.subscriptions.length === 0) {
+        return "free";
+      }
+
+      return user.subscriptions[0].type;
     } catch (error) {
       console.error("Error getting subscription tier:", error);
       return null;

@@ -6,9 +6,9 @@ import { prisma } from "@/lib/prisma";
 import TrainingPlanView from "../../components/TrainingPlanView";
 
 interface TrainingPlanViewPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export const metadata: Metadata = {
@@ -16,9 +16,10 @@ export const metadata: Metadata = {
   description: "View your saved training plan",
 };
 
-export default async function TrainingPlanViewPage({
-  params,
-}: TrainingPlanViewPageProps) {
+export default async function TrainingPlanViewPage(
+  props: TrainingPlanViewPageProps
+) {
+  const params = await props.params;
   const { id } = params;
 
   // Get user session

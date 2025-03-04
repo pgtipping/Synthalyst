@@ -222,7 +222,8 @@ export async function POST(req: Request) {
       response_format: { type: "json_object" },
     });
 
-    const generatedContent = JSON.parse(completion.choices[0].message.content);
+    const responseContent = completion.choices[0].message.content as string;
+    const generatedContent = JSON.parse(responseContent || "{}");
 
     // Create the full content object
     const content = {

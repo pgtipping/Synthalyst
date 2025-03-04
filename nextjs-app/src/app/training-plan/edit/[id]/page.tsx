@@ -9,12 +9,11 @@ export const metadata = {
   description: "Edit your training plan",
 };
 
-export default async function EditTrainingPlanPage({
-  params,
-}: {
-  params: { id: string };
+export default async function EditTrainingPlanPage(props: {
+  params: Promise<{ id: string }>;
 }) {
   const session = await getServerSession(authOptions);
+  const { id } = await props.params;
 
   if (!session?.user) {
     redirect("/auth/signin?callbackUrl=/training-plan");
@@ -23,7 +22,7 @@ export default async function EditTrainingPlanPage({
   // Fetch the training plan
   const trainingPlan = await prisma.trainingPlan.findUnique({
     where: {
-      id: params.id,
+      id: id,
       userId: session.user.id,
     },
   });
@@ -38,6 +37,8 @@ export default async function EditTrainingPlanPage({
   // Transform the plan to include parsed content
   const transformedPlan = {
     ...trainingPlan,
+    description: trainingPlan.description || "",
+    duration: trainingPlan.duration || "",
     content,
   };
 

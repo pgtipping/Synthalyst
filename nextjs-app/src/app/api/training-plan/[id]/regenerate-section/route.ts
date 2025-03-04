@@ -37,7 +37,7 @@ interface Section {
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -48,7 +48,8 @@ export async function POST(
       );
     }
 
-    const planId = params.id;
+    const { id } = await params;
+    const planId = id;
     const body = await req.json();
     const { sectionId } = regenerateSectionSchema.parse(body);
 
@@ -144,9 +145,8 @@ export async function POST(
       response_format: { type: "json_object" },
     });
 
-    const regeneratedSection = JSON.parse(
-      completion.choices[0].message.content || "{}"
-    );
+    const responseContent = completion.choices[0].message.content || "{}";
+    const regeneratedSection = JSON.parse(responseContent);
 
     // Update the section in the content
     const updatedSections = content.sections.map((s: Section) =>
