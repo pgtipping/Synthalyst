@@ -2,6 +2,19 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed Vercel Deployment Issues
+
+  - Identified and fixed two critical issues preventing successful Vercel deployments:
+    1. Missing exports in gemini.ts:
+       - Added the missing `fetchResourcesWithGemini` function export
+       - Added the missing `getGeminiModel` function export
+       - Refactored code to use the new `getGeminiModel` function for consistency
+    2. Type error in regenerate-section route:
+       - Updated the POST function's second parameter type to match Next.js App Router requirements
+       - Fixed parameter references to use the correct context object
+  - Committed and pushed changes to the main branch
+  - Location: `nextjs-app/src/lib/gemini.ts`, `nextjs-app/src/app/api/training-plan/[id]/regenerate-section/route.ts`
+
 - ✅ Improved Blog Post Display
 
   - Removed the cover image from blog post pages to fix broken image issues
@@ -112,6 +125,27 @@
   - Identified the importance of SessionProvider placement and React version compatibility
   - Documented the issue in the memory bank for future reference
   - Location: `memory-bank/activeContext.md`, `memory-bank/progress.md`
+
+- ✅ Implemented Component Standardization System
+
+  - Created a comprehensive component guidelines document (`docs/component-guidelines.md`) that outlines best practices for using shadcn/ui components
+  - Documented key principles for component usage, including consistency, customization, and accessibility
+  - Added sections on styling guidelines, toast notifications, common patterns, and component variants
+  - Created documentation for custom components built on top of shadcn/ui
+  - Established a migration plan for gradually replacing custom components with shadcn/ui components
+  - Created utility scripts to help with component standardization:
+    - `component-audit.js`: Identifies custom components and styling patterns that could be replaced with shadcn/ui
+    - `migrate-components.js`: Helps migrate custom components to shadcn/ui
+    - `create-variant.js`: Adds new variants to shadcn/ui components
+  - Extended the shadcn/ui Card component with a gradient variant
+  - Added multiple gradient options: primary, secondary, accent, info, and default
+  - Created an example page demonstrating all gradient variants
+  - Created specialized resource display components:
+    - ResourceCard: Displays information about resources like books, videos, and articles
+    - ResourceList: Displays multiple resources with premium filtering
+  - Enhanced the Training Plan Creator to use these new components
+  - Fixed toast implementation in the Training Plan Creator to use the correct format from the toast migration utility
+  - Location: `docs/component-guidelines.md`, `scripts/component-audit.js`, `scripts/migrate-components.js`, `scripts/create-variant.js`, `nextjs-app/src/components/ui/card.tsx`, `nextjs-app/src/app/examples/gradient-card/page.tsx`, `nextjs-app/src/app/training-plan/components/ResourceCard.tsx`, `nextjs-app/src/app/training-plan/components/ResourceList.tsx`, `nextjs-app/src/app/training-plan/components/PlanForm.tsx`
 
 # Progress Report - 2024-03-02
 
