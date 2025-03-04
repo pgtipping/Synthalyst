@@ -1,13 +1,13 @@
-import { Metadata } from "next";
 import { Suspense } from "react";
-import TrainingPlanClient from "./client-component";
+import { Metadata } from "next";
+import TrainingPlanClient from "./client";
 
 export const metadata: Metadata = {
-  title: "Training Plan Creator | Synthalyst",
+  title: "Training Plan | Synthalyst",
   description: "Create and manage your training plans",
 };
 
-export default function TrainingPlanPage() {
+export default function AltTrainingPlanPage() {
   return (
     <Suspense
       fallback={

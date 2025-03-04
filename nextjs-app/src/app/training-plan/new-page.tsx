@@ -1,13 +1,13 @@
-import { Metadata } from "next";
 import { Suspense } from "react";
-import TrainingPlanClient from "./client-component";
+import { Metadata } from "next";
+import NewTrainingPlanClient from "./new-client";
 
 export const metadata: Metadata = {
-  title: "Training Plan Creator | Synthalyst",
+  title: "New Training Plan | Synthalyst",
   description: "Create and manage your training plans",
 };
 
-export default function TrainingPlanPage() {
+export default function NewTrainingPlanPage() {
   return (
     <Suspense
       fallback={
@@ -19,7 +19,7 @@ export default function TrainingPlanPage() {
         </div>
       }
     >
-      <TrainingPlanClient />
+      <NewTrainingPlanClient />
     </Suspense>
   );
 }

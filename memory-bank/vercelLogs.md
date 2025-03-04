@@ -2,68 +2,66 @@
 
 ## 2025-03-03
 
-[20:24:30.576] Running build in Washington, D.C., USA (East) – iad1
-[20:24:31.198] Cloning github.com/pgtipping/Synthalyst (Branch: main, Commit: 0c26147)
-[20:24:31.551] Cloning completed: 352.000ms
-[20:24:39.461] Restored build cache from previous deployment (BxuAnJC1kp2Lexj5vXtZHNmRNKaA)
-[20:24:39.548] Running "vercel build"
-[20:24:40.678] Vercel CLI 41.2.2
-[20:24:43.982] Running "install" command: `npm install`...
-[20:24:53.111]
-[20:24:53.111] added 5 packages, changed 10 packages, and audited 1413 packages in 9s
-[20:24:53.111]
-[20:24:53.111] 244 packages are looking for funding
-[20:24:53.111] run `npm fund` for details
-[20:24:53.116]
-[20:24:53.116] 3 moderate severity vulnerabilities
-[20:24:53.116]
-[20:24:53.116] To address all issues (including breaking changes), run:
-[20:24:53.116] npm audit fix --force
-[20:24:53.116]
-[20:24:53.116] Run `npm audit` for details.
-[20:24:53.157] Detected Next.js version: 15.2.0
-[20:24:53.157] Running "prisma migrate deploy && prisma generate && next build"
-[20:24:53.627] Prisma schema loaded from prisma/schema.prisma
-[20:24:53.633] Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-noisy-mountain-a4gl2bkt-pooler.us-east-1.aws.neon.tech"
-[20:24:54.420]
-[20:24:54.420] 6 migrations found in prisma/migrations
-[20:24:54.420]
-[20:24:54.528]
-[20:24:54.534] No pending migrations to apply.
-[20:24:55.019] Prisma schema loaded from prisma/schema.prisma
-[20:24:55.533]
-[20:24:55.533] ✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 260ms
-[20:24:55.533]
-[20:24:55.533] Start by importing your Prisma Client (See: <https://pris.ly/d/importing-client>)
-[20:24:55.533]
-[20:24:55.533] Tip: Want to react to database changes in your app as they happen? Discover how with Pulse: <https://pris.ly/tip-1-pulse>
-[20:24:55.534]
-[20:24:56.566] ▲ Next.js 15.2.0
-[20:24:56.566]
-[20:24:56.650] Creating an optimized production build ...
-[20:25:23.171] ⚠ Compiled with warnings
-[20:25:23.171]
-[20:25:23.171] ./src/app/api/training-plan/enhanced-generate/route.ts
-[20:25:23.171] Attempted import error: 'fetchResourcesWithGemini' is not exported from '@/lib/gemini' (imported as 'fetchResourcesWithGemini').
-[20:25:23.171]
-[20:25:23.172] Import trace for requested module:
-[20:25:23.172] ./src/app/api/training-plan/enhanced-generate/route.ts
-[20:25:23.172]
-[20:25:23.172] ./src/lib/modelComparison.ts
-[20:25:23.172] Attempted import error: 'getGeminiModel' is not exported from './gemini' (imported as 'getGeminiModel').
-[20:25:23.172]
-[20:25:23.172] Import trace for requested module:
-[20:25:23.172] ./src/lib/modelComparison.ts
-[20:25:23.173] ./src/app/api/model-comparison/route.ts
-[20:25:23.173]
-[20:25:23.177] Skipping linting
-[20:25:23.177] Checking validity of types ...
-[20:25:40.150] Failed to compile.
-[20:25:40.150]
-[20:25:40.151] src/app/api/training-plan/[id]/regenerate-section/route.ts
-[20:25:40.151] Type error: Route "src/app/api/training-plan/[id]/regenerate-section/route.ts" has an invalid "POST" export:
-[20:25:40.151] Type "{ params: { id: string; }; }" is not a valid type for the function's second argument.
-[20:25:40.151]
-[20:25:40.213] Next.js build worker exited with code: 1 and signal: null
-[20:25:40.280] Error: Command "prisma migrate deploy && prisma generate && next build" exited with 1
-[20:25:40.669]
+[22:34:07.116] Running build in Washington, D.C., USA (East) – iad1
+[22:34:07.229] Cloning github.com/pgtipping/Synthalyst (Branch: main, Commit: 866b1ba)
+[22:34:07.544] Cloning completed: 315.000ms
+[22:34:14.318] Restored build cache from previous deployment (BxuAnJC1kp2Lexj5vXtZHNmRNKaA)
+[22:34:14.454] Running "vercel build"
+[22:34:16.122] Vercel CLI 41.2.2
+[22:34:16.929] Running "install" command: `npm install`...
+[22:34:25.716]
+[22:34:25.716] added 5 packages, changed 10 packages, and audited 1413 packages in 9s
+[22:34:25.716]
+[22:34:25.717] 244 packages are looking for funding
+[22:34:25.717] run `npm fund` for details
+[22:34:25.720]
+[22:34:25.721] 3 moderate severity vulnerabilities
+[22:34:25.721]
+[22:34:25.721] To address all issues (including breaking changes), run:
+[22:34:25.721] npm audit fix --force
+[22:34:25.721]
+[22:34:25.721] Run `npm audit` for details.
+[22:34:25.759] Detected Next.js version: 15.2.0
+[22:34:25.760] Running "prisma migrate deploy && prisma generate && next build"
+[22:34:26.218] Prisma schema loaded from prisma/schema.prisma
+[22:34:26.225] Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-noisy-mountain-a4gl2bkt-pooler.us-east-1.aws.neon.tech"
+[22:34:26.888]
+[22:34:26.888] 6 migrations found in prisma/migrations
+[22:34:26.888]
+[22:34:26.994]
+[22:34:26.995] No pending migrations to apply.
+[22:34:27.458] Prisma schema loaded from prisma/schema.prisma
+[22:34:27.948]
+[22:34:27.948] ✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 249ms
+[22:34:27.948]
+[22:34:27.948] Start by importing your Prisma Client (See: <https://pris.ly/d/importing-client>)
+[22:34:27.948]
+[22:34:27.948] Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: <https://pris.ly/orm/survey/release-5-22>
+[22:34:27.948]
+[22:34:28.788] ▲ Next.js 15.2.0
+[22:34:28.789]
+[22:34:28.869] Creating an optimized production build ...
+[22:34:55.709] ✓ Compiled successfully
+[22:34:55.714] Skipping linting
+[22:34:55.715] Checking validity of types ...
+[22:35:12.456] Collecting page data ...
+[22:35:16.286] Generating static pages (0/56) ...
+[22:35:17.143] Generating static pages (14/56)
+[22:35:17.398] Generating static pages (28/56)
+[22:35:17.536] Generating static pages (42/56)
+[22:35:17.994] ⨯ useSearchParams() should be wrapped in a suspense boundary at page "/training-plan". Read more: <https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout>
+[22:35:17.994] at a (/vercel/path1/.next/server/chunks/8302.js:4:25258)
+[22:35:17.995] at d (/vercel/path1/.next/server/chunks/8302.js:4:147954)
+[22:35:17.995] at rs (/vercel/path1/.next/server/app/training-plan/page.js:1:41384)
+[22:35:17.995] at nL (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:46773)
+[22:35:17.995] at nU (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:48548)
+[22:35:17.995] at nU (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:64360)
+[22:35:17.995] at nq (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:67434)
+[22:35:17.995] at nH (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:65009)
+[22:35:17.995] at nG (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:70865)
+[22:35:17.995] at nz (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:69548)
+[22:35:17.995] Error occurred prerendering page "/training-plan". Read more: <https://nextjs.org/docs/messages/prerender-error>
+[22:35:17.995] Export encountered an error on /training-plan/page: /training-plan, exiting the build.
+[22:35:18.008] ⨯ Next.js build worker exited with code: 1 and signal: null
+[22:35:18.086] Error: Command "prisma migrate deploy && prisma generate && next build" exited with 1
+[22:35:18.451]
