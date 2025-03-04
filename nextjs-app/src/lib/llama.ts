@@ -69,56 +69,62 @@ export async function generatePlanWithLlama(
       }
       ${data.additionalNotes ? `Additional Notes: ${data.additionalNotes}` : ""}
       
-      Structure the plan with the following sections, using HTML formatting for better readability:
+      Structure the plan with the following sections, using clean HTML formatting for better readability:
       
-      <h2>1. Overview</h2>
-      Provide a concise introduction to the training plan, explaining its purpose, scope, and expected outcomes. Mention the target audience and how the training aligns with their needs and career development.
-      
-      <h2>2. Learning Objectives</h2>
-      List and elaborate on each learning objective, explaining why it's important and how it contributes to the overall goal of the training.
-      
-      <h2>3. Target Audience</h2>
-      Describe the ideal participants for this training, including their background, experience level, and what they should expect to gain.
-      
-      <h2>4. Prerequisites</h2>
-      Clearly state what knowledge, skills, or experience participants should have before starting this training.
-      
-      <h2>5. Training Structure</h2>
-      Provide a high-level overview of how the training is organized, including the number of modules/sessions, their sequence, and the overall flow.
-      
-      <h2>6. Detailed Content</h2>
-      For each module or session, include:
-      <h3>Module 1: [Title]</h3>
-      <ul>
-        <li><strong>Duration:</strong> [Time]</li>
-        <li><strong>Learning objectives:</strong> Specific outcomes for this module</li>
-        <li><strong>Content outline:</strong> Key topics covered</li>
-        <li><strong>Activities:</strong> Exercises, discussions, case studies</li>
-        <li><strong>Resources:</strong> Materials needed for this module</li>
-      </ul>
-      
-      <h2>7. Learning Activities</h2>
-      Describe the various activities participants will engage in throughout the training, such as:
-      <ul>
-        <li>Hands-on exercises</li>
-        <li>Group discussions</li>
-        <li>Case studies</li>
-        <li>Role-playing scenarios</li>
-        <li>Practical applications</li>
-      </ul>
-      
-      <h2>8. Assessment Methods</h2>
-      Explain how learning will be evaluated, including:
-      <ul>
-        <li>Formative assessments during the training</li>
-        <li>Summative assessments at the end</li>
-        <li>Practical demonstrations of skills</li>
-        <li>Projects or assignments</li>
-        <li>Criteria for successful completion</li>
-      </ul>
-      
-      <h2>9. Resources</h2>
-      List recommended resources for participants, organized by type and relevance to specific learning objectives.
+      <div class="training-plan">
+        <h1>${data.title}</h1>
+        
+        <h2>1. Overview</h2>
+        <p>Provide a concise introduction to the training plan, explaining its purpose, scope, and expected outcomes. Mention the target audience and how the training aligns with their needs and career development.</p>
+        
+        <h2>2. Learning Objectives</h2>
+        <p>List and elaborate on each learning objective, explaining why it's important and how it contributes to the overall goal of the training.</p>
+        
+        <h2>3. Target Audience</h2>
+        <p>Describe the ideal participants for this training, including their background, experience level, and what they should expect to gain.</p>
+        
+        <h2>4. Prerequisites</h2>
+        <p>Clearly state what knowledge, skills, or experience participants should have before starting this training.</p>
+        
+        <h2>5. Training Structure</h2>
+        <p>Provide a high-level overview of how the training is organized, including the number of modules/sessions, their sequence, and the overall flow.</p>
+        
+        <h2>6. Detailed Content</h2>
+        <p>For each module or session, include:</p>
+        <div class="module">
+          <h3>Module 1: [Title]</h3>
+          <ul>
+            <li><strong>Duration:</strong> [Time]</li>
+            <li><strong>Learning objectives:</strong> Specific outcomes for this module</li>
+            <li><strong>Content outline:</strong> Key topics covered</li>
+            <li><strong>Activities:</strong> Exercises, discussions, case studies</li>
+            <li><strong>Resources:</strong> Materials needed for this module</li>
+          </ul>
+        </div>
+        
+        <h2>7. Learning Activities</h2>
+        <p>Describe the various activities participants will engage in throughout the training, such as:</p>
+        <ul>
+          <li>Hands-on exercises</li>
+          <li>Group discussions</li>
+          <li>Case studies</li>
+          <li>Role-playing scenarios</li>
+          <li>Practical applications</li>
+        </ul>
+        
+        <h2>8. Assessment Methods</h2>
+        <p>Explain how learning will be evaluated, including:</p>
+        <ul>
+          <li>Formative assessments during the training</li>
+          <li>Summative assessments at the end</li>
+          <li>Practical demonstrations of skills</li>
+          <li>Projects or assignments</li>
+          <li>Criteria for successful completion</li>
+        </ul>
+        
+        <h2>9. Resources</h2>
+        <p>List recommended resources for participants, organized by type and relevance to specific learning objectives.</p>
+      </div>
     `;
 
     // For premium users: Include Gemini resources
@@ -143,7 +149,15 @@ export async function generatePlanWithLlama(
           })
           .join("\n")}
         
-        When referencing these resources in your plan, mark them as "Premium Resource" to indicate they are specially curated resources.
+        When referencing these resources in your plan, use the following format:
+        
+        <div class="premium-resource">
+          <h4>Premium Resource: [Resource Title]</h4>
+          <p><strong>Type:</strong> [Resource Type]</p>
+          <p><strong>Author:</strong> [Author Name]</p>
+          <p><strong>Description:</strong> [Resource Description]</p>
+          <p><a href="[Resource URL]" target="_blank">Access Resource</a></p>
+        </div>
         
         In the Resources section, organize these premium resources by:
         1. Relevance to specific learning objectives

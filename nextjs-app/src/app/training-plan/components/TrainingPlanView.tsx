@@ -160,11 +160,18 @@ export default function TrainingPlanView({ plan }: TrainingPlanViewProps) {
             <div
               className="prose prose-lg max-w-none dark:prose-invert
                           prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
+                          prose-h1:text-2xl prose-h1:mb-6 prose-h1:text-center prose-h1:text-indigo-700 dark:prose-h1:text-indigo-400
                           prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-4 prose-h2:text-indigo-700 dark:prose-h2:text-indigo-400
                           prose-h3:text-lg prose-h3:mt-5 prose-h3:mb-3 prose-h3:text-indigo-600 dark:prose-h3:text-indigo-500
+                          prose-h4:text-base prose-h4:mt-4 prose-h4:mb-2 prose-h4:text-indigo-500 dark:prose-h4:text-indigo-300
                           prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-3 prose-p:leading-relaxed
                           prose-ul:my-3 prose-li:my-1 prose-li:text-gray-700 dark:prose-li:text-gray-300
-                          prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100"
+                          prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100
+                          [&_.training-plan]:space-y-4
+                          [&_.module]:border-l-2 [&_.module]:border-indigo-200 [&_.module]:pl-4 [&_.module]:py-2 [&_.module]:my-4
+                          [&_.premium-resource]:bg-gradient-to-r [&_.premium-resource]:from-amber-50 [&_.premium-resource]:to-amber-100 
+                          [&_.premium-resource]:dark:from-amber-950 [&_.premium-resource]:dark:to-amber-900
+                          [&_.premium-resource]:p-4 [&_.premium-resource]:rounded-md [&_.premium-resource]:my-4 [&_.premium-resource]:border-l-4 [&_.premium-resource]:border-amber-400"
             >
               <div dangerouslySetInnerHTML={{ __html: parsedContent }} />
             </div>
