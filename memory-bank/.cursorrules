@@ -67,6 +67,42 @@
   }
   ```
 
+### App Router Route Handler Pattern - 2024-03-07 09:15
+
+- Next.js App Router route handlers require specific parameter types
+- For dynamic routes with parameters, use the following pattern:
+  ```typescript
+  // CORRECT: Destructure params directly
+  export async function GET(
+    request: Request,
+    { params }: { params: { id: string } }
+  ) {
+    const id = params.id;
+    // ...
+  }
+  ```
+- Avoid using this pattern which causes type errors:
+  ```typescript
+  // INCORRECT: Using context object
+  export async function GET(
+    request: Request,
+    context: { params: { id: string } }
+  ) {
+    const id = context.params.id;
+    // ...
+  }
+  ```
+- Always add null checks for LLM response content:
+  ```typescript
+  const content = completion.choices[0].message.content || "{}";
+  const parsedContent = JSON.parse(content);
+  ```
+- This pattern applies to all HTTP methods (GET, POST, PUT, DELETE, etc.)
+- Common locations where this pattern is used:
+  - API routes with dynamic parameters: `[id]`, `[slug]`, etc.
+  - Nested dynamic routes: `[category]/[id]`, etc.
+- This pattern is required for successful Vercel deployment
+
 ## UI Patterns - 2024-03-01 15:30
 
 ### Loading State Pattern - 2024-03-01 15:30
