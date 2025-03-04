@@ -168,42 +168,32 @@ export default function TrainingPlanPDF({
     .replace(/\s+/g, " ")
     .trim();
 
-  // Extract sections based on headings
+  // Extract sections based on numbered headings (e.g., "1. Overview", "2. Learning Objectives")
   const sections: Section[] = [];
-  const headingRegex = /(\d+\.\s+[^:]+):/g;
-  let match;
-  let lastIndex = 0;
 
-  while ((match = headingRegex.exec(cleanContent)) !== null) {
-    const heading = match[1];
-    const startIndex = match.index;
+  // Split content by main section numbers
+  const mainSections = cleanContent.split(/(?=\d+\.\s+[A-Z])/);
 
-    if (lastIndex > 0) {
-      const sectionContent = cleanContent
-        .substring(lastIndex, startIndex)
-        .trim();
+  // Process each main section
+  mainSections.forEach((section) => {
+    if (!section.trim()) return;
+
+    // Extract heading and content
+    const match = section.match(/^(\d+\.\s*[^\.]+)(.*)/);
+    if (match) {
+      const [, heading, content] = match;
       sections.push({
-        heading: sections[sections.length - 1]?.heading || "",
-        content: sectionContent,
+        heading: heading.trim(),
+        content: content.trim(),
+      });
+    } else {
+      // If no heading pattern found, add as raw content
+      sections.push({
+        heading: "",
+        content: section.trim(),
       });
     }
-
-    sections.push({
-      heading,
-      content: "",
-    });
-
-    lastIndex = startIndex + match[0].length;
-  }
-
-  // Add the last section
-  if (lastIndex > 0 && lastIndex < cleanContent.length) {
-    const sectionContent = cleanContent.substring(lastIndex).trim();
-    sections.push({
-      heading: sections[sections.length - 1]?.heading || "",
-      content: sectionContent,
-    });
-  }
+  });
 
   return (
     <Document>
@@ -220,7 +210,9 @@ export default function TrainingPlanPDF({
         {sections.length > 0 ? (
           sections.map((section, index) => (
             <View key={index} style={styles.section}>
-              <Text style={styles.sectionTitle}>{section.heading}</Text>
+              {section.heading && (
+                <Text style={styles.sectionTitle}>{section.heading}</Text>
+              )}
               <Text style={styles.paragraph}>{section.content}</Text>
             </View>
           ))

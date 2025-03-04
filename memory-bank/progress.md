@@ -833,3 +833,8 @@
   - Replaced Inter font with standard Helvetica font that's built into PDF renderer
   - Updated font weight specifications from numeric values to string values
   - Ensured PDF generation works reliably without requiring external font files
+- ✅ Fixed PDF formatting issue in Training Plan Creator (2023-06-16)
+  - Improved section extraction logic to properly parse training plan content
+  - Fixed content duplication issue in the PDF output
+  - Enhanced section heading detection for better document structure
+  - Ensured proper separation between sections for improved readability

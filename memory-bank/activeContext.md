@@ -521,3 +521,17 @@ Key changes:
 - Ensured the PDF generation works reliably without requiring external font files
 
 This fix ensures that users can successfully generate and download PDF versions of their training plans without encountering font-related errors.
+
+### PDF Formatting Issue Fix (2023-06-16)
+
+We've addressed a formatting issue in the PDF export for training plans where content was being duplicated and sections weren't properly separated. The problem was in the content parsing logic of the `TrainingPlanPDF` component.
+
+Key changes:
+
+- Improved the section extraction algorithm to better handle the training plan format
+- Fixed the regex pattern used to identify section headings
+- Implemented a more robust approach to splitting content by main section numbers
+- Added conditional rendering for section headings to prevent empty headings
+- Removed unused variables to address linter warnings
+
+This fix ensures that the PDF exports have proper formatting with clear section separation, making the training plans more professional and readable for users.
