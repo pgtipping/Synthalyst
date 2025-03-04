@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 
 // Initialize the Google Generative AI with the API key
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || "");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 /**
  * Gets the Gemini model instance
@@ -63,8 +63,8 @@ export async function generateResourcesWithGemini(
   learningStyle?: string
 ): Promise<Resource[]> {
   try {
-    // Get the Gemini Pro model
-    const model = getGeminiModel("gemini-pro");
+    // Get the Gemini 2.0 Flash model
+    const model = getGeminiModel(); // Use the default "gemini-2.0-flash" model
 
     // Create a prompt for Gemini
     const prompt = `
