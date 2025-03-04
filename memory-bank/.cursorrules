@@ -43,6 +43,30 @@
   }
   ```
 
+### Debug Code Removal Pattern - 2024-03-06 10:30
+
+- Remove all debug code (especially console.logs of session data) before deployment
+- Debug code in client components can cause chunk loading errors during navigation
+- Common locations for problematic debug code:
+  - Components using `useSession` hook (e.g., Header.tsx)
+  - Components with state that changes during navigation
+- Signs of problematic debug code:
+  - Console logs that run on every render
+  - useEffect hooks with session or router dependencies that log data
+  - Commented out but not removed debug code (can still cause issues in some cases)
+- Always simplify client components to their essential functionality
+- Keep SessionProvider implementation as simple as possible:
+  ```tsx
+  // In ClientLayout.tsx
+  export default function ClientLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return <SessionProvider>{children}</SessionProvider>;
+  }
+  ```
+
 ## UI Patterns - 2024-03-01 15:30
 
 ### Loading State Pattern - 2024-03-01 15:30
