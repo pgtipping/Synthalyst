@@ -136,6 +136,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f7ff",
     borderLeft: "3 solid #3b82f6",
   },
+  sectionContent: {
+    marginTop: 8,
+    marginLeft: 5,
+  },
+  resourceList: {
+    marginTop: 10,
+  },
+  resourceCategory: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginTop: 10,
+    marginBottom: 5,
+    color: "#000000",
+  },
 });
 
 interface Resource {
@@ -161,6 +175,7 @@ interface Section {
   heading: string;
   content: string;
   subsections?: Subsection[];
+  listItems?: string[];
 }
 
 interface Subsection {
@@ -187,10 +202,10 @@ export default function TrainingPlanPDF({
     .replace(/<\/div>/g, "") // Remove closing div tags
     .replace(/<br\s*\/?>/g, "\n") // Convert <br> to newlines
     .replace(/<p[^>]*>(.*?)<\/p>/g, "$1\n\n") // Convert paragraphs to text with double newlines
-    .replace(/<h1[^>]*>(.*?)<\/h1>/g, "# $1\n") // Convert h1 to markdown-style heading
-    .replace(/<h2[^>]*>(.*?)<\/h2>/g, "## $1\n") // Convert h2 to markdown-style heading
-    .replace(/<h3[^>]*>(.*?)<\/h3>/g, "### $1\n") // Convert h3 to markdown-style heading
-    .replace(/<h4[^>]*>(.*?)<\/h4>/g, "#### $1\n") // Convert h4 to markdown-style heading
+    .replace(/<h1[^>]*>(.*?)<\/h1>/g, "$1\n") // Convert h1 to text with newline
+    .replace(/<h2[^>]*>(.*?)<\/h2>/g, "$1\n") // Convert h2 to text with newline
+    .replace(/<h3[^>]*>(.*?)<\/h3>/g, "$1\n") // Convert h3 to text with newline
+    .replace(/<h4[^>]*>(.*?)<\/h4>/g, "$1\n") // Convert h4 to text with newline
     .replace(/<strong>(.*?)<\/strong>/g, "$1") // Keep text from strong tags
     .replace(/<em>(.*?)<\/em>/g, "$1") // Keep text from em tags
     .replace(/<ul[^>]*>|<\/ul>/g, "") // Remove ul tags
@@ -200,6 +215,8 @@ export default function TrainingPlanPDF({
     .replace(/\s+/g, " ") // Replace multiple spaces with a single space
     .replace(/\n\s+/g, "\n") // Clean up spaces after newlines
     .replace(/\n{3,}/g, "\n\n") // Replace 3+ consecutive newlines with just 2
+    .replace(/##/g, "") // Remove markdown-style heading markers
+    .replace(/\s*##+\s*$/gm, "") // Remove hash symbols at the end of lines
     .trim();
 
   // Extract sections based on numbered headings (e.g., "1. Overview", "2. Learning Objectives")
@@ -212,19 +229,20 @@ export default function TrainingPlanPDF({
   mainSections.forEach((section) => {
     if (!section.trim()) return;
 
-    // Extract heading and content with improved regex
-    const match = section.match(/^(\d+\.\s*[^:\.]+)[:\.]?(.*)/);
+    // Extract heading and content with improved regex - removed 's' flag
+    const match = section.match(/^(\d+\.\s*[^:\.]+)[:\.]?([\s\S]*)/);
     if (match) {
-      const [, heading, content] = match;
+      const [, heading, sectionContent] = match;
+      const trimmedContent = sectionContent.trim();
 
       // Check if this is a module section (e.g., "6. Detailed Content Module 1:")
       if (
         heading.includes("Detailed Content Module") ||
         heading.includes("Module")
       ) {
-        // Process module content with improved regex
-        const moduleMatch = content.match(
-          /Duration:\s*(.*?)(?:Learning objectives:|Learning Objectives:)\s*(.*?)(?=(?:Content outline:|Content Outline:|Additional Resources:|$))(.*)/i
+        // Process module content with improved regex - removed 's' flag and used [\s\S]* instead
+        const moduleMatch = trimmedContent.match(
+          /Duration:\s*([\s\S]*?)(?:Learning objectives:|Learning Objectives:)\s*([\s\S]*?)(?=(?:Content outline:|Content Outline:|Additional Resources:|$))([\s\S]*)/i
         );
 
         if (moduleMatch) {
@@ -266,15 +284,34 @@ export default function TrainingPlanPDF({
           // Fallback if the module content doesn't match the expected format
           sections.push({
             heading: heading.trim(),
-            content: content.trim(),
+            content: trimmedContent,
           });
         }
       } else {
-        // Regular section
-        sections.push({
-          heading: heading.trim(),
-          content: content.trim(),
-        });
+        // Regular section - check if it contains bullet points - removed 's' flag and used [\s\S]* instead
+        const listItems = trimmedContent.match(/•\s*([\s\S]*?)(?=\n•|\n\n|$)/g);
+
+        if (listItems && listItems.length > 0) {
+          // This section contains list items
+          const cleanedListItems = listItems.map((item) =>
+            item.replace(/^•\s*/, "").replace(/##$/, "").trim()
+          );
+
+          // Removed 's' flag and used [\s\S]* instead
+          sections.push({
+            heading: heading.trim(),
+            content: trimmedContent
+              .split(/•\s*[\s\S]*?(?=\n•|\n\n|$)/)[0]
+              .trim(),
+            listItems: cleanedListItems,
+          });
+        } else {
+          // Regular section without list items
+          sections.push({
+            heading: heading.trim(),
+            content: trimmedContent,
+          });
+        }
       }
     } else {
       // If no heading pattern found, add as raw content
@@ -284,6 +321,37 @@ export default function TrainingPlanPDF({
       });
     }
   });
+
+  // Process resources to group them by type
+  const resourcesByType: Record<string, Resource[]> = {};
+  if (resources && resources.length > 0) {
+    resources.forEach((resource) => {
+      if (!resourcesByType[resource.type]) {
+        resourcesByType[resource.type] = [];
+      }
+      resourcesByType[resource.type].push(resource);
+    });
+  }
+
+  // Helper function to format resource type for display
+  const formatResourceType = (type: string): string => {
+    switch (type) {
+      case "book":
+        return "Books and Publications";
+      case "course":
+        return "Online Courses and Tutorials";
+      case "tool":
+        return "Tools and Software";
+      case "community":
+        return "Communities and Forums";
+      case "video":
+        return "Videos and Webinars";
+      case "article":
+        return "Articles and Guides";
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1) + "s";
+    }
+  };
 
   return (
     <Document>
@@ -356,8 +424,21 @@ export default function TrainingPlanPDF({
                   </View>
                 ))
               ) : (
-                // Render regular section content with improved paragraph handling
-                <Text style={styles.paragraph}>{section.content}</Text>
+                // Render regular section content with improved paragraph and list handling
+                <View style={styles.sectionContent}>
+                  {section.content && section.content.length > 0 && (
+                    <Text style={styles.paragraph}>{section.content}</Text>
+                  )}
+
+                  {section.listItems &&
+                    section.listItems.length > 0 &&
+                    section.listItems.map((item, i) => (
+                      <View key={i} style={styles.listItem}>
+                        <Text style={styles.listItemBullet}>•</Text>
+                        <Text style={styles.listItemText}>{item}</Text>
+                      </View>
+                    ))}
+                </View>
               )}
             </View>
           ))
@@ -368,29 +449,40 @@ export default function TrainingPlanPDF({
         {resources && resources.length > 0 && (
           <View style={styles.resourceSection}>
             <Text style={styles.resourceTitle}>Recommended Resources</Text>
-            {resources.map((resource) => (
-              <View
-                key={resource.id}
-                style={
-                  resource.isPremium
-                    ? [styles.resource, styles.premiumResource]
-                    : styles.resource
-                }
-              >
-                <View style={styles.resourceHeader}>
-                  <Text style={styles.resourceName}>{resource.title}</Text>
-                  <Text style={styles.resourceType}>{resource.type}</Text>
-                </View>
-                {resource.author && (
-                  <Text style={styles.resourceAuthor}>
-                    By {resource.author}
+            <View style={styles.resourceList}>
+              {Object.entries(resourcesByType).map(([type, typeResources]) => (
+                <View key={type}>
+                  <Text style={styles.resourceCategory}>
+                    {formatResourceType(type)}
                   </Text>
-                )}
-                <Text style={styles.resourceDescription}>
-                  {resource.description}
-                </Text>
-              </View>
-            ))}
+                  {typeResources.map((resource) => (
+                    <View
+                      key={resource.id}
+                      style={
+                        resource.isPremium
+                          ? [styles.resource, styles.premiumResource]
+                          : styles.resource
+                      }
+                    >
+                      <View style={styles.resourceHeader}>
+                        <Text style={styles.resourceName}>
+                          {resource.title}
+                        </Text>
+                        <Text style={styles.resourceType}>{resource.type}</Text>
+                      </View>
+                      {resource.author && (
+                        <Text style={styles.resourceAuthor}>
+                          By {resource.author}
+                        </Text>
+                      )}
+                      <Text style={styles.resourceDescription}>
+                        {resource.description}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ))}
+            </View>
           </View>
         )}
 
