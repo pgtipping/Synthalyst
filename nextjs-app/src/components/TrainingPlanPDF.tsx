@@ -5,12 +5,13 @@ import React from "react";
 // Create styles
 const styles = StyleSheet.create({
   page: {
-    padding: 30,
+    padding: 40,
     fontFamily: "Helvetica",
-    color: "#000000", // Ensure all text is black by default
+    color: "#000000",
+    fontSize: 12,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 30,
   },
   title: {
     fontSize: 24,
@@ -25,75 +26,21 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20,
-    paddingTop: 5,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#000000",
-    borderBottom: "1 solid #eeeeee",
-    paddingBottom: 5,
-  },
-  moduleDetails: {
-    marginBottom: 15,
-    marginLeft: 5,
-  },
-  contentBlock: {
-    marginBottom: 10,
-  },
-  duration: {
-    fontSize: 12,
-    marginBottom: 10,
-    fontWeight: "bold",
-    color: "#000000",
-  },
-  objectives: {
-    fontSize: 12,
-    marginBottom: 5,
-    color: "#000000",
-  },
-  objectivesTitle: {
-    fontWeight: "bold",
-    color: "#000000",
-    marginBottom: 5,
-  },
-  paragraph: {
-    fontSize: 12,
-    marginBottom: 8,
-    lineHeight: 1.5,
-    color: "#000000",
-  },
-  listItem: {
-    flexDirection: "row",
-    marginBottom: 5,
-    paddingLeft: 5,
-  },
-  listItemBullet: {
-    width: 10,
-    fontSize: 12,
-    color: "#000000",
-  },
-  listItemText: {
-    flex: 1,
-    fontSize: 12,
-    color: "#000000",
-    lineHeight: 1.5,
   },
   resourceSection: {
-    marginTop: 20,
+    marginTop: 30,
     borderTop: "1 solid #cccccc",
-    paddingTop: 15,
+    paddingTop: 20,
   },
   resourceTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 12,
+    marginBottom: 15,
     color: "#000000",
   },
   resource: {
-    marginBottom: 12,
-    padding: 10,
+    marginBottom: 15,
+    padding: 12,
     backgroundColor: "#f9f9f9",
     borderRadius: 4,
   },
@@ -137,18 +84,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f7ff",
     borderLeft: "3 solid #3b82f6",
   },
-  sectionContent: {
-    marginTop: 8,
-    marginLeft: 5,
-  },
   resourceList: {
-    marginTop: 10,
+    marginTop: 15,
   },
   resourceCategory: {
     fontSize: 14,
     fontWeight: "bold",
-    marginTop: 10,
-    marginBottom: 5,
+    marginTop: 15,
+    marginBottom: 8,
     color: "#000000",
   },
 });
@@ -158,71 +101,111 @@ const htmlStyles = `
   body {
     font-family: Helvetica;
     font-size: 12px;
-    line-height: 1.5;
+    line-height: 1.6;
     color: #000000;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    margin-top: 16px;
-    margin-bottom: 8px;
+    margin-top: 20px;
+    margin-bottom: 10px;
     font-weight: bold;
     color: #000000;
+    page-break-after: avoid;
   }
   
   h1 {
-    font-size: 18px;
+    font-size: 20px;
     border-bottom: 1px solid #eeeeee;
-    padding-bottom: 5px;
+    padding-bottom: 8px;
   }
   
   h2 {
-    font-size: 16px;
+    font-size: 18px;
+    margin-top: 25px;
   }
   
   h3 {
-    font-size: 14px;
+    font-size: 16px;
   }
   
   p {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    text-align: justify;
   }
   
   ul, ol {
-    margin-top: 8px;
-    margin-bottom: 8px;
-    padding-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding-left: 25px;
   }
   
   li {
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   
   .section-title {
     font-weight: bold;
     font-size: 18px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     border-bottom: 1px solid #eeeeee;
-    padding-bottom: 5px;
+    padding-bottom: 8px;
   }
   
   .section-content {
-    margin-left: 5px;
-    margin-bottom: 20px;
+    margin-left: 8px;
+    margin-bottom: 25px;
   }
   
   .duration {
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
   
   .objectives-title, .outline-title {
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
   }
   
   .module-details {
-    margin-bottom: 15px;
-    margin-left: 5px;
+    margin-bottom: 20px;
+    margin-left: 8px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-weight: bold;
+  }
+  
+  td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  /* Add page break controls */
+  .page-break {
+    page-break-after: always;
+  }
+  
+  /* Ensure resources start on a new page if needed */
+  .resources-section {
+    page-break-before: auto;
   }
 `;
 
@@ -298,7 +281,7 @@ export default function TrainingPlanPDF({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
+        <View style={styles.header} fixed>
           <Text style={styles.title}>{title}</Text>
           {createdAt && (
             <Text style={styles.subtitle}>
@@ -312,7 +295,7 @@ export default function TrainingPlanPDF({
         </View>
 
         {resources && resources.length > 0 && (
-          <View style={styles.resourceSection}>
+          <View style={styles.resourceSection} break>
             <Text style={styles.resourceTitle}>Recommended Resources</Text>
             <View style={styles.resourceList}>
               {Object.entries(resourcesByType).map(([type, typeResources]) => (
