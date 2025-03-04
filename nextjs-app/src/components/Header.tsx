@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -31,13 +31,13 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  // Debug session state
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Session Status:", status);
-      console.log("Session Data:", session);
-    }
-  }, [session, status]);
+  // Debug session state - removed for production
+  // useEffect(() => {
+  //   if (process.env.NODE_ENV === "development") {
+  //     console.log("Session Status:", status);
+  //     console.log("Session Data:", session);
+  //   }
+  // }, [session, status]);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
