@@ -828,3 +828,8 @@
   - Added proper error handling and user feedback
   - Ensured consistent styling with the application's design language
   - Improved the user experience by providing a more professional output format
+- ✅ Fixed PDF font loading issue (2023-06-15)
+  - Resolved "Unknown font format" error by removing custom font registration
+  - Replaced Inter font with standard Helvetica font that's built into PDF renderer
+  - Updated font weight specifications from numeric values to string values
+  - Ensured PDF generation works reliably without requiring external font files

@@ -1,21 +1,5 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Font,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import React from "react";
-
-// Register fonts
-Font.register({
-  family: "Inter",
-  fonts: [
-    { src: "/fonts/Inter-Regular.ttf" },
-    { src: "/fonts/Inter-Bold.ttf", fontWeight: 700 },
-  ],
-});
 
 // Create styles
 const styles = StyleSheet.create({
@@ -23,7 +7,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#fff",
     padding: 40,
-    fontFamily: "Inter",
+    fontFamily: "Helvetica",
   },
   header: {
     marginBottom: 20,
@@ -33,7 +17,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 700,
+    fontWeight: "bold",
     marginBottom: 8,
     color: "#4F46E5", // indigo-600
   },
@@ -48,13 +32,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: 700,
+    fontWeight: "bold",
     marginBottom: 8,
     color: "#4F46E5", // indigo-600
   },
   subsectionTitle: {
     fontSize: 14,
-    fontWeight: 700,
+    fontWeight: "bold",
     marginBottom: 6,
     marginTop: 12,
     color: "#6366F1", // indigo-500
@@ -88,7 +72,7 @@ const styles = StyleSheet.create({
   },
   resourceTitle: {
     fontSize: 14,
-    fontWeight: 700,
+    fontWeight: "bold",
     marginBottom: 8,
     color: "#4F46E5", // indigo-600
   },
@@ -105,7 +89,7 @@ const styles = StyleSheet.create({
   },
   resourceName: {
     fontSize: 11,
-    fontWeight: 700,
+    fontWeight: "bold",
   },
   resourceType: {
     fontSize: 9,

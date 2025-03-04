@@ -508,3 +508,16 @@ Key changes:
 - Styled the PDF to match the application's design language
 
 This enhancement improves the user experience by providing a more professional and shareable output format for training plans.
+
+### PDF Font Issue Fix
+
+We've fixed an issue with the PDF export feature where custom fonts were failing to load, resulting in an "Unknown font format" error. The error occurred because the specified font files (`/fonts/Inter-Regular.ttf` and `/fonts/Inter-Bold.ttf`) were not found in the public directory.
+
+Key changes:
+
+- Removed the custom font registration using `Font.register()`
+- Switched to using the standard "Helvetica" font that's built into the PDF renderer
+- Updated font weight specifications from numeric values (700) to string values ("bold")
+- Ensured the PDF generation works reliably without requiring external font files
+
+This fix ensures that users can successfully generate and download PDF versions of their training plans without encountering font-related errors.
