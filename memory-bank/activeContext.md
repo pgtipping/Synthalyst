@@ -345,3 +345,14 @@ We've successfully implemented and fixed tests for these endpoints using a stand
    - Added a null check for the LLM response content to prevent potential null reference errors
    - This resolves the error: "Type '{ params: { id: string; }; }' is not a valid type for the function's second argument"
    - Location: `nextjs-app/src/app/api/training-plan/[id]/regenerate-section/route.ts`
+
+6. ✅ IMPROVED: Training Plan formatting and styling (2024-03-07):
+
+   - Enhanced the Llama prompt to generate better HTML structure for training plans
+   - Added a wrapper div with class "training-plan" for better styling control
+   - Improved the module sections with proper HTML structure and styling
+   - Added special styling for premium resources with gradient backgrounds and borders
+   - Updated the CSS in both PlanForm and TrainingPlanView components for consistent display
+   - Added specific styling for different heading levels, paragraphs, lists, and custom elements
+   - This results in a more professional and readable training plan output
+   - Location: `nextjs-app/src/lib/llama.ts`, `nextjs-app/src/app/training-plan/components/PlanForm.tsx`, `nextjs-app/src/app/training-plan/components/TrainingPlanView.tsx`

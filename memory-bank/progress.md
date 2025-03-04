@@ -2,6 +2,17 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Improved Training Plan formatting and styling (2024-03-07)
+
+  - Enhanced the Llama prompt to generate better HTML structure for training plans
+  - Added a wrapper div with class "training-plan" for better styling control
+  - Improved the module sections with proper HTML structure and styling
+  - Added special styling for premium resources with gradient backgrounds and borders
+  - Updated the CSS in both PlanForm and TrainingPlanView components for consistent display
+  - Added specific styling for different heading levels, paragraphs, lists, and custom elements
+  - This results in a more professional and readable training plan output
+  - Location: `nextjs-app/src/lib/llama.ts`, `nextjs-app/src/app/training-plan/components/PlanForm.tsx`, `nextjs-app/src/app/training-plan/components/TrainingPlanView.tsx`
+
 - ✅ Fixed Type Error in regenerate-section Route (2024-03-07)
 
   - Fixed a type error in the regenerate-section route that was causing Vercel deployment failures
