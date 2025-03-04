@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     padding: 40,
     fontFamily: "Helvetica",
     color: "#000000",
-    fontSize: 12,
+    fontSize: 10,
   },
   header: {
     marginBottom: 30,
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   resourceName: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "bold",
     flex: 1,
     color: "#000000",
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
 const htmlStyles = `
   body {
     font-family: Helvetica;
-    font-size: 12px;
+    font-size: 10px;
     line-height: 1.6;
     color: #000000;
   }
