@@ -2396,3 +2396,95 @@ This ensures compliance with Next.js 15.2.0+ requirements for client-side naviga
 4. Improves user experience during loading states
 
 // ... existing code ...
+
+### Enhanced ClientComponentWrapper Pattern - 2024-03-04 15:30
+
+The ClientComponentWrapper has been enhanced with multiple loading UI variants, a higher-order component version, and comprehensive tests.
+
+#### Loading UI Variants
+
+The component now supports four loading UI variants:
+
+```tsx
+// Default variant (centered spinner with text)
+<ClientComponentWrapper loadingText="Loading...">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Minimal variant (inline spinner with small text)
+<ClientComponentWrapper loadingText="Loading..." variant="minimal">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Fullscreen variant (overlay with backdrop blur)
+<ClientComponentWrapper loadingText="Loading..." variant="fullscreen">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Skeleton variant (content placeholder)
+<ClientComponentWrapper loadingText="Loading..." variant="skeleton">
+  <MyComponent />
+</ClientComponentWrapper>
+```
+
+#### Higher-Order Component (HOC) Version
+
+A HOC version is available for a more functional approach:
+
+```tsx
+import { withClientComponent } from "@/components/wrappers/withClientComponent";
+
+// Define your client component
+function MyClientComponent(props) {
+  const searchParams = useSearchParams();
+  // ...
+}
+
+// Wrap it with the HOC
+const WrappedComponent = withClientComponent(MyClientComponent, {
+  loadingText: "Loading component...",
+  variant: "minimal",
+});
+
+// Use the wrapped component in your page
+export default function Page() {
+  return <WrappedComponent />;
+}
+```
+
+#### Compose Utility
+
+A compose utility is available for combining multiple HOCs:
+
+```tsx
+import {
+  withClientComponent,
+  compose,
+} from "@/components/wrappers/withClientComponent";
+
+const EnhancedComponent = compose(
+  withAnalytics,
+  withErrorBoundary,
+  withClientComponent
+)(BaseComponent);
+```
+
+#### When to Use Each Variant
+
+- **Default**: Use for most content areas where a centered loading indicator is appropriate
+- **Minimal**: Use for smaller UI elements or inline loading states
+- **Fullscreen**: Use for initial page loads or major transitions
+- **Skeleton**: Use for content-heavy sections where preserving layout is important
+
+#### Testing
+
+The components are thoroughly tested:
+
+```bash
+cd nextjs-app
+npm test -- -t "ClientComponentWrapper"
+```
+
+For more details, see the documentation in `nextjs-app/docs/client-component-wrapper.md`.
+
+// ... existing code ...
