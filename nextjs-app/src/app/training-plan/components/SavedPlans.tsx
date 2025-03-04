@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Trash2, PlusCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,6 +97,11 @@ export default function SavedPlans() {
     router.push(`/training-plan/view/${id}`);
   };
 
+  const handleCreateNew = () => {
+    // Navigate to the training plan page with the create tab active
+    router.push("/training-plan?tab=create");
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -112,7 +117,8 @@ export default function SavedPlans() {
         <p className="text-muted-foreground mb-6">
           Create a new training plan to get started.
         </p>
-        <Button onClick={() => router.push("/training-plan?tab=create")}>
+        <Button onClick={handleCreateNew}>
+          <PlusCircle className="h-4 w-4 mr-2" />
           Create Training Plan
         </Button>
       </div>
@@ -120,61 +126,71 @@ export default function SavedPlans() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {plans.map((plan) => (
-        <Card key={plan.id} className="flex flex-col">
-          <CardHeader>
-            <CardTitle className="line-clamp-2">{plan.title}</CardTitle>
-            <CardDescription>
-              Created {format(new Date(plan.createdAt), "PPP")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow">
-            {/* Content preview could go here if needed */}
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleView(plan.id)}
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              View
-            </Button>
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Your Saved Plans</h2>
+        <Button onClick={handleCreateNew}>
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Create New Plan
+        </Button>
+      </div>
 
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  {isDeleting === plan.id ? (
-                    <Spinner className="h-4 w-4 mr-2" />
-                  ) : (
-                    <Trash2 className="h-4 w-4 mr-2" />
-                  )}
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    the training plan.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDelete(plan.id)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {plans.map((plan) => (
+          <Card key={plan.id} className="flex flex-col">
+            <CardHeader>
+              <CardTitle className="line-clamp-2">{plan.title}</CardTitle>
+              <CardDescription>
+                Created {format(new Date(plan.createdAt), "PPP")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow">
+              {/* Content preview could go here if needed */}
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleView(plan.id)}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                View
+              </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    {isDeleting === plan.id ? (
+                      <Spinner className="h-4 w-4 mr-2" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
                     Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardFooter>
-        </Card>
-      ))}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      the training plan.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(plan.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,19 +1,13 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlanForm from "./components/PlanForm";
+import SavedPlans from "./components/SavedPlans";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import {
-  HelpCircle,
-  FileText,
-  FileX,
-  Trash2,
-  Download,
-  Copy,
-} from "lucide-react";
+import { HelpCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -22,31 +16,24 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { toast } from "@/lib/toast-migration";
-import { Loader2, InfoIcon } from "lucide-react";
-import { ResourceList } from "./components/ResourceList";
-import { Resource } from "./components/ResourceCard";
-import { pdf } from "@react-pdf/renderer";
-import TrainingPlanPDF from "@/components/TrainingPlanPDF";
-
-// Define the plan type
-interface SavedPlan {
-  id: string;
-  title: string;
-  createdAt: string;
-  content: string;
-  model: string;
-  isPremiumUser: boolean;
-  resourceCount: number;
-  resources?: Resource[];
-}
 
 export default function TrainingPlanClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const defaultTab = searchParams.get("tab") || "create";
   const [activeTab, setActiveTab] = useState(defaultTab);
+
+  // Update the URL when the tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    router.push(`/training-plan?tab=${value}`);
+  };
+
+  // Update the active tab if the URL changes
+  useEffect(() => {
+    const tab = searchParams.get("tab") || "create";
+    setActiveTab(tab);
+  }, [searchParams]);
 
   return (
     <div className="container py-8 max-w-5xl">
@@ -110,7 +97,7 @@ export default function TrainingPlanClient() {
       </div>
 
       <div>
-        <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="create">Create New Plan</TabsTrigger>
             <TabsTrigger value="saved">Saved Plans</TabsTrigger>
@@ -119,277 +106,10 @@ export default function TrainingPlanClient() {
             <PlanForm />
           </TabsContent>
           <TabsContent value="saved">
-            <SavedPlansTab setActiveTab={setActiveTab} />
+            <SavedPlans />
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
 }
-
-// Define the props for the SavedPlansTab component
-interface SavedPlansTabProps {
-  setActiveTab: (tab: string) => void;
-}
-
-const SavedPlansTab = ({ setActiveTab }: SavedPlansTabProps) => {
-  const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedPlan, setSelectedPlan] = useState<SavedPlan | null>(null);
-
-  useEffect(() => {
-    // Load saved plans from localStorage
-    const loadSavedPlans = () => {
-      try {
-        const plans = JSON.parse(localStorage.getItem("savedPlans") || "[]");
-        setSavedPlans(plans);
-      } catch (error) {
-        console.error("Error loading saved plans:", error);
-        setSavedPlans([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadSavedPlans();
-  }, []);
-
-  const deletePlan = (id: string) => {
-    try {
-      const updatedPlans = savedPlans.filter((plan) => plan.id !== id);
-      localStorage.setItem("savedPlans", JSON.stringify(updatedPlans));
-      setSavedPlans(updatedPlans);
-
-      if (selectedPlan?.id === id) {
-        setSelectedPlan(null);
-      }
-
-      toast({
-        title: "Plan deleted",
-        description: "The training plan has been deleted.",
-      });
-    } catch (error) {
-      console.error("Error deleting plan:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete the training plan.",
-      });
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (savedPlans.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-center">
-        <FileX className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium">No saved plans</h3>
-        <p className="text-muted-foreground mt-2 max-w-md">
-          You have not saved any training plans yet. Create a new plan to get
-          started.
-        </p>
-        <Button
-          variant="default"
-          className="mt-4"
-          onClick={() => setActiveTab("create")}
-        >
-          Create New Plan
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-1 space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Your Plans</h3>
-          <Badge>{savedPlans.length}</Badge>
-        </div>
-        <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
-          {savedPlans.map((plan) => (
-            <Card
-              key={plan.id}
-              className={`cursor-pointer transition-all ${
-                selectedPlan?.id === plan.id
-                  ? "border-primary"
-                  : "hover:border-muted-foreground/20"
-              }`}
-              onClick={() => setSelectedPlan(plan)}
-            >
-              <CardHeader className="p-4">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-base font-medium line-clamp-1">
-                    {plan.title}
-                  </CardTitle>
-                  {plan.isPremiumUser && (
-                    <Badge
-                      variant="outline"
-                      className="bg-gradient-to-r from-amber-500 to-amber-300 border-0 text-white text-xs"
-                    >
-                      Premium
-                    </Badge>
-                  )}
-                </div>
-                <CardDescription className="text-xs">
-                  Created on {new Date(plan.createdAt).toLocaleDateString()}
-                </CardDescription>
-              </CardHeader>
-              <CardFooter className="p-4 pt-0 flex justify-between">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deletePlan(plan.id);
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  Delete
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      <div className="md:col-span-2">
-        {selectedPlan ? (
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>{selectedPlan.title}</CardTitle>
-                  <CardDescription>
-                    Created on{" "}
-                    {new Date(selectedPlan.createdAt).toLocaleDateString()}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="outline">{selectedPlan.model}</Badge>
-                  {selectedPlan.isPremiumUser && (
-                    <Badge
-                      variant="default"
-                      className="bg-gradient-to-r from-amber-500 to-amber-300"
-                    >
-                      Premium
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {selectedPlan.isPremiumUser && selectedPlan.resourceCount > 0 && (
-                <Alert
-                  variant="default"
-                  className="bg-amber-50 border-amber-200 mb-4"
-                >
-                  <InfoIcon className="h-4 w-4 text-amber-500" />
-                  <AlertTitle>Premium Resources</AlertTitle>
-                  <AlertDescription>
-                    This plan includes {selectedPlan.resourceCount} premium
-                    AI-curated resources tailored to your objectives.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div
-                className="prose prose-sm max-w-none dark:prose-invert border rounded-md p-4 bg-white dark:bg-gray-950"
-                dangerouslySetInnerHTML={{ __html: selectedPlan.content }}
-              />
-
-              {/* Display resources if available */}
-              {selectedPlan.resources && selectedPlan.resources.length > 0 && (
-                <div className="mt-6">
-                  <ResourceList
-                    resources={selectedPlan.resources}
-                    isPremiumUser={selectedPlan.isPremiumUser}
-                  />
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    // Generate PDF blob
-                    const blob = await pdf(
-                      <TrainingPlanPDF
-                        title={selectedPlan.title}
-                        content={selectedPlan.content}
-                        resources={selectedPlan.resources}
-                        createdAt={selectedPlan.createdAt}
-                      />
-                    ).toBlob();
-
-                    // Create download link
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `${selectedPlan.title.replace(
-                      /\s+/g,
-                      "-"
-                    )}.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-
-                    toast({
-                      title: "PDF downloaded",
-                      description:
-                        "The training plan has been downloaded as a PDF.",
-                    });
-                  } catch (error) {
-                    console.error("Error exporting PDF:", error);
-                    toast({
-                      variant: "destructive",
-                      title: "Error",
-                      description: "Failed to export training plan as PDF",
-                    });
-                  }
-                }}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(selectedPlan.content);
-                  toast({
-                    title: "Copied to clipboard",
-                    description:
-                      "The training plan has been copied to your clipboard.",
-                  });
-                }}
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                Copy to Clipboard
-              </Button>
-            </CardFooter>
-          </Card>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px] border border-dashed rounded-lg p-8 text-center">
-            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">Select a plan</h3>
-            <p className="text-muted-foreground mt-2 max-w-md">
-              Choose a training plan from the list to view its details.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
