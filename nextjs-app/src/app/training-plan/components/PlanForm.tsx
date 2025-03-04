@@ -300,8 +300,8 @@ export default function PlanForm() {
 
   // Update the GeneratedPlanDisplay component
   const GeneratedPlanDisplay = ({ plan }: { plan: GeneratedPlan }) => {
-    return (
-      <div className="space-y-6">
+  return (
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Sparkles className="h-5 w-5 text-yellow-500" />
