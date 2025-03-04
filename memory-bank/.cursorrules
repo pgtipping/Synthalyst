@@ -39,6 +39,106 @@
 - Monitor and log AI performance metrics to identify areas for improvement
 - Regularly review and update prompts based on output quality
 
+### Feedback Mechanism Pattern - 2024-03-08
+
+- Every AI-powered tool should include at least one feedback mechanism
+- Types of feedback mechanisms to implement:
+  - Simple rating systems (1-5 stars, thumbs up/down)
+  - Detailed feedback forms for specific aspects of AI output
+  - In-context feedback options during tool usage
+  - Follow-up emails requesting feedback after tool usage
+- Best practices for feedback implementation:
+  - Keep primary feedback mechanisms simple and non-intrusive
+  - Offer more detailed feedback options as a secondary step
+  - Clearly explain how feedback improves the AI
+  - Thank users for providing feedback
+  - Show appreciation for detailed feedback
+- Feedback data collection:
+  - Store feedback with the associated AI output
+  - Track feedback metrics over time to measure improvement
+  - Identify patterns in negative feedback for targeted improvements
+  - Use feedback to refine prompts and post-processing
+- Feedback UI patterns:
+  - Place simple feedback mechanisms near the AI output
+  - Use subtle animations to draw attention to feedback options
+  - Provide clear confirmation when feedback is submitted
+  - Consider offering incentives for detailed feedback (e.g., additional free uses)
+- Example implementation:
+  ```jsx
+  <div className="mt-4 border-t pt-4">
+    <p className="text-sm text-gray-600 mb-2">Was this output helpful?</p>
+    <div className="flex space-x-4">
+      <button
+        onClick={() => submitFeedback("positive")}
+        className="flex items-center text-sm text-gray-700 hover:text-primary"
+      >
+        <ThumbsUp className="w-4 h-4 mr-1" />
+        <span>Yes, it was helpful</span>
+      </button>
+      <button
+        onClick={() => submitFeedback("negative")}
+        className="flex items-center text-sm text-gray-700 hover:text-primary"
+      >
+        <ThumbsDown className="w-4 h-4 mr-1" />
+        <span>No, it needs improvement</span>
+      </button>
+    </div>
+  </div>
+  ```
+
+### Custom Business Solutions CTA Pattern - 2024-03-08
+
+- Strategic placement of CTAs for custom business solutions:
+  - After showcasing AI capabilities
+  - Near testimonials from existing clients
+  - At the end of tool usage flows
+  - In the footer of all pages
+  - In the header navigation
+- CTA messaging should:
+  - Emphasize personalization and customization
+  - Highlight business value and ROI
+  - Address specific pain points
+  - Create a sense of exclusivity
+- Visual design for custom solution CTAs:
+  - Use distinctive styling to stand out from other CTAs
+  - Consider using a secondary color to differentiate from primary actions
+  - Include business-focused icons (e.g., briefcase, handshake, chart)
+  - Use subtle animations or hover effects to draw attention
+- Example implementations:
+  - Primary CTA: "Get Custom Solutions for Your Business"
+  - Secondary CTA: "Talk to Our Team About Your Needs"
+  - Subtle CTA: "Need a tailored solution? Contact us →"
+- Placement pattern:
+  - Include at least one custom business solution CTA on every page
+  - Ensure the CTA is visible without scrolling on key pages
+  - Use contextual CTAs that relate to the specific tool or content
+- Example implementation:
+  ```jsx
+  <div className="mt-12 p-4 bg-blue-50 rounded-lg border border-blue-200">
+    <div className="flex items-start">
+      <div className="flex-shrink-0 mt-1">
+        <Briefcase className="w-5 h-5 text-primary" />
+      </div>
+      <div className="ml-3">
+        <h3 className="text-lg font-semibold mb-2">Need a Custom Solution?</h3>
+        <p className="text-sm text-gray-700 mb-4">
+          Our team can create tailored AI solutions designed specifically for
+          your business needs and workflows.
+        </p>
+        <Link href="/contact">
+          <Button
+            variant="outline"
+            className="border-primary text-primary hover:bg-primary/10"
+          >
+            Contact Our Team
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </Link>
+      </div>
+    </div>
+  </div>
+  ```
+
 ## Next.js Development Patterns - 2024-03-04 08:15
 
 ### Layout Error Prevention Pattern - 2024-03-04 08:15
