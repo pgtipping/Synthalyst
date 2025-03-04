@@ -20,8 +20,11 @@ The `ClientComponentWrapper` component is located at `nextjs-app/src/components/
 1. A consistent Suspense boundary for client components
 2. A standardized loading UI with spinner and customizable text
 3. A simple API for wrapping client components
+4. Multiple loading UI variants for different contexts
 
 ## Usage
+
+### Basic Usage
 
 ```tsx
 // In a page.tsx file
@@ -35,6 +38,74 @@ export default function Page() {
     </ClientComponentWrapper>
   );
 }
+```
+
+### With Different Loading Variants
+
+The component supports multiple loading UI variants:
+
+```tsx
+// Default variant (centered spinner with text)
+<ClientComponentWrapper loadingText="Loading...">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Minimal variant (inline spinner with small text)
+<ClientComponentWrapper loadingText="Loading..." variant="minimal">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Fullscreen variant (overlay with backdrop blur)
+<ClientComponentWrapper loadingText="Loading..." variant="fullscreen">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Skeleton variant (content placeholder)
+<ClientComponentWrapper loadingText="Loading..." variant="skeleton">
+  <MyComponent />
+</ClientComponentWrapper>
+```
+
+### Using the Higher-Order Component
+
+For a more functional approach, you can use the HOC version:
+
+```tsx
+import { withClientComponent } from "@/components/wrappers/withClientComponent";
+
+// Define your client component
+function MyClientComponent(props) {
+  const searchParams = useSearchParams();
+  // ...
+}
+
+// Wrap it with the HOC
+const WrappedComponent = withClientComponent(MyClientComponent, {
+  loadingText: "Loading component...",
+  variant: "minimal",
+});
+
+// Use the wrapped component in your page
+export default function Page() {
+  return <WrappedComponent />;
+}
+```
+
+### Composing Multiple HOCs
+
+You can compose multiple HOCs together using the `compose` utility:
+
+```tsx
+import {
+  withClientComponent,
+  compose,
+} from "@/components/wrappers/withClientComponent";
+
+const EnhancedComponent = compose(
+  withAnalytics,
+  withErrorBoundary,
+  withClientComponent
+)(BaseComponent);
 ```
 
 ## When to Use
@@ -76,6 +147,7 @@ The pattern is used in several places throughout the application:
    ```
 
 3. JD Developer page:
+
    ```tsx
    // nextjs-app/src/app/jd-developer/page.tsx
    export default function JDDeveloperPage() {
@@ -87,18 +159,47 @@ The pattern is used in several places throughout the application:
    }
    ```
 
+4. Test Example:
+   ```tsx
+   // nextjs-app/src/app/examples/client-wrapper-test/page.tsx
+   export default function ClientWrapperTestPage() {
+     return (
+       <ClientComponentWrapper loadingText="Loading test component...">
+         <TestComponent />
+       </ClientComponentWrapper>
+     );
+   }
+   ```
+
 ## Benefits
 
 1. Consistent loading UI across the application
 2. Simplified implementation of Suspense boundaries
 3. Prevents Vercel build errors related to missing Suspense boundaries
 4. Improves user experience during loading states
+5. Multiple loading UI variants for different contexts
+6. Functional programming approach with HOC and compose utilities
+7. Comprehensive test coverage for reliability
 
-## Future Enhancements
+## Available Loading Variants
 
-Potential future enhancements for the `ClientComponentWrapper` component:
+1. **Default**: Centered spinner with text below, suitable for most content areas
+2. **Minimal**: Inline spinner with small text, good for smaller UI elements
+3. **Fullscreen**: Full-screen overlay with backdrop blur, ideal for initial page loads
+4. **Skeleton**: Content placeholder with pulse animation, best for content-heavy sections
 
-1. Add support for different loading UI variants (minimal, full-screen, etc.)
-2. Add support for error boundaries
-3. Create a higher-order component (HOC) version for wrapping components programmatically
-4. Add automated tests to verify proper Suspense boundary implementation
+## Testing
+
+The components are thoroughly tested:
+
+- Unit tests for the `ClientComponentWrapper` component
+- Unit tests for the `LoadingUI` component with all variants
+- Unit tests for the `withClientComponent` HOC
+- Tests for prop preservation and display name handling
+
+Run the tests with:
+
+```bash
+cd nextjs-app
+npm test -- -t "ClientComponentWrapper"
+```
