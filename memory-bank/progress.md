@@ -6,12 +6,15 @@
 
   - Enhanced HTML content cleaning to better preserve structure when converting to PDF
   - Improved regex patterns for extracting sections, headings, and content
-  - Enhanced styling for better readability with increased line height and improved spacing
-  - Added border-bottom to section titles for visual separation
-  - Standardized capitalization for section titles (e.g., "Learning Objectives", "Content Outline")
+  - Enhanced styling for better readability with increased line height and visual separation
   - Added special styling for premium resources with blue left border and light blue background
   - Fixed list item rendering to properly handle various bullet point formats
-  - Improved handling of HTML tags in content for better structure preservation
+  - Improved handling of HTML tags in content for better conversion
+  - Fixed issue with list items not being properly formatted with indentation and spacing
+  - Removed hash symbols (##) that were appearing at the end of some list items
+  - Enhanced resources section to group resources by type (Books, Courses, Tools, etc.)
+  - Added proper category headings for each resource type
+  - Fixed regex patterns to be compatible with earlier ECMAScript versions
   - This results in a more professional and readable PDF output that properly reflects the training plan content
   - Location: `nextjs-app/src/components/TrainingPlanPDF.tsx`
 

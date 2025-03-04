@@ -19,7 +19,7 @@ We've just fixed inconsistencies in the Gemini API integration for the Training 
    - Pushed the changes to the main branch on GitHub
    - This ensures consistent API usage across the application
 
-We've just improved the TrainingPlanPDF component to fix formatting issues:
+We've improved the TrainingPlanPDF component to fix formatting issues:
 
 1. ✅ FIXED: Training Plan PDF Export Formatting (2024-03-08):
 
@@ -38,8 +38,19 @@ We've just improved the TrainingPlanPDF component to fix formatting issues:
      - Preservation of content structure
    - Location: `nextjs-app/src/components/TrainingPlanPDF.tsx`
 
-2. ✅ COMMITTED: Changes pushed to main branch:
-   - Committed the fixes with a descriptive message: "Fix Training Plan PDF export formatting issues"
+2. ✅ ADDITIONAL IMPROVEMENTS: Training Plan PDF Export Formatting (2024-03-08):
+
+   - Fixed issue with list items not being properly formatted with indentation and spacing
+   - Removed hash symbols (##) that were appearing at the end of some list items
+   - Improved section heading styling to ensure proper spacing between headings and content
+   - Enhanced resources section to group resources by type (Books, Courses, Tools, etc.)
+   - Added proper category headings for each resource type
+   - Improved content extraction for sections with bullet points
+   - Fixed regex patterns to be compatible with earlier ECMAScript versions
+   - Location: `nextjs-app/src/components/TrainingPlanPDF.tsx`
+
+3. ✅ COMMITTED: Changes pushed to main branch:
+   - Committed the fixes with a descriptive message: "Fix Training Plan PDF formatting issues with list items and section headings"
    - Pushed the changes to the main branch on GitHub
    - This ensures consistent and professional PDF output for training plans
 
@@ -445,160 +456,4 @@ We've successfully implemented and fixed tests for these endpoints using a stand
   - **Minimal**: Inline spinner with small text, good for smaller UI elements
   - **Fullscreen**: Full-screen overlay with backdrop blur, ideal for initial page loads
   - **Skeleton**: Content placeholder with pulse animation, best for content-heavy sections
-- Created a higher-order component (HOC) version called `withClientComponent` for a more functional approach
-- Added a `compose` utility function for combining multiple HOCs together
-- Implemented comprehensive test coverage for all new components and utilities
-- Created detailed documentation in `nextjs-app/docs/client-component-wrapper.md`
-- Updated the README in the wrappers directory to reflect the new features
-- Created a test example page at `/examples/client-wrapper-test` to demonstrate the functionality
-
-### Benefits of the Enhancements
-
-- **Improved User Experience**: Different loading variants provide appropriate feedback based on context
-- **Reduced Boilerplate**: HOC version simplifies component wrapping and enables composition
-- **Better Maintainability**: Comprehensive tests ensure reliability and prevent regressions
-- **Increased Developer Productivity**: Clear documentation and examples make it easier to use the pattern
-
-### Next Steps
-
-- Consider adding error boundary support to handle errors in client components
-- Explore creating specialized variants for specific sections of the application
-- Implement automated detection of navigation hooks to suggest wrapping with ClientComponentWrapper
-- Add the pattern to the project's ESLint rules to enforce proper usage
-
-## Current Focus - 2024-03-08 16:00
-
-The current focus is on ensuring consistent and correct LLM API integration across the application, particularly for the Training Plan Creator feature. Recent work has involved:
-
-1. Standardizing the Gemini API integration:
-
-   - Updated the environment variable from `GOOGLE_GEMINI_API_KEY` to `GEMINI_API_KEY`
-   - Ensured the default model is set to "gemini-2.0-flash" instead of "gemini-pro"
-   - Verified that all code using the Gemini API follows the established patterns
-
-2. Verifying the OpenRouter API integration for the Llama 3.2 3b model:
-
-   - Confirmed the correct usage of the OpenRouter API for accessing the Llama model
-   - Ensured the model name "meta-llama/llama-3.2-3b-instruct" is used consistently
-
-3. Documenting the two-stage LLM approach for the Training Plan Creator:
-   - Premium users: Gemini 2.0 Flash for resource recommendations + Llama 3.2 3b for plan generation
-   - Free users: Enhanced prompt with Llama 3.2 3b only
-
-## Recent Changes - 2024-03-08 16:05
-
-- Fixed inconsistencies in the Gemini API integration in `nextjs-app/src/lib/gemini.ts`
-- Updated Memory Bank documentation to reflect the correct API usage patterns
-- Added detailed examples and guidelines to `.cursorrules` for future reference
-
-## Next Steps - 2024-03-08 16:10
-
-1. Continue monitoring the performance of the Gemini 2.0 Flash model for resource recommendations
-2. Consider implementing additional validation for the resources returned by the Gemini API
-3. Explore opportunities to further optimize the prompts for both Gemini and Llama models
-4. Ensure all environment variables are properly documented in `.env.example` files
-
-## Active Decisions - 2024-03-08 16:15
-
-1. **LLM Selection Strategy**:
-
-   - Use Gemini 2.0 Flash for resource recommendations due to its knowledge of current resources and ability to follow structured output formats
-   - Use Llama 3.2 3b for plan generation due to its strong reasoning capabilities and cost-effectiveness
-
-2. **API Integration Pattern**:
-
-   - Maintain utility functions (`getGeminiModel()`, `openRouter` instance) for consistent API access
-   - Use Zod schemas for validating structured outputs from LLMs
-   - Implement robust error handling for all LLM API calls
-
-3. **Environment Variable Naming**:
-   - Standardize on `GEMINI_API_KEY` for the Google Generative AI API
-   - Maintain `OPENROUTER_API_KEY` for the OpenRouter API
-   - Ensure all `.env.example` files reflect the current naming conventions
-
-## Current Focus (2023-06-15)
-
-### Training Plan Creator PDF Export Feature
-
-We've enhanced the Training Plan Creator by replacing the HTML export functionality with a more professional PDF export feature. This improvement provides users with a better way to share and print their training plans.
-
-Key changes:
-
-- Created a new `TrainingPlanPDF.tsx` component that renders training plans as PDF documents
-- Integrated with the existing `@react-pdf/renderer` library already used in the JD Developer component
-- Updated both the PlanForm and SavedPlansTab components to use the new PDF export functionality
-- Added proper error handling and user feedback for the PDF generation process
-- Ensured the PDF includes all relevant information: title, content, resources, and creation date
-- Styled the PDF to match the application's design language
-
-This enhancement improves the user experience by providing a more professional and shareable output format for training plans.
-
-### PDF Font Issue Fix
-
-We've fixed an issue with the PDF export feature where custom fonts were failing to load, resulting in an "Unknown font format" error. The error occurred because the specified font files (`/fonts/Inter-Regular.ttf` and `/fonts/Inter-Bold.ttf`) were not found in the public directory.
-
-Key changes:
-
-- Removed the custom font registration using `Font.register()`
-- Switched to using the standard "Helvetica" font that's built into the PDF renderer
-- Updated font weight specifications from numeric values (700) to string values ("bold")
-- Ensured the PDF generation works reliably without requiring external font files
-
-This fix ensures that users can successfully generate and download PDF versions of their training plans without encountering font-related errors.
-
-### PDF Formatting Issue Fix (2023-06-16)
-
-We've addressed a formatting issue in the PDF export for training plans where content was being duplicated and sections weren't properly separated. The problem was in the content parsing logic of the `TrainingPlanPDF` component.
-
-Key changes:
-
-- Improved the section extraction algorithm to better handle the training plan format
-- Fixed the regex pattern used to identify section headings
-- Implemented a more robust approach to splitting content by main section numbers
-- Added conditional rendering for section headings to prevent empty headings
-- Removed unused variables to address linter warnings
-
-This fix ensures that the PDF exports have proper formatting with clear section separation, making the training plans more professional and readable for users.
-
-### Enhanced PDF Formatting for Training Plan Modules (2023-06-17)
-
-We've further improved the PDF formatting for training plans to better handle the detailed module content and provide a more structured, professional output. The enhancements focus on properly parsing and displaying the specialized content found in training modules.
-
-Key improvements:
-
-- Enhanced the module content extraction regex pattern to better handle variations in the training plan format
-- Improved parsing of learning objectives with better handling of bullet points and multiline content
-- Added specialized rendering for learning objectives as a properly formatted list with bullet points
-- Enhanced content outline presentation with structured formatting and improved readability
-- Added proper headings for each subsection to improve visual hierarchy
-- Implemented better handling of nested content in module outlines
-- Fixed edge cases where certain formatting patterns weren't being properly recognized
-
-These enhancements provide a much more professional and structured PDF output that properly represents the hierarchical nature of training plans, making them more valuable for users to download, share, and print.
-
-## PDF Formatting Improvements (2023-06-18)
-
-The PDF export feature in the Training Plan Creator has been enhanced with the following improvements:
-
-1. **Consistent Text Color**: All text in the PDF is now black by default, ensuring better readability and a more professional appearance. Previously, some text had colored elements that didn't print well.
-
-2. **Improved Typography and Hierarchy**:
-
-   - Increased font sizes for better readability
-   - Proper heading hierarchy with clear visual distinction
-   - Consistent line heights and spacing
-   - Better formatting for lists and bullet points
-
-3. **Enhanced Visual Structure**:
-
-   - Cleaner section separations
-   - Improved margins and padding
-   - Better alignment of content elements
-   - More professional styling for resource sections
-
-4. **Styling Consistency**:
-   - Standardized styling across all sections
-   - Consistent treatment of headings, paragraphs, and lists
-   - Uniform formatting for special elements like learning objectives and content outlines
-
-These improvements make the PDF output more professional, easier to read, and better suited for printing or sharing. The changes were inspired by the well-structured JobDescriptionPDF component, applying similar formatting principles to ensure consistency across the application.
+- Created a higher-order component (HOC) version called `withClientComponent`
