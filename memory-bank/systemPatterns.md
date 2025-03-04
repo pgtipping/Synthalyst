@@ -343,3 +343,130 @@ The application uses a migration utility pattern to handle the transition from t
    - Using the hook: `const { toast } = useToast(); toast({ title: "Success" })`
 
 This pattern ensures backward compatibility while allowing gradual migration to the new sonner API as needed.
+
+# System Patterns (2024-03-05)
+
+## Component Architecture (Updated 2024-03-05)
+
+### Component Library
+
+The project uses [shadcn/ui](https://ui.shadcn.com/) as its primary component library. This is a collection of reusable components built using Radix UI and Tailwind CSS. The components are designed to be customizable and accessible.
+
+Key principles for component usage:
+
+- Use shadcn/ui components whenever possible to maintain a consistent look and feel
+- Customize components using the shadcn/ui theming system rather than direct Tailwind classes
+- Use the `cn` utility from `@/lib/utils` for class merging
+- Create variants using `cva` for consistent styling
+- All components should be accessible and follow WCAG guidelines
+
+A comprehensive component guidelines document has been created at `docs/component-guidelines.md` that outlines best practices for using shadcn/ui components.
+
+### Component Variants
+
+The project extends shadcn/ui components with custom variants to provide consistent styling options across the application. For example, the Card component has been extended with a gradient variant:
+
+```tsx
+<Card variant="gradient" variantKey="primary">
+  <CardHeader>
+    <CardTitle>Card Title</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <p>Card content</p>
+  </CardContent>
+</Card>
+```
+
+Available gradient keys for the Card component:
+
+- `primary`: Blue to indigo gradient
+- `secondary`: Purple to pink gradient
+- `accent`: Amber gradient
+- `info`: Subtle blue gradient
+- `default`: Subtle gray gradient
+
+An example page demonstrating all gradient variants is available at `/examples/gradient-card`.
+
+### Custom Components
+
+The project includes several custom components built on top of shadcn/ui:
+
+#### ResourceCard and ResourceList
+
+These components are used in the Training Plan Creator to display resources such as books, videos, and articles. They include support for premium resources and filtering.
+
+```tsx
+<ResourceCard
+  resource={{
+    id: "1",
+    title: "Resource Title",
+    type: "book",
+    description: "Resource description",
+    isPremium: true,
+    author: "Author Name",
+    url: "https://example.com",
+  }}
+/>
+
+<ResourceList
+  resources={[/* array of resources */]}
+  isPremiumUser={true}
+/>
+```
+
+### Component Standardization Tools
+
+The project includes several utility scripts to help with component standardization:
+
+#### Component Audit Script
+
+The component audit script (`scripts/component-audit.js`) identifies custom components and styling patterns that could be replaced with shadcn/ui components.
+
+```bash
+node scripts/component-audit.js
+```
+
+#### Component Migration Script
+
+The component migration script (`scripts/migrate-components.js`) helps migrate custom components to shadcn/ui.
+
+```bash
+node scripts/migrate-components.js [component-name]
+```
+
+#### Create Variant Script
+
+The create variant script (`scripts/create-variant.js`) adds new variants to shadcn/ui components.
+
+```bash
+node scripts/create-variant.js [component-name] [variant-name]
+```
+
+Available variant templates:
+
+- `gradient`: Gradient backgrounds
+- `outline`: Colored outlines with matching text
+- `glass`: Frosted glass effect with backdrop blur
+
+## Toast System
+
+The project has migrated from the old toast system to the new sonner toast system. A toast migration utility has been created at `@/lib/toast-migration.ts` that provides backward compatibility.
+
+All components should import toast from `@/lib/toast-migration` instead of `@/hooks/use-toast`.
+
+```typescript
+import { toast } from "@/lib/toast-migration";
+
+// Success toast
+toast({
+  title: "Success",
+  description: "Operation completed successfully.",
+});
+
+// Error toast
+toast({
+  variant: "destructive",
+  title: "Error",
+  description: "Something went wrong.",
+});
+```

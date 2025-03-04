@@ -622,7 +622,108 @@ The JD Developer component uses a two-layer filtering approach to ensure templat
 
 This approach ensures that templates only appear in the templates list and saved job descriptions only appear in the saved JDs list, even if there are inconsistencies in the database.
 
-# Technical Context (2024-03-02)
+# Technical Context (Updated 2024-03-05)
+
+## Frontend Technologies
+
+### Component Library
+
+The project uses [shadcn/ui](https://ui.shadcn.com/) as its primary component library. This is a collection of reusable components built using Radix UI and Tailwind CSS. The components are designed to be customizable and accessible.
+
+Key features of shadcn/ui:
+
+- Built on top of Radix UI primitives
+- Styled with Tailwind CSS
+- Fully accessible and follows WAI-ARIA guidelines
+- Customizable through a theming system
+- Components are copied into the project rather than installed as a dependency
+
+The project has a comprehensive component guidelines document at `docs/component-guidelines.md` that outlines best practices for using shadcn/ui components.
+
+### Component Customization
+
+The project extends shadcn/ui components with custom variants to provide consistent styling options across the application. This is done using the `cva` (class variance authority) utility from the `class-variance-authority` package.
+
+For example, the Card component has been extended with a gradient variant:
+
+```tsx
+// In card.tsx
+const getCardVariantStyles = (variantKey: string = "default") => {
+  const variants: Record<string, string> = {
+    primary: "bg-gradient-to-br from-blue-500 to-indigo-600 text-white",
+    secondary: "bg-gradient-to-br from-purple-500 to-pink-600 text-white",
+    accent: "bg-gradient-to-br from-amber-400 to-amber-600 text-white",
+    info: "bg-gradient-to-br from-blue-50 to-blue-100",
+    default: "bg-gradient-to-br from-gray-50 to-gray-100",
+  };
+
+  return variants[variantKey] || variants.default;
+};
+
+// Usage
+<Card variant="gradient" variantKey="primary">
+  <CardHeader>
+    <CardTitle>Card Title</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <p>Card content</p>
+  </CardContent>
+</Card>;
+```
+
+### Utility Scripts
+
+The project includes several utility scripts to help with component standardization:
+
+#### Component Audit Script
+
+The component audit script (`scripts/component-audit.js`) identifies custom components and styling patterns that could be replaced with shadcn/ui components.
+
+```bash
+node scripts/component-audit.js
+```
+
+This script scans the codebase for custom components and logs any missing shadcn/ui components.
+
+#### Component Migration Script
+
+The component migration script (`scripts/migrate-components.js`) helps migrate custom components to shadcn/ui.
+
+```bash
+node scripts/migrate-components.js [component-name]
+```
+
+This script provides a template for migrating a custom component to a shadcn/ui component.
+
+#### Create Variant Script
+
+The create variant script (`scripts/create-variant.js`) adds new variants to shadcn/ui components.
+
+```bash
+node scripts/create-variant.js [component-name] [variant-name]
+```
+
+This script modifies a shadcn/ui component to add a new variant.
+
+### Toast System
+
+The project has migrated from the old toast system to the new sonner toast system. A toast migration utility has been created at `@/lib/toast-migration.ts` that provides backward compatibility.
+
+```typescript
+// Old way (deprecated)
+import { useToast } from "@/hooks/use-toast";
+const { toast } = useToast();
+toast({ description: "Something happened" });
+
+// New way
+import { toast } from "@/lib/toast-migration";
+toast({
+  title: "Success",
+  description: "Operation completed successfully.",
+});
+```
+
+The toast migration utility ensures that all toast calls are consistent and follow the new sonner API.
 
 ## UI Implementation Patterns (2024-03-02)
 

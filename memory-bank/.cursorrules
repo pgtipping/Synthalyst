@@ -2103,3 +2103,141 @@ When implementing changes to the Training Plan Creator, follow the approach outl
   - Apply `transition-colors` for hover effects on interactive elements
   - Avoid using emoji icons (👁️, ❤️) in favor of professional SVG icons
   - Maintain consistent color schemes with the rest of the UI
+
+# Component Standardization (2024-03-05)
+
+## Component Guidelines
+
+The project uses shadcn/ui as its primary component library. A comprehensive component guidelines document has been created at `docs/component-guidelines.md` that outlines best practices for using shadcn/ui components.
+
+Key principles:
+
+- Use shadcn/ui components whenever possible to maintain a consistent look and feel
+- Customize components using the shadcn/ui theming system rather than direct Tailwind classes
+- Use the `cn` utility from `@/lib/utils` for class merging
+- Create variants using `cva` for consistent styling
+- All components should be accessible and follow WCAG guidelines
+
+## Component Variants
+
+The Card component has been extended with a gradient variant that provides consistent gradient styles:
+
+```tsx
+// Primary gradient (blue to indigo)
+<Card variant="gradient" variantKey="primary">
+  <CardHeader>
+    <CardTitle className="text-white">Primary Gradient</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <p className="text-white/90">Content with white text for contrast</p>
+  </CardContent>
+</Card>
+```
+
+Available gradient keys:
+
+- `primary`: Blue to indigo gradient (white text recommended)
+- `secondary`: Purple to pink gradient (white text recommended)
+- `accent`: Amber gradient (white text recommended)
+- `info`: Subtle blue gradient (default text color works well)
+- `default`: Subtle gray gradient (default text color works well)
+
+An example page demonstrating all gradient variants is available at `/examples/gradient-card`.
+
+## Custom Components
+
+The project includes several custom components built on top of shadcn/ui:
+
+### ResourceCard
+
+The ResourceCard component displays information about a resource, such as a book, video, or article. It includes support for premium resources.
+
+```tsx
+<ResourceCard
+  resource={{
+    id: "1",
+    title: "Resource Title",
+    type: "book",
+    description: "Resource description",
+    isPremium: true,
+    author: "Author Name",
+    url: "https://example.com",
+  }}
+/>
+```
+
+### ResourceList
+
+The ResourceList component displays a list of resources and handles premium resource visibility based on the user's subscription status.
+
+```tsx
+<ResourceList
+  resources={
+    [
+      /* array of resources */
+    ]
+  }
+  isPremiumUser={true}
+/>
+```
+
+## Utility Scripts
+
+The project includes several utility scripts to help with component standardization:
+
+### Component Audit Script
+
+The component audit script identifies custom components and styling patterns that could be replaced with shadcn/ui components.
+
+```bash
+node scripts/component-audit.js
+```
+
+### Component Migration Script
+
+The component migration script helps migrate custom components to shadcn/ui.
+
+```bash
+node scripts/migrate-components.js [component-name]
+```
+
+### Create Variant Script
+
+The create variant script adds new variants to shadcn/ui components.
+
+```bash
+node scripts/create-variant.js [component-name] [variant-name]
+```
+
+Available variant templates:
+
+- `gradient`: Gradient backgrounds
+- `outline`: Colored outlines with matching text
+- `glass`: Frosted glass effect with backdrop blur
+
+# Toast Migration (2024-03-02)
+
+## Toast Implementation
+
+The project has migrated from the old toast system to the new sonner toast system. A toast migration utility has been created at `@/lib/toast-migration.ts` that provides backward compatibility.
+
+All components should import toast from `@/lib/toast-migration` instead of `@/hooks/use-toast`.
+
+```typescript
+import { toast } from "@/lib/toast-migration";
+
+// Success toast
+toast({
+  title: "Success",
+  description: "Operation completed successfully.",
+});
+
+// Error toast
+toast({
+  variant: "destructive",
+  title: "Error",
+  description: "Something went wrong.",
+});
+```
+
+// ... existing content ...
