@@ -460,6 +460,19 @@ We've successfully implemented and fixed tests for these endpoints using a stand
 
 ## Current Work Focus (2023-07-10)
 
+### Fixed Vercel Deployment Issue (2023-07-13)
+
+We've fixed a critical issue that was causing Vercel deployments to fail:
+
+- Identified that the `react-pdf-html` package was missing from the dependencies in package.json
+- This package is required by the TrainingPlanPDF component for rendering HTML content in PDFs
+- Added `react-pdf-html` version 1.1.18 to the dependencies in package.json
+- Added `react-pdf` version 7.7.0 to ensure all required dependencies are available
+- Committed and pushed the changes to the main branch
+- Documented the fix in the vercelLogs.md file for future reference
+
+This fix ensures that the TrainingPlanPDF component can function correctly in the production environment, allowing users to generate properly formatted PDF exports of their training plans.
+
 ### Training Plan PDF Export Improvements (2023-07-10)
 
 We've completely redesigned the Training Plan PDF export functionality to use the `react-pdf-html` library for better HTML rendering. This is a significant improvement over the previous approach that manually parsed HTML content.

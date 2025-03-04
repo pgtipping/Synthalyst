@@ -1,67 +1,79 @@
 # Vercel Build Logs
 
-## 2025-03-03
+## 2025-03-04
 
-[22:34:07.116] Running build in Washington, D.C., USA (East) – iad1
-[22:34:07.229] Cloning github.com/pgtipping/Synthalyst (Branch: main, Commit: 866b1ba)
-[22:34:07.544] Cloning completed: 315.000ms
-[22:34:14.318] Restored build cache from previous deployment (BxuAnJC1kp2Lexj5vXtZHNmRNKaA)
-[22:34:14.454] Running "vercel build"
-[22:34:16.122] Vercel CLI 41.2.2
-[22:34:16.929] Running "install" command: `npm install`...
-[22:34:25.716]
-[22:34:25.716] added 5 packages, changed 10 packages, and audited 1413 packages in 9s
-[22:34:25.716]
-[22:34:25.717] 244 packages are looking for funding
-[22:34:25.717] run `npm fund` for details
-[22:34:25.720]
-[22:34:25.721] 3 moderate severity vulnerabilities
-[22:34:25.721]
-[22:34:25.721] To address all issues (including breaking changes), run:
-[22:34:25.721] npm audit fix --force
-[22:34:25.721]
-[22:34:25.721] Run `npm audit` for details.
-[22:34:25.759] Detected Next.js version: 15.2.0
-[22:34:25.760] Running "prisma migrate deploy && prisma generate && next build"
-[22:34:26.218] Prisma schema loaded from prisma/schema.prisma
-[22:34:26.225] Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-noisy-mountain-a4gl2bkt-pooler.us-east-1.aws.neon.tech"
-[22:34:26.888]
-[22:34:26.888] 6 migrations found in prisma/migrations
-[22:34:26.888]
-[22:34:26.994]
-[22:34:26.995] No pending migrations to apply.
-[22:34:27.458] Prisma schema loaded from prisma/schema.prisma
-[22:34:27.948]
-[22:34:27.948] ✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 249ms
-[22:34:27.948]
-[22:34:27.948] Start by importing your Prisma Client (See: <https://pris.ly/d/importing-client>)
-[22:34:27.948]
-[22:34:27.948] Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: <https://pris.ly/orm/survey/release-5-22>
-[22:34:27.948]
-[22:34:28.788] ▲ Next.js 15.2.0
-[22:34:28.789]
-[22:34:28.869] Creating an optimized production build ...
-[22:34:55.709] ✓ Compiled successfully
-[22:34:55.714] Skipping linting
-[22:34:55.715] Checking validity of types ...
-[22:35:12.456] Collecting page data ...
-[22:35:16.286] Generating static pages (0/56) ...
-[22:35:17.143] Generating static pages (14/56)
-[22:35:17.398] Generating static pages (28/56)
-[22:35:17.536] Generating static pages (42/56)
-[22:35:17.994] ⨯ useSearchParams() should be wrapped in a suspense boundary at page "/training-plan". Read more: <https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout>
-[22:35:17.994] at a (/vercel/path1/.next/server/chunks/8302.js:4:25258)
-[22:35:17.995] at d (/vercel/path1/.next/server/chunks/8302.js:4:147954)
-[22:35:17.995] at rs (/vercel/path1/.next/server/app/training-plan/page.js:1:41384)
-[22:35:17.995] at nL (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:46773)
-[22:35:17.995] at nU (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:48548)
-[22:35:17.995] at nU (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:64360)
-[22:35:17.995] at nq (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:67434)
-[22:35:17.995] at nH (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:65009)
-[22:35:17.995] at nG (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:70865)
-[22:35:17.995] at nz (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:69548)
-[22:35:17.995] Error occurred prerendering page "/training-plan". Read more: <https://nextjs.org/docs/messages/prerender-error>
-[22:35:17.995] Export encountered an error on /training-plan/page: /training-plan, exiting the build.
-[22:35:18.008] ⨯ Next.js build worker exited with code: 1 and signal: null
-[22:35:18.086] Error: Command "prisma migrate deploy && prisma generate && next build" exited with 1
-[22:35:18.451]
+[06:19:22.667] Running build in Washington, D.C., USA (East) – iad1
+[06:19:22.760] Cloning github.com/pgtipping/Synthalyst (Branch: main, Commit: 6c7dd45)
+[06:19:23.112] Cloning completed: 352.000ms
+[06:19:30.026] Restored build cache from previous deployment (2CaCiFC2bbGGNnku6WY5DryAHC2d)
+[06:19:30.115] Running "vercel build"
+[06:19:30.891] Vercel CLI 41.2.2
+[06:19:32.087] Running "install" command: `npm install`...
+[06:19:36.045]
+[06:19:36.045] up to date, audited 1413 packages in 4s
+[06:19:36.045]
+[06:19:36.045] 244 packages are looking for funding
+[06:19:36.045] run `npm fund` for details
+[06:19:36.049]
+[06:19:36.050] 3 moderate severity vulnerabilities
+[06:19:36.050]
+[06:19:36.050] To address all issues (including breaking changes), run:
+[06:19:36.050] npm audit fix --force
+[06:19:36.050]
+[06:19:36.050] Run `npm audit` for details.
+[06:19:38.073] Detected Next.js version: 15.2.0
+[06:19:38.073] Running "prisma migrate deploy && prisma generate && next build"
+[06:19:38.548] Prisma schema loaded from prisma/schema.prisma
+[06:19:38.555] Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-noisy-mountain-a4gl2bkt-pooler.us-east-1.aws.neon.tech"
+[06:19:39.252]
+[06:19:39.253] 6 migrations found in prisma/migrations
+[06:19:39.253]
+[06:19:39.363]
+[06:19:39.364] No pending migrations to apply.
+[06:19:39.835] Prisma schema loaded from prisma/schema.prisma
+[06:19:40.332]
+[06:19:40.333] ✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 262ms
+[06:19:40.333]
+[06:19:40.333] Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+[06:19:40.333]
+[06:19:40.333] Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+[06:19:40.333]
+[06:19:41.168] ▲ Next.js 15.2.0
+[06:19:41.169]
+[06:19:41.247] Creating an optimized production build ...
+[06:19:47.223] Failed to compile.
+[06:19:47.223]
+[06:19:47.223] ./src/components/TrainingPlanPDF.tsx
+[06:19:47.223] Module not found: Can't resolve 'react-pdf-html'
+[06:19:47.223]
+[06:19:47.223] https://nextjs.org/docs/messages/module-not-found
+[06:19:47.223]
+[06:19:47.224] Import trace for requested module:
+[06:19:47.224] ./src/app/training-plan/client-component.tsx
+[06:19:47.224]
+[06:19:47.224]
+[06:19:47.224] > Build failed because of webpack errors
+[06:19:47.262] Error: Command "prisma migrate deploy && prisma generate && next build" exited with 1
+[06:19:47.635]
+
+## 2025-03-05 - Fixed Deployment Issue
+
+### Issue Identified
+
+The Vercel deployment was failing because the `react-pdf-html` package was missing from the dependencies in package.json. This package is required by the TrainingPlanPDF component for rendering HTML content in PDFs.
+
+### Solution Implemented
+
+1. Added `react-pdf-html` version 1.1.18 to the dependencies in package.json
+2. Added `react-pdf` version 7.7.0 to ensure all required dependencies are available
+3. Committed and pushed the changes to the main branch
+
+### Expected Result
+
+The next Vercel deployment should successfully build now that the required package is properly included in the dependencies. This will allow the TrainingPlanPDF component to function correctly in the production environment.
+
+### Additional Notes
+
+- Local build attempts encountered some issues with Prisma permissions and React child errors in the 404 page, but these are separate from the Vercel deployment issue.
+- The specific error "Module not found: Can't resolve 'react-pdf-html'" should be resolved with this fix.
+- Future enhancements to the PDF functionality should ensure all required dependencies are properly added to package.json.

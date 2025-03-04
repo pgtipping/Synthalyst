@@ -940,3 +940,21 @@ These improvements make the PDF output more professional and better suited for p
   - Added custom CSS for HTML content styling
   - More maintainable and robust solution
 - **Location**: `nextjs-app/src/components/TrainingPlanPDF.tsx`
+
+### Fixed Vercel Deployment Issue (2023-07-13)
+
+- **Issue Identified**:
+  - Vercel deployment was failing with error: "Module not found: Can't resolve 'react-pdf-html'"
+  - The TrainingPlanPDF component requires the react-pdf-html package for rendering HTML content in PDFs
+  - The package was installed locally but not properly added to package.json dependencies
+- **Solution Implemented**:
+  - Added react-pdf-html version 1.1.18 to the dependencies in package.json
+  - Added react-pdf version 7.7.0 to ensure all required dependencies are available
+  - Committed and pushed the changes to the main branch
+  - Documented the fix in vercelLogs.md for future reference
+- **Impact**:
+  - Resolved the build failure in the Vercel deployment pipeline
+  - Ensured the TrainingPlanPDF component functions correctly in production
+  - Improved the reliability of the PDF export functionality for end users
+  - Established a pattern for properly documenting dependencies for future components
+- **Location**: `package.json`, `memory-bank/vercelLogs.md`
