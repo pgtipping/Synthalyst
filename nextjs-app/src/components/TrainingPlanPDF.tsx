@@ -4,152 +4,127 @@ import React from "react";
 // Create styles
 const styles = StyleSheet.create({
   page: {
-    flexDirection: "column",
-    backgroundColor: "#fff",
-    padding: 40,
+    padding: 30,
     fontFamily: "Helvetica",
+    color: "#000000", // Ensure all text is black by default
   },
   header: {
     marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    paddingBottom: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 8,
-    color: "#4F46E5", // indigo-600
+    marginBottom: 10,
+    color: "#000000",
   },
   subtitle: {
-    fontSize: 12,
-    color: "#6B7280", // gray-500
-    marginBottom: 4,
+    fontSize: 14,
+    marginBottom: 5,
+    color: "#444444",
   },
   section: {
-    marginTop: 20,
-    marginBottom: 10,
+    marginBottom: 15,
+    paddingTop: 5,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#4F46E5", // indigo-600
-  },
-  subsectionTitle: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
-    marginTop: 12,
-    color: "#6366F1", // indigo-500
+    color: "#000000",
   },
-  moduleTitle: {
-    fontSize: 13,
+  moduleDetails: {
+    marginBottom: 10,
+    marginLeft: 5,
+  },
+  contentBlock: {
+    marginBottom: 8,
+  },
+  duration: {
+    fontSize: 12,
+    marginBottom: 8,
     fontWeight: "bold",
-    marginBottom: 6,
-    marginTop: 10,
-    color: "#4338CA", // indigo-700
+    color: "#000000",
+  },
+  objectives: {
+    fontSize: 12,
+    marginBottom: 5,
+    color: "#000000",
+  },
+  objectivesTitle: {
+    fontWeight: "bold",
+    color: "#000000",
   },
   paragraph: {
-    fontSize: 11,
-    lineHeight: 1.5,
-    marginBottom: 8,
-  },
-  list: {
-    marginLeft: 10,
-    marginBottom: 8,
+    fontSize: 12,
+    marginBottom: 5,
+    lineHeight: 1.4,
+    color: "#000000",
   },
   listItem: {
-    fontSize: 11,
-    lineHeight: 1.5,
-    marginBottom: 4,
     flexDirection: "row",
+    marginBottom: 3,
+    paddingLeft: 5,
   },
   listItemBullet: {
     width: 10,
+    fontSize: 12,
+    color: "#000000",
   },
   listItemText: {
     flex: 1,
+    fontSize: 12,
+    color: "#000000",
+    lineHeight: 1.4,
   },
   resourceSection: {
-    marginTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    marginTop: 15,
+    borderTop: "1 solid #cccccc",
     paddingTop: 10,
   },
   resourceTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 8,
-    color: "#4F46E5", // indigo-600
+    marginBottom: 10,
+    color: "#000000",
   },
   resource: {
     marginBottom: 10,
     padding: 8,
-    backgroundColor: "#F9FAFB", // gray-50
-    borderRadius: 4,
+    backgroundColor: "#f9f9f9",
   },
   resourceHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 5,
   },
   resourceName: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "bold",
+    flex: 1,
+    color: "#000000",
   },
   resourceType: {
-    fontSize: 9,
-    color: "#6B7280", // gray-500
+    fontSize: 10,
+    color: "#444444",
   },
   resourceAuthor: {
-    fontSize: 9,
-    color: "#6B7280", // gray-500
-    marginBottom: 4,
+    fontSize: 10,
+    marginBottom: 5,
+    fontStyle: "italic",
+    color: "#444444",
   },
   resourceDescription: {
     fontSize: 10,
-    lineHeight: 1.4,
+    color: "#000000",
   },
   footer: {
     position: "absolute",
     bottom: 30,
-    left: 40,
-    right: 40,
-    fontSize: 9,
-    color: "#9CA3AF", // gray-400
+    left: 30,
+    right: 30,
+    fontSize: 10,
     textAlign: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    paddingTop: 10,
-  },
-  pageNumber: {
-    position: "absolute",
-    bottom: 30,
-    right: 40,
-    fontSize: 9,
-    color: "#9CA3AF", // gray-400
-  },
-  contentBlock: {
-    marginBottom: 12,
-  },
-  moduleDetails: {
-    marginLeft: 10,
-    marginTop: 4,
-    marginBottom: 8,
-  },
-  duration: {
-    fontSize: 11,
-    fontStyle: "italic",
-    color: "#6B7280", // gray-500
-    marginBottom: 6,
-  },
-  objectives: {
-    fontSize: 11,
-    marginBottom: 6,
-  },
-  objectivesTitle: {
-    fontWeight: "bold",
+    color: "#666666",
   },
 });
 
@@ -319,10 +294,8 @@ export default function TrainingPlanPDF({
                       <Text style={styles.duration}>{subsection.content}</Text>
                     ) : subsection.title === "Learning objectives" ? (
                       <View style={styles.contentBlock}>
-                        <Text style={styles.objectives}>
-                          <Text style={styles.objectivesTitle}>
-                            Learning objectives:
-                          </Text>
+                        <Text style={styles.objectivesTitle}>
+                          Learning objectives:
                         </Text>
                         {/* Split objectives by bullet points or dashes and render as a list */}
                         {subsection.content
@@ -339,10 +312,8 @@ export default function TrainingPlanPDF({
                       </View>
                     ) : (
                       <View style={styles.contentBlock}>
-                        <Text style={styles.paragraph}>
-                          <Text style={{ fontWeight: "bold" }}>
-                            Content outline:
-                          </Text>
+                        <Text style={styles.objectivesTitle}>
+                          Content outline:
                         </Text>
                         {/* Process content outline to handle potential structure */}
                         {subsection.content
