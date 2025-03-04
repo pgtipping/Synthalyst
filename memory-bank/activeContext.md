@@ -491,3 +491,20 @@ The current focus is on ensuring consistent and correct LLM API integration acro
    - Standardize on `GEMINI_API_KEY` for the Google Generative AI API
    - Maintain `OPENROUTER_API_KEY` for the OpenRouter API
    - Ensure all `.env.example` files reflect the current naming conventions
+
+## Current Focus (2023-06-15)
+
+### Training Plan Creator PDF Export Feature
+
+We've enhanced the Training Plan Creator by replacing the HTML export functionality with a more professional PDF export feature. This improvement provides users with a better way to share and print their training plans.
+
+Key changes:
+
+- Created a new `TrainingPlanPDF.tsx` component that renders training plans as PDF documents
+- Integrated with the existing `@react-pdf/renderer` library already used in the JD Developer component
+- Updated both the PlanForm and SavedPlansTab components to use the new PDF export functionality
+- Added proper error handling and user feedback for the PDF generation process
+- Ensured the PDF includes all relevant information: title, content, resources, and creation date
+- Styled the PDF to match the application's design language
+
+This enhancement improves the user experience by providing a more professional and shareable output format for training plans.

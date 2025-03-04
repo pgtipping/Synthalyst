@@ -46,6 +46,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Sparkles, Download, Copy, Loader2, AlertCircle } from "lucide-react";
 import { ResourceList } from "./ResourceList";
 import { Resource } from "./ResourceCard";
+import { pdf } from "@react-pdf/renderer";
+import TrainingPlanPDF from "@/components/TrainingPlanPDF";
 
 // Updated schema with mandatory and optional fields
 const formSchema = z.object({
@@ -348,20 +350,47 @@ export default function PlanForm() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              const blob = new Blob([plan.content], { type: "text/html" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "training-plan.html";
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
+            onClick={async () => {
+              try {
+                // Generate PDF blob
+                const blob = await pdf(
+                  <TrainingPlanPDF
+                    title={form.getValues("title")}
+                    content={plan.content}
+                    resources={plan.resources}
+                    createdAt={new Date().toISOString()}
+                  />
+                ).toBlob();
+
+                // Create download link
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${form
+                  .getValues("title")
+                  .replace(/\s+/g, "-")}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                toast({
+                  title: "PDF downloaded",
+                  description:
+                    "The training plan has been downloaded as a PDF.",
+                });
+              } catch (error) {
+                console.error("Error exporting PDF:", error);
+                toast({
+                  variant: "destructive",
+                  title: "Error",
+                  description: "Failed to export training plan as PDF",
+                });
+              }
             }}
           >
             <Download className="h-4 w-4 mr-2" />
-            Download HTML
+            Download PDF
           </Button>
           <Button
             variant="outline"

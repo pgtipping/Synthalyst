@@ -817,3 +817,14 @@
 - Explore creating specialized variants for specific sections of the application
 - Implement automated detection of navigation hooks to suggest wrapping with ClientComponentWrapper
 - Add the pattern to the project's ESLint rules to enforce proper usage
+
+## Recent Updates (2023-06-15)
+
+### Training Plan Creator Enhancements
+
+- ✅ Replaced HTML export with PDF export functionality
+  - Created a new `TrainingPlanPDF.tsx` component for rendering training plans as PDFs
+  - Integrated with the existing `@react-pdf/renderer` library
+  - Added proper error handling and user feedback
+  - Ensured consistent styling with the application's design language
+  - Improved the user experience by providing a more professional output format
