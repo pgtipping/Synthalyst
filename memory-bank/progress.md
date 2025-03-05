@@ -1,5 +1,66 @@
 # Progress Report - 2024-03-08
 
+## Recent Updates (Last 24 Hours)
+
+- ✅ Refined Landing Page Business Focus and UI (2024-03-08)
+
+  - Updated text to emphasize general business focus rather than HR-specific:
+    - Changed "Ready to Transform Your HR Operations?" to "Ready to Transform Your Business Operations?"
+    - Changed "streamline their HR processes" to "streamline their business processes"
+  - Enhanced button styling and user interaction:
+    - Updated primary button to use blue background with white text as default
+    - Improved secondary button with semi-transparent background for better visibility
+    - Enhanced hover states for both buttons to provide better visual feedback
+    - Added subtle background to the feedback link to make it more visible
+  - These changes:
+    - Better align with the project brief's statement that this is "NOT a HR focused app"
+    - Improve overall user experience and encourage engagement
+    - Support our strategic focus on custom business solutions and feedback collection
+  - Location: `nextjs-app/src/app/page.tsx`
+
+- ✅ Enhanced Landing Page with AI-Focused Content (2024-03-08)
+
+  - Completely redesigned the landing page to showcase AI capabilities:
+    - Updated hero section with AI-centric messaging and value proposition
+    - Added AI showcase section with before/after comparison
+    - Reorganized features by AI capability rather than function
+    - Enhanced stats section with AI performance metrics
+    - Added "How Our AI Works" section with visual explanation
+    - Improved CTA sections with feedback mechanisms
+  - Implemented multiple feedback touchpoints throughout the page
+  - Added strategic CTAs for custom business solutions
+  - Included visual indicators of AI intelligence for each tool
+  - Added previews of actual AI outputs to demonstrate quality
+  - This comprehensive update better communicates our AI excellence and encourages user engagement
+  - Location: `nextjs-app/src/app/page.tsx`
+
+- ✅ Fixed Training Plan PDF Export Formatting (2024-03-08)
+
+  - Enhanced HTML content cleaning to better preserve structure when converting to PDF
+  - Improved regex patterns for extracting sections, headings, and content
+  - Enhanced styling for better readability with increased line height and visual separation
+  - Added special styling for premium resources with blue left border and light blue background
+  - Fixed list item rendering to properly handle various bullet point formats
+  - Improved handling of HTML tags in content for better conversion
+  - Fixed issue with list items not being properly formatted with indentation and spacing
+  - Removed hash symbols (##) that were appearing at the end of some list items
+  - Enhanced resources section to group resources by type (Books, Courses, Tools, etc.)
+  - Added proper category headings for each resource type
+  - Fixed regex patterns to be compatible with earlier ECMAScript versions
+  - This results in a more professional and readable PDF output that properly reflects the training plan content
+  - Location: `nextjs-app/src/components/TrainingPlanPDF.tsx`
+
+- ✅ Fixed Gemini API Integration Inconsistencies (2024-03-08)
+
+  - Standardized the environment variable name from `GOOGLE_GEMINI_API_KEY` to `GEMINI_API_KEY` in the gemini.ts file
+  - Updated the `generateResourcesWithGemini` function to consistently use the "gemini-2.0-flash" model instead of "gemini-pro"
+  - Ensured the model selection is done through the `getGeminiModel()` utility function without explicitly specifying the model name
+  - Added clear comments to indicate we're using the default "gemini-2.0-flash" model
+  - Verified that no other files were using the old environment variable name or explicitly using the "gemini-pro" model
+  - Confirmed that all .env.example files were already using the correct environment variable name
+  - This ensures consistent API usage across the application and maintains the use of the latest Gemini model
+  - Location: `nextjs-app/src/lib/gemini.ts`
+
 ## Strategic Direction Update (2024-03-08)
 
 - ✅ Established New Strategic Focus: AI Excellence (2024-03-08)

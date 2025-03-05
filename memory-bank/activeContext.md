@@ -1,5 +1,31 @@
 # Active Context (2024-03-08)
 
+## Current Focus (2024-03-08)
+
+We've just made additional improvements to the landing page:
+
+1. ✅ UPDATED: Landing Page Business Focus (2024-03-08):
+
+   - Changed "Ready to Transform Your HR Operations?" to "Ready to Transform Your Business Operations?"
+   - Changed "streamline their HR processes" to "streamline their business processes"
+   - This better reflects that Synthalyst is a general-purpose business app, not just HR-focused
+   - These changes align with the project brief which states: "Though it currently contains HR focused tools, it is NOT a HR focused app"
+
+2. ✅ IMPROVED: Button Styling and Feedback Link (2024-03-08):
+
+   - Updated primary button styling to use blue background with white text as default
+   - Enhanced secondary button with semi-transparent background for better visibility
+   - Improved hover states for both buttons to provide better visual feedback
+   - Added subtle background to the feedback link to make it more visible and clickable
+   - These changes improve the overall user experience and encourage engagement
+   - The improved button styling also better aligns with our strategic focus on custom business solutions
+
+3. ✅ COMMITTED: Changes pushed to main branch (2024-03-08):
+   - Committed with messages:
+     - "Update home page: Fix second button styling and improve feedback link visibility"
+   - All changes successfully pushed to the main branch
+   - This ensures the improvements are live in the production environment
+
 ## Strategic Focus: Making AI Excellence Real (2024-03-08)
 
 Our primary development focus is now on ensuring that all AI-powered features in Synthalyst deliver exceptional quality that matches or exceeds the claims made on our landing page and marketing materials. This means:
@@ -22,7 +48,7 @@ Our primary development focus is now on ensuring that all AI-powered features in
 
 This focus will drive all development activities going forward, ensuring that Synthalyst becomes known for the exceptional quality of its AI-powered tools.
 
-## Current Focus (2024-03-08)
+## Previous Focus (2024-03-08)
 
 We've just enhanced the landing page with AI-focused content and improved UX:
 
@@ -84,60 +110,6 @@ We've just enhanced the landing page with AI-focused content and improved UX:
    - Committed with message: "Enhance landing page with AI-focused content and improved UX"
    - All changes successfully pushed to the main branch
    - This ensures the improvements are live in the production environment
-
-## Previous Focus (2024-03-08)
-
-We've just fixed inconsistencies in the Gemini API integration for the Training Plan Creator:
-
-1. ✅ FIXED: Gemini API Integration Inconsistencies (2024-03-08):
-
-   - Standardized the environment variable name from `GOOGLE_GEMINI_API_KEY` to `GEMINI_API_KEY` in the gemini.ts file
-   - Updated the `generateResourcesWithGemini` function to consistently use the "gemini-2.0-flash" model instead of "gemini-pro"
-   - Ensured the model selection is done through the `getGeminiModel()` utility function without explicitly specifying the model name
-   - Added clear comments to indicate we're using the default "gemini-2.0-flash" model
-   - Verified that no other files were using the old environment variable name or explicitly using the "gemini-pro" model
-   - Confirmed that all .env.example files were already using the correct environment variable name
-   - Location: `nextjs-app/src/lib/gemini.ts`
-
-2. ✅ COMMITTED: Changes pushed to main branch:
-   - Committed the fixes with a descriptive message: "Fix inconsistencies in Gemini API integration: standardize environment variable name and use gemini-2.0-flash model consistently"
-   - Pushed the changes to the main branch on GitHub
-   - This ensures consistent API usage across the application
-
-We've improved the TrainingPlanPDF component to fix formatting issues:
-
-1. ✅ FIXED: Training Plan PDF Export Formatting (2024-03-08):
-
-   - Enhanced HTML content cleaning to better preserve structure when converting to PDF
-   - Improved regex patterns for extracting sections, headings, and content
-   - Enhanced styling for better readability:
-     - Increased line height for better text spacing
-     - Added border-bottom to section titles for visual separation
-     - Improved spacing between elements
-     - Standardized capitalization for section titles
-   - Added special styling for premium resources with blue left border and light blue background
-   - Fixed list item rendering to properly handle various bullet point formats
-   - Improved handling of HTML tags in content:
-     - Better conversion of paragraphs, headings, and lists
-     - Proper handling of nested content
-     - Preservation of content structure
-   - Location: `nextjs-app/src/components/TrainingPlanPDF.tsx`
-
-2. ✅ ADDITIONAL IMPROVEMENTS: Training Plan PDF Export Formatting (2024-03-08):
-
-   - Fixed issue with list items not being properly formatted with indentation and spacing
-   - Removed hash symbols (##) that were appearing at the end of some list items
-   - Improved section heading styling to ensure proper spacing between headings and content
-   - Enhanced resources section to group resources by type (Books, Courses, Tools, etc.)
-   - Added proper category headings for each resource type
-   - Improved content extraction for sections with bullet points
-   - Fixed regex patterns to be compatible with earlier ECMAScript versions
-   - Location: `nextjs-app/src/components/TrainingPlanPDF.tsx`
-
-3. ✅ COMMITTED: Changes pushed to main branch:
-   - Committed the fixes with a descriptive message: "Fix Training Plan PDF formatting issues with list items and section headings"
-   - Pushed the changes to the main branch on GitHub
-   - This ensures consistent and professional PDF output for training plans
 
 # Active Context (2024-03-05)
 
