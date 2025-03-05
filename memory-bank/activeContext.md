@@ -619,23 +619,28 @@ We've just fixed a TypeScript error in the Vercel deployment related to the reac
 
 ## Current Focus (2024-03-10)
 
-We've improved the UI of the Training Plan Creator Guide page:
+We've implemented a Coming Soon page for tools that aren't ready for production:
 
-1. ✅ IMPROVED: Training Plan Creator Guide UI (2024-03-10):
+1. ✅ IMPLEMENTED: Coming Soon Page and Middleware (2024-03-10):
 
-   - Enhanced the readability and visual appeal of the guide page by:
-     - Limiting the content width to 850px for better readability
-     - Setting the page background to white and content container to #f5f5f7
-     - Adding a subtle shadow to create a card-like effect for the content
-     - Increasing white space between elements for better visual separation
-     - Improving typography with better line height and text sizing
-     - Adding proper spacing between sections and list items
-     - Adding decorative borders to separate content sections
-     - Centering the title and adding a bottom border for emphasis
-     - Making the CTA button larger and more prominent
-   - These changes improve the user experience by:
-     - Making the content easier to read and scan
-     - Creating a clearer visual hierarchy
-     - Providing a more modern and professional appearance
-     - Ensuring the guide is accessible on different screen sizes
-   - Location: `nextjs-app/src/app/blog/training-plan-creator-guide/page.tsx`
+   - Created a Coming Soon page that displays when users try to access tools that aren't ready for production
+   - Implemented middleware to redirect users to the Coming Soon page for non-production-ready tools
+   - Maintained access to development versions of tools via:
+     - Development environment (process.env.NODE_ENV === "development")
+     - URL parameter (?dev=true) for testing in production
+   - Only the following tools are accessible in production:
+     - JD Developer
+     - Interview Questions Generator
+     - Training Plan Creator
+   - All other tools redirect to the Coming Soon page
+   - The Coming Soon page includes:
+     - Clear messaging about the tool being under development
+     - Email notification signup for when the tool is ready
+     - Link to return to the home page
+     - Special link for developers to access the development version
+   - This approach allows us to:
+     - Continue development on all tools
+     - Only expose production-ready tools to end users
+     - Maintain a professional appearance
+     - Build anticipation for upcoming tools
+   - Location: `nextjs-app/src/app/coming-soon/page.tsx`, `nextjs-app/src/app/coming-soon/middleware.ts`
