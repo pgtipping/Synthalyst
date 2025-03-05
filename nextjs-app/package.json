@@ -118,6 +118,7 @@
     "@types/react-dom": "^19.0.4",
     "@types/supertest": "^6.0.2",
     "@types/testing-library__jest-dom": "^6.0.0",
+    "@types/uuid": "^10.0.0",
     "babel-jest": "^29.7.0",
     "bcrypt": "^5.1.1",
     "dotenv-cli": "^8.0.0",

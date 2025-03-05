@@ -12,7 +12,7 @@ const notesUpdateSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if user is authenticated
@@ -31,7 +31,8 @@ export async function POST(
     }
 
     // Get the submission ID from the URL params
-    const { id } = params;
+    const paramsValue = await params;
+    const { id } = paramsValue;
 
     // Parse the request body
     const body = await request.json();
