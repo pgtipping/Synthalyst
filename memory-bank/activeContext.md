@@ -734,12 +734,14 @@ We've implemented a more user-friendly authentication approach that allows users
    - `nextjs-app/src/app/training-plan/components/TrainingPlanClient.tsx`
    - `nextjs-app/src/app/training-plan/components/PlanForm.tsx`
 
-5. **Follow-up Fix (2025-03-05):**
+5. **Follow-up Fixes (2025-03-05):**
    - Fixed a build error in Vercel deployment caused by missing props in client-component.tsx
-   - Updated the PlanForm component in client-component.tsx to include the required props (session, usageCount, setUsageCount)
-   - This ensures consistency between the two implementations of the Training Plan Creator
-   - File modified: `nextjs-app/src/app/training-plan/client-component.tsx`
+   - Updated the PlanForm component in client-component.tsx to include the required props
+   - Fixed another build error in Vercel deployment caused by missing props in client.tsx
+   - Updated the PlanForm component in client.tsx to include the required props
+   - Verified both fixes by running successful builds locally
+   - Files modified:
+     - `nextjs-app/src/app/training-plan/client-component.tsx`
+     - `nextjs-app/src/app/training-plan/client.tsx`
 
 ## Coming Soon Page Implementation (2024-03-05)
-
-// ... existing content ...
