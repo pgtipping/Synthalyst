@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import SavedJDs from "./components/SavedJDs";
 import type { JobDescription } from "@/types/jobDescription";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ClientComponentWrapper } from "@/components/wrappers/ClientComponentWrapper";
+import { Button } from "@/components/ui/button";
 
 // Component that safely uses useSearchParams inside a Suspense boundary
 function JDDeveloperContent() {
@@ -56,10 +57,10 @@ function JDDeveloperContent() {
   };
 
   useEffect(() => {
-    if (!session?.user?.email) return;
-
-    // Initial fetch
-    fetchTemplates();
+    // Initial fetch of templates if user is authenticated
+    if (session?.user?.email && activeTab === "templates") {
+      fetchTemplates();
+    }
 
     // Set active tab from URL parameter if present
     if (tabParam && ["form", "templates", "saved"].includes(tabParam)) {
@@ -70,7 +71,7 @@ function JDDeveloperContent() {
     const handleTabSwitch = (event: Event) => {
       const customEvent = event as CustomEvent;
       setActiveTab(customEvent.detail);
-      if (customEvent.detail === "templates") {
+      if (customEvent.detail === "templates" && session?.user?.email) {
         fetchTemplates();
       }
     };
@@ -80,7 +81,7 @@ function JDDeveloperContent() {
     return () => {
       window.removeEventListener("switchTab", handleTabSwitch);
     };
-  }, [session, tabParam]);
+  }, [session, tabParam, activeTab]);
 
   const handleTemplateSelect = (template: JobDescription) => {
     setSelectedTemplate(template);
@@ -90,19 +91,6 @@ function JDDeveloperContent() {
       description: "The template has been loaded into the form.",
     });
   };
-
-  if (!session) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">JD Developer</h1>
-          <p className="text-gray-600 mb-8">
-            Please sign in to create and manage job descriptions.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container py-10">
@@ -136,18 +124,58 @@ function JDDeveloperContent() {
         </TabsContent>
         <TabsContent value="templates">
           <Card className="p-6">
-            <TemplateList
-              templates={templates}
-              onUseTemplate={handleTemplateSelect}
-              isLoading={isLoading}
-              error={error}
-              onTemplatesChanged={fetchTemplates}
-            />
+            {!session ? (
+              <div className="text-center py-8">
+                <h2 className="text-xl font-semibold mb-4">
+                  Templates Library
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Sign in to access and manage job description templates.
+                </p>
+                <Button
+                  onClick={() =>
+                    signIn(undefined, {
+                      callbackUrl: "/jd-developer?tab=templates",
+                    })
+                  }
+                >
+                  Sign In to Access Templates
+                </Button>
+              </div>
+            ) : (
+              <TemplateList
+                templates={templates}
+                onUseTemplate={handleTemplateSelect}
+                isLoading={isLoading}
+                error={error}
+                onTemplatesChanged={fetchTemplates}
+              />
+            )}
           </Card>
         </TabsContent>
         <TabsContent value="saved">
           <Card className="p-6">
-            <SavedJDs onUseAsTemplate={handleTemplateSelect} />
+            {!session ? (
+              <div className="text-center py-8">
+                <h2 className="text-xl font-semibold mb-4">
+                  Saved Job Descriptions
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Sign in to access your saved job descriptions.
+                </p>
+                <Button
+                  onClick={() =>
+                    signIn(undefined, {
+                      callbackUrl: "/jd-developer?tab=saved",
+                    })
+                  }
+                >
+                  Sign In to View Saved JDs
+                </Button>
+              </div>
+            ) : (
+              <SavedJDs onUseAsTemplate={handleTemplateSelect} />
+            )}
           </Card>
         </TabsContent>
       </Tabs>
