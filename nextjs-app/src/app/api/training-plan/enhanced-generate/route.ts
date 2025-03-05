@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { subscription } from "@/lib/subscription";
 import { generatePlanWithLlama } from "@/lib/llama";
 import { fetchResourcesWithGemini } from "@/lib/gemini";
@@ -34,24 +32,6 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const validatedData = requestSchema.parse(body);
-
-    // Get user session
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: "You must be logged in to generate a training plan" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user email matches session email
-    if (validatedData.userEmail !== session.user.email) {
-      return NextResponse.json(
-        { error: "User email does not match session email" },
-        { status: 403 }
-      );
-    }
 
     // Check subscription status
     const isPremiumUser = await subscription.isPremium(validatedData.userEmail);

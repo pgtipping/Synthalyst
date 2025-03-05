@@ -24,7 +24,7 @@ export async function generatePlanWithLlama(
         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3.2-70b-instruct",
+        model: "meta-llama/llama-3.2-3b-instruct",
         messages: [
           {
             role: "system",

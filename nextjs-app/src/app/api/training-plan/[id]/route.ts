@@ -72,10 +72,10 @@ type TrainingPlanContent = {
 
 export async function PATCH(
   request: NextRequest,
-  props: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await props.params;
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -227,10 +227,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  props: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await props.params;
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
