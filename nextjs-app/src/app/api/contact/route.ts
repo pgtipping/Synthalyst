@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { validateRequest, handleAPIError } from "@/lib/middleware";
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 
 // Updated schema to match the enhanced contact form
 const contactSchema = z.object({
@@ -32,8 +33,22 @@ export async function POST(request: Request) {
       inquiryType: formData.inquiryType,
     });
 
-    // Log additional details for debugging
-    logger.debug("Contact form details", {
+    // Save the submission to the database
+    const submission = await prisma.contactSubmission.create({
+      data: {
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        company: formData.company,
+        phone: formData.phone,
+        inquiryType: formData.inquiryType,
+        message: formData.message,
+        status: "new",
+      },
+    });
+
+    logger.debug("Contact form saved to database", {
+      id: submission.id,
       ...formData,
       // Mask part of the message for privacy in logs
       message:
@@ -65,6 +80,7 @@ export async function POST(request: Request) {
       {
         message: "Message sent successfully",
         success: true,
+        submissionId: submission.id,
       },
       { status: 200 }
     );
