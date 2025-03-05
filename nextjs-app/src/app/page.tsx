@@ -162,7 +162,7 @@ export default function Home() {
               <Link href="/tools">
                 <Button
                   size="lg"
-                  className="bg-white text-primary hover:bg-blue-50 min-w-[200px]"
+                  className="bg-primary text-white hover:bg-white hover:text-primary min-w-[200px] transition-colors"
                 >
                   Try Our AI Tools
                   <Sparkles className="ml-2 h-5 w-5" />
@@ -172,7 +172,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white text-white hover:bg-primary/20 min-w-[200px]"
+                  className="border-white text-white bg-primary/20 hover:bg-white hover:text-primary hover:border-primary min-w-[200px] transition-colors"
                 >
                   Get Custom Solutions
                   <MessageSquare className="ml-2 h-5 w-5" />
@@ -645,17 +645,17 @@ export default function Home() {
       <section className="py-20 px-4 hero-gradient">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-            Ready to Transform Your HR Operations?
+            Ready to Transform Your Business Operations?
           </h2>
           <p className="text-xl mb-8 text-blue-50">
             Join thousands of organizations already using Synthalyst to
-            streamline their HR processes.
+            streamline their business processes.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link href="/tools">
               <Button
                 size="lg"
-                className="bg-white text-primary hover:bg-blue-50 min-w-[200px]"
+                className="bg-primary text-white hover:bg-white hover:text-primary min-w-[200px] transition-colors"
               >
                 Try Our AI Tools
                 <Sparkles className="ml-2 h-5 w-5" />
@@ -665,16 +665,19 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-primary/20 min-w-[200px]"
+                className="border-white text-white bg-primary/20 hover:bg-white hover:text-primary hover:border-primary min-w-[200px] transition-colors"
               >
                 Get Custom Solutions
                 <MessageSquare className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>
-          <p className="mt-6 text-sm text-blue-100">
+          <p className="mt-6 text-sm text-white">
             Have feedback on our AI tools?{" "}
-            <Link href="/contact" className="underline hover:text-white">
+            <Link
+              href="/contact"
+              className="font-medium bg-white/10 px-2 py-1 rounded-md text-white underline hover:bg-white/20 transition-colors"
+            >
               Share your thoughts
             </Link>{" "}
             to help us improve.
