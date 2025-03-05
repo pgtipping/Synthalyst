@@ -76,6 +76,21 @@
     - Prevented potential authentication errors caused by mismatched ports
   - **Location**: `nextjs-app/package.json`, `nextjs-app/README.md`, `nextjs-app/.env.example`
 
+## 2025-03-05 Updates
+
+### Fixed Admin Layout and Authentication
+
+- Created a proper admin layout file that was previously empty, causing build failures on Vercel
+- Added role-based authentication to protect admin routes
+- Extended the NextAuth session type to include the user role
+- Updated the JWT and session callbacks to include the user role
+- Fixed type errors in the admin layout component
+
+### Build Status
+
+- Successfully fixed the type errors in the admin layout
+- Vercel deployment should now complete successfully
+
 # Progress Report - 2024-03-09
 
 ## Recent Updates (Last 24 Hours)

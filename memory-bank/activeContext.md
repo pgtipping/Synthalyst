@@ -15,6 +15,7 @@
 - Ensured fallback to Gemini works when Llama generation fails
 - Enhanced LLM quality control for interview question rubric generation
 - Improved tab display for different screen sizes in the Interview Questions Generator
+- Fixed Admin Layout and Authentication
 
 ## Next Steps
 
@@ -258,3 +259,13 @@ We've implemented a more user-friendly authentication approach that allows users
    - Files modified:
      - `nextjs-app/src/app/training-plan/client-component.tsx`
      - `nextjs-app/src/app/training-plan/client.tsx`
+
+## Recent Changes - 2025-03-05
+
+### Fixed Admin Layout and Authentication
+
+- Created a proper admin layout file that was previously empty, causing build failures on Vercel
+- Added role-based authentication to protect admin routes
+- Extended the NextAuth session type to include the user role
+- Updated the JWT and session callbacks to include the user role
+- Fixed type errors in the admin layout component
