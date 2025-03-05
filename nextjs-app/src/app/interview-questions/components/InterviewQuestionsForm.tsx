@@ -839,13 +839,14 @@ export default function InterviewQuestionsForm() {
                             }
 
                             /* Make sure headers in the rubric are properly aligned */
-                            .scoring-rubric .bg-indigo-50,
+                            .scoring-rubric div[class*="bg-indigo-50"],
                             .scoring-rubric [class*="bg-indigo-50"] {
                               flex-direction: column;
                               align-items: flex-start;
+                              padding: 0.75rem 1rem;
                             }
 
-                            .scoring-rubric .bg-indigo-50 span,
+                            .scoring-rubric div[class*="bg-indigo-50"] span,
                             .scoring-rubric [class*="bg-indigo-50"] span {
                               margin-top: 0.25rem;
                               align-self: flex-start;
@@ -855,6 +856,17 @@ export default function InterviewQuestionsForm() {
                             .scoring-rubric div {
                               max-width: 100%;
                               word-break: break-word;
+                            }
+
+                            /* Fix for card spacing */
+                            .scoring-rubric div[class*="mb-4"] {
+                              margin-bottom: 1.5rem;
+                            }
+
+                            /* Improve text readability */
+                            .scoring-rubric p {
+                              font-size: 0.9375rem;
+                              line-height: 1.5;
                             }
                           }
                         `}</style>

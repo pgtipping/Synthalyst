@@ -336,12 +336,14 @@ IMPORTANT:
           .map((line) => line.trim())
           .filter((line) => line.length > 0);
 
+        // First pass: Try to identify level headers with more flexible patterns
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
 
-          // Check if it's a heading (category) like "Excellent (4-5):" or "Good (3):"
+          // More flexible pattern matching for level headers
+          // Match patterns like "Excellent (4-5 points):", "Good (3):", "Average:", etc.
           const levelMatch = line.match(
-            /^([A-Za-z]+)(?:\s*\((\d+(?:-\d+)?)\s*(?:points?|)\))?:?$/i
+            /^([A-Za-z]+(?:\s+[A-Za-z]+)?)(?:\s*\((\d+(?:-\d+)?)\s*(?:points?|)\))?:?$/i
           );
 
           if (levelMatch) {
@@ -383,11 +385,39 @@ IMPORTANT:
           });
         }
 
+        // Second pass: If no levels were found, try to extract from paragraph format
+        if (levels.length === 0) {
+          // Look for patterns like "Excellent (4 points): criteria..."
+          const paragraphLevels = rubricText.match(
+            /([A-Za-z]+(?:\s+[A-Za-z]+)?)\s*\((\d+(?:-\d+)?)\s*(?:points?|)\):\s*([^.]+(?:\.[^.]+)*)/g
+          );
+
+          if (paragraphLevels) {
+            paragraphLevels.forEach((levelText) => {
+              const match = levelText.match(
+                /([A-Za-z]+(?:\s+[A-Za-z]+)?)\s*\((\d+(?:-\d+)?)\s*(?:points?|)\):\s*(.+)/
+              );
+              if (match) {
+                const [, level, points, criteriaText] = match;
+                const criteria = criteriaText
+                  .split(".")
+                  .map((c) => c.trim())
+                  .filter((c) => c.length > 0);
+
+                if (criteria.length > 0) {
+                  levels.push({
+                    level,
+                    points,
+                    criteria,
+                  });
+                }
+              }
+            });
+          }
+        }
+
         // Generate professional-looking HTML for the scoring rubric
-        result.scoringRubric = generateProfessionalRubricHtml(
-          levels,
-          rubricText
-        );
+        result.scoringRubric = generateProfessionalRubricHtml(levels);
       } else {
         // If no rubric was found, use the fallback
         result.scoringRubric = getFallbackQuestions(
@@ -481,18 +511,66 @@ IMPORTANT:
 
 // Function to generate professional-looking HTML for the scoring rubric
 function generateProfessionalRubricHtml(
-  levels: Array<{ level: string; points: string | null; criteria: string[] }>,
-  fallbackText: string
+  levels: Array<{ level: string; points: string | null; criteria: string[] }>
 ): string {
-  // If no levels were found, create a fallback structure
+  // If no levels were found, create a structured fallback with predefined levels
+  // instead of the simple single-card fallback
   if (levels.length === 0) {
+    // Create a default structured rubric with standard scoring levels
     return `<div class="scoring-rubric space-y-4">
-      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200">
-        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400">
-          <p class="font-semibold text-indigo-900 text-lg">Scoring Criteria</p>
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">Excellent</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            4-5 points
+          </span>
         </div>
         <div class="p-4 bg-white">
-          <p class="mb-2 text-gray-800">${fallbackText}</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Strong, detailed response demonstrating technical skills and core competencies</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Clear understanding of best practices and ability to apply knowledge</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Provides specific, relevant examples from experience</p>
+        </div>
+      </div>
+      
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">Good</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            3-4 points
+          </span>
+        </div>
+        <div class="p-4 bg-white">
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Adequate response demonstrating some technical skills and core competencies</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Some real-world examples, but lacks specificity or depth</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Shows good understanding of concepts</p>
+        </div>
+      </div>
+      
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">Average</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            2-3 points
+          </span>
+        </div>
+        <div class="p-4 bg-white">
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Limited response that may touch on technical skills or core competencies</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Lacks real-world examples or clear understanding of best practices</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Basic understanding of concepts</p>
+        </div>
+      </div>
+      
+      <div class="mb-4 overflow-hidden rounded-lg shadow-sm border border-indigo-200 transition-all hover:shadow-md hover:translate-y-[-2px]">
+        <div class="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+          <p class="font-semibold text-indigo-900 text-lg">Poor</p>
+          <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            1-2 points
+          </span>
+        </div>
+        <div class="p-4 bg-white">
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Inadequate or off-topic response that does not demonstrate technical skills</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Lacks understanding of best practices or ability to apply knowledge</p>
+          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Unable to provide relevant examples</p>
         </div>
       </div>
     </div>`;
