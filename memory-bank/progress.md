@@ -1065,3 +1065,13 @@ These improvements make the PDF output more professional and better suited for p
     - Improved developer experience with clear documentation
     - Prevented potential authentication errors caused by mismatched ports
   - **Location**: `nextjs-app/package.json`, `nextjs-app/README.md`, `nextjs-app/.env.example`
+
+## 2024-03-05: Vercel Deployment Fix
+
+- Fixed API route handler signatures in the contact submissions admin routes to be compatible with Next.js 15.2.0
+- Successfully deployed the application to Vercel after resolving the type error in the route handlers
+- Updated the following files:
+  - `src/app/api/admin/contact-submissions/[id]/delete/route.ts`
+  - `src/app/api/admin/contact-submissions/[id]/update-status/route.ts`
+  - `src/app/api/admin/contact-submissions/[id]/update-notes/route.ts`
+  - `src/app/api/admin/contact-submissions/[id]/route.ts`

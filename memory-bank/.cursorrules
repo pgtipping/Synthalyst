@@ -2450,7 +2450,7 @@ In Next.js 15, there are important type requirements for route handlers and page
    ```typescript
    export async function GET(
      req: Request,
-     { params }: { params: Promise<{ id: string }> }
+     { params }: { params: { id: string } }
    ) {
      const { id } = await params;
      // Use id here
@@ -2859,5 +2859,31 @@ For more details, see the documentation in `nextjs-app/docs/client-component-wra
     )}
   </TabsTrigger>
   ```
+
+// ... existing code ...
+
+## 2024-03-05: Next.js 15.2.0 API Route Handler Signatures
+
+When working with API routes in Next.js 15.2.0, ensure that the route handler functions use the correct parameter signature:
+
+```typescript
+// Correct signature for Next.js 15.2.0
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  // ...
+}
+
+// Incorrect signature (will cause build errors)
+export async function GET(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  // ...
+}
+```
+
+This applies to all HTTP methods (GET, POST, PUT, DELETE, etc.) in API route handlers. Using the incorrect signature will result in a type error during build: "Type '{ params: { id: string; }; }' is not a valid type for the function's second argument."
 
 // ... existing code ...

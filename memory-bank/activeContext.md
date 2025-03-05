@@ -277,3 +277,30 @@ We've implemented a more user-friendly authentication approach that allows users
 - Fixed the GET handler in the contact submissions detail route
 - Fixed the POST handlers in the update-notes and update-status routes
 - Resolved the Vercel deployment error: "Type '{ params: { id: string; }; }' is not a valid type for the function's second argument"
+
+## 2024-03-05: Fixed Vercel Build Error
+
+Fixed a critical build error that was preventing successful deployment on Vercel. The issue was related to the API route handler signatures in Next.js 15.2.0. The following files were updated to match the new signature requirements:
+
+- `src/app/api/admin/contact-submissions/[id]/delete/route.ts`
+- `src/app/api/admin/contact-submissions/[id]/update-status/route.ts`
+- `src/app/api/admin/contact-submissions/[id]/update-notes/route.ts`
+- `src/app/api/admin/contact-submissions/[id]/route.ts`
+
+The fix involved changing the context parameter from:
+
+```typescript
+context: {
+  params: {
+    id: string;
+  }
+}
+```
+
+to:
+
+```typescript
+{ params }: { params: { id: string } }
+```
+
+This change aligns with Next.js 15.2.0's API route handler signature requirements.
