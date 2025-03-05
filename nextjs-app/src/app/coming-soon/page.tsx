@@ -2,12 +2,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Clock, Bell } from "lucide-react";
 
-export default function ComingSoonPage({
+export default async function ComingSoonPage({
   searchParams,
 }: {
-  searchParams: { tool?: string; path?: string };
+  searchParams:
+    | Promise<{ tool?: string; path?: string }>
+    | { tool?: string; path?: string };
 }) {
-  const toolName = searchParams.tool || "This tool";
+  // Resolve searchParams if it's a Promise
+  const resolvedParams =
+    searchParams instanceof Promise ? await searchParams : searchParams;
+  const toolName = resolvedParams.tool || "This tool";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
