@@ -653,15 +653,6 @@ export default function JDForm({
   }, [session]);
 
   const onSubmit = async (values: FormValues) => {
-    if (!session?.user?.email) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create job descriptions.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       const response = await fetch("/api/jd-developer/generate", {
@@ -915,8 +906,9 @@ export default function JDForm({
     // Check if user is authenticated
     if (!session?.user?.email) {
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to save job descriptions.",
+        title: "Sign in required",
+        description:
+          "You need to sign in to save job descriptions. You can continue using the generator without signing in.",
         action: (
           <Button
             variant="outline"
