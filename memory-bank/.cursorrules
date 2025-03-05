@@ -2738,7 +2738,7 @@ For more details, see the documentation in `nextjs-app/docs/client-component-wra
 
 // ... existing code ...
 
-## LLM Quality Control Patterns - 2024-03-10
+## LLM Quality Control Patterns - 2025-03-05
 
 - When implementing LLM-based features, always include comprehensive quality control measures:
 
@@ -2810,7 +2810,7 @@ For more details, see the documentation in `nextjs-app/docs/client-component-wra
   };
   ```
 
-## Responsive Design Patterns - 2024-03-10
+## Responsive Design Patterns - 2025-03-05
 
 - When implementing UI components, use these responsive design patterns:
 
