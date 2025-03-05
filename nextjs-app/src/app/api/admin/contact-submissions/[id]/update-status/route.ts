@@ -12,7 +12,7 @@ const statusUpdateSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     // Check if user is authenticated
@@ -21,8 +21,17 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check if the user's email is the admin email
+    const userEmail = session.user.email;
+    if (userEmail !== "pgtipping1@gmail.com") {
+      return NextResponse.json(
+        { error: "Forbidden: Admin access required" },
+        { status: 403 }
+      );
+    }
+
     // Get the submission ID from the URL params
-    const { id } = params;
+    const { id } = context.params;
 
     // Parse the form data
     const formData = await request.formData();

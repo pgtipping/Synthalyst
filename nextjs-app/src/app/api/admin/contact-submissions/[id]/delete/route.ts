@@ -6,7 +6,7 @@ import { logger } from "@/lib/logger";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     // Check if user is authenticated
@@ -25,7 +25,7 @@ export async function DELETE(
     }
 
     // Get the submission ID from the URL params
-    const { id } = params;
+    const { id } = context.params;
 
     try {
       // Delete the submission
