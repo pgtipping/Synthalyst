@@ -467,38 +467,30 @@ IMPORTANT:
           const standardLevels = [
             {
               level: "Excellent",
-              points: "4-5",
+              points: "4",
               defaultCriteria: [
-                "Strong, detailed response demonstrating technical skills",
-                "Clear understanding of best practices",
-                "Provides specific, relevant examples",
+                "Strong examples, clear communication, organized and detail-oriented",
               ],
             },
             {
               level: "Good",
-              points: "3-4",
+              points: "3",
               defaultCriteria: [
-                "Adequate response with some technical skills",
-                "Some real-world examples but lacks depth",
-                "Good understanding of concepts",
+                "Good examples, effective communication, mostly organized",
               ],
             },
             {
               level: "Average",
-              points: "2-3",
+              points: "2",
               defaultCriteria: [
-                "Limited response with basic skills",
-                "Lacks specific examples",
-                "Basic understanding of concepts",
+                "Basic examples, adequate communication, somewhat organized",
               ],
             },
             {
               level: "Poor",
-              points: "1-2",
+              points: "1",
               defaultCriteria: [
-                "Inadequate response lacking technical skills",
-                "No relevant examples",
-                "Poor understanding of concepts",
+                "Weak or no examples, poor communication, disorganized",
               ],
             },
           ];
@@ -521,7 +513,7 @@ IMPORTANT:
             }
           });
 
-          // Sort levels in the standard order
+          // Sort levels in the standard order (Excellent -> Good -> Average -> Poor)
           levels.sort((a, b) => {
             const aIndex = standardLevels.findIndex((sl) =>
               a.level.toLowerCase().includes(sl.level.toLowerCase())
@@ -533,68 +525,62 @@ IMPORTANT:
           });
         }
 
-        // Ensure consistent number of criteria across all levels
-        const maxCriteria = Math.max(
-          ...levels.map((level) => level.criteria.length)
-        );
-        levels.forEach((level) => {
-          // Get the standard level that matches this level
-          const standardLevel = [
-            {
-              level: "excellent",
-              defaultCriteria: [
-                "Strong, detailed response demonstrating technical skills",
-                "Clear understanding of best practices",
-                "Provides specific, relevant examples",
-              ],
-            },
-            {
-              level: "good",
-              defaultCriteria: [
-                "Adequate response with some technical skills",
-                "Some real-world examples but lacks depth",
-                "Good understanding of concepts",
-              ],
-            },
-            {
-              level: "average",
-              defaultCriteria: [
-                "Limited response with basic skills",
-                "Lacks specific examples",
-                "Basic understanding of concepts",
-              ],
-            },
-            {
-              level: "poor",
-              defaultCriteria: [
-                "Inadequate response lacking technical skills",
-                "No relevant examples",
-                "Poor understanding of concepts",
-              ],
-            },
-          ].find((sl) => level.level.toLowerCase().includes(sl.level));
+        // Remove the previous code that ensured consistent criteria
+        // Instead, implement the cascading criteria system
 
-          // If we need to add more criteria
-          if (level.criteria.length < maxCriteria && standardLevel) {
-            // Add criteria from the standard level that aren't already included
-            for (let i = level.criteria.length; i < maxCriteria; i++) {
-              if (
-                standardLevel.defaultCriteria[
-                  i % standardLevel.defaultCriteria.length
-                ]
-              ) {
-                level.criteria.push(
-                  standardLevel.defaultCriteria[
-                    i % standardLevel.defaultCriteria.length
-                  ]
-                );
+        // First, make sure we have exactly one criterion per level
+        levels.forEach((level) => {
+          // If a level has multiple criteria, keep only the first one
+          if (level.criteria.length > 1) {
+            level.criteria = [level.criteria[0]];
+          }
+          // If a level has no criteria, add a default one
+          else if (level.criteria.length === 0) {
+            const defaultCriteria = {
+              excellent:
+                "Strong examples, clear communication, organized and detail-oriented",
+              good: "Good examples, effective communication, mostly organized",
+              average:
+                "Basic examples, adequate communication, somewhat organized",
+              poor: "Weak or no examples, poor communication, disorganized",
+            };
+
+            // Find the matching default criterion
+            for (const [key, value] of Object.entries(defaultCriteria)) {
+              if (level.level.toLowerCase().includes(key)) {
+                level.criteria = [value];
+                break;
               }
+            }
+
+            // If no match found, use a generic criterion
+            if (level.criteria.length === 0) {
+              level.criteria = ["Meets expectations for this level"];
             }
           }
         });
 
+        // Now implement the cascading system
+        // We'll create a new array of levels with the cascading criteria
+        const cascadingLevels = [];
+
+        for (let i = 0; i < levels.length; i++) {
+          const cascadingCriteria = [];
+
+          // Add criteria from this level and all levels below it
+          for (let j = i; j < levels.length; j++) {
+            cascadingCriteria.push(levels[j].criteria[0]);
+          }
+
+          cascadingLevels.push({
+            level: levels[i].level,
+            points: levels[i].points,
+            criteria: cascadingCriteria,
+          });
+        }
+
         // Generate professional-looking HTML for the scoring rubric
-        result.scoringRubric = generateProfessionalRubricHtml(levels);
+        result.scoringRubric = generateProfessionalRubricHtml(cascadingLevels);
       } else {
         // If no rubric was found, use the fallback
         result.scoringRubric = getFallbackQuestions(
