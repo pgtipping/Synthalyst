@@ -269,3 +269,11 @@ We've implemented a more user-friendly authentication approach that allows users
 - Extended the NextAuth session type to include the user role
 - Updated the JWT and session callbacks to include the user role
 - Fixed type errors in the admin layout component
+
+### Fixed Next.js 15 Type Errors in Admin API Routes
+
+- Updated all admin API route handlers to use the correct parameter structure for Next.js 15
+- Fixed the DELETE handler in the contact submissions delete route
+- Fixed the GET handler in the contact submissions detail route
+- Fixed the POST handlers in the update-notes and update-status routes
+- Resolved the Vercel deployment error: "Type '{ params: { id: string; }; }' is not a valid type for the function's second argument"

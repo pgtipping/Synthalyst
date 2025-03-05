@@ -86,9 +86,17 @@
 - Updated the JWT and session callbacks to include the user role
 - Fixed type errors in the admin layout component
 
+### Fixed Next.js 15 Type Errors in Admin API Routes
+
+- Updated all admin API route handlers to use the correct parameter structure for Next.js 15
+- Fixed the DELETE handler in the contact submissions delete route
+- Fixed the GET handler in the contact submissions detail route
+- Fixed the POST handlers in the update-notes and update-status routes
+- Resolved the Vercel deployment error: "Type '{ params: { id: string; }; }' is not a valid type for the function's second argument"
+
 ### Build Status
 
-- Successfully fixed the type errors in the admin layout
+- Successfully fixed the type errors in the admin layout and API routes
 - Vercel deployment should now complete successfully
 
 # Progress Report - 2024-03-09
