@@ -12,6 +12,7 @@ interface ExtendedUser {
   name: string | null;
   image?: string | null;
   accessToken?: string;
+  role?: string;
 }
 
 export const authOptions: AuthOptions = {
@@ -152,6 +153,17 @@ export const authOptions: AuthOptions = {
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image;
+
+        // Add role to token
+        if (user.email) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { role: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+          }
+        }
       }
       return token;
     },
@@ -164,6 +176,11 @@ export const authOptions: AuthOptions = {
         if (token.accessToken) {
           (session.user as ExtendedUser).accessToken =
             token.accessToken as string;
+        }
+
+        // Add role to session from token
+        if (token.role) {
+          (session.user as ExtendedUser).role = token.role as string;
         }
       }
       return session;
