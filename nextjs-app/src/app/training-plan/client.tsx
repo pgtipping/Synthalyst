@@ -1,6 +1,8 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlanForm from "./components/PlanForm";
 import PlanList from "./components/PlanList";
@@ -8,6 +10,16 @@ import PlanList from "./components/PlanList";
 export default function TrainingPlanClient() {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get("tab") || "saved";
+  const { data: session } = useSession();
+  const [usageCount, setUsageCount] = useState(0);
+
+  // Load usage count from localStorage on component mount
+  useEffect(() => {
+    const storedCount = localStorage.getItem("trainingPlanUsageCount");
+    if (storedCount) {
+      setUsageCount(parseInt(storedCount, 10));
+    }
+  }, []);
 
   return (
     <div className="container py-8">
@@ -29,7 +41,14 @@ export default function TrainingPlanClient() {
         </TabsContent>
 
         <TabsContent value="create" className="space-y-6">
-          <PlanForm />
+          <PlanForm
+            session={session}
+            usageCount={usageCount}
+            setUsageCount={(count: number) => {
+              setUsageCount(count);
+              localStorage.setItem("trainingPlanUsageCount", count.toString());
+            }}
+          />
         </TabsContent>
       </Tabs>
     </div>
