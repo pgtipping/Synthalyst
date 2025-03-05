@@ -525,10 +525,7 @@ IMPORTANT:
           });
         }
 
-        // Remove the previous code that ensured consistent criteria
-        // Instead, implement the cascading criteria system
-
-        // First, make sure we have exactly one criterion per level
+        // Ensure each level has exactly one criterion
         levels.forEach((level) => {
           // If a level has multiple criteria, keep only the first one
           if (level.criteria.length > 1) {
@@ -560,27 +557,9 @@ IMPORTANT:
           }
         });
 
-        // Now implement the cascading system
-        // We'll create a new array of levels with the cascading criteria
-        const cascadingLevels = [];
-
-        for (let i = 0; i < levels.length; i++) {
-          const cascadingCriteria = [];
-
-          // Add criteria from this level and all levels below it
-          for (let j = i; j < levels.length; j++) {
-            cascadingCriteria.push(levels[j].criteria[0]);
-          }
-
-          cascadingLevels.push({
-            level: levels[i].level,
-            points: levels[i].points,
-            criteria: cascadingCriteria,
-          });
-        }
-
+        // Remove the cascading system and use the levels directly
         // Generate professional-looking HTML for the scoring rubric
-        result.scoringRubric = generateProfessionalRubricHtml(cascadingLevels);
+        result.scoringRubric = generateProfessionalRubricHtml(levels);
       } else {
         // If no rubric was found, use the fallback
         result.scoringRubric = getFallbackQuestions(
