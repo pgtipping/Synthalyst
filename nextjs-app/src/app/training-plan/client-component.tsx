@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlanForm from "./components/PlanForm";
 import SavedPlans from "./components/SavedPlans";
@@ -21,11 +22,19 @@ export default function TrainingPlanClient() {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get("tab") || "create";
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const { data: session } = useSession();
+  const [usageCount, setUsageCount] = useState(0);
 
   // Update the active tab if the URL changes
   useEffect(() => {
     const tab = searchParams.get("tab") || "create";
     setActiveTab(tab);
+
+    // Load usage count from localStorage
+    const storedCount = localStorage.getItem("trainingPlanUsageCount");
+    if (storedCount) {
+      setUsageCount(parseInt(storedCount, 10));
+    }
   }, [searchParams]);
 
   return (
@@ -96,7 +105,17 @@ export default function TrainingPlanClient() {
             <TabsTrigger value="saved">Saved Plans</TabsTrigger>
           </TabsList>
           <TabsContent value="create">
-            <PlanForm />
+            <PlanForm
+              session={session}
+              usageCount={usageCount}
+              setUsageCount={(count: number) => {
+                setUsageCount(count);
+                localStorage.setItem(
+                  "trainingPlanUsageCount",
+                  count.toString()
+                );
+              }}
+            />
           </TabsContent>
           <TabsContent value="saved">
             <SavedPlans />
