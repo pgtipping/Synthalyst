@@ -700,3 +700,39 @@ We've implemented a Coming Soon page for tools that aren't ready for production:
      - Maintain a professional appearance
      - Build anticipation for upcoming tools
    - Location: `nextjs-app/src/app/coming-soon/page.tsx`, `nextjs-app/src/app/coming-soon/middleware.ts`
+
+## Strategic Authentication Implementation (2024-03-05)
+
+We've implemented a more user-friendly authentication approach that allows users to experience the app's functionality before requiring them to sign in. This strategic authentication is triggered at specific action points rather than blocking entire routes:
+
+1. **Authentication Triggers:**
+
+   - After 3 uses of the Interview Questions Generator
+   - When saving job descriptions or templates in JD Developer
+   - When saving training plans
+   - When accessing saved content (e.g., saved training plans)
+
+2. **Implementation Details:**
+
+   - Removed route-based authentication from middleware
+   - Added client-side usage counters stored in localStorage
+   - Implemented authentication checks at specific action points
+   - Added user-friendly authentication prompts with direct sign-in buttons
+
+3. **Benefits:**
+
+   - Improved user experience by allowing exploration before authentication
+   - Increased potential for user conversion by demonstrating value first
+   - Maintained security for sensitive operations and data
+   - Better alignment with modern web application authentication patterns
+
+4. **Files Modified:**
+   - `nextjs-app/src/middleware.ts`
+   - `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
+   - `nextjs-app/src/app/jd-developer/components/JDForm.tsx`
+   - `nextjs-app/src/app/training-plan/components/TrainingPlanClient.tsx`
+   - `nextjs-app/src/app/training-plan/components/PlanForm.tsx`
+
+## Coming Soon Page Implementation (2024-03-05)
+
+// ... existing content ...
