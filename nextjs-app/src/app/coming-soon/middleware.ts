@@ -1,4 +1,3 @@
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -36,8 +35,7 @@ const ALWAYS_ACCESSIBLE_PATHS = [
   "/coming-soon",
 ];
 
-// Middleware function to handle Coming Soon redirects
-function handleComingSoonRedirects(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if this is a development environment
@@ -48,7 +46,7 @@ function handleComingSoonRedirects(request: NextRequest) {
 
   // Always allow access in development mode or if dev parameter is present
   if (isDev || hasDevParam) {
-    return null; // Continue to next middleware
+    return NextResponse.next();
   }
 
   // Check if the path is for a tool that's not production ready
@@ -90,49 +88,24 @@ function handleComingSoonRedirects(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return null; // Continue to next middleware
-}
-
-// Main middleware function
-export function middleware(request: NextRequest) {
-  // First, check if we need to redirect to Coming Soon
-  const comingSoonRedirect = handleComingSoonRedirects(request);
-  if (comingSoonRedirect) {
-    return comingSoonRedirect;
-  }
-
-  // Continue with normal processing
   return NextResponse.next();
 }
 
-// Protect routes that require authentication
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-
-    // If no token exists, redirect to login
-    if (!token) {
-      return NextResponse.redirect(new URL("/auth/signin", req.url));
-    }
-
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: "/auth/signin",
-    },
-  }
-);
-
-// Configure which routes to protect
 export const config = {
   matcher: [
-    "/jd-developer/:path*",
+    // Match all tool paths
     "/2do/:path*",
-    "/training-plan/:path*",
-    "/api/protected/:path*",
+    "/learning-content/:path*",
+    "/knowledge-gpt/:path*",
+    "/competency-manager/:path*",
+    "/model-comparison/:path*",
+    "/the-synth/:path*",
+    // Also match the root paths
+    "/2do",
+    "/learning-content",
+    "/knowledge-gpt",
+    "/competency-manager",
+    "/model-comparison",
+    "/the-synth",
   ],
 };
