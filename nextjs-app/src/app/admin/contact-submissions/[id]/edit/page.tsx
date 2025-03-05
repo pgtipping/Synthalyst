@@ -1,81 +1,55 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save } from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
+import EditNotesForm from "./edit-notes-form";
 
-interface EditNotesPageProps {
+export const metadata: Metadata = {
+  title: "Edit Notes | Admin Dashboard",
+  description: "Edit notes for a contact submission",
+};
+
+// Define the ContactSubmission interface
+interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  company: string | null;
+  phone: string | null;
+  inquiryType: string;
+  message: string;
+  status: string;
+  notes: string | null;
+  assignedTo: string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+interface PageProps {
   params: {
     id: string;
   };
 }
 
-export default function EditNotesPage({ params }: EditNotesPageProps) {
-  const router = useRouter();
-  const [notes, setNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+export default async function EditNotesPage(props: PageProps) {
+  const { params } = props;
 
-  // Fetch existing notes when the component mounts
-  useEffect(() => {
-    const fetchSubmission = async () => {
-      try {
-        const response = await fetch(
-          `/api/admin/contact-submissions/${params.id}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setNotes(data.notes || "");
-        } else {
-          toast.error("Failed to fetch submission details");
-        }
-      } catch (error) {
-        console.error("Error fetching submission:", error);
-        toast.error("Failed to fetch submission details");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Fetch the contact submission from the database
+  const submissions = (await prisma.$queryRaw`
+    SELECT * FROM "ContactSubmission" WHERE id = ${params.id}
+  `) as ContactSubmission[];
 
-    fetchSubmission();
-  }, [params.id]);
+  const submission = submissions[0];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(
-        `/api/admin/contact-submissions/${params.id}/update-notes`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ notes }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update notes");
-      }
-
-      toast.success("Notes updated successfully");
-      router.push(`/admin/contact-submissions/${params.id}`);
-      router.refresh();
-    } catch (error) {
-      toast.error("Failed to update notes");
-      console.error("Error updating notes:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // If submission not found, return 404
+  if (!submission) {
+    notFound();
+  }
 
   return (
     <div className="space-y-6">
@@ -108,32 +82,10 @@ export default function EditNotesPage({ params }: EditNotesPageProps) {
           <CardTitle>Admin Notes</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add your notes about this submission here..."
-                className="min-h-[200px]"
-              />
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    "Saving..."
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Notes
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          )}
+          <EditNotesForm
+            submissionId={params.id}
+            initialNotes={submission.notes || ""}
+          />
         </CardContent>
       </Card>
     </div>
