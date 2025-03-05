@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
+import { sendContactReply } from "@/lib/email";
 
 // Schema for email reply
 const replySchema = z.object({
@@ -14,7 +15,7 @@ const replySchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check if user is authenticated
@@ -33,7 +34,7 @@ export async function POST(
     }
 
     // Get the submission ID from the URL params
-    const { id } = await params;
+    const { id } = params;
 
     // Parse the request body
     const body = await request.json();
@@ -55,10 +56,6 @@ export async function POST(
 
     // Send the email
     try {
-      // TODO: Replace this with your actual email sending implementation
-      // For example, using SendGrid, Nodemailer, or another email service
-
-      // For now, we'll log the email details and simulate sending
       logger.info("Sending reply email", {
         to: validatedData.recipientEmail,
         subject: validatedData.subject,
@@ -66,20 +63,20 @@ export async function POST(
         submissionId: id,
       });
 
-      // Simulate email sending delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Format the message as HTML
+      const htmlMessage = validatedData.message.replace(/\n/g, "<br>");
 
-      // In a real implementation, you would use code like this:
-      /*
-      const emailService = new EmailService();
-      await emailService.sendEmail({
-        to: validatedData.recipientEmail,
-        from: "support@synthalyst.com",
-        subject: validatedData.subject,
-        text: validatedData.message,
-        html: validatedData.message.replace(/\n/g, "<br>"),
-      });
-      */
+      // Send the email using SendGrid
+      const emailSent = await sendContactReply(
+        validatedData.recipientEmail,
+        validatedData.subject,
+        htmlMessage,
+        "Synthalyst Support"
+      );
+
+      if (!emailSent) {
+        throw new Error("Failed to send email");
+      }
 
       // Record the reply in the database
       await prisma.contactSubmissionReply.create({
