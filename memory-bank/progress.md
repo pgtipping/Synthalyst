@@ -2,6 +2,19 @@
 
 ## Recent Updates (Last 24 Hours)
 
+- ✅ Fixed Next.js 15 Type Error in Coming Soon Page (2025-03-05)
+
+  - Resolved a TypeScript error that was causing Vercel deployments to fail
+  - The error was related to Next.js 15's new requirement for searchParams to be a Promise type
+  - Implemented the following changes:
+    - Updated the Coming Soon page component to be async
+    - Changed the searchParams type to accept both Promise and plain object
+    - Added logic to resolve the searchParams if it's a Promise
+  - This fix ensures compatibility with Next.js 15's new requirements for page props
+  - The deployment should now complete successfully without TypeScript errors
+  - Updated vercelLogs.md to document the issue and solution for future reference
+  - Location: `nextjs-app/src/app/coming-soon/page.tsx`
+
 - ✅ Implemented Coming Soon Page for Non-Production Tools (2025-03-05)
 
   - Created a Coming Soon page that displays when users try to access tools that aren't ready for production

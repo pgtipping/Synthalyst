@@ -619,6 +619,31 @@ We've just fixed a TypeScript error in the Vercel deployment related to the reac
 
 ## Current Focus (2025-03-05)
 
+We've just fixed a critical Vercel deployment error related to Next.js 15 type compatibility:
+
+1. ✅ FIXED: Next.js 15 Type Error in Coming Soon Page (2025-03-05):
+
+   - Resolved a TypeScript error that was causing Vercel deployments to fail
+   - The error was: "Type '{ searchParams: { tool?: string | undefined; path?: string | undefined; }; }' does not satisfy the constraint 'PageProps'"
+   - Root cause: Next.js 15 requires `searchParams` to be a Promise type, but our Coming Soon page was expecting a plain object
+   - Solution implemented:
+     - Updated the Coming Soon page component to be async
+     - Changed the searchParams type to accept both Promise and plain object
+     - Added logic to resolve the searchParams if it's a Promise
+   - This fix ensures compatibility with Next.js 15's new requirements for page props
+   - The deployment should now complete successfully
+   - Location: `nextjs-app/src/app/coming-soon/page.tsx`
+
+2. ✅ COMMITTED: Changes pushed to main branch (2025-03-05):
+   - Committed with message: "Fix Next.js 15 type error in Coming Soon page"
+   - All changes successfully pushed to the main branch
+   - Updated vercelLogs.md to document the issue and solution
+   - This ensures the fix is properly documented for future reference
+
+# Active Context (2025-03-05)
+
+## Current Focus (2025-03-05)
+
 We've updated the Coming Soon page implementation to improve security and revert unrelated changes:
 
 1. ✅ UPDATED: Coming Soon Page Security (2025-03-05):
