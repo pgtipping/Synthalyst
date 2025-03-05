@@ -15,7 +15,7 @@ const replySchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     // Check if user is authenticated
@@ -34,7 +34,7 @@ export async function POST(
     }
 
     // Get the submission ID from the URL params
-    const { id } = params;
+    const { id } = context.params;
 
     // Parse the request body
     const body = await request.json();
