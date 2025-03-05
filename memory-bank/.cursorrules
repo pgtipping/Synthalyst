@@ -2685,3 +2685,55 @@ For more details, see the documentation in `nextjs-app/docs/client-component-wra
 - Implementation in `nextjs-app/src/app/api/training-plan/enhanced-generate/route.ts`
 
 // ... existing code ...
+
+## Memory Bank Update Pattern - 2025-03-04
+
+### Date Determination Pattern - 2025-03-04
+
+- ALWAYS programmatically determine today's date when updating memory bank files
+- Never use hardcoded dates in memory bank entries
+- Use the following pattern to get the current date in YYYY-MM-DD format:
+  ```bash
+  # In terminal
+  date +"%Y-%m-%d"
+  ```
+  ```javascript
+  // In JavaScript
+  const today = new Date().toISOString().split("T")[0];
+  ```
+  ```python
+  # In Python
+  from datetime import date
+  today = date.today().strftime("%Y-%m-%d")
+  ```
+- Apply the current date to all new entries in memory bank files:
+  - Use the date for section headings: `## Current Focus (YYYY-MM-DD)`
+  - Use the date for entry timestamps: `- ✅ UPDATED: Feature X (YYYY-MM-DD)`
+  - Use the date for file headings: `# Progress Report - YYYY-MM-DD`
+- This ensures accurate documentation of when changes were actually made
+- Prevents confusion from outdated or incorrect timestamps
+- Maintains a clear chronological history of project development
+- Example implementation in memory bank update workflow:
+
+  ```bash
+  # 1. Get today's date
+  TODAY=$(date +"%Y-%m-%d")
+
+  # 2. Use the date in your edits
+  # For example, in activeContext.md:
+  # # Active Context ($TODAY)
+  # ## Current Focus ($TODAY)
+  # - ✅ UPDATED: Feature X ($TODAY)
+
+  # 3. Commit the changes with the date
+  git add memory-bank/*.md
+  git commit -m "Update memory bank files with current date ($TODAY)"
+  git push origin main
+  ```
+
+- When updating memory bank files through AI tools, always instruct the AI to:
+  1. Programmatically determine today's date first
+  2. Use that date consistently throughout all updates
+  3. Never rely on dates mentioned in previous entries
+
+// ... existing code ...
