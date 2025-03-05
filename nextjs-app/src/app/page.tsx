@@ -316,7 +316,7 @@ export default function Home() {
       </section>
 
       {/* Features Section - Reorganized by AI Capability */}
-      <section className="py-20 px-4 bg-secondary/30">
+      <section className="py-20 px-4 bg-[#f5f5f7]">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-6">
             Our AI Capabilities
