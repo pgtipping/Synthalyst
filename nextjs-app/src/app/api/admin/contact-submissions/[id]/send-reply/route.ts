@@ -78,26 +78,38 @@ export async function POST(
         throw new Error("Failed to send email");
       }
 
-      // Record the reply in the database
-      await prisma.contactSubmissionReply.create({
-        data: {
-          submissionId: id,
-          subject: validatedData.subject,
-          message: validatedData.message,
-          sentBy: session.user.id || "unknown",
-          sentAt: new Date(),
-        },
-      });
+      // Use a transaction to ensure both operations succeed or fail together
+      await prisma.$transaction([
+        // Insert the reply record
+        prisma.$executeRaw`
+          INSERT INTO "ContactSubmissionReply" (
+            "id", 
+            "submissionId", 
+            "subject", 
+            "message", 
+            "sentBy", 
+            "sentAt"
+          ) 
+          VALUES (
+            ${crypto.randomUUID()}, 
+            ${id}, 
+            ${validatedData.subject}, 
+            ${validatedData.message}, 
+            ${session.user.id || "unknown"}, 
+            NOW()
+          )
+        `,
 
-      // Update the submission status and last replied date
-      await prisma.contactSubmission.update({
-        where: { id },
-        data: {
-          status: "in-progress",
-          updatedAt: new Date(),
-          lastRepliedAt: new Date(),
-        },
-      });
+        // Update the submission status
+        prisma.$executeRaw`
+          UPDATE "ContactSubmission"
+          SET 
+            "status" = 'in-progress',
+            "updatedAt" = NOW(),
+            "lastRepliedAt" = NOW()
+          WHERE "id" = ${id}
+        `,
+      ]);
     } catch (emailError) {
       logger.error("Failed to send reply email", emailError);
       return NextResponse.json(
