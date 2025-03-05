@@ -55,13 +55,8 @@ const generateSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // Get session but don't require authentication for generating job descriptions
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
 
     const body = await request.json();
     const validatedData = generateSchema.parse(body);
@@ -69,7 +64,7 @@ export async function POST(request: Request) {
     // Generate enhanced job description using LLM
     const enhancedDescription = await generateJobDescription({
       ...validatedData,
-      userEmail: session.user.email,
+      userEmail: session?.user?.email || "anonymous@user.com", // Provide a default email for anonymous users
       // Ensure arrays are always provided
       requirements: {
         required: validatedData.requirements.required || [],
