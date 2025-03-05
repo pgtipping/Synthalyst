@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next/types";
 import { prisma } from "@/lib/prisma";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";

@@ -10,6 +10,10 @@ alwaysApply: true
 
 - /nextjs-app
 
+## git directory
+
+- root folder: /synthalyst
+
 ## project guides
 
 - /guides
@@ -19,3 +23,5 @@ alwaysApply: true
 - DO NOT install packages in root folder
 - Always check folder before installing any package
 - focus ALL development in development folder (/nextjs-app)
+- stage and commit files from the root directory
+- ALWAYS stage files with "git add ."
