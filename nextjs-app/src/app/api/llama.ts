@@ -1,12 +1,11 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { Groq } from "groq-sdk";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextRequest) {
   try {
-    const { prompt } = req.body;
+    const body = await req.json();
+    const { prompt } = body;
     if (typeof prompt !== "string") {
       throw new Error("Prompt must be a string");
     }
@@ -20,11 +19,14 @@ export default async function handler(
       model: "mixtral-8x7b-32768",
     });
 
-    res
-      .status(200)
-      .json({ completion: completion.choices[0]?.message?.content || "" });
+    return NextResponse.json({
+      completion: completion.choices[0]?.message?.content || "",
+    });
   } catch (error) {
     console.error("Error generating completion:", error);
-    res.status(500).json({ error: "Failed to generate completion" });
+    return NextResponse.json(
+      { error: "Failed to generate completion" },
+      { status: 500 }
+    );
   }
 }
