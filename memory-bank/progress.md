@@ -76,7 +76,31 @@
     - Prevented potential authentication errors caused by mismatched ports
   - **Location**: `nextjs-app/package.json`, `nextjs-app/README.md`, `nextjs-app/.env.example`
 
-## 2025-03-05 Updates
+## 2024-03-05: Next.js 15.2.0 Compatibility Fixes
+
+- Fixed API route handler params type to use `Promise<{ id: string }>` in all dynamic routes
+- Created custom type definition for Next.js Metadata to resolve import errors
+- Updated NextApiRequest/NextApiResponse imports to use NextRequest/NextResponse from next/server
+- Successfully deployed the application to Vercel after resolving all type errors
+- Documented the changes in memory bank for future reference
+
+### Key Achievements
+
+- **Resolved Critical Build Errors**: Fixed multiple type errors that were preventing successful deployment
+- **Maintained Backward Compatibility**: Used type definitions to avoid changing existing import statements
+- **Modernized API Handlers**: Updated API handlers to use App Router patterns
+- **Improved Type Safety**: Enhanced type definitions with more specific types
+- **Documented Solutions**: Added detailed documentation of the fixes for future reference
+
+### Technical Details
+
+- **API Route Handler Params**: In Next.js 15.2.0, params in dynamic routes are now asynchronous and must be typed as a Promise
+- **Metadata Type**: The Metadata type is now imported from "next/types" instead of "next"
+- **API Request/Response Types**: NextApiRequest/NextApiResponse are replaced by NextRequest/NextResponse from next/server
+- **Request Body Handling**: Changed from direct access (req.body) to async parsing (await req.json())
+- **Response Handling**: Changed from res.status().json() to return NextResponse.json()
+
+## 2024-03-05 Updates
 
 ### Fixed Admin Layout and Authentication
 

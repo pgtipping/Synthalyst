@@ -2887,3 +2887,90 @@ export async function GET(
 This applies to all HTTP methods (GET, POST, PUT, DELETE, etc.) in API route handlers. Using the incorrect signature will result in a type error during build: "Type '{ params: { id: string; }; }' is not a valid type for the function's second argument."
 
 // ... existing code ...
+
+## Next.js 15.2.0 Compatibility Patterns - 2024-03-05
+
+### API Route Handler Params Pattern - 2024-03-05
+
+- In Next.js 15.2.0, params in dynamic routes are asynchronous and must be typed as a Promise
+- Always use this pattern for dynamic route handlers:
+
+```typescript
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Get the params by awaiting them
+  const { id } = await params;
+
+  // Use the params
+  // ...
+}
+```
+
+- This applies to all HTTP methods (GET, POST, PUT, DELETE, etc.)
+- Always await the params before accessing them
+- This pattern is required for successful builds in Next.js 15.2.0
+
+### Metadata Type Pattern - 2024-03-05
+
+- For pages that use the Metadata type, use one of these approaches:
+
+1. **Custom Type Definition (Preferred)**:
+   - Create a type definition file in src/types
+   - Define the Metadata interface in the "next" module
+   - This allows keeping existing import statements
+
+```typescript
+// src/types/next-metadata.d.ts
+declare module "next" {
+  export interface Metadata {
+    title?: string | null;
+    description?: string | null;
+    // Other properties...
+  }
+}
+```
+
+2. **Import from next/types**:
+   - Update import statements to use next/types
+   - This requires changing all files that import Metadata
+
+```typescript
+import type { Metadata } from "next/types";
+```
+
+### API Request/Response Pattern - 2024-03-05
+
+- In Next.js 15.2.0, use NextRequest and NextResponse from next/server instead of NextApiRequest and NextApiResponse from next
+- Use this pattern for API handlers:
+
+```typescript
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
+export default async function handler(req: NextRequest) {
+  try {
+    // Parse the request body
+    const body = await req.json();
+
+    // Process the request
+    // ...
+
+    // Return the response
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    // Handle errors
+    return NextResponse.json({ error: "Error message" }, { status: 500 });
+  }
+}
+```
+
+- Key differences from the old pattern:
+  - Import from next/server instead of next
+  - Use NextRequest instead of NextApiRequest
+  - Use await req.json() instead of req.body
+  - Return NextResponse.json() instead of res.status().json()
+  - No separate response parameter (res)
+
+// ... existing code ...

@@ -304,3 +304,34 @@ to:
 ```
 
 This change aligns with Next.js 15.2.0's API route handler signature requirements.
+
+## 2024-03-05: Next.js 15.2.0 Compatibility Fixes
+
+We've successfully resolved several compatibility issues with Next.js 15.2.0 that were preventing successful deployment:
+
+1. **API Route Handler Params Type Fix**:
+
+   - Updated all dynamic API route handlers to use `Promise<{ id: string }>` for the params type
+   - Modified code to properly await params before accessing them
+   - This fixed the error: "Type '{ params: { id: string; }; }' is not a valid type for the function's second argument"
+   - Affected files:
+     - `src/app/api/admin/contact-submissions/[id]/delete/route.ts`
+     - `src/app/api/admin/contact-submissions/[id]/route.ts`
+     - `src/app/api/admin/contact-submissions/[id]/update-notes/route.ts`
+     - `src/app/api/admin/contact-submissions/[id]/update-status/route.ts`
+
+2. **Metadata Type Definition Fix**:
+
+   - Created a custom type definition file for Next.js Metadata
+   - This allowed us to keep existing import statements (`import { Metadata } from "next"`)
+   - Fixed the error: "Module 'next' has no exported member 'Metadata'"
+   - Added file: `src/types/next-metadata.d.ts`
+
+3. **NextApiRequest/NextApiResponse Import Fix**:
+   - Updated imports from "next" to "next/server" in API handlers
+   - Changed `NextApiRequest` to `NextRequest` and `NextApiResponse` to `NextResponse`
+   - Modified request handling to use App Router patterns (await req.json(), return NextResponse.json())
+   - Fixed the error: "Module 'next' has no exported member 'NextApiRequest'"
+   - Updated file: `src/app/api/llama.ts`
+
+These fixes ensure compatibility with Next.js 15.2.0 and allow successful deployment to Vercel.
