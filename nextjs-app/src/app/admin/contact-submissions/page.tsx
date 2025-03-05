@@ -1,21 +1,45 @@
-import type { Metadata } from "next/types";
+import { Metadata } from "next/types";
 import { prisma } from "@/lib/prisma";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export const metadata: Metadata = {
   title: "Contact Submissions | Admin Dashboard",
-  description: "Manage contact form submissions",
+  description: "View and manage contact form submissions",
 };
 
+// Define the ContactSubmission interface with the new fields
+interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  inquiryType: string;
+  status: string;
+  createdAt: Date | string;
+  lastRepliedAt: Date | string | null;
+  replyCount: number;
+}
+
 export default async function ContactSubmissionsPage() {
-  // Fetch contact submissions from the database
-  const submissions = await prisma.contactSubmission.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  // Fetch contact submissions from the database using raw SQL to include the new fields
+  const submissions = await prisma.$queryRaw<ContactSubmission[]>`
+    SELECT 
+      cs.id, 
+      cs.name, 
+      cs.email, 
+      cs.subject, 
+      cs."inquiryType", 
+      cs.status, 
+      cs."createdAt", 
+      cs."lastRepliedAt",
+      COUNT(csr.id) as "replyCount"
+    FROM "ContactSubmission" cs
+    LEFT JOIN "ContactSubmissionReply" csr ON cs.id = csr."submissionId"
+    GROUP BY cs.id
+    ORDER BY cs."createdAt" DESC
+  `;
 
   // Status badge colors
   const statusColors = {
@@ -76,43 +100,48 @@ export default async function ContactSubmissionsPage() {
         </div>
       </div>
 
-      {submissions.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No contact submissions found.</p>
-        </div>
-      ) : (
+      <div className="bg-card rounded-lg shadow-sm border">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full">
             <thead>
-              <tr className="bg-muted/50">
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+              <tr className="border-b">
+                <th className="px-4 py-3 text-left text-sm font-medium">
                   Name
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-                  Email
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-left text-sm font-medium">
                   Subject
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-left text-sm font-medium">
                   Type
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-left text-sm font-medium">
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-left text-sm font-medium">
                   Date
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-left text-sm font-medium">
+                  Replies
+                </th>
+                <th className="px-4 py-3 text-right text-sm font-medium">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody>
               {submissions.map((submission) => (
-                <tr key={submission.id} className="border-b hover:bg-muted/30">
-                  <td className="px-4 py-3 text-sm">{submission.name}</td>
-                  <td className="px-4 py-3 text-sm">{submission.email}</td>
+                <tr
+                  key={submission.id}
+                  className="border-b last:border-b-0 hover:bg-muted/50"
+                >
+                  <td className="px-4 py-3 text-sm">
+                    <div>
+                      <span className="font-medium">{submission.name}</span>
+                      <div className="text-xs text-muted-foreground">
+                        {submission.email}
+                      </div>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-sm">{submission.subject}</td>
                   <td className="px-4 py-3 text-sm">
                     <span
@@ -137,11 +166,32 @@ export default async function ContactSubmissionsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {formatDistanceToNow(new Date(submission.createdAt), {
-                      addSuffix: true,
-                    })}
+                    <div>
+                      {format(new Date(submission.createdAt), "MMM d, yyyy")}
+                      <div className="text-xs text-muted-foreground">
+                        {format(new Date(submission.createdAt), "h:mm a")}
+                      </div>
+                      {submission.lastRepliedAt && (
+                        <div className="text-xs text-green-600 mt-1">
+                          Replied:{" "}
+                          {format(
+                            new Date(submission.lastRepliedAt),
+                            "MMM d, h:mm a"
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-sm">
+                    {submission.replyCount > 0 ? (
+                      <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                        {submission.replyCount}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">None</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-right">
                     <Link
                       href={`/admin/contact-submissions/${submission.id}`}
                       className="text-primary hover:underline"
@@ -154,7 +204,7 @@ export default async function ContactSubmissionsPage() {
             </tbody>
           </table>
         </div>
-      )}
+      </div>
     </div>
   );
 }

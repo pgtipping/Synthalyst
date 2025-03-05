@@ -14,6 +14,7 @@ import {
   Clock,
   Tag,
   AlertCircle,
+  MessageSquare,
 } from "lucide-react";
 
 // Define the ContactSubmission interface
@@ -31,6 +32,17 @@ interface ContactSubmission {
   assignedTo: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
+  lastRepliedAt: Date | string | null;
+}
+
+// Define the ContactSubmissionReply interface
+interface ContactSubmissionReply {
+  id: string;
+  submissionId: string;
+  subject: string;
+  message: string;
+  sentBy: string;
+  sentAt: Date | string;
 }
 
 export const metadata = {
@@ -58,6 +70,13 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
   if (!submission) {
     notFound();
   }
+
+  // Fetch replies for this submission
+  const replies = await prisma.$queryRaw<ContactSubmissionReply[]>`
+    SELECT * FROM "ContactSubmissionReply" 
+    WHERE "submissionId" = ${id}
+    ORDER BY "sentAt" DESC
+  `;
 
   // Status badge colors
   const statusColors = {
@@ -223,9 +242,51 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
               <AlertCircle className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">{submission.status}</span>
             </div>
+
+            {submission.lastRepliedAt && (
+              <div className="flex items-center space-x-3">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">
+                  Last replied:{" "}
+                  {format(
+                    new Date(submission.lastRepliedAt),
+                    "MMM d, yyyy h:mm a"
+                  )}
+                </span>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Reply History */}
+      {replies.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Reply History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {replies.map((reply) => (
+                <div
+                  key={reply.id}
+                  className="border-b pb-4 last:border-b-0 last:pb-0"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium">{reply.subject}</h3>
+                    <span className="text-sm text-muted-foreground">
+                      {format(new Date(reply.sentAt), "MMM d, yyyy h:mm a")}
+                    </span>
+                  </div>
+                  <div className="bg-muted/30 p-4 rounded-md whitespace-pre-wrap">
+                    {reply.message}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Action Buttons */}
       <div className="flex justify-end gap-3">

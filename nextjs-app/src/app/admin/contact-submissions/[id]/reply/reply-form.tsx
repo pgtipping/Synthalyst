@@ -29,18 +29,48 @@ export default function ReplyForm({
     setIsSubmitting(true);
 
     try {
-      // In a real implementation, you would send an email here
-      // This is a placeholder for the email sending functionality
-      console.log(
-        `Sending email to ${recipientEmail} with subject: ${subject}`
+      // Send the reply email via API
+      const response = await fetch(
+        `/api/admin/contact-submissions/${submissionId}/send-reply`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            recipientEmail,
+            subject,
+            message,
+          }),
+        }
       );
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send reply");
+      }
+
+      // Update the submission status to "in-progress" if it was "new"
+      await fetch(
+        `/api/admin/contact-submissions/${submissionId}/update-status`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            status: "in-progress",
+          }),
+        }
+      );
 
       toast.success("Reply sent successfully");
       router.push(`/admin/contact-submissions/${submissionId}`);
       router.refresh();
     } catch (error) {
-      toast.error("Failed to send reply");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to send reply"
+      );
       console.error("Error sending reply:", error);
     } finally {
       setIsSubmitting(false);
