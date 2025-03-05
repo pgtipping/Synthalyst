@@ -33,13 +33,11 @@ export async function POST(
 
     try {
       // Update the submission status
-      await prisma.contactSubmission.update({
-        where: { id },
-        data: {
-          status: validatedData.status,
-          updatedAt: new Date(),
-        },
-      });
+      await prisma.$queryRaw`
+        UPDATE "ContactSubmission"
+        SET status = ${validatedData.status}, "updatedAt" = ${new Date()}
+        WHERE id = ${id}
+      `;
     } catch (dbError) {
       logger.error(
         "Database error updating contact submission status",

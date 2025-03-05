@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,31 @@ export default function EditNotesPage({ params }: EditNotesPageProps) {
   const router = useRouter();
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch existing notes when the component mounts
+  useEffect(() => {
+    const fetchSubmission = async () => {
+      try {
+        const response = await fetch(
+          `/api/admin/contact-submissions/${params.id}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setNotes(data.notes || "");
+        } else {
+          toast.error("Failed to fetch submission details");
+        }
+      } catch (error) {
+        console.error("Error fetching submission:", error);
+        toast.error("Failed to fetch submission details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubmission();
+  }, [params.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,26 +108,32 @@ export default function EditNotesPage({ params }: EditNotesPageProps) {
           <CardTitle>Admin Notes</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add your notes about this submission here..."
-              className="min-h-[200px]"
-            />
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  "Saving..."
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Notes
-                  </>
-                )}
-              </Button>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add your notes about this submission here..."
+                className="min-h-[200px]"
+              />
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    "Saving..."
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Notes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>

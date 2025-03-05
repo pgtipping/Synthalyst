@@ -3,14 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { z } from "zod";
 
-// Schema for notes update
-const notesUpdateSchema = z.object({
-  notes: z.string(),
-});
-
-export async function POST(
+export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
@@ -21,28 +15,30 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check if the user's email is the admin email
+    const userEmail = session.user.email;
+    if (userEmail !== "pgtipping1@gmail.com") {
+      return NextResponse.json(
+        { error: "Forbidden: Admin access required" },
+        { status: 403 }
+      );
+    }
+
     // Get the submission ID from the URL params
     const { id } = params;
 
-    // Parse the request body
-    const body = await request.json();
-
-    // Validate the notes
-    const validatedData = notesUpdateSchema.parse(body);
-
     try {
-      // Update the submission notes
+      // Delete the submission
       await prisma.$queryRaw`
-        UPDATE "ContactSubmission"
-        SET notes = ${validatedData.notes}, "updatedAt" = ${new Date()}
+        DELETE FROM "ContactSubmission"
         WHERE id = ${id}
       `;
     } catch (dbError) {
-      logger.error("Database error updating contact submission notes", dbError);
+      logger.error("Database error deleting contact submission", dbError);
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
-    logger.info(`Contact submission ${id} notes updated`, {
+    logger.info(`Contact submission ${id} deleted`, {
       userId: session.user.id || "unknown",
       submissionId: id,
     });
@@ -50,17 +46,17 @@ export async function POST(
     // Return success response
     return NextResponse.json(
       {
-        message: "Notes updated successfully",
+        message: "Submission deleted successfully",
         success: true,
       },
       { status: 200 }
     );
   } catch (error) {
-    logger.error("Failed to update contact submission notes", error);
+    logger.error("Failed to delete contact submission", error);
 
     // Return error response
     return NextResponse.json(
-      { error: "Failed to update notes" },
+      { error: "Failed to delete submission" },
       { status: 500 }
     );
   }

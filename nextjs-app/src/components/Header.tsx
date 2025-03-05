@@ -105,11 +105,21 @@ export default function Header() {
     }
 
     if (status === "authenticated" && session?.user) {
+      const isAdmin = session.user.email === "pgtipping1@gmail.com";
+
       return (
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground hidden md:inline">
             {session.user.email}
           </span>
+          {isAdmin && (
+            <Link href="/admin">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Admin
+              </Button>
+            </Link>
+          )}
           <Button
             variant="ghost"
             onClick={handleLogout}
@@ -129,6 +139,67 @@ export default function Header() {
           Login
         </Button>
       </Link>
+    );
+  };
+
+  const renderMobileAuthButton = () => {
+    if (status === "loading") {
+      return (
+        <Button
+          variant="ghost"
+          disabled
+          className="flex items-center gap-2 w-full"
+        >
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading...
+        </Button>
+      );
+    }
+
+    if (status === "authenticated" && session?.user) {
+      const isAdmin = session.user.email === "pgtipping1@gmail.com";
+
+      return (
+        <>
+          <div className="text-sm text-muted-foreground mb-2">
+            {session.user.email}
+          </div>
+          {isAdmin && (
+            <Link href="/admin" onClick={() => setMenuOpen(false)}>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 w-full mb-2"
+              >
+                <Users className="w-4 h-4" />
+                Admin Dashboard
+              </Button>
+            </Link>
+          )}
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="flex items-center gap-2 w-full"
+          >
+            <User className="w-4 h-4" />
+            Logout
+          </Button>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <Link href="/auth/signin" onClick={() => setMenuOpen(false)}>
+          <Button variant="outline" className="w-full mb-2">
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/auth/signup" onClick={() => setMenuOpen(false)}>
+          <Button variant="secondary" className="w-full">
+            Sign Up
+          </Button>
+        </Link>
+      </>
     );
   };
 
@@ -270,7 +341,7 @@ export default function Header() {
                 Contact
               </Link>
               <div className="flex flex-col space-y-2 pt-4 border-t">
-                {renderAuthButton()}
+                {renderMobileAuthButton()}
                 <Link href="/get-started" onClick={() => setMenuOpen(false)}>
                   <Button className="w-full">Get Started</Button>
                 </Link>
