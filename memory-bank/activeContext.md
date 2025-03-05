@@ -619,6 +619,37 @@ We've just fixed a TypeScript error in the Vercel deployment related to the reac
 
 ## Current Focus (2024-03-10)
 
+We've updated the Coming Soon page implementation to improve security and revert unrelated changes:
+
+1. ✅ UPDATED: Coming Soon Page Security (2024-03-10):
+
+   - Removed the "Are you a developer?" section and link from the Coming Soon page
+   - Maintained the `?dev=true` parameter functionality for developer access
+   - This ensures that only developers who know about the parameter can access in-development tools
+   - The Coming Soon page now only shows:
+     - Clear messaging about the tool being under development
+     - Email notification signup for when the tool is ready
+     - Link to return to the home page
+   - This approach improves security by removing the publicly visible developer access link
+   - Location: `nextjs-app/src/app/coming-soon/page.tsx`
+
+2. ✅ REVERTED: Training Plan Tab Changes (2024-03-10):
+
+   - Reverted unrelated changes to the Training Plan tab functionality
+   - Removed URL handling for tab changes in the TrainingPlanClient component
+   - Updated the SavedPlans component to use a simple Link component for the "Create New Plan" button
+   - This ensures that the Training Plan functionality remains focused on its core purpose
+   - Location: `nextjs-app/src/app/training-plan/client-component.tsx`, `nextjs-app/src/app/training-plan/components/SavedPlans.tsx`
+
+3. ✅ COMMITTED: Changes pushed to main branch (2024-03-10):
+   - Committed with message: "Remove developer access link from Coming Soon page and revert Training Plan tab changes"
+   - All changes successfully pushed to the main branch
+   - This ensures the security improvements are live in the production environment
+
+# Active Context (2024-03-10)
+
+## Current Focus (2024-03-10)
+
 We've implemented a Coming Soon page for tools that aren't ready for production:
 
 1. ✅ IMPLEMENTED: Coming Soon Page and Middleware (2024-03-10):

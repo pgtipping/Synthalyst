@@ -1126,3 +1126,21 @@ These improvements make the PDF output more professional and better suited for p
     - Providing a more modern and professional appearance
     - Ensuring the guide is accessible on different screen sizes
   - Location: `nextjs-app/src/app/blog/training-plan-creator-guide/page.tsx`
+
+- ✅ Improved Coming Soon Page Security (2024-03-10)
+
+  - Removed the "Are you a developer?" section and link from the Coming Soon page
+  - Maintained the `?dev=true` parameter functionality for developer access
+  - This ensures that only developers who know about the parameter can access in-development tools
+  - The Coming Soon page now only shows:
+    - Clear messaging about the tool being under development
+    - Email notification signup for when the tool is ready
+    - Link to return to the home page
+  - Reverted unrelated Training Plan tab changes:
+    - Removed URL handling for tab changes in the TrainingPlanClient component
+    - Updated the SavedPlans component to use a simple Link component for the "Create New Plan" button
+  - These changes:
+    - Improve security by removing the publicly visible developer access link
+    - Keep the Training Plan functionality focused on its core purpose
+    - Maintain a clean separation of concerns between different features
+  - Location: `nextjs-app/src/app/coming-soon/page.tsx`, `nextjs-app/src/app/training-plan/client-component.tsx`, `nextjs-app/src/app/training-plan/components/SavedPlans.tsx`
