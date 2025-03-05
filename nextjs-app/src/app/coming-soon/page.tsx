@@ -8,7 +8,6 @@ export default function ComingSoonPage({
   searchParams: { tool?: string; path?: string };
 }) {
   const toolName = searchParams.tool || "This tool";
-  const originalPath = searchParams.path || "/";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
@@ -48,18 +47,6 @@ export default function ComingSoonPage({
                 Return to Home
               </Button>
             </Link>
-
-            <div className="text-center text-sm text-gray-500">
-              <p>
-                Are you a developer?{" "}
-                <Link
-                  href={originalPath}
-                  className="text-primary hover:underline"
-                >
-                  View development version
-                </Link>
-              </p>
-            </div>
           </div>
         </div>
       </div>

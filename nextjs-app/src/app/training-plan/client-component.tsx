@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlanForm from "./components/PlanForm";
@@ -19,15 +19,8 @@ import {
 
 export default function TrainingPlanClient() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const defaultTab = searchParams.get("tab") || "create";
   const [activeTab, setActiveTab] = useState(defaultTab);
-
-  // Update the URL when the tab changes
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    router.push(`/training-plan?tab=${value}`);
-  };
 
   // Update the active tab if the URL changes
   useEffect(() => {
@@ -97,7 +90,7 @@ export default function TrainingPlanClient() {
       </div>
 
       <div>
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="create">Create New Plan</TabsTrigger>
             <TabsTrigger value="saved">Saved Plans</TabsTrigger>

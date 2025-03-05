@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 interface SavedPlan {
   id: string;
@@ -97,11 +98,6 @@ export default function SavedPlans() {
     router.push(`/training-plan/view/${id}`);
   };
 
-  const handleCreateNew = () => {
-    // Navigate to the training plan page with the create tab active
-    router.push("/training-plan?tab=create");
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -117,10 +113,12 @@ export default function SavedPlans() {
         <p className="text-muted-foreground mb-6">
           Create a new training plan to get started.
         </p>
-        <Button onClick={handleCreateNew}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Create Training Plan
-        </Button>
+        <Link href="/training-plan">
+          <Button>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create Training Plan
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -129,10 +127,12 @@ export default function SavedPlans() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Your Saved Plans</h2>
-        <Button onClick={handleCreateNew}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Create New Plan
-        </Button>
+        <Link href="/training-plan">
+          <Button>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create New Plan
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
