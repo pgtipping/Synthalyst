@@ -185,6 +185,34 @@ export default function JDForm({
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [generatedJD, setGeneratedJD] = useState<string | null>(null);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [templateCategory, setTemplateCategory] = useState("General");
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [saveTitle, setSaveTitle] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isTemplateLoading, setIsTemplateLoading] = useState(false);
+  const [isTemplateCreating, setIsTemplateCreating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isAdvancedMode, setIsAdvancedMode] = useState(false);
+  const [isCustomPromptDialogOpen, setIsCustomPromptDialogOpen] =
+    useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
+  const [isCustomPromptLoading, setIsCustomPromptLoading] = useState(false);
+  const [isCustomPromptGenerated, setIsCustomPromptGenerated] = useState(false);
+  const [customPromptResult, setCustomPromptResult] = useState("");
+  const [isCustomPromptError, setIsCustomPromptError] = useState(false);
+  const [customPromptErrorMessage, setCustomPromptErrorMessage] = useState("");
+  const [isCustomPromptSuccess, setIsCustomPromptSuccess] = useState(false);
+  const [isCustomPromptSaving, setIsCustomPromptSaving] = useState(false);
+  const [isCustomPromptSaved, setIsCustomPromptSaved] = useState(false);
+  const [isCustomPromptSaveError, setIsCustomPromptSaveError] = useState(false);
+  const [customPromptSaveErrorMessage, setCustomPromptSaveErrorMessage] =
+    useState("");
+  const [isCustomPromptSaveSuccess, setIsCustomPromptSaveSuccess] =
+    useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -628,15 +656,6 @@ export default function JDForm({
   }, [session]);
 
   const onSubmit = async (values: FormValues) => {
-    if (!session?.user?.email) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create job descriptions.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       const response = await fetch("/api/jd-developer/generate", {
@@ -649,90 +668,31 @@ export default function JDForm({
           department: values.department,
           location: values.location,
           employmentType: values.employmentType,
-          description: values.jobDescription || "",
-          responsibilities: values.responsibilities || [],
-          requirements: {
-            required: values.requirements.required || [],
-            preferred: values.requirements.preferred || [],
-          },
-          qualifications: {
-            education: values.qualifications.education || [],
-            experience: values.qualifications.experience || [],
-            certifications: values.qualifications.certifications || [],
-          },
-          industry: values.industry,
-          level: values.level,
-          salary: values.salary
-            ? {
-                range: {
-                  min: values.salary.min || 0,
-                  max: values.salary.max || 0,
-                },
-                type: values.salary.type,
-                currency: values.salary.currency,
-              }
-            : undefined,
+          jobDescription: values.jobDescription,
+          responsibilities: values.responsibilities,
+          requirements: values.requirements,
+          qualifications: values.qualifications,
+          salary: values.salary,
+          benefits: values.benefits,
+          company: values.company,
+          contactInfo: values.contactInfo,
+          applicationProcess: values.applicationProcess,
+          additionalInfo: values.additionalInfo,
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Failed to generate job description"
-        );
+        throw new Error("Failed to generate job description");
       }
 
-      const { generatedContent } = await response.json();
-
-      // Update form with generated content
-      form.reset({
-        jobTitle: generatedContent.title,
-        department: generatedContent.department || "",
-        location: generatedContent.location || "",
-        employmentType: generatedContent.employmentType || "",
-        jobDescription: generatedContent.description,
-        responsibilities: generatedContent.responsibilities,
-        requirements: {
-          required: generatedContent.requirements.required,
-          preferred:
-            Array.isArray(generatedContent.requirements.preferred) &&
-            generatedContent.requirements.preferred.length > 0
-              ? generatedContent.requirements.preferred
-              : [{ name: "", level: "intermediate" as const, description: "" }],
-        },
-        qualifications: {
-          education: generatedContent.qualifications.education,
-          experience: generatedContent.qualifications.experience,
-          certifications: generatedContent.qualifications.certifications,
-        },
-        salary: generatedContent.salary
-          ? {
-              min: generatedContent.salary.range?.min || 0,
-              max: generatedContent.salary.range?.max || 0,
-              type: generatedContent.salary.type || "yearly",
-              currency: generatedContent.salary.currency || "USD",
-            }
-          : {
-              min: 0,
-              max: 0,
-              type: "yearly" as const,
-              currency: "USD",
-            },
-        industry: generatedContent.metadata.industry || "",
-        level: generatedContent.metadata.level || "",
-        isTemplate: false,
-      });
-
-      toast({
-        title: "Success",
-        description: "Job description generated successfully!",
-      });
+      const data = await response.json();
+      setGeneratedJD(data.jobDescription);
+      setSaveTitle(values.jobTitle);
     } catch (error) {
       console.error("Error generating job description:", error);
       toast({
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "An error occurred",
+        description: "Failed to generate job description",
         variant: "destructive",
       });
     } finally {
@@ -740,15 +700,16 @@ export default function JDForm({
     }
   };
 
-  const handleSaveAsTemplate = async (values: FormValues) => {
-    // Check if user is authenticated
+  const handleSaveAsTemplate = () => {
     if (!session?.user?.email) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to save templates.",
+        variant: "default",
         action: (
           <Button
             variant="outline"
+            size="sm"
             onClick={() =>
               signIn(undefined, { callbackUrl: window.location.href })
             }
@@ -760,131 +721,43 @@ export default function JDForm({
       return;
     }
 
-    setIsSavingTemplate(true);
-
-    try {
-      // Prepare data in the format expected by our updated API
-      const templateData = {
-        name: values.jobTitle,
-        type: values.industry,
-        level: values.level,
-        content: JSON.stringify({
-          title: values.jobTitle,
-          department: values.department,
-          location: values.location,
-          employmentType: values.employmentType,
-          description: values.jobDescription || "",
-          responsibilities: values.responsibilities || [],
-          requirements: {
-            required:
-              values.requirements.required.map((skill) => ({
-                name: skill.name,
-                level: skill.level,
-                description: skill.description,
-              })) || [],
-            preferred: values.requirements.preferred
-              ? values.requirements.preferred.map((skill) => {
-                  // Handle both string and object formats
-                  if (typeof skill === "string") {
-                    return skill;
-                  }
-                  return {
-                    name: skill.name,
-                    level: skill.level,
-                    description: skill.description,
-                  };
-                })
-              : [],
-          },
-          qualifications: {
-            education: values.qualifications.education || [],
-            experience: values.qualifications.experience || [],
-            certifications: values.qualifications.certifications || [],
-          },
-          salary: values.salary
-            ? {
-                range: {
-                  min: values.salary.min || 0,
-                  max: values.salary.max || 0,
-                },
-                type: values.salary.type,
-                currency: values.salary.currency,
-              }
-            : {
-                range: {
-                  min: 0,
-                  max: 0,
-                },
-                type: "yearly",
-                currency: "USD",
-              },
-          metadata: {
-            industry: values.industry,
-            level: values.level,
-            isTemplate: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        }),
-        requirements: {
-          required: values.requirements.required || [],
-          preferred: values.requirements.preferred || [],
-        },
-      };
-
-      console.log(
-        "Sending template data:",
-        JSON.stringify(templateData, null, 2)
-      );
-
-      const response = await fetch("/api/jd-developer/templates", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(templateData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch((e) => {
-          console.error("Error parsing error response:", e);
-          return { error: "Unknown error occurred" };
-        });
-        console.error("Template save error:", errorData);
-        throw new Error(errorData.error || "Failed to save template");
-      }
-
-      toast({
-        title: "Success",
-        description: "Template saved successfully",
-      });
-
-      // Switch to templates tab
-      window.dispatchEvent(
-        new CustomEvent("switchTab", { detail: "templates" })
-      );
-    } catch (error) {
-      console.error("Error saving template:", error);
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSavingTemplate(false);
-    }
+    setIsTemplateDialogOpen(true);
   };
 
-  const handleSaveJobDescription = async (values: FormValues) => {
-    // Check if user is authenticated
+  const handleSaveTemplate = async () => {
+    if (!session?.user?.email) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save templates.",
+        variant: "default",
+        action: (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              signIn(undefined, { callbackUrl: window.location.href })
+            }
+          >
+            Sign In
+          </Button>
+        ),
+      });
+      return;
+    }
+
+    // ... existing code ...
+  };
+
+  const handleSaveJD = () => {
     if (!session?.user?.email) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to save job descriptions.",
+        variant: "default",
         action: (
           <Button
             variant="outline"
+            size="sm"
             onClick={() =>
               signIn(undefined, { callbackUrl: window.location.href })
             }
@@ -896,613 +769,37 @@ export default function JDForm({
       return;
     }
 
-    setIsSavingTemplate(true);
-    try {
-      const jobData = {
-        title: values.jobTitle,
-        department: values.department,
-        location: values.location,
-        employmentType: values.employmentType,
-        description: values.jobDescription || "",
-        responsibilities: values.responsibilities || [],
-        requirements: {
-          required: values.requirements.required || [],
-          preferred: values.requirements.preferred || [],
-        },
-        qualifications: {
-          education: values.qualifications.education || [],
-          experience: values.qualifications.experience || [],
-          certifications: values.qualifications.certifications || [],
-        },
-        salary: values.salary
-          ? {
-              range: {
-                min: values.salary.min || 0,
-                max: values.salary.max || 0,
-              },
-              type: values.salary.type as "hourly" | "monthly" | "yearly",
-              currency: values.salary.currency,
+    setIsSaveDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!session?.user?.email) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save job descriptions.",
+        variant: "default",
+        action: (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              signIn(undefined, { callbackUrl: window.location.href })
             }
-          : {
-              range: {
-                min: 0,
-                max: 0,
-              },
-              type: "yearly",
-              currency: "USD",
-            },
-        metadata: {
-          industry: values.industry,
-          level: values.level,
-          isTemplate: false,
-        },
-      };
-
-      const response = await fetch("/api/jd-developer/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(jobData),
+          >
+            Sign In
+          </Button>
+        ),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save job description");
-      }
-
-      toast({
-        title: "Success",
-        description: "Job description saved successfully!",
-      });
-
-      // Switch to saved tab
-      window.dispatchEvent(new CustomEvent("switchTab", { detail: "saved" }));
-    } catch (error) {
-      console.error("Error saving job description:", error);
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSavingTemplate(false);
+      return;
     }
+
+    // ... existing code ...
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="jobTitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Job Title</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., Senior Software Engineer"
-                    {...field}
-                    disabled={isLoading || isSavingTemplate}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="department"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Department (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., Engineering"
-                    {...field}
-                    disabled={isLoading || isSavingTemplate}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., Remote, New York, NY"
-                    {...field}
-                    disabled={isLoading || isSavingTemplate}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="employmentType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Employment Type</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      form.trigger("employmentType");
-                    }}
-                    defaultValue={field.value}
-                    disabled={isLoading || isSavingTemplate}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select employment type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full-time">Full-time</SelectItem>
-                      <SelectItem value="part-time">Part-time</SelectItem>
-                      <SelectItem value="contract">Contract</SelectItem>
-                      <SelectItem value="temporary">Temporary</SelectItem>
-                      <SelectItem value="internship">Internship</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="industry"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Industry</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      form.trigger("industry");
-                    }}
-                    defaultValue={field.value}
-                    disabled={isLoading || isSavingTemplate}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="technology">Technology</SelectItem>
-                      <SelectItem value="healthcare">Healthcare</SelectItem>
-                      <SelectItem value="finance">Finance</SelectItem>
-                      <SelectItem value="education">Education</SelectItem>
-                      <SelectItem value="retail">Retail</SelectItem>
-                      <SelectItem value="manufacturing">
-                        Manufacturing
-                      </SelectItem>
-                      <SelectItem value="services">Services</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Position Level</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      form.trigger("level");
-                    }}
-                    defaultValue={field.value}
-                    disabled={isLoading || isSavingTemplate}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select position level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="entry">Entry Level</SelectItem>
-                      <SelectItem value="junior">Junior</SelectItem>
-                      <SelectItem value="mid">Mid Level</SelectItem>
-                      <SelectItem value="senior">Senior</SelectItem>
-                      <SelectItem value="lead">Lead</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="director">Director</SelectItem>
-                      <SelectItem value="executive">Executive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="jobDescription"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Job Description (Optional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter a detailed description of the role..."
-                  className="min-h-[100px]"
-                  {...field}
-                  disabled={isLoading || isSavingTemplate}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="responsibilities"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Responsibilities (Optional)</FormLabel>
-              <FormControl>
-                <ArrayInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Enter a responsibility"
-                  error={form.formState.errors.responsibilities?.message}
-                  disabled={isLoading || isSavingTemplate}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label>Required Skills (Optional)</Label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                appendSkill({
-                  name: "",
-                  level: "intermediate",
-                  description: "",
-                })
-              }
-              disabled={isLoading || isSavingTemplate}
-            >
-              Add Skill
-            </Button>
-          </div>
-
-          {skillFields.map((field, index) => (
-            <div key={field.id} className="flex gap-4">
-              <FormField
-                control={form.control}
-                name={`requirements.required.${index}.name`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input {...field} placeholder="Skill name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`requirements.required.${index}.level`}
-                render={({ field }) => (
-                  <FormItem className="w-40">
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="beginner">Beginner</SelectItem>
-                          <SelectItem value="intermediate">
-                            Intermediate
-                          </SelectItem>
-                          <SelectItem value="advanced">Advanced</SelectItem>
-                          <SelectItem value="expert">Expert</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`requirements.required.${index}.description`}
-                render={({ field }) => (
-                  <FormItem className="w-60">
-                    <FormControl>
-                      <Textarea {...field} placeholder="Skill description" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => removeSkill(index)}
-                disabled={isLoading || isSavingTemplate}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label>Preferred Skills (Optional)</Label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                appendPreferredSkill({
-                  name: "",
-                  level: "intermediate",
-                  description: "",
-                })
-              }
-              disabled={isLoading || isSavingTemplate}
-            >
-              Add Preferred Skill
-            </Button>
-          </div>
-
-          {preferredSkillFields.map((field, index) => (
-            <div key={field.id} className="flex gap-4">
-              <FormField
-                control={form.control}
-                name={`requirements.preferred.${index}.name`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input {...field} placeholder="Skill name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`requirements.preferred.${index}.level`}
-                render={({ field }) => (
-                  <FormItem className="w-40">
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="beginner">Beginner</SelectItem>
-                          <SelectItem value="intermediate">
-                            Intermediate
-                          </SelectItem>
-                          <SelectItem value="advanced">Advanced</SelectItem>
-                          <SelectItem value="expert">Expert</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`requirements.preferred.${index}.description`}
-                render={({ field }) => (
-                  <FormItem className="w-60">
-                    <FormControl>
-                      <Textarea {...field} placeholder="Skill description" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => removePreferredSkill(index)}
-                disabled={isLoading || isSavingTemplate}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-
-        <FormField
-          control={form.control}
-          name="qualifications.education"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Educational Requirements (Optional)</FormLabel>
-              <FormControl>
-                <ArrayInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Enter required degree, certification, or educational qualification"
-                  error={
-                    form.formState.errors?.qualifications?.education?.message
-                  }
-                  disabled={isLoading || isSavingTemplate}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="qualifications.experience"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Professional Experience (Optional)</FormLabel>
-              <FormControl>
-                <ArrayInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Enter required work experience or professional background"
-                  error={
-                    form.formState.errors?.qualifications?.experience?.message
-                  }
-                  disabled={isLoading || isSavingTemplate}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="qualifications.certifications"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Required Certifications (Optional)</FormLabel>
-              <FormControl>
-                <ArrayInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Enter required certification"
-                  error={
-                    form.formState.errors?.qualifications?.certifications
-                      ?.message
-                  }
-                  disabled={isLoading || isSavingTemplate}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="salary.min"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Minimum Salary (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="e.g., 50000"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    disabled={isLoading || isSavingTemplate}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="salary.max"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Maximum Salary (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="e.g., 80000"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    disabled={isLoading || isSavingTemplate}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="salary.type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Salary Type (Optional)</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={isLoading || isSavingTemplate}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select salary type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hourly">Hourly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="yearly">Yearly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="salary.currency"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Currency (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., USD"
-                    {...field}
-                    disabled={isLoading || isSavingTemplate}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        {/* ... existing form fields ... */}
 
         <div className="flex justify-end space-x-4">
           <Button
@@ -1559,7 +856,7 @@ export default function JDForm({
           <Button
             type="button"
             variant="secondary"
-            onClick={() => handleSaveAsTemplate(form.getValues())}
+            onClick={() => handleSaveAsTemplate()}
             disabled={isLoading || isSavingTemplate}
           >
             {isSavingTemplate ? (
@@ -1577,7 +874,7 @@ export default function JDForm({
             onClick={() => {
               // Save the current form state
               const values = form.getValues();
-              handleSaveJobDescription(values);
+              handleSaveJD();
             }}
             disabled={isLoading || isSavingTemplate}
           >

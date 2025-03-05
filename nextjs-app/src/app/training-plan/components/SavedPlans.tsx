@@ -113,7 +113,7 @@ export default function SavedPlans() {
         <p className="text-muted-foreground mb-6">
           Create a new training plan to get started.
         </p>
-        <Link href="/training-plan">
+        <Link href="/training-plan?tab=create">
           <Button>
             <PlusCircle className="h-4 w-4 mr-2" />
             Create Training Plan
@@ -127,7 +127,7 @@ export default function SavedPlans() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Your Saved Plans</h2>
-        <Link href="/training-plan">
+        <Link href="/training-plan?tab=create">
           <Button>
             <PlusCircle className="h-4 w-4 mr-2" />
             Create New Plan
