@@ -164,7 +164,9 @@ IMPORTANT INSTRUCTIONS:
 1. Generate EXACTLY ${validatedData.numberOfQuestions} DISTINCT, STANDALONE interview questions
 2. Do NOT include additional questions in the evaluation tips or as follow-up questions
 3. Evaluation tips should focus on how to evaluate responses, not introduce new questions
-4. Each question should be complete and self-contained`;
+4. Each question should be complete and self-contained
+5. For scoring rubrics, ensure each level has ONE detailed, well-formed criterion that clearly distinguishes performance levels
+6. Maintain consistent quality and detail across all outputs`;
 
     // Base prompt for generating questions
     let userPrompt = `Generate ${validatedData.numberOfQuestions} interview questions for a ${validatedData.jobLevel} position in the ${validatedData.industry} industry.
@@ -205,7 +207,17 @@ Also, create a comprehensive scoring rubric that can be used to evaluate all res
 1. Include scoring categories (e.g., Excellent, Good, Average, Poor)
 2. Define clear criteria for each scoring level
 3. Cover both technical knowledge and soft skills
-4. Be specific to the industry and job level`;
+4. Be specific to the industry and job level
+
+For each scoring level, provide ONE detailed, complete criterion that:
+- Is a full sentence with proper grammar
+- Clearly describes what to look for at that performance level
+- Includes specific details related to the ${validatedData.industry} industry
+- Addresses both technical skills and core competencies
+- Is proportional in quality to the level (e.g., "Excellent" should describe excellence)
+
+Example format for each level:
+Excellent: "Demonstrates comprehensive knowledge of [industry] concepts, provides specific examples from experience, and clearly articulates how their skills address the core competencies."`;
     }
 
     // Format the response as a simple, clear structure
@@ -257,7 +269,7 @@ IMPORTANT:
           },
         ],
         model: "mixtral-8x7b-32768",
-        temperature: 0.7,
+        temperature: 0.5,
         max_tokens: 4000,
       })
       .catch((error) => {
@@ -525,7 +537,7 @@ IMPORTANT:
           });
         }
 
-        // Ensure each level has exactly one criterion
+        // First, make sure we have exactly one criterion per level
         levels.forEach((level) => {
           // If a level has multiple criteria, keep only the first one
           if (level.criteria.length > 1) {
@@ -555,9 +567,45 @@ IMPORTANT:
               level.criteria = ["Meets expectations for this level"];
             }
           }
+
+          // Validate the quality of the criterion
+          const criterion = level.criteria[0];
+
+          // More comprehensive quality checks
+          const isLowQuality =
+            criterion.length < 15 || // Too short
+            !criterion.includes(" ") || // Single word
+            criterion.split(" ").length < 5 || // Too few words
+            !criterion.match(/[.!?]$/) || // Not a complete sentence
+            !(
+              criterion.toLowerCase().includes("skill") ||
+              criterion.toLowerCase().includes("competenc") ||
+              criterion.toLowerCase().includes("knowledge") ||
+              criterion.toLowerCase().includes("demonstrat") ||
+              criterion.toLowerCase().includes("abilit")
+            ); // Lacks key assessment terms
+
+          if (isLowQuality) {
+            // Replace with a better default based on the level
+            const industrySpecificDefaults = {
+              excellent: `Demonstrates strong technical skills, core competencies, and deep understanding of the ${validatedData.industry} industry, providing specific examples and clear articulation of complex concepts.`,
+              good: `Shows good technical skills and understanding of the ${validatedData.industry} industry with effective communication and relevant examples, though may have minor areas for improvement.`,
+              average: `Shows basic technical skills and core competencies related to the ${validatedData.industry} industry, but lacks depth in examples or comprehensive understanding.`,
+              poor: `Lacks technical skills and core competencies required for the ${validatedData.industry} industry, with minimal relevant examples and unclear communication.`,
+            };
+
+            // Find the matching default criterion
+            for (const [key, value] of Object.entries(
+              industrySpecificDefaults
+            )) {
+              if (level.level.toLowerCase().includes(key)) {
+                level.criteria = [value];
+                break;
+              }
+            }
+          }
         });
 
-        // Remove the cascading system and use the levels directly
         // Generate professional-looking HTML for the scoring rubric
         result.scoringRubric = generateProfessionalRubricHtml(levels);
       } else {
@@ -669,8 +717,6 @@ function generateProfessionalRubricHtml(
         </div>
         <div class="p-4 bg-white">
           <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Strong, detailed response demonstrating technical skills and core competencies</p>
-          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Clear understanding of best practices and ability to apply knowledge</p>
-          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Provides specific, relevant examples from experience</p>
         </div>
       </div>
       
@@ -683,8 +729,6 @@ function generateProfessionalRubricHtml(
         </div>
         <div class="p-4 bg-white">
           <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Adequate response demonstrating some technical skills and core competencies</p>
-          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Some real-world examples, but lacks specificity or depth</p>
-          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Shows good understanding of concepts</p>
         </div>
       </div>
       
@@ -697,8 +741,6 @@ function generateProfessionalRubricHtml(
         </div>
         <div class="p-4 bg-white">
           <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Limited response that may touch on technical skills or core competencies</p>
-          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Lacks real-world examples or clear understanding of best practices</p>
-          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Basic understanding of concepts</p>
         </div>
       </div>
       
@@ -711,8 +753,6 @@ function generateProfessionalRubricHtml(
         </div>
         <div class="p-4 bg-white">
           <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> Inadequate or off-topic response that does not demonstrate technical skills</p>
-          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">2.</span> Lacks understanding of best practices or ability to apply knowledge</p>
-          <p class="mb-2 text-gray-800"><span class="font-semibold mr-2">3.</span> Unable to provide relevant examples</p>
         </div>
       </div>
     </div>`;
@@ -744,11 +784,8 @@ function generateProfessionalRubricHtml(
         </div>
         <div class="p-4 bg-white">`;
 
-    criteria.forEach((criterion, index) => {
-      htmlRubric += `<p class="mb-2 text-gray-800"><span class="font-semibold mr-2">${
-        index + 1
-      }.</span> ${criterion}</p>`;
-    });
+    // Only display the first criterion for each level
+    htmlRubric += `<p class="mb-2 text-gray-800"><span class="font-semibold mr-2">1.</span> ${criteria[0]}</p>`;
 
     htmlRubric += `
         </div>

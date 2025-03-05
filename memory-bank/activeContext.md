@@ -1,4 +1,34 @@
-# Active Context (2025-03-04)
+# Active Context - [2025-03-05T07:00:00Z]
+
+## Current Focus
+
+- Training plan generation functionality improvements
+- Authentication requirement adjustments
+
+## Recent Changes
+
+- Fixed Llama model ID in training plan generation (changed from `meta-llama/llama-3.2-70b-instruct` to `meta-llama/llama-3.2-3b-instruct`)
+- Updated test files to use correct model ID
+- Removed authentication requirement from enhanced training plan generation endpoint
+- Ensured fallback to Gemini works when Llama generation fails
+
+## Next Steps
+
+- Monitor training plan generation performance with new model ID
+- Consider implementing rate limiting for unauthenticated users
+- Add error tracking for model fallback scenarios
+
+## Active Decisions
+
+- Allow unauthenticated access to training plan generation
+- Use 3B model instead of 70B for better reliability
+- Maintain fallback to Gemini for robustness
+
+## Current Considerations
+
+- Need to balance accessibility with service protection
+- Monitor usage patterns of unauthenticated users
+- Consider implementing caching for common training plan requests
 
 ## Current Focus (2025-03-04)
 

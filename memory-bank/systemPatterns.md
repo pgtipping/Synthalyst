@@ -627,3 +627,31 @@ toast({
   - Click tracking for optimization
   - A/B testing of messaging and placement
   - Progressive disclosure of additional information
+
+# System Patterns - [2025-03-05T07:00:00Z]
+
+## LLM Integration Patterns
+
+### Model Selection and Fallback
+
+- Primary: Llama 3.2 3B model via OpenRouter
+- Secondary: Gemini 2.0 Flash
+- Fallback chain: Llama -> Gemini -> Default Template
+- Model selection based on task complexity and user tier
+
+### Authentication Patterns
+
+- Authentication required for:
+  - Saving generated content
+  - Accessing premium features
+  - User-specific customizations
+- Authentication optional for:
+  - Basic content generation
+  - Enhanced plan generation
+  - Public API endpoints
+
+### Error Handling
+
+- Graceful fallback between models
+- Clear error messages for API failures
+- Maintain service availability through fallbacks

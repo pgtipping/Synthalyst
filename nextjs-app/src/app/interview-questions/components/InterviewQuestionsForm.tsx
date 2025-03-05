@@ -531,8 +531,10 @@ export default function InterviewQuestionsForm() {
                   className="flex-1 flex items-center justify-center py-2 px-1 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasResults}
                 >
-                  <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-indigo-600" />
-                  <span className="font-medium text-xs sm:text-base">Q</span>
+                  <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" />
+                  <span className="hidden md:inline-block ml-1.5 font-medium">
+                    Questions
+                  </span>
                   {generatedQuestions.length > 0 && (
                     <span className="ml-1 bg-indigo-100 text-indigo-800 text-xs font-medium px-1 py-0.5 rounded-full">
                       {generatedQuestions.length}
@@ -544,8 +546,10 @@ export default function InterviewQuestionsForm() {
                   className="flex-1 flex items-center justify-center py-2 px-1 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasTips}
                 >
-                  <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-blue-600" />
-                  <span className="font-medium text-xs sm:text-base">T</span>
+                  <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                  <span className="hidden md:inline-block ml-1.5 font-medium">
+                    Tips
+                  </span>
                   {evaluationTips.length > 0 && (
                     <span className="ml-1 bg-blue-100 text-blue-800 text-xs font-medium px-1 py-0.5 rounded-full">
                       {evaluationTips.length}
@@ -557,8 +561,10 @@ export default function InterviewQuestionsForm() {
                   className="flex-1 flex items-center justify-center py-2 px-1 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasRubric}
                 >
-                  <Award className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-emerald-600" />
-                  <span className="font-medium text-xs sm:text-base">R</span>
+                  <Award className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+                  <span className="hidden md:inline-block ml-1.5 font-medium">
+                    Rubric
+                  </span>
                   {hasRubric && (
                     <span className="ml-1 bg-emerald-100 text-emerald-800 text-xs font-medium px-1 py-0.5 rounded-full">
                       4
