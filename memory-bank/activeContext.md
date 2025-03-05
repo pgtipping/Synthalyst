@@ -1,9 +1,11 @@
-# Active Context - [2025-03-05T07:00:00Z]
+# Active Context - [2025-03-10]
 
 ## Current Focus
 
 - Training plan generation functionality improvements
 - Authentication requirement adjustments
+- LLM output quality improvements
+- UI/UX enhancements for different screen sizes
 
 ## Recent Changes
 
@@ -11,24 +13,69 @@
 - Updated test files to use correct model ID
 - Removed authentication requirement from enhanced training plan generation endpoint
 - Ensured fallback to Gemini works when Llama generation fails
+- Enhanced LLM quality control for interview question rubric generation
+- Improved tab display for different screen sizes in the Interview Questions Generator
 
 ## Next Steps
 
 - Monitor training plan generation performance with new model ID
 - Consider implementing rate limiting for unauthenticated users
 - Add error tracking for model fallback scenarios
+- Continue improving LLM output quality across all tools
+- Implement responsive design improvements for other components
 
 ## Active Decisions
 
 - Allow unauthenticated access to training plan generation
 - Use 3B model instead of 70B for better reliability
 - Maintain fallback to Gemini for robustness
+- Implement comprehensive quality validation for LLM outputs
+- Use responsive design patterns that adapt to different screen sizes
 
 ## Current Considerations
 
 - Need to balance accessibility with service protection
 - Monitor usage patterns of unauthenticated users
 - Consider implementing caching for common training plan requests
+- Evaluate effectiveness of LLM quality control measures
+- Assess user experience on different device sizes
+
+## LLM Quality Control Improvements (2025-03-10)
+
+We've implemented several enhancements to improve the quality and consistency of LLM-generated content:
+
+1. ✅ ENHANCED: Interview Questions Rubric Generation (2025-03-10):
+   - Improved system prompt with specific instructions for rubric criteria
+   - Added requirements for detailed, well-formed criteria that clearly distinguish performance levels
+   - Lowered temperature parameter from 0.7 to 0.5 for more consistent outputs
+   - Implemented comprehensive quality validation for criteria, checking for:
+     - Minimum length (15 characters)
+     - Proper sentence structure (not single words)
+     - Minimum word count (5 words)
+     - Complete sentences with proper punctuation
+     - Presence of key assessment terms (skills, competencies, knowledge, etc.)
+   - Created more detailed, industry-specific fallback criteria for when LLM generation fails quality checks
+   - This ensures consistently high-quality rubrics that provide meaningful evaluation guidance
+   - Location: `nextjs-app/src/app/api/interview-questions/generate/route.ts`
+
+## UI/UX Improvements (2025-03-10)
+
+We've made several improvements to the user interface to enhance the experience across different device sizes:
+
+1. ✅ ENHANCED: Interview Questions Tab Display (2025-03-10):
+
+   - Improved tab display for the Interview Questions Generator
+   - Maintained icons and count badges on all screen sizes
+   - Added text labels (Questions, Tips, Rubric) that appear only on medium screens and larger
+   - This provides a clean interface on mobile while offering more context on larger screens
+   - Location: `nextjs-app/src/app/interview-questions/components/InterviewQuestionsForm.tsx`
+
+2. ✅ FIXED: Development Server Port Configuration (2025-03-10):
+   - Updated package.json to explicitly set the development server port to 3001
+   - Updated README.md to reflect the correct port (3001) for local development
+   - Updated .env.example to use port 3001 for NEXTAUTH_URL
+   - This ensures consistency between the development server port and authentication configuration
+   - Location: `nextjs-app/package.json`, `nextjs-app/README.md`, `nextjs-app/.env.example`
 
 ## Current Focus (2025-03-04)
 

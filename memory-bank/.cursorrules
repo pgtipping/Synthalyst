@@ -2737,3 +2737,127 @@ For more details, see the documentation in `nextjs-app/docs/client-component-wra
   3. Never rely on dates mentioned in previous entries
 
 // ... existing code ...
+
+## LLM Quality Control Patterns - 2024-03-10
+
+- When implementing LLM-based features, always include comprehensive quality control measures:
+
+  1. **Enhanced Prompting**:
+
+     - Use detailed system prompts with specific instructions
+     - Include examples of desired output format and quality
+     - Specify requirements for structure, completeness, and relevance
+
+  2. **Parameter Tuning**:
+
+     - Use lower temperature (0.5-0.7) for more consistent outputs
+     - Adjust max_tokens based on the expected response length
+     - Consider using top_p and frequency_penalty for diverse but controlled outputs
+
+  3. **Output Validation**:
+
+     - Implement comprehensive quality checks for LLM outputs
+     - Validate minimum length, structure, and completeness
+     - Check for presence of key terms relevant to the domain
+     - Ensure proper sentence structure and punctuation
+
+  4. **Fallback Mechanisms**:
+
+     - Create high-quality fallback content for when LLM generation fails
+     - Make fallbacks context-aware using user input parameters
+     - Ensure fallbacks maintain the same structure and format as expected LLM outputs
+
+  5. **Model Selection**:
+     - Use smaller, more reliable models when possible
+     - Implement model fallback chains (e.g., Llama → Gemini)
+     - Balance performance with reliability based on the use case
+
+- Example implementation in Interview Questions rubric generation:
+
+  ```typescript
+  // System prompt with specific instructions
+  const systemPrompt = `You are an expert interviewer who creates highly relevant and effective interview questions, evaluation guidelines, and scoring rubrics. 
+  Your responses will be used directly in an interview preparation tool.
+  
+  IMPORTANT INSTRUCTIONS:
+  1. Generate EXACTLY ${numberOfQuestions} DISTINCT, STANDALONE interview questions
+  2. Do NOT include additional questions in the evaluation tips or as follow-up questions
+  3. Evaluation tips should focus on how to evaluate responses, not introduce new questions
+  4. Each question should be complete and self-contained
+  5. For scoring rubrics, ensure each level has ONE detailed, well-formed criterion that clearly distinguishes performance levels
+  6. Maintain consistent quality and detail across all outputs`;
+
+  // Quality validation for criteria
+  const isLowQuality =
+    criterion.length < 15 || // Too short
+    !criterion.includes(" ") || // Single word
+    criterion.split(" ").length < 5 || // Too few words
+    !criterion.match(/[.!?]$/) || // Not a complete sentence
+    !(
+      criterion.toLowerCase().includes("skill") ||
+      criterion.toLowerCase().includes("competenc") ||
+      criterion.toLowerCase().includes("knowledge") ||
+      criterion.toLowerCase().includes("demonstrat") ||
+      criterion.toLowerCase().includes("abilit")
+    ); // Lacks key assessment terms
+
+  // Industry-specific fallback criteria
+  const industrySpecificDefaults = {
+    excellent: `Demonstrates strong technical skills, core competencies, and deep understanding of the ${industry} industry, providing specific examples and clear articulation of complex concepts.`,
+    good: `Shows good technical skills and understanding of the ${industry} industry with effective communication and relevant examples, though may have minor areas for improvement.`,
+    average: `Shows basic technical skills and core competencies related to the ${industry} industry, but lacks depth in examples or comprehensive understanding.`,
+    poor: `Lacks technical skills and core competencies required for the ${industry} industry, with minimal relevant examples and unclear communication.`,
+  };
+  ```
+
+## Responsive Design Patterns - 2024-03-10
+
+- When implementing UI components, use these responsive design patterns:
+
+  1. **Progressive Enhancement**:
+
+     - Start with a minimal, functional mobile design
+     - Add features and complexity for larger screens
+     - Use Tailwind's responsive prefixes (sm:, md:, lg:, xl:) to control visibility
+
+  2. **Responsive Text Display**:
+
+     - Hide descriptive text on small screens with `hidden md:inline-block`
+     - Show only essential icons/badges on mobile
+     - Maintain touch-friendly tap targets (min 44px) on all screen sizes
+
+  3. **Flexible Layouts**:
+
+     - Use flex-wrap for horizontal elements that might overflow
+     - Implement grid layouts with auto-fit/auto-fill for dynamic columns
+     - Set appropriate min/max widths to prevent extreme scaling
+
+  4. **Consistent Spacing**:
+
+     - Use responsive spacing utilities (p-2 sm:p-4 md:p-6)
+     - Maintain adequate whitespace on all screen sizes
+     - Reduce padding/margins proportionally on smaller screens
+
+  5. **Testing Across Breakpoints**:
+     - Test at standard breakpoints: 640px, 768px, 1024px, 1280px
+     - Verify functionality at the edges of breakpoints
+     - Ensure smooth transitions between breakpoints
+
+- Example implementation in Interview Questions tabs:
+  ```jsx
+  <TabsTrigger
+    value="questions"
+    className="flex-1 flex items-center justify-center py-2 px-1 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
+    disabled={!hasResults}
+  >
+    <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" />
+    <span className="hidden md:inline-block ml-1.5 font-medium">Questions</span>
+    {generatedQuestions.length > 0 && (
+      <span className="ml-1 bg-indigo-100 text-indigo-800 text-xs font-medium px-1 py-0.5 rounded-full">
+        {generatedQuestions.length}
+      </span>
+    )}
+  </TabsTrigger>
+  ```
+
+// ... existing code ...
