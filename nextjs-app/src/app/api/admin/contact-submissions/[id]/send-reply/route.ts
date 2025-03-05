@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 import { sendContactReply } from "@/lib/email";
+import { Prisma } from "@prisma/client";
 
 // Schema for email reply
 const replySchema = z.object({
@@ -79,37 +80,41 @@ export async function POST(
       }
 
       // Use a transaction to ensure both operations succeed or fail together
-      await prisma.$transaction([
-        // Insert the reply record
-        prisma.$executeRaw`
-          INSERT INTO "ContactSubmissionReply" (
-            "id", 
-            "submissionId", 
-            "subject", 
-            "message", 
-            "sentBy", 
-            "sentAt"
-          ) 
-          VALUES (
-            ${crypto.randomUUID()}, 
-            ${id}, 
-            ${validatedData.subject}, 
-            ${validatedData.message}, 
-            ${session.user.id || "unknown"}, 
-            NOW()
-          )
-        `,
+      await prisma.$transaction(async (tx) => {
+        // Create the reply record using Prisma's model API
+        await tx.$queryRaw(
+          Prisma.sql`
+            INSERT INTO "ContactSubmissionReply" (
+              "id", 
+              "submissionId", 
+              "subject", 
+              "message", 
+              "sentBy", 
+              "sentAt"
+            ) 
+            VALUES (
+              ${crypto.randomUUID()}, 
+              ${id}, 
+              ${validatedData.subject}, 
+              ${validatedData.message}, 
+              ${session.user.id || "unknown"}, 
+              NOW()
+            )
+          `
+        );
 
-        // Update the submission status
-        prisma.$executeRaw`
-          UPDATE "ContactSubmission"
-          SET 
-            "status" = 'in-progress',
-            "updatedAt" = NOW(),
-            "lastRepliedAt" = NOW()
-          WHERE "id" = ${id}
-        `,
-      ]);
+        // Update the submission status using Prisma's model API
+        await tx.$queryRaw(
+          Prisma.sql`
+            UPDATE "ContactSubmission"
+            SET 
+              "status" = 'in-progress',
+              "updatedAt" = NOW(),
+              "lastRepliedAt" = NOW()
+            WHERE "id" = ${id}
+          `
+        );
+      });
     } catch (emailError) {
       logger.error("Failed to send reply email", emailError);
       return NextResponse.json(
