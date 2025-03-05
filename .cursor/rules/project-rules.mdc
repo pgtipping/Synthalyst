@@ -23,5 +23,6 @@ alwaysApply: true
 - DO NOT install packages in root folder
 - Always check folder before installing any package
 - focus ALL development in development folder (/nextjs-app)
+- update memory bank before staging files
 - stage and commit files from the root directory
 - ALWAYS stage files with "git add ."
