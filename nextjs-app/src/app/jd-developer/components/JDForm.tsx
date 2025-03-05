@@ -101,6 +101,19 @@ const formSchema = z.object({
       currency: "USD",
     })
     .optional(),
+  benefits: z.array(z.string()).default([]),
+  company: z
+    .object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      culture: z.array(z.string()).default([]),
+    })
+    .default({
+      name: "",
+      description: "",
+      culture: [],
+    })
+    .optional(),
   industry: z.string().min(1, "Industry is required"),
   level: z.string().min(1, "Level is required"),
   isTemplate: z.boolean().default(false),
@@ -244,6 +257,12 @@ export default function JDForm({
         type: initialTemplate?.salary?.type || "yearly",
         currency: initialTemplate?.salary?.currency || "USD",
       },
+      benefits: initialTemplate?.benefits || [],
+      company: {
+        name: initialTemplate?.company?.name || "",
+        description: initialTemplate?.company?.description || "",
+        culture: initialTemplate?.company?.culture || [],
+      },
       industry: initialTemplate?.metadata?.industry || "",
       level: initialTemplate?.metadata?.level || "",
       isTemplate: false,
@@ -300,9 +319,15 @@ export default function JDForm({
           type: initialTemplate.salary?.type || "yearly",
           currency: initialTemplate.salary?.currency || "USD",
         },
+        benefits: initialTemplate.benefits || [],
+        company: {
+          name: initialTemplate.company?.name || "",
+          description: initialTemplate.company?.description || "",
+          culture: initialTemplate.company?.culture || [],
+        },
         industry: initialTemplate.metadata.industry || "",
         level: initialTemplate.metadata.level || "",
-        isTemplate: true,
+        isTemplate: false,
       });
     }
   }, [initialTemplate, form]);
@@ -657,6 +682,8 @@ export default function JDForm({
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
+    setGeneratedJD(null);
+
     try {
       const response = await fetch("/api/jd-developer/generate", {
         method: "POST",
@@ -668,16 +695,15 @@ export default function JDForm({
           department: values.department,
           location: values.location,
           employmentType: values.employmentType,
-          jobDescription: values.jobDescription,
+          description: values.jobDescription,
           responsibilities: values.responsibilities,
           requirements: values.requirements,
           qualifications: values.qualifications,
           salary: values.salary,
           benefits: values.benefits,
           company: values.company,
-          contactInfo: values.contactInfo,
-          applicationProcess: values.applicationProcess,
-          additionalInfo: values.additionalInfo,
+          industry: values.industry,
+          level: values.level,
         }),
       });
 
@@ -832,6 +858,12 @@ export default function JDForm({
                   max: 0,
                   type: "yearly",
                   currency: "USD",
+                },
+                benefits: [],
+                company: {
+                  name: "",
+                  description: "",
+                  culture: [],
                 },
                 industry: "",
                 level: "",
