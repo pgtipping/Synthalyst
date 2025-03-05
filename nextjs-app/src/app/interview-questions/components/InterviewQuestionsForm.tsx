@@ -525,44 +525,42 @@ export default function InterviewQuestionsForm() {
             className="w-full"
           >
             <div className="px-6 pt-4">
-              <TabsList className="w-full flex flex-wrap sm:flex-nowrap p-1 bg-gray-100 rounded-xl overflow-hidden">
+              <TabsList className="w-full flex flex-nowrap p-1 bg-gray-100 rounded-xl overflow-hidden">
                 <TabsTrigger
                   value="questions"
-                  className="flex-1 flex items-center justify-center py-2.5 px-2 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
+                  className="flex-1 flex items-center justify-center py-2 px-1 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasResults}
                 >
-                  <HelpCircle className="h-5 w-5 mr-1 sm:mr-2 text-indigo-600" />
-                  <span className="font-medium text-sm sm:text-base">Q</span>
+                  <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-indigo-600" />
+                  <span className="font-medium text-xs sm:text-base">Q</span>
                   {generatedQuestions.length > 0 && (
-                    <span className="ml-1 sm:ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                    <span className="ml-1 bg-indigo-100 text-indigo-800 text-xs font-medium px-1 py-0.5 rounded-full">
                       {generatedQuestions.length}
                     </span>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="tips"
-                  className="flex-1 flex items-center justify-center py-2.5 px-2 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
+                  className="flex-1 flex items-center justify-center py-2 px-1 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasTips}
                 >
-                  <CheckSquare className="h-5 w-5 mr-1 sm:mr-2 text-blue-600" />
-                  <span className="font-medium text-sm sm:text-base">Tips</span>
+                  <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-blue-600" />
+                  <span className="font-medium text-xs sm:text-base">T</span>
                   {evaluationTips.length > 0 && (
-                    <span className="ml-1 sm:ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                    <span className="ml-1 bg-blue-100 text-blue-800 text-xs font-medium px-1 py-0.5 rounded-full">
                       {evaluationTips.length}
                     </span>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="rubric"
-                  className="flex-1 flex items-center justify-center py-2.5 px-2 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
+                  className="flex-1 flex items-center justify-center py-2 px-1 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasRubric}
                 >
-                  <Award className="h-5 w-5 mr-1 sm:mr-2 text-emerald-600" />
-                  <span className="font-medium text-sm sm:text-base">
-                    Rubric
-                  </span>
+                  <Award className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-emerald-600" />
+                  <span className="font-medium text-xs sm:text-base">R</span>
                   {hasRubric && (
-                    <span className="ml-1 sm:ml-2 bg-emerald-100 text-emerald-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                    <span className="ml-1 bg-emerald-100 text-emerald-800 text-xs font-medium px-1 py-0.5 rounded-full">
                       4
                     </span>
                   )}

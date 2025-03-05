@@ -533,6 +533,66 @@ IMPORTANT:
           });
         }
 
+        // Ensure consistent number of criteria across all levels
+        const maxCriteria = Math.max(
+          ...levels.map((level) => level.criteria.length)
+        );
+        levels.forEach((level) => {
+          // Get the standard level that matches this level
+          const standardLevel = [
+            {
+              level: "excellent",
+              defaultCriteria: [
+                "Strong, detailed response demonstrating technical skills",
+                "Clear understanding of best practices",
+                "Provides specific, relevant examples",
+              ],
+            },
+            {
+              level: "good",
+              defaultCriteria: [
+                "Adequate response with some technical skills",
+                "Some real-world examples but lacks depth",
+                "Good understanding of concepts",
+              ],
+            },
+            {
+              level: "average",
+              defaultCriteria: [
+                "Limited response with basic skills",
+                "Lacks specific examples",
+                "Basic understanding of concepts",
+              ],
+            },
+            {
+              level: "poor",
+              defaultCriteria: [
+                "Inadequate response lacking technical skills",
+                "No relevant examples",
+                "Poor understanding of concepts",
+              ],
+            },
+          ].find((sl) => level.level.toLowerCase().includes(sl.level));
+
+          // If we need to add more criteria
+          if (level.criteria.length < maxCriteria && standardLevel) {
+            // Add criteria from the standard level that aren't already included
+            for (let i = level.criteria.length; i < maxCriteria; i++) {
+              if (
+                standardLevel.defaultCriteria[
+                  i % standardLevel.defaultCriteria.length
+                ]
+              ) {
+                level.criteria.push(
+                  standardLevel.defaultCriteria[
+                    i % standardLevel.defaultCriteria.length
+                  ]
+                );
+              }
+            }
+          }
+        });
+
         // Generate professional-looking HTML for the scoring rubric
         result.scoringRubric = generateProfessionalRubricHtml(levels);
       } else {
