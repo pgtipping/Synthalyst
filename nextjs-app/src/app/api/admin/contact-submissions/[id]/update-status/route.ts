@@ -12,7 +12,7 @@ const statusUpdateSchema = z.object({
 
 export async function POST(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check if user is authenticated
@@ -31,7 +31,7 @@ export async function POST(
     }
 
     // Get the submission ID from the URL params
-    const { id } = context.params;
+    const { id } = params;
 
     // Parse the form data
     const formData = await request.formData();

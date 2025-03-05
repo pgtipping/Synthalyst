@@ -23,7 +23,7 @@ interface ContactSubmission {
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check if user is authenticated
@@ -42,7 +42,7 @@ export async function GET(
     }
 
     // Get the submission ID from the URL params
-    const { id } = context.params;
+    const { id } = params;
 
     try {
       // Fetch the submission
