@@ -1,56 +1,43 @@
-import { openRouter } from "@/lib/openrouter";
-import { PlanGenerationParams, Resource } from "./defaultTrainingPlan";
+import { Groq } from "groq-sdk";
+import { PlanGenerationParams } from "./defaultTrainingPlan";
 
 interface PlanResponse {
   text: string;
 }
 
 /**
- * Generates a training plan using Llama 3.2 via OpenRouter
+ * Generates a training plan using Mixtral 8x7B via Groq
  */
-export async function generatePlanWithLlama(
+export async function generatePlanWithGroq(
   data: PlanGenerationParams
 ): Promise<PlanResponse> {
+  // Initialize the Groq client
+  const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
+
   // Create the prompt
-  const prompt = createLlamaPrompt(data);
+  const prompt = createGroqPrompt(data);
 
-  // Call the OpenRouter API
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+  // Generate the training plan
+  const completion = await groq.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are an expert training developer who creates detailed, professional training plans. Format your response using HTML for better readability.",
       },
-      body: JSON.stringify({
-        model: "meta-llama/llama-3.2-70b-instruct",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert training developer who creates detailed, professional training plans. Format your response using HTML for better readability.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 4000,
-      }),
-    }
-  );
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    model: "mixtral-8x7b-32768",
+    temperature: 0.7,
+    max_tokens: 4000,
+  });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(
-      `OpenRouter API error: ${errorData.error?.message || response.statusText}`
-    );
-  }
-
-  const responseData = await response.json();
-  const text = responseData.choices[0]?.message?.content || "";
+  const text = completion.choices[0]?.message?.content || "";
 
   // Return the generated plan
   return {
@@ -59,9 +46,9 @@ export async function generatePlanWithLlama(
 }
 
 /**
- * Creates a prompt for the Llama model based on the provided parameters
+ * Creates a prompt for the Groq model based on the provided parameters
  */
-function createLlamaPrompt(data: PlanGenerationParams): string {
+function createGroqPrompt(data: PlanGenerationParams): string {
   let prompt = `
     Create a detailed, professional training plan based on:
     

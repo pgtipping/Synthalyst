@@ -48,6 +48,15 @@ import { ResourceList } from "./ResourceList";
 import { Resource } from "./ResourceCard";
 import { pdf } from "@react-pdf/renderer";
 import TrainingPlanPDF from "@/components/TrainingPlanPDF";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Session } from "next-auth";
 
 // Updated schema with mandatory and optional fields
 const formSchema = z.object({
@@ -69,7 +78,6 @@ const formSchema = z.object({
 // Define the type for the generated plan
 interface GeneratedPlan {
   content: string;
-  model: string;
   isPremiumUser: boolean;
   resourceCount: number;
   resources?: Resource[];
@@ -94,6 +102,8 @@ export default function PlanForm({
   );
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCopying, setIsCopying] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -157,7 +167,6 @@ export default function PlanForm({
       const data = await response.json();
       setGeneratedPlan({
         content: data.plan,
-        model: "",
         isPremiumUser: data.isPremiumUser,
         resourceCount: data.resourceCount,
         resources: data.resources || [],
@@ -252,6 +261,69 @@ export default function PlanForm({
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleCopyToClipboard = async () => {
+    if (generatedPlan) {
+      try {
+        setIsCopying(true);
+        await navigator.clipboard.writeText(generatedPlan.content);
+        toast({
+          title: "Copied to clipboard",
+          description: "The training plan has been copied to your clipboard.",
+        });
+      } catch (error) {
+        console.error("Error copying to clipboard:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to copy to clipboard",
+        });
+      } finally {
+        setIsCopying(false);
+      }
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (generatedPlan) {
+      try {
+        setIsDownloading(true);
+        // Generate PDF blob
+        const blob = await pdf(
+          <TrainingPlanPDF
+            title={form.getValues("title")}
+            content={generatedPlan.content}
+            resources={generatedPlan.resources}
+            createdAt={new Date().toISOString()}
+          />
+        ).toBlob();
+
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${form.getValues("title").replace(/\s+/g, "-")}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toast({
+          title: "PDF downloaded",
+          description: "The training plan has been downloaded as a PDF.",
+        });
+      } catch (error: unknown) {
+        console.error("Error generating PDF:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to generate PDF",
+        });
+      } finally {
+        setIsDownloading(false);
+      }
     }
   };
 
@@ -839,7 +911,60 @@ export default function PlanForm({
         </Alert>
       )}
 
-      {generatedPlan && <GeneratedPlanDisplay plan={generatedPlan} />}
+      {generatedPlan && (
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Generated Training Plan
+              </CardTitle>
+              <CardDescription>
+                {generatedPlan.isPremiumUser
+                  ? "Premium plan with AI-curated resources"
+                  : "Standard training plan"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div
+                className="prose prose-sm dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: generatedPlan.content }}
+              />
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={handleCopyToClipboard}
+                disabled={isCopying}
+              >
+                {isCopying ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Copying...
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy to Clipboard
+                  </>
+                )}
+              </Button>
+              <Button onClick={handleDownloadPDF} disabled={isDownloading}>
+                {isDownloading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Preparing PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download PDF
+                  </>
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

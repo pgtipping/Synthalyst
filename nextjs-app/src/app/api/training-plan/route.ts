@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { generateResourcesWithGemini, Resource } from "@/lib/gemini";
-import { generatePlanWithLlama } from "@/lib/llama";
+import { generateTrainingPlanWithFallback } from "@/lib/trainingPlanFallback";
 import { z } from "zod";
 
 // Define the schema for the request body
@@ -63,8 +63,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate the training plan with Llama
-    const planResponse = await generatePlanWithLlama({
+    // Generate the training plan with fallback mechanism
+    const planResponse = await generateTrainingPlanWithFallback({
       title: validatedData.title,
       description: validatedData.description,
       objectives: validatedData.objectives,
@@ -98,9 +98,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle other errors
+    // Handle other errors with proper JSON formatting
     return NextResponse.json(
-      { error: "Failed to generate training plan" },
+      {
+        error: "Failed to generate training plan",
+        message: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

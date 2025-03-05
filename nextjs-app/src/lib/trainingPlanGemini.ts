@@ -1,67 +1,14 @@
-import { openRouter } from "@/lib/openrouter";
-import { PlanGenerationParams, Resource } from "./defaultTrainingPlan";
+import { PlanGenerationParams } from "./defaultTrainingPlan";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 interface PlanResponse {
   text: string;
 }
 
 /**
- * Generates a training plan using Llama 3.2 via OpenRouter
+ * Creates a prompt for the Gemini model based on the provided parameters
  */
-export async function generatePlanWithLlama(
-  data: PlanGenerationParams
-): Promise<PlanResponse> {
-  // Create the prompt
-  const prompt = createLlamaPrompt(data);
-
-  // Call the OpenRouter API
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "meta-llama/llama-3.2-70b-instruct",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert training developer who creates detailed, professional training plans. Format your response using HTML for better readability.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 4000,
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(
-      `OpenRouter API error: ${errorData.error?.message || response.statusText}`
-    );
-  }
-
-  const responseData = await response.json();
-  const text = responseData.choices[0]?.message?.content || "";
-
-  // Return the generated plan
-  return {
-    text,
-  };
-}
-
-/**
- * Creates a prompt for the Llama model based on the provided parameters
- */
-function createLlamaPrompt(data: PlanGenerationParams): string {
+function createGeminiPrompt(data: PlanGenerationParams): string {
   let prompt = `
     Create a detailed, professional training plan based on:
     
@@ -184,4 +131,28 @@ function createLlamaPrompt(data: PlanGenerationParams): string {
   }
 
   return prompt;
+}
+
+/**
+ * Generates a training plan using Google's Gemini 2.0 Flash model
+ */
+export async function generatePlanWithGemini(
+  data: PlanGenerationParams
+): Promise<PlanResponse> {
+  // Initialize the Gemini API
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  // Create the prompt
+  const prompt = createGeminiPrompt(data);
+
+  // Generate the training plan
+  const result = await model.generateContent(prompt);
+  const response = result.response;
+  const text = response.text();
+
+  // Return the generated plan
+  return {
+    text,
+  };
 }
