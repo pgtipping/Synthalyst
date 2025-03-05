@@ -1,4 +1,3 @@
-import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
@@ -34,20 +33,24 @@ interface ContactSubmission {
   updatedAt: Date | string;
 }
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Contact Submission Details | Admin Dashboard",
   description: "View and manage contact submission details",
 };
 
-export default async function ContactSubmissionDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+// Updated interface to use Promise for params according to Next.js 15 requirements
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function ContactSubmissionDetailPage(props: PageProps) {
+  // Await the params Promise to get the actual id
+  const { id } = await props.params;
+
   // Fetch the contact submission from the database
-  const submissions = (await prisma.$queryRaw`
-    SELECT * FROM "ContactSubmission" WHERE id = ${params.id}
-  `) as ContactSubmission[];
+  const submissions = await prisma.$queryRaw<ContactSubmission[]>`
+    SELECT * FROM "ContactSubmission" WHERE id = ${id}
+  `;
 
   const submission = submissions[0];
 
@@ -80,7 +83,7 @@ export default async function ContactSubmissionDetailPage({
           { label: "Contact Submissions", href: "/admin/contact-submissions" },
           {
             label: "Details",
-            href: `/admin/contact-submissions/${params.id}`,
+            href: `/admin/contact-submissions/${id}`,
             active: true,
           },
         ]}
@@ -227,7 +230,7 @@ export default async function ContactSubmissionDetailPage({
       {/* Action Buttons */}
       <div className="flex justify-end gap-3">
         <form
-          action={`/api/admin/contact-submissions/${params.id}/update-status`}
+          action={`/api/admin/contact-submissions/${id}/update-status`}
           method="POST"
         >
           <input type="hidden" name="status" value="in-progress" />
@@ -241,7 +244,7 @@ export default async function ContactSubmissionDetailPage({
         </form>
 
         <form
-          action={`/api/admin/contact-submissions/${params.id}/update-status`}
+          action={`/api/admin/contact-submissions/${id}/update-status`}
           method="POST"
         >
           <input type="hidden" name="status" value="resolved" />
@@ -254,11 +257,11 @@ export default async function ContactSubmissionDetailPage({
           </Button>
         </form>
 
-        <Link href={`/admin/contact-submissions/${params.id}/edit`}>
+        <Link href={`/admin/contact-submissions/${id}/edit`}>
           <Button variant="outline">Edit Notes</Button>
         </Link>
 
-        <Link href={`/admin/contact-submissions/${params.id}/reply`}>
+        <Link href={`/admin/contact-submissions/${id}/reply`}>
           <Button
             variant="outline"
             className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200"
@@ -276,7 +279,7 @@ export default async function ContactSubmissionDetailPage({
                 "Are you sure you want to delete this submission? This action cannot be undone."
               )
             ) {
-              fetch(`/api/admin/contact-submissions/${params.id}/delete`, {
+              fetch(`/api/admin/contact-submissions/${id}/delete`, {
                 method: "DELETE",
               })
                 .then((response) => {
