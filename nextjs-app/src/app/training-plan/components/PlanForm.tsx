@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/lib/toast-migration";
-import { useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -75,15 +75,24 @@ interface GeneratedPlan {
   resources?: Resource[];
 }
 
-export default function PlanForm() {
+interface PlanFormProps {
+  session: any; // Using any to avoid type compatibility issues
+  usageCount: number;
+  setUsageCount: (count: number) => void;
+}
+
+export default function PlanForm({
+  session,
+  usageCount,
+  setUsageCount,
+}: PlanFormProps) {
   const router = useRouter();
-  const { data: session } = useSession();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedPlan | null>(
     null
   );
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -104,20 +113,34 @@ export default function PlanForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!session?.user?.email) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "You must be logged in to generate a training plan",
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    setGeneratedPlan(null);
-    setError(null);
-
     try {
+      setIsGenerating(true);
+      setGeneratedPlan(null);
+
+      // Check if user has reached the usage limit and is not authenticated
+      const newUsageCount = usageCount + 1;
+      if (newUsageCount > 3 && !session) {
+        toast({
+          title: "Authentication Required",
+          description:
+            "You've reached the free usage limit. Please sign in to continue using this tool.",
+          action: (
+            <Button
+              variant="outline"
+              onClick={() =>
+                signIn(undefined, { callbackUrl: window.location.href })
+              }
+            >
+              Sign In
+            </Button>
+          ),
+        });
+        return;
+      }
+
+      // Update usage count
+      setUsageCount(newUsageCount);
+
       const response = await fetch("/api/training-plan", {
         method: "POST",
         headers: {
@@ -167,16 +190,29 @@ export default function PlanForm() {
   };
 
   const savePlan = async () => {
+    if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save training plans.",
+        action: (
+          <Button
+            variant="outline"
+            onClick={() =>
+              signIn(undefined, { callbackUrl: window.location.href })
+            }
+          >
+            Sign In
+          </Button>
+        ),
+      });
+      return;
+    }
+
     if (!generatedPlan) return;
 
-    setIsSubmitting(true);
+    setIsSaving(true);
 
     try {
-      // Check if user is logged in
-      if (!session?.user?.email) {
-        throw new Error("You must be logged in to save a training plan");
-      }
-
       // Get the title from the form
       const title = form.getValues("title");
 
@@ -215,7 +251,7 @@ export default function PlanForm() {
             : "Failed to save training plan",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
@@ -769,9 +805,9 @@ export default function PlanForm() {
                 type="button"
                 variant="outline"
                 onClick={savePlan}
-                disabled={isSubmitting}
+                disabled={isSaving}
               >
-                {isSubmitting ? (
+                {isSaving ? (
                   <>
                     <Spinner className="mr-2 h-4 w-4" />
                     Saving...

@@ -37,14 +37,16 @@ const ALWAYS_ACCESSIBLE_PATHS = [
 ];
 
 // Middleware function to handle Coming Soon redirects
-function handleComingSoonRedirects(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+function handleComingSoonRedirects(
+  req: NextRequest | { nextUrl: NextRequest["nextUrl"] }
+) {
+  const { pathname } = req.nextUrl;
 
   // Check if this is a development environment
   const isDev = process.env.NODE_ENV === "development";
 
   // Check if the URL has a dev query parameter
-  const hasDevParam = request.nextUrl.searchParams.has("dev");
+  const hasDevParam = req.nextUrl.searchParams.has("dev");
 
   // Always allow access in development mode or if dev parameter is present
   if (isDev || hasDevParam) {
@@ -82,7 +84,7 @@ function handleComingSoonRedirects(request: NextRequest) {
       .join(" ");
 
     // Create the redirect URL with query parameters
-    const url = request.nextUrl.clone();
+    const url = new URL(req.nextUrl.toString());
     url.pathname = "/coming-soon";
     url.searchParams.set("tool", formattedToolName);
     url.searchParams.set("path", pathname);
@@ -94,24 +96,18 @@ function handleComingSoonRedirects(request: NextRequest) {
 }
 
 // Main middleware function
-export function middleware(request: NextRequest) {
-  // First, check if we need to redirect to Coming Soon
-  const comingSoonRedirect = handleComingSoonRedirects(request);
-  if (comingSoonRedirect) {
-    return comingSoonRedirect;
-  }
-
-  // Continue with normal processing
-  return NextResponse.next();
-}
-
-// Protect routes that require authentication
 export default withAuth(
   function middleware(req) {
+    // First, check if we need to redirect to Coming Soon
+    const comingSoonRedirect = handleComingSoonRedirects(req);
+    if (comingSoonRedirect) {
+      return comingSoonRedirect;
+    }
+
     const token = req.nextauth.token;
 
-    // If no token exists, redirect to login
-    if (!token) {
+    // If no token exists and this is a protected route, redirect to login
+    if (!token && isProtectedRoute(req.nextUrl.pathname)) {
       return NextResponse.redirect(new URL("/auth/signin", req.url));
     }
 
@@ -119,7 +115,14 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        // Allow Coming Soon redirects to happen without requiring auth
+        if (isComingSoonRoute(req.nextUrl.pathname)) {
+          return true;
+        }
+        // For protected routes, require a token
+        return !!token;
+      },
     },
     pages: {
       signIn: "/auth/signin",
@@ -127,12 +130,51 @@ export default withAuth(
   }
 );
 
+// Helper function to check if a route requires authentication
+function isProtectedRoute(pathname: string) {
+  const protectedRoutes = ["/api/protected"];
+
+  return protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+}
+
+// Helper function to check if a route should redirect to Coming Soon
+function isComingSoonRoute(pathname: string) {
+  const comingSoonRoutes = [
+    "/2do",
+    "/learning-content",
+    "/knowledge-gpt",
+    "/competency-manager",
+    "/model-comparison",
+    "/the-synth",
+  ];
+
+  return comingSoonRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+}
+
 // Configure which routes to protect
 export const config = {
   matcher: [
-    "/jd-developer/:path*",
-    "/2do/:path*",
-    "/training-plan/:path*",
+    // Authentication protected routes (only API routes)
     "/api/protected/:path*",
+
+    // Coming Soon routes
+    "/2do/:path*",
+    "/learning-content/:path*",
+    "/knowledge-gpt/:path*",
+    "/competency-manager/:path*",
+    "/model-comparison/:path*",
+    "/the-synth/:path*",
+
+    // Root paths for Coming Soon
+    "/2do",
+    "/learning-content",
+    "/knowledge-gpt",
+    "/competency-manager",
+    "/model-comparison",
+    "/the-synth",
   ],
 };

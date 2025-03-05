@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import PlanForm from "./PlanForm";
 import SavedPlans from "./SavedPlans";
+import { Button } from "@/components/ui/button";
 
 export default function TrainingPlanClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState("create");
+  const [usageCount, setUsageCount] = useState(0);
 
   // Set the active tab based on the URL query parameter
   useEffect(() => {
@@ -20,15 +22,27 @@ export default function TrainingPlanClient() {
     if (tab && (tab === "create" || tab === "saved")) {
       setActiveTab(tab);
     }
+
+    // Load usage count from localStorage
+    const storedCount = localStorage.getItem("trainingPlanUsageCount");
+    if (storedCount) {
+      setUsageCount(parseInt(storedCount, 10));
+    }
   }, [searchParams]);
 
-  // Check if user is authenticated
+  // Only require authentication for the "saved" tab
   useEffect(() => {
-    if (status === "unauthenticated") {
-      toast.error("You must be logged in to use the Training Plan Creator");
-      router.push("/auth/signin?callbackUrl=/training-plan");
+    if (activeTab === "saved" && status === "unauthenticated") {
+      toast.error("You must be logged in to view saved training plans", {
+        action: {
+          label: "Sign In",
+          onClick: () =>
+            signIn(undefined, { callbackUrl: "/training-plan?tab=saved" }),
+        },
+      });
+      setActiveTab("create");
     }
-  }, [status, router]);
+  }, [activeTab, status]);
 
   // Show loading state while checking authentication
   if (status === "loading") {
@@ -42,38 +56,63 @@ export default function TrainingPlanClient() {
     );
   }
 
-  // Don't render content if not authenticated
-  if (status === "unauthenticated") {
-    return null;
-  }
+  const handleTabChange = (value: string) => {
+    if (value === "saved" && status === "unauthenticated") {
+      toast.error("You must be logged in to view saved training plans", {
+        action: {
+          label: "Sign In",
+          onClick: () =>
+            signIn(undefined, { callbackUrl: "/training-plan?tab=saved" }),
+        },
+      });
+      return;
+    }
+
+    setActiveTab(value);
+    router.push(`/training-plan?tab=${value}`);
+  };
 
   return (
-    <div className="container py-6 space-y-6">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold">Training Plan Creator</h1>
-        <p className="text-muted-foreground">
-          Create and manage professional training plans with AI assistance
-        </p>
-      </div>
-
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-6"
-      >
-        <TabsList className="grid w-full grid-cols-2 md:w-auto">
-          <TabsTrigger value="create">Create New Plan</TabsTrigger>
-          <TabsTrigger value="saved">Saved Plans</TabsTrigger>
+    <div className="container py-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+          <TabsTrigger value="create">Create Plan</TabsTrigger>
+          <TabsTrigger value="saved">
+            Saved Plans {status === "unauthenticated" && "🔒"}
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="create" className="space-y-6">
-          <div className="bg-card rounded-lg border shadow-sm p-6">
-            <PlanForm />
-          </div>
+        <TabsContent value="create">
+          <PlanForm
+            session={session}
+            usageCount={usageCount}
+            setUsageCount={(count: number) => {
+              setUsageCount(count);
+              localStorage.setItem("trainingPlanUsageCount", count.toString());
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="saved">
-          <SavedPlans />
+          {status === "authenticated" ? (
+            <SavedPlans />
+          ) : (
+            <div className="text-center p-8 bg-gray-50 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4">
+                Authentication Required
+              </h3>
+              <p className="mb-6">
+                You need to sign in to view your saved training plans.
+              </p>
+              <Button
+                onClick={() =>
+                  signIn(undefined, { callbackUrl: "/training-plan?tab=saved" })
+                }
+              >
+                Sign In
+              </Button>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
@@ -741,11 +741,21 @@ export default function JDForm({
   };
 
   const handleSaveAsTemplate = async (values: FormValues) => {
+    // Check if user is authenticated
     if (!session?.user?.email) {
       toast({
-        title: "Authentication required",
+        title: "Authentication Required",
         description: "Please sign in to save templates.",
-        variant: "destructive",
+        action: (
+          <Button
+            variant="outline"
+            onClick={() =>
+              signIn(undefined, { callbackUrl: window.location.href })
+            }
+          >
+            Sign In
+          </Button>
+        ),
       });
       return;
     }
@@ -867,11 +877,21 @@ export default function JDForm({
   };
 
   const handleSaveJobDescription = async (values: FormValues) => {
+    // Check if user is authenticated
     if (!session?.user?.email) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to save job descriptions.",
-        variant: "destructive",
+        action: (
+          <Button
+            variant="outline"
+            onClick={() =>
+              signIn(undefined, { callbackUrl: window.location.href })
+            }
+          >
+            Sign In
+          </Button>
+        ),
       });
       return;
     }

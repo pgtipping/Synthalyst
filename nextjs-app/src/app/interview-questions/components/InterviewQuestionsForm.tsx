@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useSession, signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -64,19 +65,23 @@ const jobLevels = [
 ];
 
 export default function InterviewQuestionsForm() {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
   const [evaluationTips, setEvaluationTips] = useState<string[]>([]);
-  const [scoringRubric, setScoringRubric] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<string>("questions");
-  const [isMounted, setIsMounted] = useState(true);
+  const [scoringRubric, setScoringRubric] = useState("");
+  const [activeTab, setActiveTab] = useState("form");
+  const [usageCount, setUsageCount] = useState(0);
   const { toast } = useToast();
 
-  // Set isMounted to false when component unmounts
+  // Load usage count from localStorage on component mount
   useEffect(() => {
-    return () => {
-      setIsMounted(false);
-    };
+    setIsMounted(true);
+    const storedCount = localStorage.getItem("interviewQuestionsUsageCount");
+    if (storedCount) {
+      setUsageCount(parseInt(storedCount, 10));
+    }
   }, []);
 
   const form = useForm<FormValues>({
@@ -98,6 +103,34 @@ export default function InterviewQuestionsForm() {
       formSchema.parse(data);
 
       if (!isMounted) return;
+
+      // Check if user has reached the usage limit and is not authenticated
+      const newUsageCount = usageCount + 1;
+      if (newUsageCount > 3 && !session) {
+        toast({
+          title: "Authentication Required",
+          description:
+            "You've reached the free usage limit. Please sign in to continue using this tool.",
+          variant: "default",
+        });
+
+        // Save the form data to localStorage so it's not lost
+        localStorage.setItem(
+          "interviewQuestionsFormData",
+          JSON.stringify(data)
+        );
+
+        // Redirect to sign in
+        signIn(undefined, { callbackUrl: window.location.href });
+        return;
+      }
+
+      // Update and save the usage count
+      setUsageCount(newUsageCount);
+      localStorage.setItem(
+        "interviewQuestionsUsageCount",
+        newUsageCount.toString()
+      );
 
       setIsLoading(true);
       setGeneratedQuestions([]);
