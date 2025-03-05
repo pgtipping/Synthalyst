@@ -18,6 +18,11 @@
   - `nextjs-app/src/app/jd-developer/components/JDForm.tsx`
   - `nextjs-app/src/app/training-plan/components/TrainingPlanClient.tsx`
   - `nextjs-app/src/app/training-plan/components/PlanForm.tsx`
+- Fixed a follow-up issue (2025-03-05):
+  - Resolved a Vercel build error caused by missing props in client-component.tsx
+  - Updated the PlanForm component in client-component.tsx to include the required props
+  - Ensured consistency between both implementations of the Training Plan Creator
+  - File modified: `nextjs-app/src/app/training-plan/client-component.tsx`
 
 ### Fix Next.js 15 Type Error in Coming Soon Page (2025-03-05)
 
