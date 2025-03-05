@@ -628,10 +628,10 @@ We've just fixed a critical Vercel deployment error related to Next.js 15 type c
    - Root cause: Next.js 15 requires `searchParams` to be a Promise type, but our Coming Soon page was expecting a plain object
    - Solution implemented:
      - Updated the Coming Soon page component to be async
-     - Changed the searchParams type to accept both Promise and plain object
-     - Added logic to resolve the searchParams if it's a Promise
+     - Changed the searchParams type to accept only Promise type
+     - Updated the code to always await `searchParams` since it's now guaranteed to be a Promise
    - This fix ensures compatibility with Next.js 15's new requirements for page props
-   - The deployment should now complete successfully
+   - The deployment should now complete without type errors
    - Location: `nextjs-app/src/app/coming-soon/page.tsx`
 
 2. ✅ COMMITTED: Changes pushed to main branch (2025-03-05):
