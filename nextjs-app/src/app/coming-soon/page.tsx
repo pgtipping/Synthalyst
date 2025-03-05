@@ -5,13 +5,10 @@ import { Clock, Bell } from "lucide-react";
 export default async function ComingSoonPage({
   searchParams,
 }: {
-  searchParams:
-    | Promise<{ tool?: string; path?: string }>
-    | { tool?: string; path?: string };
+  searchParams: Promise<{ tool?: string; path?: string }>;
 }) {
-  // Resolve searchParams if it's a Promise
-  const resolvedParams =
-    searchParams instanceof Promise ? await searchParams : searchParams;
+  // Resolve searchParams since it's a Promise in Next.js 15
+  const resolvedParams = await searchParams;
   const toolName = resolvedParams.tool || "This tool";
 
   return (
