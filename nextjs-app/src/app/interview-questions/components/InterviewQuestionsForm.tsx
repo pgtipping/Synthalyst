@@ -525,42 +525,46 @@ export default function InterviewQuestionsForm() {
             className="w-full"
           >
             <div className="px-6 pt-4">
-              <TabsList className="w-full grid grid-cols-1 md:grid-cols-3 p-1 bg-gray-100 rounded-xl overflow-hidden">
+              <TabsList className="w-full flex flex-wrap sm:flex-nowrap p-1 bg-gray-100 rounded-xl overflow-hidden">
                 <TabsTrigger
                   value="questions"
-                  className="flex items-center justify-center py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10"
+                  className="flex-1 flex items-center justify-center py-2.5 px-2 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasResults}
                 >
-                  <HelpCircle className="h-5 w-5 mr-2 text-indigo-600" />
-                  <span className="font-medium">Questions</span>
+                  <HelpCircle className="h-5 w-5 mr-1 sm:mr-2 text-indigo-600" />
+                  <span className="font-medium text-sm sm:text-base">
+                    Questions
+                  </span>
                   {generatedQuestions.length > 0 && (
-                    <span className="ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    <span className="ml-1 sm:ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded-full">
                       {generatedQuestions.length}
                     </span>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="tips"
-                  className="flex items-center justify-center py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10"
+                  className="flex-1 flex items-center justify-center py-2.5 px-2 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasTips}
                 >
-                  <CheckSquare className="h-5 w-5 mr-2 text-blue-600" />
-                  <span className="font-medium">Evaluation Tips</span>
+                  <CheckSquare className="h-5 w-5 mr-1 sm:mr-2 text-blue-600" />
+                  <span className="font-medium text-sm sm:text-base">Tips</span>
                   {evaluationTips.length > 0 && (
-                    <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    <span className="ml-1 sm:ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
                       {evaluationTips.length}
                     </span>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="rubric"
-                  className="flex items-center justify-center py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10"
+                  className="flex-1 flex items-center justify-center py-2.5 px-2 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
                   disabled={!hasRubric}
                 >
-                  <Award className="h-5 w-5 mr-2 text-emerald-600" />
-                  <span className="font-medium">Scoring Rubric</span>
+                  <Award className="h-5 w-5 mr-1 sm:mr-2 text-emerald-600" />
+                  <span className="font-medium text-sm sm:text-base">
+                    Rubric
+                  </span>
                   {hasRubric && (
-                    <span className="ml-2 bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    <span className="ml-1 sm:ml-2 bg-emerald-100 text-emerald-800 text-xs font-medium px-2 py-0.5 rounded-full">
                       4 levels
                     </span>
                   )}
@@ -587,11 +591,11 @@ export default function InterviewQuestionsForm() {
                             role="article"
                             aria-label={`Question ${index + 1}`}
                           >
-                            <div className="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex justify-between items-center">
+                            <div className="bg-indigo-50 px-4 py-3 border-b-2 border-indigo-400 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                               <p className="font-semibold text-indigo-900 text-lg">
                                 Question {index + 1}
                               </p>
-                              <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                              <span className="mt-1 sm:mt-0 bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                                 Core
                               </span>
                             </div>
@@ -632,11 +636,11 @@ export default function InterviewQuestionsForm() {
                             role="article"
                             aria-label={`Evaluation Tip ${index + 1}`}
                           >
-                            <div className="bg-blue-50 px-4 py-3 border-b-2 border-blue-400 flex justify-between items-center">
+                            <div className="bg-blue-50 px-4 py-3 border-b-2 border-blue-400 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                               <p className="font-semibold text-blue-900 text-lg">
                                 Evaluation Tip {index + 1}
                               </p>
-                              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                              <span className="mt-1 sm:mt-0 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                                 Guidance
                               </span>
                             </div>
@@ -795,29 +799,62 @@ export default function InterviewQuestionsForm() {
                           @media (max-width: 640px) {
                             .level-header {
                               flex-direction: column;
+                              align-items: flex-start;
                               gap: 0.5rem;
                             }
 
                             .level-rating {
                               flex-direction: row;
                               gap: 0.5rem;
+                              align-self: flex-start;
+                            }
+
+                            /* Fix for rubric display on mobile */
+                            .scoring-rubric
+                              div[class*="overflow-hidden rounded-lg"] {
+                              width: 100%;
+                              max-width: 100%;
+                              margin-bottom: 1rem;
+                            }
+
+                            .scoring-rubric div[class*="bg-indigo-50"] {
+                              flex-direction: column;
+                              align-items: flex-start;
+                            }
+
+                            .scoring-rubric div[class*="bg-indigo-50"] span {
+                              margin-top: 0.25rem;
+                              align-self: flex-start;
                             }
                           }
                         `}</style>
 
                         <style jsx global>{`
-                          /* The scoring-rubric styles are now handled by Tailwind classes directly in the HTML */
-                          /* This ensures consistent styling with the rest of the application */
-
                           /* Add any additional styles needed for mobile responsiveness */
                           @media (max-width: 640px) {
-                            .scoring-rubric .bg-indigo-50 {
+                            /* Ensure the rubric content is fully visible on mobile */
+                            .scoring-rubric {
+                              width: 100%;
+                              overflow-x: hidden;
+                            }
+
+                            /* Make sure headers in the rubric are properly aligned */
+                            .scoring-rubric .bg-indigo-50,
+                            .scoring-rubric [class*="bg-indigo-50"] {
                               flex-direction: column;
                               align-items: flex-start;
                             }
 
-                            .scoring-rubric .bg-indigo-50 span {
+                            .scoring-rubric .bg-indigo-50 span,
+                            .scoring-rubric [class*="bg-indigo-50"] span {
                               margin-top: 0.25rem;
+                              align-self: flex-start;
+                            }
+
+                            /* Ensure all content is visible */
+                            .scoring-rubric div {
+                              max-width: 100%;
+                              word-break: break-word;
                             }
                           }
                         `}</style>
