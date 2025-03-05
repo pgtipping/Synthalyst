@@ -532,9 +532,7 @@ export default function InterviewQuestionsForm() {
                   disabled={!hasResults}
                 >
                   <HelpCircle className="h-5 w-5 mr-1 sm:mr-2 text-indigo-600" />
-                  <span className="font-medium text-sm sm:text-base">
-                    Questions
-                  </span>
+                  <span className="font-medium text-sm sm:text-base">Q</span>
                   {generatedQuestions.length > 0 && (
                     <span className="ml-1 sm:ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded-full">
                       {generatedQuestions.length}
@@ -565,7 +563,7 @@ export default function InterviewQuestionsForm() {
                   </span>
                   {hasRubric && (
                     <span className="ml-1 sm:ml-2 bg-emerald-100 text-emerald-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                      4 levels
+                      4
                     </span>
                   )}
                 </TabsTrigger>
@@ -861,12 +859,20 @@ export default function InterviewQuestionsForm() {
                             /* Fix for card spacing */
                             .scoring-rubric div[class*="mb-4"] {
                               margin-bottom: 1.5rem;
+                              width: 100% !important;
+                              display: block !important;
                             }
 
                             /* Improve text readability */
                             .scoring-rubric p {
                               font-size: 0.9375rem;
                               line-height: 1.5;
+                            }
+
+                            /* Ensure all rubric levels are displayed */
+                            .scoring-rubric > div {
+                              display: block !important;
+                              margin-bottom: 1rem !important;
                             }
                           }
                         `}</style>

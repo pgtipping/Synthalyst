@@ -325,7 +325,7 @@ IMPORTANT:
         const rubricText = rubricMatch[1].trim();
 
         // Parse the rubric text to identify different scoring levels
-        const levels = [];
+        let levels = [];
         let currentLevel = null;
         let currentPoints = null;
         let currentCriteria = [];
@@ -386,13 +386,18 @@ IMPORTANT:
         }
 
         // Second pass: If no levels were found, try to extract from paragraph format
-        if (levels.length === 0) {
+        if (levels.length === 0 || levels.length < 3) {
           // Look for patterns like "Excellent (4 points): criteria..."
           const paragraphLevels = rubricText.match(
             /([A-Za-z]+(?:\s+[A-Za-z]+)?)\s*\((\d+(?:-\d+)?)\s*(?:points?|)\):\s*([^.]+(?:\.[^.]+)*)/g
           );
 
           if (paragraphLevels) {
+            // Clear existing levels if we're doing a second pass
+            if (levels.length < 3) {
+              levels = [];
+            }
+
             paragraphLevels.forEach((levelText) => {
               const match = levelText.match(
                 /([A-Za-z]+(?:\s+[A-Za-z]+)?)\s*\((\d+(?:-\d+)?)\s*(?:points?|)\):\s*(.+)/
@@ -414,6 +419,118 @@ IMPORTANT:
               }
             });
           }
+        }
+
+        // Third pass: If still not enough levels, try to extract from continuous text
+        if (levels.length === 0 || levels.length < 3) {
+          // Look for standard level names in the text
+          const standardLevels = ["excellent", "good", "average", "poor"];
+          const foundLevels = new Set(levels.map((l) => l.level.toLowerCase()));
+
+          // For each standard level not found yet
+          standardLevels.forEach((standardLevel) => {
+            if (
+              !Array.from(foundLevels).some((fl) => fl.includes(standardLevel))
+            ) {
+              // Look for this level in the text
+              const regex = new RegExp(
+                `${standardLevel}\\s*(?:\\(?(\\d+(?:-\\d+)?)\\s*(?:points?|)?\\)?)?[:\\.]?\\s*([^.]+(?:\\.[^.]+)*)`,
+                "i"
+              );
+              const match = rubricText.match(regex);
+
+              if (match) {
+                const [, points = "", criteriaText] = match;
+                if (criteriaText) {
+                  const criteria = criteriaText
+                    .split(".")
+                    .map((c) => c.trim())
+                    .filter((c) => c.length > 0);
+
+                  if (criteria.length > 0) {
+                    levels.push({
+                      level:
+                        standardLevel.charAt(0).toUpperCase() +
+                        standardLevel.slice(1),
+                      points,
+                      criteria,
+                    });
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // Ensure we have all standard levels
+        if (levels.length < 4) {
+          const standardLevels = [
+            {
+              level: "Excellent",
+              points: "4-5",
+              defaultCriteria: [
+                "Strong, detailed response demonstrating technical skills",
+                "Clear understanding of best practices",
+                "Provides specific, relevant examples",
+              ],
+            },
+            {
+              level: "Good",
+              points: "3-4",
+              defaultCriteria: [
+                "Adequate response with some technical skills",
+                "Some real-world examples but lacks depth",
+                "Good understanding of concepts",
+              ],
+            },
+            {
+              level: "Average",
+              points: "2-3",
+              defaultCriteria: [
+                "Limited response with basic skills",
+                "Lacks specific examples",
+                "Basic understanding of concepts",
+              ],
+            },
+            {
+              level: "Poor",
+              points: "1-2",
+              defaultCriteria: [
+                "Inadequate response lacking technical skills",
+                "No relevant examples",
+                "Poor understanding of concepts",
+              ],
+            },
+          ];
+
+          // Add any missing standard levels
+          const existingLevels = new Set(
+            levels.map((l) => l.level.toLowerCase())
+          );
+          standardLevels.forEach((sl) => {
+            if (
+              !Array.from(existingLevels).some((el) =>
+                el.includes(sl.level.toLowerCase())
+              )
+            ) {
+              levels.push({
+                level: sl.level,
+                points: sl.points,
+                criteria: sl.defaultCriteria,
+              });
+            }
+          });
+
+          // Sort levels in the standard order
+          levels.sort((a, b) => {
+            const aIndex = standardLevels.findIndex((sl) =>
+              a.level.toLowerCase().includes(sl.level.toLowerCase())
+            );
+            const bIndex = standardLevels.findIndex((sl) =>
+              b.level.toLowerCase().includes(sl.level.toLowerCase())
+            );
+            return aIndex - bIndex;
+          });
         }
 
         // Generate professional-looking HTML for the scoring rubric
