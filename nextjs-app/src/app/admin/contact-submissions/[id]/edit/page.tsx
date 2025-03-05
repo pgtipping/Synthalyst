@@ -1,19 +1,11 @@
-import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
 import EditNotesForm from "./edit-notes-form";
 
-export const metadata: Metadata = {
-  title: "Edit Notes | Admin Dashboard",
-  description: "Edit notes for a contact submission",
-};
-
-// Define the ContactSubmission interface
 interface ContactSubmission {
   id: string;
   name: string;
@@ -30,61 +22,60 @@ interface ContactSubmission {
   updatedAt: Date | string;
 }
 
+export const metadata = {
+  title: "Edit Notes | Contact Submission | Admin | Synthalyst",
+  description: "Edit notes for a contact submission",
+};
+
+// Updated interface to use Promise for params according to Next.js 15 requirements
 interface PageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditNotesPage(props: PageProps) {
-  const { params } = props;
+  // Await the params Promise to get the actual id
+  const { id } = await props.params;
 
   // Fetch the contact submission from the database
-  const submissions = (await prisma.$queryRaw`
-    SELECT * FROM "ContactSubmission" WHERE id = ${params.id}
-  `) as ContactSubmission[];
+  const submission = await prisma.$queryRaw<ContactSubmission[]>`
+    SELECT * FROM "ContactSubmission" WHERE id = ${id}
+  `;
 
-  const submission = submissions[0];
-
-  // If submission not found, return 404
-  if (!submission) {
+  if (!submission || submission.length === 0) {
     notFound();
   }
 
+  const contactSubmission = submission[0];
+
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto py-6">
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
           { label: "Admin", href: "/admin" },
           { label: "Contact Submissions", href: "/admin/contact-submissions" },
-          { label: "Details", href: `/admin/contact-submissions/${params.id}` },
+          { label: "Details", href: `/admin/contact-submissions/${id}` },
           {
             label: "Edit Notes",
-            href: `/admin/contact-submissions/${params.id}/edit`,
+            href: `/admin/contact-submissions/${id}/edit`,
             active: true,
           },
         ]}
       />
 
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Edit Notes</h1>
-        <Link href={`/admin/contact-submissions/${params.id}`}>
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Details
-          </Button>
-        </Link>
-      </div>
-
-      <Card>
+      <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Admin Notes</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Edit Notes</CardTitle>
+            <Link href={`/admin/contact-submissions/${id}`}>
+              <Button variant="outline">Back to Details</Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
           <EditNotesForm
-            submissionId={params.id}
-            initialNotes={submission.notes || ""}
+            submissionId={contactSubmission.id}
+            initialNotes={contactSubmission.notes || ""}
           />
         </CardContent>
       </Card>

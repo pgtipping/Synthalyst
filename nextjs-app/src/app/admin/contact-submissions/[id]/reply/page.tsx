@@ -1,19 +1,11 @@
-import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
 import ReplyForm from "./reply-form";
 
-export const metadata: Metadata = {
-  title: "Reply to Submission | Admin Dashboard",
-  description: "Reply to a contact submission",
-};
-
-// Define the ContactSubmission interface
 interface ContactSubmission {
   id: string;
   name: string;
@@ -30,76 +22,75 @@ interface ContactSubmission {
   updatedAt: Date | string;
 }
 
+export const metadata = {
+  title: "Reply | Contact Submission | Admin | Synthalyst",
+  description: "Reply to a contact submission",
+};
+
+// Updated interface to use Promise for params according to Next.js 15 requirements
 interface PageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function ReplyPage(props: PageProps) {
-  const { params } = props;
+  // Await the params Promise to get the actual id
+  const { id } = await props.params;
 
   // Fetch the contact submission from the database
-  const submissions = (await prisma.$queryRaw`
-    SELECT * FROM "ContactSubmission" WHERE id = ${params.id}
-  `) as ContactSubmission[];
+  const submission = await prisma.$queryRaw<ContactSubmission[]>`
+    SELECT * FROM "ContactSubmission" WHERE id = ${id}
+  `;
 
-  const submission = submissions[0];
-
-  // If submission not found, return 404
-  if (!submission) {
+  if (!submission || submission.length === 0) {
     notFound();
   }
 
+  const contactSubmission = submission[0];
+
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto py-6">
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
           { label: "Admin", href: "/admin" },
           { label: "Contact Submissions", href: "/admin/contact-submissions" },
-          { label: "Details", href: `/admin/contact-submissions/${params.id}` },
+          { label: "Details", href: `/admin/contact-submissions/${id}` },
           {
             label: "Reply",
-            href: `/admin/contact-submissions/${params.id}/reply`,
+            href: `/admin/contact-submissions/${id}/reply`,
             active: true,
           },
         ]}
       />
 
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Reply to Submission</h1>
-        <Link href={`/admin/contact-submissions/${params.id}`}>
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Details
-          </Button>
-        </Link>
-      </div>
-
-      <div className="bg-muted/30 p-4 rounded-md mb-6">
-        <div className="mb-2">
-          <span className="font-medium">From:</span> {submission.name} (
-          {submission.email})
-        </div>
-        <div className="mb-2">
-          <span className="font-medium">Subject:</span> {submission.subject}
-        </div>
-        <div>
-          <span className="font-medium">Message:</span>
-          <div className="mt-2 whitespace-pre-wrap">{submission.message}</div>
-        </div>
-      </div>
-
-      <Card>
+      <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Compose Reply</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Reply to {contactSubmission.name}</CardTitle>
+            <Link href={`/admin/contact-submissions/${id}`}>
+              <Button variant="outline">Back to Details</Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-6">
+            <h3 className="text-lg font-medium mb-2">Original Message</h3>
+            <div className="bg-muted p-4 rounded-md">
+              <p className="mb-2">
+                <strong>From:</strong> {contactSubmission.name} (
+                {contactSubmission.email})
+              </p>
+              <p className="mb-2">
+                <strong>Subject:</strong> {contactSubmission.subject}
+              </p>
+              <p className="whitespace-pre-wrap">{contactSubmission.message}</p>
+            </div>
+          </div>
+
           <ReplyForm
-            submissionId={params.id}
-            recipientEmail={submission.email}
-            initialSubject={`RE: ${submission.subject}`}
+            submissionId={contactSubmission.id}
+            recipientEmail={contactSubmission.email}
+            initialSubject={`Re: ${contactSubmission.subject}`}
           />
         </CardContent>
       </Card>
