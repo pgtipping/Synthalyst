@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Send, AlertCircle, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface ReplyFormProps {
   submissionId: string;
@@ -23,6 +25,8 @@ export default function ReplyForm({
   const router = useRouter();
   const [subject, setSubject] = useState(initialSubject);
   const [message, setMessage] = useState("");
+  const [useReplyTo, setUseReplyTo] = useState(false);
+  const [replyToEmail, setReplyToEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailStatus, setEmailStatus] = useState<
     "idle" | "sending" | "success" | "error"
@@ -47,6 +51,7 @@ export default function ReplyForm({
             recipientEmail,
             subject,
             message,
+            replyToEmail: useReplyTo ? replyToEmail : undefined,
           }),
         }
       );
@@ -128,6 +133,44 @@ export default function ReplyForm({
             required
             disabled={isSubmitting || emailStatus === "success"}
           />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 mb-2">
+            <Checkbox
+              id="useReplyTo"
+              checked={useReplyTo}
+              onCheckedChange={(checked) => setUseReplyTo(checked === true)}
+              disabled={isSubmitting || emailStatus === "success"}
+            />
+            <Label
+              htmlFor="useReplyTo"
+              className="text-sm font-medium cursor-pointer"
+            >
+              Set custom reply-to email address
+            </Label>
+          </div>
+
+          {useReplyTo && (
+            <div className="space-y-2 pl-6">
+              <label htmlFor="replyToEmail" className="text-sm font-medium">
+                Reply-To Email
+              </label>
+              <Input
+                id="replyToEmail"
+                type="email"
+                value={replyToEmail}
+                onChange={(e) => setReplyToEmail(e.target.value)}
+                placeholder="your-email@example.com"
+                required={useReplyTo}
+                disabled={isSubmitting || emailStatus === "success"}
+              />
+              <p className="text-xs text-muted-foreground">
+                When the recipient replies to your email, it will go to this
+                address instead of the default sender.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">

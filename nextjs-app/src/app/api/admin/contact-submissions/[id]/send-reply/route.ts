@@ -12,6 +12,7 @@ const replySchema = z.object({
   recipientEmail: z.string().email("Invalid email address"),
   subject: z.string().min(1, "Subject is required"),
   message: z.string().min(1, "Message is required"),
+  replyToEmail: z.string().email("Invalid reply-to email").optional(),
 });
 
 export async function POST(
@@ -72,7 +73,8 @@ export async function POST(
         validatedData.recipientEmail,
         validatedData.subject,
         htmlMessage,
-        "Synthalyst Support"
+        "Synthalyst Support",
+        validatedData.replyToEmail || userEmail
       );
 
       if (!emailSent) {

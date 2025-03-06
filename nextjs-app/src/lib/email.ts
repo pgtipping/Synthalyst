@@ -12,6 +12,7 @@ if (process.env.SENDGRID_API_KEY) {
 export interface EmailData {
   to: string;
   from: string | { email: string; name: string };
+  replyTo?: string;
   subject: string;
   text: string;
   html: string;
@@ -44,15 +45,19 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
  * @param subject Email subject
  * @param message Email message (HTML)
  * @param fromName Name to display in the from field
+ * @param replyToEmail Email address for replies
  * @returns A promise that resolves to true if the email was sent successfully
  */
 export async function sendContactReply(
   to: string,
   subject: string,
   message: string,
-  fromName: string = "Synthalyst Support"
+  fromName: string = "Synthalyst Support",
+  replyToEmail?: string
 ): Promise<boolean> {
   const fromEmail = process.env.SENDGRID_FROM_EMAIL || "support@synthalyst.com";
+  const replyTo =
+    replyToEmail || process.env.REPLY_TO_EMAIL || "pgtipping1@gmail.com";
 
   const emailData: EmailData = {
     to,
@@ -60,6 +65,7 @@ export async function sendContactReply(
       email: fromEmail,
       name: fromName,
     },
+    replyTo,
     subject,
     text: message.replace(/<[^>]*>/g, ""), // Strip HTML for text version
     html: message,

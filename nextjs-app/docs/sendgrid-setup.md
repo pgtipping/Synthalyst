@@ -43,11 +43,29 @@ Add the following variables to your `.env` file:
 ```
 SENDGRID_API_KEY="your-sendgrid-api-key"
 SENDGRID_FROM_EMAIL="your-verified-email@yourdomain.com"
+REPLY_TO_EMAIL="your-personal-email@example.com"  # Optional: Default reply-to address
 ```
 
-Make sure to replace the values with your actual SendGrid API key and verified sender email.
+Make sure to replace the values with your actual SendGrid API key, verified sender email, and optional default reply-to email.
 
-### 5. Test the Integration
+### 5. Reply-To Functionality
+
+The application supports custom reply-to email addresses, which allows recipients to reply to a different email address than the sender address. This is useful when:
+
+- You're using a no-reply sender address but want replies to go to a monitored inbox
+- Different team members need to receive replies to their personal email addresses
+- You want to track replies through a specific email address
+
+To use this feature:
+
+1. Set a default reply-to address in your `.env` file using the `REPLY_TO_EMAIL` variable
+2. When sending a reply through the admin interface, you can:
+   - Use the default reply-to address (set in the environment variable)
+   - Set a custom reply-to address for a specific email by checking "Set custom reply-to email address" and entering the desired email
+
+The reply-to address will be included in the email headers, so when recipients click "Reply" in their email client, their response will be directed to the specified reply-to address instead of the sender address.
+
+### 6. Test the Integration
 
 To test if your SendGrid integration is working:
 
@@ -55,6 +73,7 @@ To test if your SendGrid integration is working:
 2. Open a submission and click "Reply"
 3. Fill out the form and send a test email to yourself
 4. Check your inbox to confirm the email was delivered
+5. Try replying to the email to verify the reply-to functionality works as expected
 
 ## Troubleshooting
 
