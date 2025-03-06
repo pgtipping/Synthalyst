@@ -1,4 +1,4 @@
-# Active Context - [2025-03-05]
+# Active Context - [2025-03-06]
 
 ## Current Focus
 
@@ -6,8 +6,9 @@
 - Authentication requirement adjustments
 - LLM output quality improvements
 - UI/UX enhancements for different screen sizes
-- Integrated HR toolkit development planning
+- Integrated HR toolkit development planning with JD-first approach
 - Organizational reference data standardization for HR tools
+- Premium vs. freemium feature differentiation
 
 ## Recent Changes
 
@@ -20,6 +21,8 @@
 - Fixed Admin Layout and Authentication
 - Created comprehensive implementation plan for integrating HR tools (guides/integrated-hr-toolkit.md)
 - Added organizational reference data schema and management to the HR toolkit implementation plan
+- Revised the integrated HR toolkit implementation plan to adopt a JD-first approach
+- Defined premium vs. freemium feature differentiation for all HR tools
 
 ## Next Steps
 
@@ -31,6 +34,8 @@
 - Begin implementation of the integrated HR toolkit, starting with the competency data layer
 - Design and implement the organizational reference data schema
 - Create seed data for common job levels, families, and competency categories
+- Implement competency extraction and standardization in the JD Developer
+- Add "Save Competencies" feature for premium users in JD Developer
 
 ## Active Decisions
 
@@ -39,7 +44,10 @@
 - Maintain fallback to Gemini for robustness
 - Implement comprehensive quality validation for LLM outputs
 - Use responsive design patterns that adapt to different screen sizes
-- Develop Competency Matrix Creator as a separate tool with integration points to Competency Manager
+- Adopt a JD-first approach for competency management
+- Use LLM to standardize competencies extracted from JDs
+- Maintain full standalone functionality for freemium users
+- Provide enhanced integration features for premium users
 - Create a unified data layer for competencies that can be accessed by all HR tools
 - Implement standardized organizational reference data (job levels, job families, competency categories) to support HR tools
 - Provide seed data for common organizational structures to improve user onboarding
@@ -54,6 +62,41 @@
 - Prioritize development of the integrated HR toolkit to create a seamless workflow between all HR tools
 - Determine the right level of flexibility vs. standardization for organizational reference data
 - Consider industry-specific variations in job architectures and competency frameworks
+- Evaluate the best approach for premium feature upselling without disrupting the freemium user experience
+
+## Integrated HR Toolkit Development (2025-03-06)
+
+We've revised our implementation plan for integrating all HR tools into a unified ecosystem:
+
+1. ✅ UPDATED: Implementation Plan Document (2025-03-06):
+
+   - Adopted a JD-first approach where competencies are extracted from job descriptions
+   - Defined clear distinction between premium and freemium features
+   - Outlined competency extraction and standardization using LLM
+   - Revised implementation phases to prioritize JD Developer enhancements
+   - Added "Save Competencies" feature for premium users
+   - Maintained standalone functionality for all tools for freemium users
+   - Location: `guides/integrated-hr-toolkit.md`
+
+2. ✅ DEFINED: Premium vs. Freemium Features (2025-03-06):
+
+   - Freemium users: Access to standalone tools with full core functionality
+   - Premium users: Cross-tool integration, data sharing, and enhanced features
+   - Premium features include:
+     - Saving and reusing competencies across tools
+     - Competency Matrix Creator
+     - Job title integration in Interview Questions Generator
+     - Competency-based training plans
+   - This approach ensures value for both user tiers while encouraging upgrades
+   - Location: `guides/integrated-hr-toolkit.md`
+
+3. ✅ DESIGNED: Competency Standardization Process (2025-03-06):
+   - Created LLM-powered process to standardize competencies extracted from JDs
+   - Implemented deduplication logic to prevent similar competencies
+   - Designed competency level specification with behaviors
+   - Ensured consistent naming and structure across all competencies
+   - This provides a robust foundation for competency-based HR tools
+   - Location: `guides/integrated-hr-toolkit.md`
 
 ## LLM Quality Control Improvements (2025-03-05)
 
@@ -92,137 +135,15 @@ We've made several improvements to the user interface to enhance the experience 
    - This ensures consistency between the development server port and authentication configuration
    - Location: `nextjs-app/package.json`, `nextjs-app/README.md`, `nextjs-app/.env.example`
 
-## Integrated HR Toolkit Development (2025-03-05)
+## Organizational Reference Data (2025-03-05)
 
-We've created a comprehensive implementation plan for integrating all HR tools into a unified ecosystem:
-
-1. ✅ CREATED: Implementation Plan Document (2025-03-05):
-
-   - Developed a detailed phased approach spanning 12 weeks
-   - Defined clear technical specifications and integration points
-   - Outlined database schema changes to support competency-based integration
-   - Added organizational reference data requirements for job levels, titles, and competency taxonomy
-   - Provided enhanced LLM prompts for each tool to leverage competency data
-   - Location: `guides/integrated-hr-toolkit.md`
-
-2. ✅ DEFINED: Organizational Reference Data Schema (2025-03-05):
+1. ✅ DEFINED: Organizational Reference Data Schema (2025-03-05):
    - Created database schema for competency categories, job levels, job families, and job titles
    - Designed relationships between organizational data and existing models
    - Planned admin interfaces for managing reference data
    - Outlined seed data requirements for common organizational structures
    - This provides a foundation for standardized HR data across all tools
    - Location: `guides/integrated-hr-toolkit.md`
-
-## Current Focus (2025-03-04)
-
-We've just made additional improvements to the landing page:
-
-1. ✅ UPDATED: Landing Page Business Focus (2025-03-04):
-
-   - Changed "Ready to Transform Your HR Operations?" to "Ready to Transform Your Business Operations?"
-   - Changed "streamline their HR processes" to "streamline their business processes"
-   - This better reflects that Synthalyst is a general-purpose business app, not just HR-focused
-   - These changes align with the project brief which states: "Though it currently contains HR focused tools, it is NOT a HR focused app"
-
-2. ✅ IMPROVED: Button Styling and Feedback Link (2025-03-04):
-
-   - Updated primary button styling to use blue background with white text as default
-   - Enhanced secondary button with semi-transparent background for better visibility
-   - Improved hover states for both buttons to provide better visual feedback
-   - Added subtle background to the feedback link to make it more visible and clickable
-   - These changes improve the overall user experience and encourage engagement
-   - The improved button styling also better aligns with our strategic focus on custom business solutions
-
-3. ✅ COMMITTED: Changes pushed to main branch (2025-03-04):
-   - Committed with messages:
-     - "Update home page: Fix second button styling and improve feedback link visibility"
-   - All changes successfully pushed to the main branch
-   - This ensures the improvements are live in the production environment
-
-## Strategic Focus: Making AI Excellence Real (2025-03-04)
-
-Our primary development focus is now on ensuring that all AI-powered features in Synthalyst deliver exceptional quality that matches or exceeds the claims made on our landing page and marketing materials. This means:
-
-1. **AI Excellence Priority**: Every development decision should prioritize making the LLMs and AI agents shine in user interactions.
-
-2. **Quality Over Quantity**: We will focus on perfecting existing AI tools before adding new ones, ensuring each tool delivers impressive results.
-
-3. **Prompt Engineering Excellence**: We will invest significant effort in crafting sophisticated prompts that bring out the best in our LLM integrations.
-
-4. **Output Refinement**: All AI-generated content should undergo post-processing to ensure professional formatting and presentation.
-
-5. **User-Perceived Intelligence**: We will implement features that make the AI appear more intelligent, such as maintaining context between interactions and personalizing responses.
-
-6. **Continuous Improvement**: We will gather user feedback on AI quality and continuously refine our implementations.
-
-7. **Feedback Mechanisms**: We will incorporate proper feedback mechanisms throughout the application to gather user insights for continuous improvement of our AI tools.
-
-8. **Custom Business Solutions**: We will strategically position CTAs across the web app encouraging users to contact the Synthalyst team for custom solutions tailored to their businesses.
-
-This focus will drive all development activities going forward, ensuring that Synthalyst becomes known for the exceptional quality of its AI-powered tools.
-
-## Previous Focus (2025-03-04)
-
-We've just enhanced the landing page with AI-focused content and improved UX:
-
-1. ✅ ENHANCED: Landing Page Hero Section (2025-03-04):
-
-   - Updated headline to "Experience Next-Generation AI That Thinks Like a Human Expert"
-   - Improved subheading to emphasize AI speed and personalization
-   - Changed CTA buttons to "Try Our AI Tools" and "Get Custom Solutions"
-   - Added visual indicators of AI qualities (Intelligent, Accurate, Personalized)
-   - This better showcases the intelligence of our AI tools and sets appropriate expectations
-
-2. ✅ ADDED: AI Showcase/Demo Section (2025-03-04):
-
-   - Created a before/after comparison showing traditional vs. AI-powered approaches
-   - Highlighted time savings and quality improvements
-   - Added a testimonial with a CTA for custom business solutions
-   - Included a clear call-to-action to try the JD Developer tool
-   - This demonstrates the value of our AI tools in a tangible way
-
-3. ✅ REORGANIZED: Features Section by AI Capability (2025-03-04):
-
-   - Grouped tools into three categories: Natural Language Generation, Intelligent Analysis, and Knowledge Processing
-   - Added visual indicators of AI intelligence for each tool (Context Understanding, Reasoning, etc.)
-   - Included small previews of actual AI outputs for each tool
-   - Added a "Most Popular" badge to highlight the JD Developer tool
-   - This helps users understand the AI capabilities behind each tool
-
-4. ✅ ENHANCED: Stats Section with AI Performance Metrics (2025-03-04):
-
-   - Replaced generic stats with specific AI performance metrics
-   - Added visual icons for each metric
-   - Included descriptions explaining the significance of each metric
-   - Added an "AI Excellence Certified" badge with additional information
-   - This provides concrete evidence of our AI's capabilities
-
-5. ✅ ADDED: "How Our AI Works" Section (2025-03-04):
-
-   - Created a 3-step visual explanation of the AI process
-   - Highlighted context understanding, personalized content generation, and continuous learning
-   - Added a feedback section emphasizing how user input improves the AI
-   - Included CTAs for trying tools and sharing feedback
-   - This helps users understand the intelligence behind our tools
-
-6. ✅ IMPROVED: Final CTA Section (2025-03-04):
-
-   - Updated buttons to match the hero section for consistency
-   - Added a feedback request link to encourage user input
-   - Maintained the existing design language while enhancing the messaging
-   - This reinforces our key calls to action
-
-7. ✅ INCORPORATED: Feedback Mechanisms (2025-03-04):
-
-   - Added multiple touchpoints for users to provide feedback
-   - Emphasized how feedback makes the AI smarter
-   - Included clear CTAs for contacting the Synthalyst team for custom solutions
-   - This supports our strategic focus on continuous improvement
-
-8. ✅ COMMITTED: Changes pushed to main branch (2025-03-04):
-   - Committed with message: "Enhance landing page with AI-focused content and improved UX"
-   - All changes successfully pushed to the main branch
-   - This ensures the improvements are live in the production environment
 
 ## Current Focus (2025-03-05)
 
