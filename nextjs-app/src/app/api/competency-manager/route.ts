@@ -224,8 +224,10 @@ export async function PUT(request: Request) {
       );
     }
 
-    const { framework } = (await request.json()) as {
+    const { framework, industryId, categoryIds } = (await request.json()) as {
       framework: CompetencyFramework;
+      industryId?: string;
+      categoryIds?: Record<string, string>; // Map of competency index to category ID
     };
 
     // Save the framework to the database
@@ -238,32 +240,42 @@ export async function PUT(request: Request) {
         roleLevel: framework.roleLevel,
         isPublic: false,
         userId: session.user.id,
+        // Add industry reference if provided
+        industryId: industryId,
         competencies: {
-          create: framework.competencies.map((comp: Competency) => ({
-            name: comp.name,
-            description: comp.description,
-            businessImpact: comp.businessImpact,
-            type: comp.type,
-            levels: {
-              create: comp.levels.map(
-                (level: CompetencyLevel, index: number) => ({
-                  name: level.name,
-                  description: level.description,
-                  levelOrder: level.levelOrder || index + 1,
-                  behavioralIndicators: level.behavioralIndicators,
-                  developmentSuggestions: level.developmentSuggestions,
-                })
-              ),
-            },
-          })),
+          create: framework.competencies.map(
+            (comp: Competency, index: number) => ({
+              name: comp.name,
+              description: comp.description,
+              businessImpact: comp.businessImpact,
+              type: comp.type,
+              // Add category reference if provided for this competency
+              categoryId: categoryIds?.[index.toString()],
+              // Add industry reference if provided
+              industryId: industryId,
+              levels: {
+                create: comp.levels.map(
+                  (level: CompetencyLevel, levelIndex: number) => ({
+                    name: level.name,
+                    description: level.description,
+                    levelOrder: level.levelOrder || levelIndex + 1,
+                    behavioralIndicators: level.behavioralIndicators,
+                    developmentSuggestions: level.developmentSuggestions,
+                  })
+                ),
+              },
+            })
+          ),
         },
       },
       include: {
         competencies: {
           include: {
             levels: true,
+            category: true,
           },
         },
+        industryRef: true,
       },
     });
 
@@ -308,8 +320,11 @@ export async function GET(request: Request) {
                   levelOrder: "asc",
                 },
               },
+              category: true,
+              industry: true,
             },
           },
+          industryRef: true,
         },
       });
 
@@ -331,8 +346,11 @@ export async function GET(request: Request) {
           competencies: {
             include: {
               levels: true,
+              category: true,
+              industry: true,
             },
           },
+          industryRef: true,
         },
         orderBy: {
           updatedAt: "desc",

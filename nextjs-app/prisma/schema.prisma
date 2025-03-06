@@ -70,6 +70,7 @@ model User {
   templates       Template[]
   trainingPlans   TrainingPlan[]
   preferences     UserPreferences?
+  competencyMatrices CompetencyMatrix[]
 }
 
 model Profile {
@@ -209,6 +210,8 @@ model JobDescription {
   versions    JobDescription[]   @relation("VersionHistory")
   user        User               @relation(fields: [userId], references: [id])
   categories  TemplateCategory[] @relation("JobDescriptionToTemplateCategory")
+  // Add relation to Competency for integration (optional)
+  competencies Competency[] @relation("JobDescriptionToCompetency")
 
   @@index([userId])
   @@index([contentHash])
@@ -288,7 +291,7 @@ model CompetencyFramework {
   id          String       @id @default(cuid())
   name        String
   description String?      @db.Text
-  industry    String
+  industry    String       // Keep for backward compatibility
   jobFunction String
   roleLevel   String
   isPublic    Boolean      @default(false)
@@ -297,8 +300,12 @@ model CompetencyFramework {
   updatedAt   DateTime     @updatedAt
   user        User         @relation(fields: [userId], references: [id])
   competencies Competency[]
+  // New field for industry reference
+  industryId  String?
+  industryRef Industry?    @relation(fields: [industryId], references: [id])
 
   @@index([userId])
+  @@index([industryId])
 }
 
 model Competency {
@@ -312,8 +319,21 @@ model Competency {
   updatedAt     DateTime          @updatedAt
   framework     CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
   levels        CompetencyLevel[]
+  // New fields for organizational reference data
+  categoryId    String?
+  category      CompetencyCategory? @relation(fields: [categoryId], references: [id])
+  industryId    String?
+  industry      Industry? @relation(fields: [industryId], references: [id])
+  // Relations for integration with other tools
+  roleCompetencyLevels RoleCompetencyLevel[]
+  source        String?  // e.g., "JD_EXTRACTED", "USER_CREATED", "SYSTEM"
+  sourceJdId    String?  // If extracted from a JD, the ID of that JD
+  // Add relation to JobDescription
+  jobDescriptions JobDescription[] @relation("JobDescriptionToCompetency")
 
   @@index([frameworkId])
+  @@index([categoryId])
+  @@index([industryId])
 }
 
 model CompetencyLevel {
@@ -328,6 +348,119 @@ model CompetencyLevel {
   updatedAt             DateTime   @updatedAt
   competency            Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
 
+  @@index([competencyId])
+}
+
+// Organizational Reference Data Models
+model CompetencyCategory {
+  id            String       @id @default(cuid())
+  name          String       @unique
+  description   String       @db.Text
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  competencies  Competency[] // Relation to competencies in this category
+}
+
+model JobLevel {
+  id            String       @id @default(cuid())
+  name          String       // e.g., "Entry", "Associate", "Senior", "Lead", "Principal"
+  code          String?      // e.g., "L1", "L2", "L3", etc.
+  description   String       @db.Text
+  order         Int          // For sorting levels in the correct order
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  jobTitles     JobTitle[]
+  matrixRoles   MatrixRole[]
+}
+
+model JobFamily {
+  id            String       @id @default(cuid())
+  name          String       // e.g., "Engineering", "Marketing", "Sales"
+  description   String       @db.Text
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  jobTitles     JobTitle[]
+}
+
+model JobTitle {
+  id                String            @id @default(cuid())
+  title             String
+  description       String            @db.Text
+  jobFamilyId       String
+  jobFamily         JobFamily         @relation(fields: [jobFamilyId], references: [id])
+  jobLevelId        String
+  jobLevel          JobLevel          @relation(fields: [jobLevelId], references: [id])
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  matrixRoles       MatrixRole[]
+
+  @@index([jobFamilyId])
+  @@index([jobLevelId])
+}
+
+model Department {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?      @db.Text
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Industry {
+  id                  String                @id @default(cuid())
+  name                String                @unique
+  description         String?               @db.Text
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  competencies        Competency[]          // Relation to competencies in this industry
+  competencyFrameworks CompetencyFramework[] // Relation to frameworks in this industry
+  competencyMatrices  CompetencyMatrix[]
+}
+
+// Competency Matrix Models
+model CompetencyMatrix {
+  id            String       @id @default(cuid())
+  name          String
+  description   String       @db.Text
+  industryId    String?
+  industry      Industry?    @relation(fields: [industryId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  roles         MatrixRole[]
+  isPublic      Boolean      @default(false)
+
+  @@index([userId])
+  @@index([industryId])
+}
+
+model MatrixRole {
+  id                String                @id @default(cuid())
+  title             String
+  description       String                @db.Text
+  matrixId          String
+  matrix            CompetencyMatrix      @relation(fields: [matrixId], references: [id], onDelete: Cascade)
+  competencyLevels  RoleCompetencyLevel[]
+  jobTitleId        String?
+  jobTitle          JobTitle?             @relation(fields: [jobTitleId], references: [id])
+  jobLevelId        String?
+  jobLevel          JobLevel?             @relation(fields: [jobLevelId], references: [id])
+
+  @@index([matrixId])
+  @@index([jobTitleId])
+  @@index([jobLevelId])
+}
+
+model RoleCompetencyLevel {
+  id            String       @id @default(cuid())
+  roleId        String
+  role          MatrixRole   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  competencyId  String
+  competency    Competency   @relation(fields: [competencyId], references: [id])
+  levelRequired String       // References the level name in CompetencyLevel
+  
+  @@index([roleId])
   @@index([competencyId])
 }
 
