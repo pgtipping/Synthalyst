@@ -398,3 +398,28 @@ We are following a phased approach to ensure backward compatibility and minimize
 7. **Phase 6**: Training Plan Creator Integration
 
 We are currently in Phase 1.5, focusing on implementing the organizational reference data and enhancing the competency manager API.
+
+## Vercel Deployment Fix - 2025-03-06
+
+We've fixed a critical issue that was preventing successful deployment to Vercel:
+
+### Issue Details
+
+- The deployment was failing with a TypeScript error in the competency-categories API route
+- The error was related to accessing `session.user.role` in the API routes, but the TypeScript type definition for the session user object didn't include the `role` property
+- This was causing the build to fail during the type-checking phase
+
+### Solution Implemented
+
+- Updated the NextAuth.js type definitions in `nextjs-app/src/types/next-auth.d.ts` to include the `role` property in:
+  - The `Session` interface
+  - The `User` interface
+  - The `JWT` interface
+- This ensures that TypeScript recognizes the `role` property when it's accessed in the API routes
+- The fix aligns the type definitions with the actual implementation in the `auth.ts` file, where the role is added to the session user object in the `session` callback
+
+### Next Steps
+
+- Monitor the Vercel deployment to ensure it completes successfully
+- Consider implementing a more comprehensive type-checking process in the CI/CD pipeline to catch similar issues before they reach production
+- Review other areas of the codebase where session properties might be accessed to ensure proper type definitions

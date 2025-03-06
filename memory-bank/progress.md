@@ -1402,3 +1402,27 @@ These improvements make the PDF output more professional and better suited for p
 - Enhance the JD developer to extract competencies from job descriptions
 - Integrate the interview questions generator with competency frameworks
 - Implement the training plan creator integration with competency frameworks
+
+## Vercel Deployment Fix - 2025-03-06
+
+### Issue
+
+- Vercel deployment was failing with a TypeScript error in the competency-categories API route
+- The error was: `Property 'role' does not exist on type '{ id: string; name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; accessToken?: string | undefined; } & { name?: string | null | undefined; email?: string | ... 1 more ... | undefined; image?: string | ... 1 more ... | undefined; }'`
+- This occurred because we were accessing `session.user.role` in the API routes, but the TypeScript type definition for the session user object didn't include the `role` property
+
+### Fix
+
+- Updated the NextAuth.js type definitions in `nextjs-app/src/types/next-auth.d.ts` to include the `role` property in:
+  - The `Session` interface
+  - The `User` interface
+  - The `JWT` interface
+- This ensures that TypeScript recognizes the `role` property when it's accessed in the API routes
+- The fix aligns the type definitions with the actual implementation in the `auth.ts` file, where the role is added to the session user object in the `session` callback
+
+### Impact
+
+- Fixed the Vercel deployment failure
+- Ensured type safety for the `role` property in the API routes
+- Maintained the role-based authentication for admin routes
+- Improved the overall type safety of the application
