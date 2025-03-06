@@ -285,17 +285,50 @@ model LearningContent {
 }
 
 model CompetencyFramework {
-  id           String   @id @default(cuid())
-  title        String
-  description  String?
-  competencies Json
-  industry     String?
-  userId       String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id])
+  id          String       @id @default(cuid())
+  name        String
+  description String?      @db.Text
+  industry    String
+  jobFunction String
+  roleLevel   String
+  isPublic    Boolean      @default(false)
+  userId      String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id])
+  competencies Competency[]
 
   @@index([userId])
+}
+
+model Competency {
+  id            String            @id @default(cuid())
+  name          String
+  description   String            @db.Text
+  businessImpact String           @db.Text
+  type          String
+  frameworkId   String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  framework     CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  levels        CompetencyLevel[]
+
+  @@index([frameworkId])
+}
+
+model CompetencyLevel {
+  id                    String     @id @default(cuid())
+  name                  String
+  description           String     @db.Text
+  levelOrder            Int
+  behavioralIndicators  String[]
+  developmentSuggestions String[]
+  competencyId          String
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  competency            Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+
+  @@index([competencyId])
 }
 
 model ChatMessage {

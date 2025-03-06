@@ -11,6 +11,7 @@
 - Premium vs. freemium feature differentiation
 - Backward compatibility strategy for integrated HR toolkit
 - Minor formatting improvements in documentation
+- Competency Manager implementation
 
 ## Recent Changes
 
@@ -26,6 +27,10 @@
 - Revised the integrated HR toolkit implementation plan to adopt a JD-first approach
 - Defined premium vs. freemium feature differentiation for all HR tools
 - Improved formatting in the integrated HR toolkit documentation
+- Created a detailed implementation plan for the Competency Manager (2023-07-15)
+- Developed a backward compatibility strategy (2023-07-14)
+- Revised the integrated HR toolkit implementation plan (2023-07-13)
+- Improved formatting in documentation (2023-07-12)
 
 ## Next Steps
 
@@ -39,6 +44,24 @@
 - Create seed data for common job levels, families, and competency categories
 - Implement competency extraction and standardization in the JD Developer
 - Add "Save Competencies" feature for premium users in JD Developer
+- **Database Schema Implementation**
+  - Create Prisma schema for competency frameworks, competencies, and levels
+  - Set up migrations for the new schema
+  - Implement organizational reference data models
+- **UI Component Development**
+  - Create the CompetencyGeneratorForm component with mandatory fields
+  - Implement dropdown components with "Other" options
+  - Add tooltips and validation
+  - Develop the form submission and loading states
+- **LLM Integration**
+  - Set up the Gemini 2.0 Flash API connection
+  - Implement prompt construction logic
+  - Create response parsing and validation
+  - Develop fallback mechanisms
+- **API Endpoint Development**
+  - Create the competency generation endpoint
+  - Implement framework management endpoints
+  - Set up competency management endpoints
 
 ## Active Decisions
 
@@ -55,6 +78,22 @@
 - Implement standardized organizational reference data (job levels, job families, competency categories) to support HR tools
 - Provide seed data for common organizational structures to improve user onboarding
 - Implement backward compatibility strategy to prevent breaking changes during integration
+- **Form Field Requirements**
+  - Mandatory fields: Industry/Domain, Job Function, Role Level, Number of Competencies
+  - Optional fields: Competency Type, Number of Proficiency Levels, Specific Requirements, Organizational Values, Existing Competencies
+- **LLM Selection**
+  - Primary: Gemini 2.0 Flash for speed and cost-effectiveness
+  - Fallback: OpenAI GPT-4o or GPT-3.5 Turbo if needed
+- **User Experience Approach**
+  - Progressive disclosure for optional fields
+  - Tooltips for guidance
+  - Smart defaults and validation
+  - Clear loading states
+- **Implementation Phasing**
+  - Phase 1: Core generation functionality
+  - Phase 2: Enhanced user experience
+  - Phase 3: Framework management
+  - Phase 4: Premium features
 
 ## Current Considerations
 
@@ -67,6 +106,22 @@
 - Determine the right level of flexibility vs. standardization for organizational reference data
 - Consider industry-specific variations in job architectures and competency frameworks
 - Evaluate the best approach for premium feature upselling without disrupting the freemium user experience
+- **Performance Optimization**
+  - Need to ensure fast response times from the LLM
+  - Consider caching common competency frameworks
+  - Implement efficient JSON parsing and validation
+- **Error Handling**
+  - Develop robust error handling for LLM failures
+  - Create user-friendly error messages
+  - Implement retry mechanisms
+- **Scalability**
+  - Design the system to handle multiple concurrent users
+  - Ensure database schema supports future growth
+  - Consider rate limiting for LLM API calls
+- **User Feedback Loop**
+  - Plan for collecting user feedback on generated competencies
+  - Implement mechanisms for users to refine and customize results
+  - Consider A/B testing different form layouts and field options
 
 ## Integrated HR Toolkit Development (2025-03-06)
 
