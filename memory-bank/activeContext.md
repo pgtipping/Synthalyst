@@ -7,6 +7,7 @@
 - LLM output quality improvements
 - UI/UX enhancements for different screen sizes
 - Integrated HR toolkit development planning
+- Organizational reference data standardization for HR tools
 
 ## Recent Changes
 
@@ -18,6 +19,7 @@
 - Improved tab display for different screen sizes in the Interview Questions Generator
 - Fixed Admin Layout and Authentication
 - Created comprehensive implementation plan for integrating HR tools (guides/integrated-hr-toolkit.md)
+- Added organizational reference data schema and management to the HR toolkit implementation plan
 
 ## Next Steps
 
@@ -27,6 +29,8 @@
 - Continue improving LLM output quality across all tools
 - Implement responsive design improvements for other components
 - Begin implementation of the integrated HR toolkit, starting with the competency data layer
+- Design and implement the organizational reference data schema
+- Create seed data for common job levels, families, and competency categories
 
 ## Active Decisions
 
@@ -37,6 +41,8 @@
 - Use responsive design patterns that adapt to different screen sizes
 - Develop Competency Matrix Creator as a separate tool with integration points to Competency Manager
 - Create a unified data layer for competencies that can be accessed by all HR tools
+- Implement standardized organizational reference data (job levels, job families, competency categories) to support HR tools
+- Provide seed data for common organizational structures to improve user onboarding
 
 ## Current Considerations
 
@@ -46,6 +52,8 @@
 - Evaluate effectiveness of LLM quality control measures
 - Assess user experience on different device sizes
 - Prioritize development of the integrated HR toolkit to create a seamless workflow between all HR tools
+- Determine the right level of flexibility vs. standardization for organizational reference data
+- Consider industry-specific variations in job architectures and competency frameworks
 
 ## LLM Quality Control Improvements (2025-03-05)
 
@@ -83,6 +91,27 @@ We've made several improvements to the user interface to enhance the experience 
    - Updated .env.example to use port 3001 for NEXTAUTH_URL
    - This ensures consistency between the development server port and authentication configuration
    - Location: `nextjs-app/package.json`, `nextjs-app/README.md`, `nextjs-app/.env.example`
+
+## Integrated HR Toolkit Development (2025-03-05)
+
+We've created a comprehensive implementation plan for integrating all HR tools into a unified ecosystem:
+
+1. ✅ CREATED: Implementation Plan Document (2025-03-05):
+
+   - Developed a detailed phased approach spanning 12 weeks
+   - Defined clear technical specifications and integration points
+   - Outlined database schema changes to support competency-based integration
+   - Added organizational reference data requirements for job levels, titles, and competency taxonomy
+   - Provided enhanced LLM prompts for each tool to leverage competency data
+   - Location: `guides/integrated-hr-toolkit.md`
+
+2. ✅ DEFINED: Organizational Reference Data Schema (2025-03-05):
+   - Created database schema for competency categories, job levels, job families, and job titles
+   - Designed relationships between organizational data and existing models
+   - Planned admin interfaces for managing reference data
+   - Outlined seed data requirements for common organizational structures
+   - This provides a foundation for standardized HR data across all tools
+   - Location: `guides/integrated-hr-toolkit.md`
 
 ## Current Focus (2025-03-04)
 

@@ -108,6 +108,149 @@ This document outlines the implementation plan for integrating Synthalyst's HR t
   - `extractCompetencyData()` - Extracts competency information from LLM responses
   - `validateCompetencyStructure()` - Validates competency data structure
 
+### Phase 1.5: Organizational Reference Data (Weeks 2-3)
+
+#### 1.5.1 Reference Data Schema
+
+- Implement database schema for organizational reference data:
+
+  ```prisma
+  model CompetencyCategory {
+    id            String   @id @default(cuid())
+    name          String   @unique
+    description   String
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    competencies  Competency[]
+  }
+
+  model JobLevel {
+    id            String   @id @default(cuid())
+    name          String   // e.g., "Entry", "Associate", "Senior", "Lead", "Principal"
+    code          String?  // e.g., "L1", "L2", "L3", etc.
+    description   String
+    order         Int      // For sorting levels in the correct order
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    jobTitles     JobTitle[]
+    matrixRoles   MatrixRole[]
+  }
+
+  model JobFamily {
+    id            String   @id @default(cuid())
+    name          String   // e.g., "Engineering", "Marketing", "Sales"
+    description   String
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    jobTitles     JobTitle[]
+  }
+
+  model JobTitle {
+    id            String   @id @default(cuid())
+    title         String
+    description   String
+    jobFamilyId   String
+    jobFamily     JobFamily @relation(fields: [jobFamilyId], references: [id])
+    jobLevelId    String
+    jobLevel      JobLevel @relation(fields: [jobLevelId], references: [id])
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    jobDescriptions JobDescription[]
+  }
+
+  model Department {
+    id            String   @id @default(cuid())
+    name          String
+    description   String?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    jobTitles     JobTitle[]
+  }
+
+  model Industry {
+    id            String   @id @default(cuid())
+    name          String   @unique
+    description   String?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    competencies  Competency[]
+    competencyMatrices CompetencyMatrix[]
+  }
+  ```
+
+- Update existing models to reference the new schema:
+
+  ```prisma
+  model Competency {
+    // Existing fields...
+    categoryId    String?
+    category      CompetencyCategory? @relation(fields: [categoryId], references: [id])
+    industryId    String?
+    industry      Industry? @relation(fields: [industryId], references: [id])
+  }
+
+  model MatrixRole {
+    // Existing fields...
+    jobTitleId    String?
+    jobTitle      JobTitle? @relation(fields: [jobTitleId], references: [id])
+    jobLevelId    String?
+    jobLevel      JobLevel? @relation(fields: [jobLevelId], references: [id])
+  }
+  ```
+
+#### 1.5.2 Reference Data Management
+
+- Create admin interfaces for managing reference data:
+
+  - CompetencyCategoryManager - For creating and editing competency categories
+  - JobLevelManager - For defining job levels and progression criteria
+  - JobFamilyManager - For creating and organizing job families
+  - JobTitleManager - For standardizing job titles across the organization
+  - IndustryManager - For managing industry-specific data
+
+- Implement API endpoints for reference data:
+  - `GET /api/reference/competency-categories` - List all competency categories
+  - `GET /api/reference/job-levels` - List all job levels
+  - `GET /api/reference/job-families` - List all job families
+  - `GET /api/reference/job-titles` - List all job titles
+  - `GET /api/reference/industries` - List all industries
+  - Corresponding POST, PUT, and DELETE endpoints for each resource
+
+#### 1.5.3 Seed Data and Templates
+
+- Create seed data for common reference data:
+
+  - Standard competency categories (Technical, Leadership, Communication, etc.)
+  - Common job levels (Entry, Associate, Senior, Lead, Principal)
+  - Industry-standard job families (Engineering, Marketing, Sales, etc.)
+  - Sample job titles for each family and level
+
+- Implement industry-specific templates:
+
+  - Technology industry competency sets
+  - Healthcare industry competency sets
+  - Finance industry competency sets
+  - Manufacturing industry competency sets
+  - Retail industry competency sets
+
+- Create import/export functionality:
+  - Allow users to import reference data from CSV/Excel
+  - Enable export of reference data for backup or sharing
+  - Provide template files for data import
+
+#### 1.5.4 Reference Data Integration
+
+- Enhance UI components to use reference data:
+
+  - Update CompetencySelector to filter by category and industry
+  - Enhance job title selection in forms with structured job level and family data
+  - Add tooltips and guidance based on reference data
+
+- Update LLM prompts to leverage reference data:
+  - Include industry-specific terminology in prompts
+  - Reference standard job level expectations
+  - Use consistent naming conventions from reference data
+
 ### Phase 2: Competency Matrix Creator (Weeks 3-4)
 
 #### 2.1 Core Functionality
@@ -285,8 +428,11 @@ gantt
     section Foundation
     Competency Data Layer           :a1, 2025-04-01, 14d
     Shared Components               :a2, after a1, 7d
+    section Reference Data
+    Reference Data Schema           :r1, after a2, 7d
+    Reference Data Management       :r2, after r1, 7d
     section Competency Matrix
-    Core Functionality              :b1, after a2, 10d
+    Core Functionality              :b1, after r2, 10d
     Integration with Manager        :b2, after b1, 4d
     section JD Developer
     Competency-Enhanced Generation  :c1, after b2, 10d

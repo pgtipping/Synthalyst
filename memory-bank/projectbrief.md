@@ -68,6 +68,8 @@ Offers multi-purpose assistance, including:
 
 Provide a form with key inputs from users. LLM will generate the JD based on system instructions and user inputs converted to queries
 
+- guide: [integrated-hr-toolkit.md](./integrated-hr-toolkit.md)
+
 ### 2Do Task Manager
 
 - LLM powered task manager that manages user tasks primarily using natural language by voice input.
@@ -82,7 +84,7 @@ Provide a form with key inputs from users. LLM will generate the JD based on sys
 
 - LLM-powered solution that develops personalized learning plans and curricula based on user learning goals.
 
-- guide: [llmImplementation.md](./llmImplementation.md)
+- guide: [llmImplementation.md](./llmImplementation.md); [integrated-hr-toolkit.md](./integrated-hr-toolkit.md)
 
 ### Learning Content Creator
 
@@ -101,11 +103,13 @@ Uses an LLM to generate customized learning content tailored to individual user 
 
 - LLM-powered tool that develops competency frameworks for any skill or industry
 
-- guide: [llmImplementation.md](./llmImplementation.md)
+- guide: [llmImplementation.md](./llmImplementation.md); [integrated-hr-toolkit.md](./integrated-hr-toolkit.md)
 
 ### Competency Matrix Creator
 
 - LLM-powered tool that creates competency matrices for any competency and for any industry.
+
+- guide: [integrated-hr-toolkit.md](./integrated-hr-toolkit.md)
 
 ### InQDoc
 
@@ -130,14 +134,6 @@ This app will be integrated into the main app.
 Blog app powered by two LLMs, an agent provider and agent creator.
 
 - developed in a separate project: [synth-blog](https://synth-blog.vercel.app/)
-
-This app will be integrated into the main app as a page.
-
-### Employee Turnover Calculator
-
-web app that calculates employee turnover rates based on user's manual or uploaded input of employee exit data.
-
-- developed in a separate project: [Turnover App](https://turnover-app.vercel.app/)
 
 This app will be integrated into the main app as a page.
 
@@ -185,6 +181,16 @@ System takes company information and directions on how to present the company in
 - Starter information e.g. play message from the CEO
 - Other information flow and steps including presentation style, slides, video, etc
 - concluding statements and actions, e.g., take a brief survey, clarify any segments, introduction to the buddy and the buddy program, etc.
+
+## Other Apps
+
+### Employee Turnover Calculator
+
+web app that calculates employee turnover rates based on user's manual or uploaded input of employee exit data.
+
+- developed in a separate project: [Turnover App](https://turnover-app.vercel.app/)
+
+This app will be integrated into the main app as a page.
 
 ### Apartment Affordability Calculator
 
