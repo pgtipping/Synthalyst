@@ -568,6 +568,7 @@ To ensure that the implementation of the integrated HR toolkit does not break ex
 - **Additive Schema Changes**: All schema changes will be additive (new tables, optional columns)
 - **Nullable Foreign Keys**: New relationships will use nullable foreign keys
 - **Migration Strategy**:
+
   ```prisma
   // Example of backward-compatible schema change
   model JobDescription {
