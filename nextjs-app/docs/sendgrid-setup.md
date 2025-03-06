@@ -27,6 +27,20 @@ To verify a sender:
 2. Choose either "Verify a Single Sender" or "Domain Authentication"
 3. Follow the instructions provided by SendGrid
 
+#### Using Multiple Sender Addresses
+
+The application supports using different sender email addresses for different types of communications. To use multiple sender addresses:
+
+1. **Verify Each Address**: If using Single Sender Verification, verify each email address you want to use (info@synthalyst.com, support@synthalyst.com, etc.)
+2. **Domain Verification**: Alternatively, verify your entire domain (synthalyst.com) to use any email address on that domain
+
+The application includes a dropdown in the reply form to select which sender address to use for each email. Available options include:
+
+- info@synthalyst.com - For general inquiries
+- support@synthalyst.com - For support-related communications
+- contact@synthalyst.com - For contact form responses
+- noreply@synthalyst.com - For automated notifications
+
 ### 3. Create an API Key
 
 1. In your SendGrid dashboard, go to Settings > API Keys
@@ -47,6 +61,8 @@ REPLY_TO_EMAIL="your-personal-email@example.com"  # Optional: Default reply-to a
 ```
 
 Make sure to replace the values with your actual SendGrid API key, verified sender email, and optional default reply-to email.
+
+The `SENDGRID_FROM_EMAIL` will be used as the default sender when no specific sender is selected in the interface.
 
 ### 5. Reply-To Functionality
 

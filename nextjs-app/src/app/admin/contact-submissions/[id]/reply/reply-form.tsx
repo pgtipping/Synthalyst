@@ -10,12 +10,28 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ReplyFormProps {
   submissionId: string;
   recipientEmail: string;
   initialSubject: string;
 }
+
+// Available sender email addresses
+const SENDER_EMAILS = [
+  { value: "", label: "Default Sender (from .env)" },
+  { value: "info@synthalyst.com", label: "info@synthalyst.com" },
+  { value: "support@synthalyst.com", label: "support@synthalyst.com" },
+  { value: "contact@synthalyst.com", label: "contact@synthalyst.com" },
+  { value: "noreply@synthalyst.com", label: "noreply@synthalyst.com" },
+];
 
 export default function ReplyForm({
   submissionId,
@@ -27,6 +43,7 @@ export default function ReplyForm({
   const [message, setMessage] = useState("");
   const [useReplyTo, setUseReplyTo] = useState(false);
   const [replyToEmail, setReplyToEmail] = useState("");
+  const [fromEmail, setFromEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailStatus, setEmailStatus] = useState<
     "idle" | "sending" | "success" | "error"
@@ -52,6 +69,7 @@ export default function ReplyForm({
             subject,
             message,
             replyToEmail: useReplyTo ? replyToEmail : undefined,
+            fromEmail: fromEmail || undefined,
           }),
         }
       );
@@ -135,7 +153,33 @@ export default function ReplyForm({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="fromEmail" className="text-sm font-medium">
+              Send From
+            </label>
+            <Select
+              value={fromEmail}
+              onValueChange={setFromEmail}
+              disabled={isSubmitting || emailStatus === "success"}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select sender email" />
+              </SelectTrigger>
+              <SelectContent>
+                {SENDER_EMAILS.map((email) => (
+                  <SelectItem key={email.value} value={email.value}>
+                    {email.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Select which email address will appear as the sender. All
+              addresses must be verified in SendGrid.
+            </p>
+          </div>
+
           <div className="flex items-center space-x-2 mb-2">
             <Checkbox
               id="useReplyTo"

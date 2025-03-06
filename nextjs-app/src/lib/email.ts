@@ -46,6 +46,7 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
  * @param message Email message (HTML)
  * @param fromName Name to display in the from field
  * @param replyToEmail Email address for replies
+ * @param fromEmail Email address for the sender
  * @returns A promise that resolves to true if the email was sent successfully
  */
 export async function sendContactReply(
@@ -53,23 +54,23 @@ export async function sendContactReply(
   subject: string,
   message: string,
   fromName: string = "Synthalyst Support",
-  replyToEmail?: string
+  replyToEmail?: string,
+  fromEmail?: string
 ): Promise<boolean> {
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL || "support@synthalyst.com";
-  const replyTo =
-    replyToEmail || process.env.REPLY_TO_EMAIL || "pgtipping1@gmail.com";
-
-  const emailData: EmailData = {
-    to,
-    from: {
-      email: fromEmail,
-      name: fromName,
-    },
-    replyTo,
-    subject,
-    text: message.replace(/<[^>]*>/g, ""), // Strip HTML for text version
-    html: message,
+  const from = {
+    email: fromEmail || process.env.SENDGRID_FROM_EMAIL || "",
+    name: fromName,
   };
 
-  return sendEmail(emailData);
+  // Format the message as HTML
+  const htmlMessage = message.replace(/\n/g, "<br>");
+
+  return sendEmail({
+    to,
+    from,
+    replyTo: replyToEmail,
+    subject,
+    text: message,
+    html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">${htmlMessage}</div>`,
+  });
 }
