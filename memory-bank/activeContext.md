@@ -6,6 +6,7 @@
 - Authentication requirement adjustments
 - LLM output quality improvements
 - UI/UX enhancements for different screen sizes
+- Integrated HR toolkit development planning
 
 ## Recent Changes
 
@@ -16,6 +17,7 @@
 - Enhanced LLM quality control for interview question rubric generation
 - Improved tab display for different screen sizes in the Interview Questions Generator
 - Fixed Admin Layout and Authentication
+- Created comprehensive implementation plan for integrating HR tools (guides/integrated-hr-toolkit.md)
 
 ## Next Steps
 
@@ -24,6 +26,7 @@
 - Add error tracking for model fallback scenarios
 - Continue improving LLM output quality across all tools
 - Implement responsive design improvements for other components
+- Begin implementation of the integrated HR toolkit, starting with the competency data layer
 
 ## Active Decisions
 
@@ -32,6 +35,8 @@
 - Maintain fallback to Gemini for robustness
 - Implement comprehensive quality validation for LLM outputs
 - Use responsive design patterns that adapt to different screen sizes
+- Develop Competency Matrix Creator as a separate tool with integration points to Competency Manager
+- Create a unified data layer for competencies that can be accessed by all HR tools
 
 ## Current Considerations
 
@@ -40,6 +45,7 @@
 - Consider implementing caching for common training plan requests
 - Evaluate effectiveness of LLM quality control measures
 - Assess user experience on different device sizes
+- Prioritize development of the integrated HR toolkit to create a seamless workflow between all HR tools
 
 ## LLM Quality Control Improvements (2025-03-05)
 
