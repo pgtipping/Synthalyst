@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import RefreshButton from "./refresh-button";
 
 export default function TestSessionPage() {
   const { data: session, status } = useSession();
@@ -49,6 +50,8 @@ export default function TestSessionPage() {
                 {session.user.role === "ADMIN" ? "Yes" : "No"}
               </p>
             </div>
+
+            <RefreshButton />
 
             <pre className="mt-6 p-4 bg-gray-100 rounded overflow-auto max-h-96">
               {JSON.stringify(session, null, 2)}
