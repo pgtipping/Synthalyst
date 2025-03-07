@@ -281,6 +281,35 @@ export default function CompetencyManager() {
     }
   };
 
+  // Function to delete a framework
+  const deleteFramework = async (id: string) => {
+    if (!id) return;
+
+    try {
+      const response = await fetch(`/api/competency-manager/frameworks/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete framework");
+      }
+
+      // Remove the deleted framework from the state
+      setSavedFrameworks((prev) => prev.filter((f) => f.id !== id));
+
+      // If the currently viewed framework is the one being deleted, clear it
+      if (framework?.id === id) {
+        setFramework(null);
+      }
+
+      alert("Framework deleted successfully!");
+    } catch (error) {
+      alert(
+        error instanceof Error ? error.message : "Failed to delete framework"
+      );
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);

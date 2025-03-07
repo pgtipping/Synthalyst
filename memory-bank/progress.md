@@ -1,4 +1,4 @@
-# Progress Report - [2025-03-07 13:18:56]
+# Progress Report - [2025-03-07 13:28:58]
 
 ## What Works
 
@@ -163,6 +163,13 @@
   - Added loading state for better user experience
   - Improved performance by only loading visualization when needed
   - Enhanced UI with a styled button and container for visualizations
+- Fixed Select component runtime error in FrameworkSearch (2025-03-07 13:28:58)
+  - Replaced empty string values in SelectItem components with "all" value
+  - Updated filter logic to handle the new "all" value
+  - Fixed clearFilters function to use the new "all" values
+  - Added missing deleteFramework function to the page component
+  - Resolved "A <Select.Item /> must have a value prop that is not an empty string" error
+  - Improved user experience by ensuring the search functionality works correctly
 - Integrated FrameworkSearch component and implemented Saved Frameworks tab (2025-03-07 13:18:56)
   - Added proper integration of the FrameworkSearch component in the Saved Frameworks tab
   - Implemented loading state for saved frameworks with error handling

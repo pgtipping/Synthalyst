@@ -68,28 +68,28 @@ export default function FrameworkSearch({
     }
 
     // Apply industry filter
-    if (industryFilter) {
+    if (industryFilter && industryFilter !== "all") {
       results = results.filter(
         (framework) => framework.industry === industryFilter
       );
     }
 
     // Apply job function filter
-    if (jobFunctionFilter) {
+    if (jobFunctionFilter && jobFunctionFilter !== "all") {
       results = results.filter(
         (framework) => framework.jobFunction === jobFunctionFilter
       );
     }
 
     // Apply role level filter
-    if (roleLevelFilter) {
+    if (roleLevelFilter && roleLevelFilter !== "all") {
       results = results.filter(
         (framework) => framework.roleLevel === roleLevelFilter
       );
     }
 
     // Apply date filter
-    if (dateFilter) {
+    if (dateFilter && dateFilter !== "all") {
       const today = new Date();
       let dateLimit: Date;
 
@@ -154,10 +154,10 @@ export default function FrameworkSearch({
   // Clear all filters
   const clearFilters = useCallback(() => {
     setSearchTerm("");
-    setIndustryFilter("");
-    setJobFunctionFilter("");
-    setRoleLevelFilter("");
-    setDateFilter("");
+    setIndustryFilter("all");
+    setJobFunctionFilter("all");
+    setRoleLevelFilter("all");
+    setDateFilter("all");
     // No need to call onSearchResults directly as the useEffect will handle it
   }, []);
 
@@ -242,7 +242,7 @@ export default function FrameworkSearch({
               <SelectValue placeholder="All Industries" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Industries</SelectItem>
+              <SelectItem value="all">All Industries</SelectItem>
               {industries.map((industry) => (
                 <SelectItem key={industry} value={industry}>
                   {industry}
@@ -263,7 +263,7 @@ export default function FrameworkSearch({
               <SelectValue placeholder="All Job Functions" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Job Functions</SelectItem>
+              <SelectItem value="all">All Job Functions</SelectItem>
               {jobFunctions.map((jobFunction) => (
                 <SelectItem key={jobFunction} value={jobFunction}>
                   {jobFunction}
@@ -281,7 +281,7 @@ export default function FrameworkSearch({
               <SelectValue placeholder="All Role Levels" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Role Levels</SelectItem>
+              <SelectItem value="all">All Role Levels</SelectItem>
               {roleLevels.map((roleLevel) => (
                 <SelectItem key={roleLevel} value={roleLevel}>
                   {roleLevel}
@@ -299,7 +299,7 @@ export default function FrameworkSearch({
               <SelectValue placeholder="Any Time" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any Time</SelectItem>
+              <SelectItem value="all">Any Time</SelectItem>
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="week">Last Week</SelectItem>
               <SelectItem value="month">Last Month</SelectItem>
