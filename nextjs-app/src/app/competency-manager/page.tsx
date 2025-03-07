@@ -10,7 +10,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, Edit } from "lucide-react";
 import {
   CompetencyFramework,
   FormData,

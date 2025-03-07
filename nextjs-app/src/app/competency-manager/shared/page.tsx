@@ -1,75 +1,132 @@
 "use client";
 
-import React from "react";
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star } from "lucide-react";
-import { Metadata } from "next";
 
-interface SharedFrameworkPageProps {
-  params: {
-    id: string;
-  };
+// Define types for our data
+interface CompetencyLevel {
+  id: string;
+  name: string;
+  description: string;
+  levelOrder: number;
+  behavioralIndicators: string[];
+  developmentSuggestions: string[];
 }
 
-export async function generateMetadata({
-  params,
-}: SharedFrameworkPageProps): Promise<Metadata> {
-  const framework = await getFramework(params.id);
+interface Competency {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  businessImpact: string;
+  levels: CompetencyLevel[];
+}
 
-  if (!framework) {
-    return {
-      title: "Framework Not Found | Synthalyst",
-      description: "The requested competency framework could not be found.",
-    };
+interface Framework {
+  id: string;
+  name: string;
+  description: string;
+  industry: string;
+  jobFunction: string;
+  roleLevel: string;
+  createdAt: string;
+  user: {
+    name: string | null;
+  } | null;
+  competencies: Competency[];
+  averageRating: number | null;
+  feedbackCount: number;
+}
+
+function SharedFrameworkContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
+  const [framework, setFramework] = useState<Framework | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchFramework() {
+      if (!id) {
+        setError("No framework ID provided");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          `/api/competency-manager/public-frameworks?id=${id}`
+        );
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error("Framework not found or not publicly shared");
+          }
+          throw new Error("Failed to load framework");
+        }
+
+        const data = await response.json();
+        setFramework(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching framework:", err);
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchFramework();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[300px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
   }
 
-  return {
-    title: `${framework.name} | Shared Framework | Synthalyst`,
-    description: `View this shared competency framework for ${framework.industry} - ${framework.jobFunction} (${framework.roleLevel})`,
-  };
-}
-
-async function getFramework(id: string) {
-  try {
-    const framework = await prisma.competencyFramework.findUnique({
-      where: {
-        id,
-        isPublic: true, // Only fetch public frameworks
-      },
-      include: {
-        competencies: {
-          include: {
-            levels: true,
-          },
-          orderBy: {
-            name: "asc",
-          },
-        },
-        user: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
-    return framework;
-  } catch (error) {
-    console.error("Error fetching shared framework:", error);
-    return null;
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 p-6 rounded-lg shadow-md border border-red-200">
+          <h2 className="text-xl font-semibold text-red-700 mb-2">Error</h2>
+          <p className="text-red-600">{error}</p>
+          <Button asChild className="mt-4">
+            <Link href="/competency-manager">Return to Competency Manager</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
-}
-
-export default async function SharedFrameworkPage({
-  params,
-}: SharedFrameworkPageProps) {
-  const framework = await getFramework(params.id);
 
   if (!framework) {
-    notFound();
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-amber-50 p-6 rounded-lg shadow-md border border-amber-200">
+          <h2 className="text-xl font-semibold text-amber-700 mb-2">
+            Framework Not Found
+          </h2>
+          <p className="text-amber-600">
+            The requested framework could not be found or is not publicly
+            shared.
+          </p>
+          <Button asChild className="mt-4">
+            <Link href="/competency-manager">Return to Competency Manager</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   // Format date
@@ -221,5 +278,22 @@ export default async function SharedFrameworkPage({
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrap the component in a Suspense boundary
+export default function SharedFrameworksPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center min-h-[300px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          </div>
+        </div>
+      }
+    >
+      <SharedFrameworkContent />
+    </Suspense>
   );
 }

@@ -2,9 +2,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, FileJson, FileSpreadsheet, Download } from "lucide-react";
+import { FileText, FileJson, FileSpreadsheet } from "lucide-react";
 import { CompetencyFramework } from "../types";
-import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -149,40 +148,20 @@ export default function ExportOptions({ framework }: ExportOptionsProps) {
       const imgData = canvas.toDataURL("image/png");
 
       // Add image to PDF, potentially across multiple pages
-      let position = 0;
-
       for (let i = 0; i < pageCount; i++) {
         if (i > 0) {
           pdf.addPage();
         }
 
-        const srcHeight = (canvas.height * pageHeight) / imgHeight;
-        const srcWidth = canvas.width;
-        const srcX = 0;
-        const srcY = position;
-
+        // Simplified addImage call with fewer parameters
         pdf.addImage(
           imgData,
           "PNG",
           margin,
           margin,
           pdfWidth - margin * 2,
-          pageHeight,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          {
-            sourceX: srcX,
-            sourceY: srcY,
-            sourceWidth: srcWidth,
-            sourceHeight: srcHeight,
-          }
+          pageHeight
         );
-
-        position += srcHeight;
       }
 
       // Save the PDF
