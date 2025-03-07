@@ -1049,6 +1049,347 @@ export default function CompetencyManager() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case "create":
+        return (
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-6">
+              Create Competency Framework
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    htmlFor="industry"
+                  >
+                    Industry
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Select the industry or domain for which you&apos;re
+                          creating the competency framework. This helps tailor
+                          competencies to industry-specific requirements.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
+                  <select
+                    id="industry"
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                    required
+                    aria-label="Select industry"
+                  >
+                    <option value="">Select Industry</option>
+                    {industries.map((industry) => (
+                      <option key={industry} value={industry}>
+                        {industry}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    htmlFor="jobFunction"
+                  >
+                    Job Function
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Specify the job function or role for which you&apos;re
+                          creating competencies. This ensures the framework
+                          addresses the specific skills needed for the role.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
+                  <select
+                    id="jobFunction"
+                    name="jobFunction"
+                    value={formData.jobFunction}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                    required
+                    aria-label="Select job function"
+                  >
+                    <option value="">Select Job Function</option>
+                    {jobFunctions.map((job) => (
+                      <option key={job} value={job}>
+                        {job}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    htmlFor="roleLevel"
+                  >
+                    Role Level
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Indicate the seniority or experience level for the
+                          role. This helps calibrate the competency levels
+                          appropriately.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
+                  <select
+                    id="roleLevel"
+                    name="roleLevel"
+                    value={formData.roleLevel}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                    required
+                    aria-label="Select role level"
+                  >
+                    <option value="">Select Role Level</option>
+                    {roleLevels.map((level) => (
+                      <option key={level} value={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    htmlFor="numberOfCompetencies"
+                  >
+                    Number of Competencies
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Choose how many competencies to include in your
+                          framework. Best practice is 6-12 for most roles.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
+                  <input
+                    id="numberOfCompetencies"
+                    type="number"
+                    name="numberOfCompetencies"
+                    value={formData.numberOfCompetencies}
+                    onChange={(e) => handleNumberInputChange(e, 3, 15)}
+                    min="3"
+                    max="15"
+                    className="w-full p-2 border rounded"
+                    required
+                    aria-label="Number of competencies"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Competency Types
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Select the types of competencies to include in your
+                          framework. A balanced framework typically includes
+                          both technical and behavioral competencies.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
+                  <div className="space-y-2 mt-2">
+                    {competencyTypeOptions.map((type) => (
+                      <div key={type} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={type}
+                          checked={formData.competencyTypes.includes(type)}
+                          onChange={() => handleCompetencyTypeChange(type)}
+                          className="mr-2"
+                        />
+                        <label htmlFor={type} className="text-sm">
+                          {type}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    htmlFor="numberOfLevels"
+                  >
+                    Number of Proficiency Levels
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Specify how many proficiency levels each competency
+                          should have. Typically 3-5 levels work well.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
+                  <input
+                    id="numberOfLevels"
+                    type="number"
+                    name="numberOfLevels"
+                    value={formData.numberOfLevels}
+                    onChange={(e) => handleNumberInputChange(e, 2, 6)}
+                    min="2"
+                    max="6"
+                    className="w-full p-2 border rounded"
+                    required
+                    aria-label="Number of proficiency levels"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowOptionalFields(!showOptionalFields)}
+                  className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                >
+                  {showOptionalFields ? (
+                    <>
+                      <ChevronDownIcon className="h-4 w-4 mr-1" />
+                      Hide Optional Fields
+                    </>
+                  ) : (
+                    <>
+                      <ChevronRightIcon className="h-4 w-4 mr-1" />
+                      Show Optional Fields
+                    </>
+                  )}
+                </button>
+
+                {showOptionalFields && (
+                  <div className="mt-4 space-y-6">
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        htmlFor="specificRequirements"
+                      >
+                        Specific Requirements
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Include any specific skills, knowledge, or
+                              requirements that are essential for this role.
+                              This helps tailor the framework to your
+                              organization&apos;s specific needs.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
+                      <textarea
+                        id="specificRequirements"
+                        name="specificRequirements"
+                        value={formData.specificRequirements}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded h-24"
+                        placeholder="Enter any specific requirements or skills needed for this role..."
+                        aria-label="Specific requirements"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        htmlFor="organizationalValues"
+                      >
+                        Organizational Values
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Include your organization&apos;s core values to
+                              ensure the competency framework aligns with your
+                              culture. This helps create competencies that
+                              reinforce your values.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
+                      <textarea
+                        id="organizationalValues"
+                        name="organizationalValues"
+                        value={formData.organizationalValues}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded h-24"
+                        placeholder="Enter your organization's core values..."
+                        aria-label="Organizational values"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        htmlFor="existingCompetencies"
+                      >
+                        Existing Competencies
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              List any existing competencies you want to include
+                              or build upon in this framework.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
+                      <textarea
+                        id="existingCompetencies"
+                        name="existingCompetencies"
+                        value={formData.existingCompetencies}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded h-24"
+                        placeholder="Enter any existing competencies you want to include..."
+                        aria-label="Existing competencies"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Generating..." : "Generate Framework"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        );
       case "search":
         return (
           <div className="bg-white p-6 rounded-lg shadow-md">

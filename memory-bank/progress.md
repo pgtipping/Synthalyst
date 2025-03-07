@@ -35,6 +35,8 @@
 - Next.js updated to the latest version
 - Improved toast notifications for user feedback in Competency Manager
 - Fixed "Save Changes" functionality in framework editing
+- Enhanced error handling in API routes
+- Improved TooltipProvider usage for better UI stability
 
 ## Current Issues
 
@@ -205,6 +207,13 @@
   - Implemented print-friendly view
   - Added feedback mechanism for framework quality
   - Created premium feature teasers and premium page
+- Fixed Competency Manager Save Changes functionality and UI issues (2024-05-28 13:15:00)
+  - Fixed the "Save Changes" button functionality to properly handle API responses
+  - Improved error handling in the updateFrameworkDetails function
+  - Fixed TooltipProvider usage to ensure all tooltips work correctly
+  - Resolved CSS loading issues by properly structuring component hierarchy
+  - Enhanced the UI to prevent breaking when saving changes
+  - Improved the FrameworkSearch component integration
 - Improved Competency Manager UX with toast notifications (2024-05-28 12:30:00)
   - Replaced browser alerts with modern toast notifications for better user experience
   - Fixed the "Save Changes" button functionality to properly exit edit mode after saving
