@@ -261,10 +261,30 @@ The Competency Manager feature is now complete with the following components imp
   - The issue only affected the production environment, which explains why it worked in local development
 
 - Fixed admin page access issue (2024-05-28 16:00:00)
+
   - Updated the Header component to check for user role instead of hardcoded email
   - Added proper type definitions for the session to include the role property
   - This ensures that any user with the ADMIN role can access the admin page
   - The fix applies to both desktop and mobile navigation
+
+- Added user management interface for admin role assignment (2025-03-07 20:30:00)
+
+  - Created a user management page at `/admin/users` to view all users
+  - Implemented user edit page at `/admin/users/[id]` to change user roles
+  - Added API route at `/api/admin/users/[id]` to handle role updates
+  - Enhanced admin dashboard with user statistics (total users and admins)
+  - Implemented role-based access control for admin features
+  - Fixed admin page access by using role-based checks instead of hardcoded email
+  - Improved security by restricting admin actions to users with ADMIN role
+
+- Added script to assign admin role to specific email (2025-03-07 21:30:00)
+
+  - Created a script to assign the ADMIN role to pgtipping1@gmail.com
+  - Implemented the script using Prisma to update the user record
+  - Added an npm script to run the admin role assignment
+  - Ensured the Header component correctly checks for the admin role
+  - Maintained role-based access control for admin features
+  - Admin link in the navbar remains hidden from all users except admins
 
 ## Next Steps
 

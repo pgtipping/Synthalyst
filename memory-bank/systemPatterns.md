@@ -655,3 +655,32 @@ toast({
 - Graceful fallback between models
 - Clear error messages for API failures
 - Maintain service availability through fallbacks
+
+## Authentication and Authorization - [2025-03-07 20:30:00]
+
+### Role-Based Access Control
+
+The application implements role-based access control (RBAC) to manage access to different parts of the system:
+
+1. **User Roles**:
+
+   - `user`: Default role assigned to all new users
+   - `ADMIN`: Administrative role with access to admin dashboard and management features
+
+2. **Role Assignment**:
+
+   - Roles are stored in the `User` model in the database
+   - Admin users can assign roles to other users through the user management interface
+   - The admin role can only be assigned by existing admin users
+
+3. **Access Control Implementation**:
+
+   - Admin pages check for the `ADMIN` role in the user's session
+   - API routes that perform administrative actions verify the user's role
+   - Navigation elements (like admin links) are conditionally rendered based on the user's role
+   - Both client-side and server-side checks are implemented for complete security
+
+4. **User Management**:
+   - Admin users can view all users in the system
+   - Admin users can change the role of any user
+   - The user management interface is accessible only to users with the `ADMIN` role
