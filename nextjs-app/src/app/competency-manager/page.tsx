@@ -820,7 +820,7 @@ export default function CompetencyManager() {
         {!isEditing && (
           <div className="p-4 border rounded-lg bg-background">
             <h3 className="text-lg font-medium mb-4">Feedback</h3>
-            <FeedbackMechanism framework={framework} />
+            <FeedbackMechanism frameworkId={framework.id || ""} />
           </div>
         )}
 
