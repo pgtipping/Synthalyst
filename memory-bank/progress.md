@@ -1302,6 +1302,7 @@ These improvements make the PDF output more professional and better suited for p
 - **Active Development**: Focusing on completing standalone functionality for all HR tools.
 
 - **Recent Achievements**:
+  - Fixed Next.js 15 compatibility issue in competency-manager frameworks API route
   - Fixed type error in competency-categories API route
   - Enhanced competency manager with industry-specific suggestions
   - Added visualization options to the competency manager
@@ -1310,7 +1311,7 @@ These improvements make the PDF output more professional and better suited for p
 
 ## Known Issues
 
-- Type errors in NextAuth.js integration that need to be addressed
+- Need to ensure all dynamic route handlers follow Next.js 15 requirements by using Promise<{ id: string }> for params
 - Need to implement proper error handling for API routes
 - Need to add comprehensive testing for all components
 

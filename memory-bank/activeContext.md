@@ -8,6 +8,7 @@
 
 ## Recent Changes
 
+- Fixed Next.js 15 compatibility issue in competency-manager frameworks API route by updating the params type to be a Promise
 - Fixed type error in competency-categories API route by properly handling optional role property
 - Enhanced competency manager with industry-specific competency suggestions
 - Added multiple visualization options (radar chart, heatmap, matrix) for better competency analysis
@@ -35,6 +36,7 @@
 - Need to ensure all API routes have proper error handling and validation
 - Should implement comprehensive testing for all components
 - Need to address any remaining type errors in NextAuth.js integration
+- Ensure all dynamic route handlers follow Next.js 15 requirements by using Promise<{ id: string }> for params
 
 ## Training plan generation functionality improvements
 
