@@ -58,6 +58,11 @@
   - Added all form fields with proper validation and styling
   - Implemented industry-specific competency suggestions
   - Created a seamless workflow between form submission and framework display
+- Enhanced Competency Manager form with progressive disclosure and improved help system
+  - Implemented true progressive disclosure by adding a collapsible section for optional fields
+  - Added comprehensive tooltips to all form fields with detailed guidance
+  - Improved the organization of the form to reduce initial complexity
+  - Maintained all "Other" options in dropdowns for custom input
 
 ## Known Issues
 

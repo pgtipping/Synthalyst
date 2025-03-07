@@ -67,6 +67,11 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Enhanced Competency Manager form with progressive disclosure and improved help system (2025-03-07)
+  - Implemented true progressive disclosure by adding a collapsible section for optional fields
+  - Added comprehensive tooltips to all form fields with detailed guidance
+  - Improved the organization of the form to reduce initial complexity
+  - Maintained all "Other" options in dropdowns for custom input
 - Implemented framework generator form in the Competency Manager (2025-03-07)
   - Connected the generator form to the main page UI
   - Added all form fields with proper validation and styling
