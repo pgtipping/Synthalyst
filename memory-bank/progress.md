@@ -1,7 +1,18 @@
-# Progress Report - [2025-03-06]
+# Progress Report - [2025-03-07]
 
 ## What Works
 
+- Competency Manager with industry-specific suggestions
+- Competency framework visualization options (radar chart, heatmap, matrix)
+- Framework management features (create, edit, save, delete)
+- Export options for competency frameworks (JSON, PDF, CSV)
+- Sharing options for competency frameworks
+- Premium feature teasers in Competency Manager
+- User feedback mechanism for competency framework quality
+- Public and private feedback channels for framework ratings
+- LLM-specific feedback collection for AI improvement
+- Analytics dashboard for framework ratings
+- Top AI-Generated Frameworks showcase
 - Basic training plan generation with Llama 3.2 3B model
 - Enhanced training plan generation without authentication
 - Fallback to Gemini when Llama fails
@@ -14,52 +25,26 @@
 - API endpoints for competency categories
 - NextAuth type definitions with role property
 - Strategic development approach: "Standalone First, Integration Second"
-- Competency Manager with industry-specific suggestions
-- Competency framework visualization options (radar chart, heatmap, matrix)
-- Framework management features (create, edit, save, delete)
-- Export options for competency frameworks (JSON, PDF, CSV)
-- Sharing options for competency frameworks
-- Premium feature teasers in Competency Manager
-- User feedback mechanism for competency framework quality
-- Public and private feedback channels for framework ratings
-- LLM-specific feedback collection for AI improvement
-- Analytics dashboard for framework ratings
-- Top AI-Generated Frameworks showcase
 
 ## Recent Achievements
 
-- Fixed model ID configuration for Llama integration
-- Removed authentication barriers for plan generation
-- Improved error handling in model fallback scenarios
-- Updated test suite for correct model usage
-- Created comprehensive implementation plan for integrated HR toolkit
-- Revised the integrated HR toolkit implementation plan to adopt a JD-first approach
-- Defined premium vs. freemium feature differentiation for all HR tools
-- Added backward compatibility strategy to prevent breaking changes during integration
-- Improved formatting in the integrated HR toolkit documentation
-- Implemented database schema for competency frameworks, competencies, and levels
-- Created organizational reference data models
-- Set up migrations for the new schema
-- Added relationships between competencies and job descriptions
-- Added relationships between competencies and organizational reference data
-- Implemented API endpoints for competency categories
-- Added admin role validation for reference data management
-- Fixed NextAuth type definitions to include role property
-- Adopted "Standalone First, Integration Second" development approach
+- Enhanced Competency Manager with user feedback mechanisms
+- Added analytics dashboard for framework ratings
+- Created Top AI-Generated Frameworks showcase
+- Implemented visualization components with responsive design
+- Added export options for competency frameworks (JSON, PDF, CSV)
+- Implemented sharing options for competency frameworks
+- Fixed Next.js 15 compatibility issues in API routes
+- Enhanced competency manager with industry-specific competency suggestions
 - Revised development priorities to focus on completing standalone functionality
-- Enhanced Competency Manager with industry-specific suggestions
 - Added multiple visualization options for competency frameworks
 - Implemented framework management features
-- Added export and sharing options for competency frameworks
 - Created premium feature teasers to showcase upgrade value
-- Implemented user feedback mechanism for competency framework quality
-- Created public and private feedback channels for framework ratings
-- Added LLM-specific feedback collection for AI improvement
-- Developed analytics dashboard for framework ratings
-- Created Top AI-Generated Frameworks showcase
 
 ## Known Issues
 
+- Print-friendly view for competency frameworks not yet implemented
+- Search functionality for saved frameworks not yet implemented
 - NextAuth debug warnings in development environment
 - Need to implement rate limiting for unauthenticated users
 - Consider caching for repeated plan requests
@@ -72,6 +57,7 @@
 
 ## Current Status
 
+- Competency Manager is nearly complete with core functionality, visualization options, management features, export/sharing options, premium teasers, and user feedback mechanisms
 - Training plan generation is fully functional
 - Authentication removed where not necessary
 - Model fallback system working as expected
@@ -87,6 +73,8 @@
 
 ## In Progress
 
+- Print-friendly view for competency frameworks
+- Search functionality for saved frameworks
 - Design of the competency data layer
 - Organizational reference data schema and management
 - Competency extraction and standardization service design
