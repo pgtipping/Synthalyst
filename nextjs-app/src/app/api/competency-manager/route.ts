@@ -13,8 +13,14 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
+// Define interface for cache item
+interface CacheItem {
+  framework: CompetencyFramework;
+  timestamp: number;
+}
+
 // Simple in-memory cache for frequently used frameworks
-const frameworkCache = new Map();
+const frameworkCache = new Map<string, CacheItem>();
 
 // Cache expiration in ms (24 hours)
 const CACHE_EXPIRATION = 24 * 60 * 60 * 1000;
@@ -45,7 +51,7 @@ interface CompetencyFramework {
 }
 
 // Helper function to get framework from cache
-function getFrameworkFromCache(cacheKey) {
+function getFrameworkFromCache(cacheKey: string) {
   const cachedItem = frameworkCache.get(cacheKey);
 
   if (cachedItem) {
