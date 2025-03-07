@@ -20,7 +20,7 @@ alwaysApply: true
 
 ## mandatory rules
 
--  if you are not 98% certain the solution will resolve the issue, search the web for the precise fix
+- if you are not 95% certain the solution will resolve the issue, search the web for the precise fix
 - DO NOT install packages in root folder
 - Always check folder before installing any package
 - focus ALL development in development folder (/nextjs-app)

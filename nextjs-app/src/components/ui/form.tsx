@@ -44,17 +44,31 @@ const FormField = <
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext);
   const itemContext = React.useContext(FormItemContext);
-  const formContext = useFormContext();
+
+  // Use nullish coalescing operator to handle null context
+  const methods = useFormContext() ?? {};
 
   if (!fieldContext) {
     throw new Error("useFormField should be used within <FormField>");
   }
 
-  if (!formContext) {
-    throw new Error("useFormField should be used within a FormProvider");
+  // Return early with default values if no form context
+  if (!methods || !Object.keys(methods).length) {
+    return {
+      id: itemContext?.id || "",
+      name: fieldContext.name,
+      formItemId: `${itemContext?.id || ""}-form-item`,
+      formDescriptionId: `${itemContext?.id || ""}-form-item-description`,
+      formMessageId: `${itemContext?.id || ""}-form-item-message`,
+      error: undefined,
+      invalid: false,
+      isDirty: false,
+      isTouched: false,
+      isValidating: false,
+    };
   }
 
-  const { getFieldState, formState } = formContext;
+  const { getFieldState, formState } = methods;
   const fieldState = getFieldState(fieldContext.name, formState);
 
   const { id } = itemContext;
