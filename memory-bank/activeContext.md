@@ -1,4 +1,4 @@
-# Active Context - [2025-03-07 13:28:58]
+# Active Context - [2025-03-07 13:51:09]
 
 ## Current Focus
 
@@ -73,6 +73,14 @@ The Competency Manager feature is nearly complete with the following components 
   - Add more customization options for visualizations
 
 ## Recent Changes
+
+- Fixed infinite loop in FrameworkSearch component (2025-03-07 13:51:09)
+
+  - Resolved "Maximum update depth exceeded" error in the Select component
+  - Fixed useEffect dependency array to prevent infinite state updates
+  - Changed dependency from applySearch callback to individual filter states
+  - Prevented component from repeatedly calling setState inside componentDidUpdate
+  - Improved performance and stability of the search functionality
 
 - Fixed Select component runtime error in FrameworkSearch (2025-03-07 13:28:58)
 

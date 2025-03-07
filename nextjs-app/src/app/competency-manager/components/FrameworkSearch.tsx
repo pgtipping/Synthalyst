@@ -149,7 +149,13 @@ export default function FrameworkSearch({
   // Apply search whenever any filter changes
   useEffect(() => {
     applySearch();
-  }, [applySearch]);
+  }, [
+    searchTerm,
+    industryFilter,
+    jobFunctionFilter,
+    roleLevelFilter,
+    dateFilter,
+  ]);
 
   // Clear all filters
   const clearFilters = useCallback(() => {

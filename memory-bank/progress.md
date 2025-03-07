@@ -1,4 +1,4 @@
-# Progress Report - [2025-03-07 13:28:58]
+# Progress Report - [2025-03-07 13:51:09]
 
 ## What Works
 
@@ -163,6 +163,12 @@
   - Added loading state for better user experience
   - Improved performance by only loading visualization when needed
   - Enhanced UI with a styled button and container for visualizations
+- Fixed infinite loop in FrameworkSearch component (2025-03-07 13:51:09)
+  - Resolved "Maximum update depth exceeded" error in the Select component
+  - Fixed useEffect dependency array to prevent infinite state updates
+  - Changed dependency from applySearch callback to individual filter states
+  - Prevented component from repeatedly calling setState inside componentDidUpdate
+  - Improved performance and stability of the search functionality
 - Fixed Select component runtime error in FrameworkSearch (2025-03-07 13:28:58)
   - Replaced empty string values in SelectItem components with "all" value
   - Updated filter logic to handle the new "all" value
