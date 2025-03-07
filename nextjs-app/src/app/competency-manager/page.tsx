@@ -113,6 +113,7 @@ export default function CompetencyManager() {
   const [filteredFrameworks, setFilteredFrameworks] = useState<
     CompetencyFramework[]
   >([]);
+  const [loadingProgress, setLoadingProgress] = useState<string | null>(null);
 
   const industries = [
     "Technology",
@@ -319,23 +320,85 @@ export default function CompetencyManager() {
         specificRequirements: formData.specificRequirements,
         organizationalValues: formData.organizationalValues,
         existingCompetencies: formData.existingCompetencies,
+        streaming: true, // Request streaming response
       };
 
-      const response = await fetch("/api/competency-manager", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      // Use EventSource for streaming response
+      if (typeof EventSource !== "undefined") {
+        // Create a new EventSource connection
+        const response = await fetch("/api/competency-manager", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+          },
+          body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate competency framework");
+        // Check if streaming is supported by the server
+        if (
+          response.headers.get("Content-Type")?.includes("text/event-stream")
+        ) {
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder();
+
+          if (!reader) {
+            throw new Error("Streaming not supported");
+          }
+
+          // Process the stream
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split("\n\n");
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                try {
+                  const data = JSON.parse(line.substring(6));
+
+                  if (data.message) {
+                    // Update loading state with the message
+                    setLoadingProgress(data.message);
+                  } else if (data.framework) {
+                    // Final result with the framework
+                    setFramework(data.framework);
+                    setActiveCompetencyIndex(0);
+                    setIsLoading(false);
+                    return;
+                  }
+                } catch (e) {
+                  console.error("Error parsing SSE data:", e);
+                }
+              }
+            }
+          }
+        } else {
+          // Fallback to regular JSON response
+          const data = await response.json();
+          setFramework(data.framework);
+          setActiveCompetencyIndex(0);
+        }
+      } else {
+        // Fallback for browsers not supporting EventSource
+        const response = await fetch("/api/competency-manager", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate competency framework");
+        }
+
+        const data = await response.json();
+        setFramework(data.framework);
+        setActiveCompetencyIndex(0);
       }
-
-      const data = await response.json();
-      setFramework(data.framework);
-      setActiveCompetencyIndex(0);
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -622,8 +685,160 @@ export default function CompetencyManager() {
           </div>
         </div>
 
-        {/* Rest of the framework details */}
-        {/* ... existing code ... */}
+        {/* Framework description and metadata */}
+        <div className="p-4 border rounded-lg bg-background">
+          <p className="text-gray-700 mb-4">{framework.description}</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+            <div>
+              <span className="text-sm font-medium text-gray-500">
+                Industry
+              </span>
+              <p>{framework.industry}</p>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-gray-500">
+                Job Function
+              </span>
+              <p>{framework.jobFunction}</p>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-gray-500">
+                Role Level
+              </span>
+              <p>{framework.roleLevel}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Visualization section */}
+        {showVisualization && framework.competencies.length > 0 && (
+          <div className="p-4 border rounded-lg bg-background">
+            <h3 className="text-lg font-medium mb-4">Visualization</h3>
+            <CompetencyVisualization competencies={framework.competencies} />
+          </div>
+        )}
+
+        {/* Competencies section */}
+        <div className="p-4 border rounded-lg bg-background">
+          <h3 className="text-lg font-medium mb-4">Competencies</h3>
+          <div className="space-y-4">
+            {framework.competencies.map((competency, index) => (
+              <details
+                key={index}
+                className="border rounded-lg p-4"
+                open={index === activeCompetencyIndex}
+              >
+                <summary
+                  className="flex justify-between items-center cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveCompetencyIndex(
+                      index === activeCompetencyIndex ? -1 : index
+                    );
+                  }}
+                >
+                  <div>
+                    <h4 className="text-lg font-medium">{competency.name}</h4>
+                    <div className="text-sm text-gray-500">
+                      Type: {competency.type}
+                    </div>
+                  </div>
+                </summary>
+
+                <div className="mt-4 space-y-4 pt-4 border-t">
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-500">
+                      Description
+                    </h5>
+                    <p className="text-gray-700">{competency.description}</p>
+                  </div>
+
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-500">
+                      Business Impact
+                    </h5>
+                    <p className="text-gray-700">{competency.businessImpact}</p>
+                  </div>
+
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-500 mb-2">
+                      Proficiency Levels
+                    </h5>
+                    <div className="space-y-4">
+                      {competency.levels
+                        .sort((a, b) => a.levelOrder - b.levelOrder)
+                        .map((level, levelIndex) => (
+                          <div
+                            key={levelIndex}
+                            className="border rounded p-3 bg-gray-50"
+                          >
+                            <h6 className="font-medium">{level.name}</h6>
+                            <p className="text-sm text-gray-600 mb-2">
+                              {level.description}
+                            </p>
+
+                            <div className="mb-2">
+                              <span className="text-xs font-medium text-gray-500">
+                                Behavioral Indicators:
+                              </span>
+                              <ul className="list-disc pl-5 text-sm">
+                                {level.behavioralIndicators.map(
+                                  (indicator, i) => (
+                                    <li key={i}>{indicator}</li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+
+                            <div>
+                              <span className="text-xs font-medium text-gray-500">
+                                Development Suggestions:
+                              </span>
+                              <ul className="list-disc pl-5 text-sm">
+                                {level.developmentSuggestions.map(
+                                  (suggestion, i) => (
+                                    <li key={i}>{suggestion}</li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* Feedback section if not editing */}
+        {!isEditing && (
+          <div className="p-4 border rounded-lg bg-background">
+            <h3 className="text-lg font-medium mb-4">Feedback</h3>
+            <FeedbackMechanism framework={framework} />
+          </div>
+        )}
+
+        {/* Edit and save controls */}
+        <div className="flex justify-between">
+          {!isEditing ? (
+            <div className="flex gap-2">
+              <Button onClick={startEditing}>Edit Details</Button>
+              <Button variant="outline" onClick={saveFramework}>
+                Save Framework
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Button onClick={updateFrameworkDetails}>Save Changes</Button>
+              <Button variant="outline" onClick={cancelEditing}>
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -1325,68 +1540,103 @@ export default function CompetencyManager() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <TooltipProvider>
-        <div className="max-w-6xl mx-auto space-y-6">
-          <Breadcrumb
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Tools", href: "/tools" },
-              {
-                label: "Competency Manager",
-                href: "/competency-manager",
-                active: true,
-              },
-            ]}
-          />
+    <div className="container mx-auto py-8">
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Tools", href: "/tools" },
+          { label: "Competency Manager", href: "#" },
+        ]}
+      />
 
-          <h1 className="text-4xl font-bold">Competency Manager</h1>
-          <p className="text-lg text-gray-600">
-            Generate comprehensive competency frameworks for any role or
-            industry using AI.
-          </p>
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h1 className="text-3xl font-bold mb-6">Competency Manager</h1>
 
-          {/* Tabs for Generator, Saved Frameworks, and Feedback */}
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              <button
-                onClick={() => setActiveTab("generator")}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "generator"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Framework Generator
-              </button>
-              <button
-                onClick={() => setActiveTab("saved")}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "saved"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Saved Frameworks{" "}
-                {savedFrameworks.length > 0 && `(${savedFrameworks.length})`}
-              </button>
-              <button
-                onClick={() => setActiveTab("feedback")}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "feedback"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                AI Framework Ratings
-              </button>
-            </nav>
-          </div>
-
-          {/* Render the active tab content */}
-          {renderTabContent()}
+        <div className="flex mb-6 border-b">
+          <button
+            className={`pb-2 px-4 ${
+              activeTab === "generator"
+                ? "border-b-2 border-blue-500 text-blue-500 font-medium"
+                : "text-gray-500"
+            }`}
+            onClick={() => setActiveTab("generator")}
+          >
+            Generator
+          </button>
+          <button
+            className={`pb-2 px-4 ${
+              activeTab === "saved"
+                ? "border-b-2 border-blue-500 text-blue-500 font-medium"
+                : "text-gray-500"
+            }`}
+            onClick={() => setActiveTab("saved")}
+          >
+            Saved Frameworks
+          </button>
+          <button
+            className={`pb-2 px-4 ${
+              activeTab === "feedback"
+                ? "border-b-2 border-blue-500 text-blue-500 font-medium"
+                : "text-gray-500"
+            }`}
+            onClick={() => setActiveTab("feedback")}
+          >
+            Analytics & Feedback
+          </button>
         </div>
-      </TooltipProvider>
+
+        {isLoading && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
+              <div className="flex flex-col items-center">
+                <div className="relative w-24 h-24 mb-4">
+                  <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-200 rounded-full"></div>
+                  <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">
+                  Generating Framework
+                </h3>
+                <p className="text-gray-600 mb-2">
+                  {loadingProgress ||
+                    "Our AI is crafting a tailored competency framework for you..."}
+                </p>
+                <p className="text-sm text-gray-500">
+                  This may take up to 30 seconds
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">
+                  Error generating framework
+                </h3>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {renderTabContent()}
+      </div>
     </div>
   );
 }

@@ -13,6 +13,12 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
+// Simple in-memory cache for frequently used frameworks
+const frameworkCache = new Map();
+
+// Cache expiration in ms (24 hours)
+const CACHE_EXPIRATION = 24 * 60 * 60 * 1000;
+
 interface CompetencyLevel {
   name: string;
   description: string;
@@ -38,7 +44,49 @@ interface CompetencyFramework {
   competencies: Competency[];
 }
 
+// Helper function to get framework from cache
+function getFrameworkFromCache(cacheKey) {
+  const cachedItem = frameworkCache.get(cacheKey);
+
+  if (cachedItem) {
+    // Check if cache has expired
+    if (Date.now() - cachedItem.timestamp < CACHE_EXPIRATION) {
+      console.log("Framework cache hit for:", cacheKey);
+      return cachedItem.framework;
+    } else {
+      // Remove expired cache entry
+      frameworkCache.delete(cacheKey);
+    }
+  }
+
+  return null;
+}
+
 export async function POST(request: Request) {
+  // For streaming response
+  const encoder = new TextEncoder();
+  const streamController = new TransformStream();
+  const writer = streamController.writable.getWriter();
+
+  // Helper function to stream updates to the client
+  const streamUpdate = async (message: string) => {
+    await writer.write(
+      encoder.encode(`data: ${JSON.stringify({ message })}\n\n`)
+    );
+  };
+
+  // Helper function to stream final result
+  const streamResult = async (framework: CompetencyFramework) => {
+    await writer.write(
+      encoder.encode(`data: ${JSON.stringify({ framework })}\n\n`)
+    );
+    await writer.close();
+  };
+
+  // Check if client supports streaming
+  const acceptHeader = request.headers.get("accept") || "";
+  const wantsStream = acceptHeader.includes("text/event-stream");
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -59,165 +107,398 @@ export async function POST(request: Request) {
       specificRequirements,
       organizationalValues,
       existingCompetencies,
+      streaming = false, // Client can explicitly request streaming
     } = await request.json();
 
-    // Construct additional context based on optional fields
-    let additionalContext = "";
+    // Determine if we should use streaming based on client headers and request param
+    const useStreaming = wantsStream || streaming;
 
-    if (competencyTypes && competencyTypes.length > 0) {
-      additionalContext += `Focus on the following competency types: ${competencyTypes.join(
-        ", "
-      )}.\n`;
-    }
-
-    if (numberOfLevels) {
-      additionalContext += `Include ${numberOfLevels} proficiency levels for each competency.\n`;
-    }
-
-    if (specificRequirements) {
-      additionalContext += `Specific requirements: ${specificRequirements}\n`;
-    }
-
-    if (organizationalValues) {
-      additionalContext += `Organizational values to incorporate: ${organizationalValues}\n`;
-    }
-
-    if (existingCompetencies) {
-      additionalContext += `Build upon or complement these existing competencies: ${existingCompetencies}\n`;
-    }
-
-    const prompt = `
-    You are an expert in competency framework development with deep knowledge of skills and behaviors across industries and roles.
-
-    Generate a comprehensive competency framework for a ${roleLevel} ${jobFunction} in the ${industry} industry.
-
-    The framework should include ${numberOfCompetencies} competencies that are:
-    1. Specific and measurable
-    2. Relevant to the role and industry
-    3. Structured with clear progression between levels
-    4. Actionable for development planning
-
-    ${additionalContext}
-
-    For each competency, provide:
-    - Name: A concise, professional title
-    - Description: A clear explanation of the competency (2-3 sentences)
-    - Business Impact: How this competency contributes to organizational success
-    - ${numberOfLevels || 4} proficiency levels with:
-      - Level Name: (e.g., Basic, Intermediate, Advanced, Expert)
-      - Level Description: A brief overview of capabilities at this level
-      - Behavioral Indicators: 3-5 specific, observable behaviors that demonstrate this level
-      - Development Suggestions: 2-3 activities to develop this competency level
-
-    Format the response as structured JSON that can be parsed programmatically with this exact schema:
-    {
-      "name": "Framework Name",
-      "description": "Framework Description",
-      "industry": "${industry}",
-      "jobFunction": "${jobFunction}",
-      "roleLevel": "${roleLevel}",
-      "competencies": [
-        {
-          "name": "Competency Name",
-          "description": "Competency Description",
-          "businessImpact": "Business Impact Description",
-          "type": "Competency Type",
-          "levels": [
-            {
-              "name": "Level Name",
-              "description": "Level Description",
-              "levelOrder": 1,
-              "behavioralIndicators": ["Indicator 1", "Indicator 2", "Indicator 3"],
-              "developmentSuggestions": ["Suggestion 1", "Suggestion 2"]
-            }
-          ]
-        }
-      ]
-    }
-    
-    IMPORTANT: Return ONLY the JSON object without any markdown formatting or explanation.
-    `;
-
-    // Use Gemini 2.0 Flash as primary LLM
-    let competencyFramework;
-    try {
-      // Get the Gemini model
-      const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.95,
-          topK: 40,
-          maxOutputTokens: 4000,
-          responseMimeType: "application/json",
+    // If streaming is requested, start the response stream
+    if (useStreaming) {
+      const response = new Response(streamController.readable, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
         },
       });
 
-      // Generate content
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      // Process continues asynchronously after returning the response
+      streamUpdate("Starting framework generation process...");
 
-      try {
-        competencyFramework = JSON.parse(text);
-      } catch (parseError) {
-        console.error("Error parsing Gemini response:", parseError);
-        console.log("Raw Gemini response:", text);
-        throw new Error("Failed to parse Gemini response");
+      // Create a cache key based on common parameters
+      const cacheKey = `${industry}|${jobFunction}|${roleLevel}|${numberOfCompetencies}|${numberOfLevels}`;
+
+      // Check if we have a cached framework for these parameters
+      const cachedFramework = getFrameworkFromCache(cacheKey);
+      if (cachedFramework) {
+        await streamUpdate("Found cached framework, returning immediately.");
+        await streamResult(cachedFramework);
+        return response;
       }
-    } catch (error) {
-      console.error("Gemini API error:", error);
 
-      // Fallback to Groq LLama model if Gemini fails
+      // Construct additional context based on optional fields
+      let additionalContext = "";
+
+      if (competencyTypes && competencyTypes.length > 0) {
+        additionalContext += `Focus on the following competency types: ${competencyTypes.join(
+          ", "
+        )}.\n`;
+      }
+
+      if (numberOfLevels) {
+        additionalContext += `Include ${numberOfLevels} proficiency levels for each competency.\n`;
+      }
+
+      if (specificRequirements) {
+        additionalContext += `Specific requirements: ${specificRequirements}\n`;
+      }
+
+      if (organizationalValues) {
+        additionalContext += `Organizational values to incorporate: ${organizationalValues}\n`;
+      }
+
+      if (existingCompetencies) {
+        additionalContext += `Build upon or complement these existing competencies: ${existingCompetencies}\n`;
+      }
+
+      await streamUpdate("Analyzing industry and role requirements...");
+
+      const prompt = `
+      You are an expert in competency framework development with deep knowledge of skills and behaviors across industries and roles.
+
+      Generate a comprehensive competency framework for a ${roleLevel} ${jobFunction} in the ${industry} industry.
+
+      The framework should include ${numberOfCompetencies} competencies that are:
+      1. Specific and measurable
+      2. Relevant to the role and industry
+      3. Structured with clear progression between levels
+      4. Actionable for development planning
+
+      ${additionalContext}
+
+      For each competency, provide:
+      - Name: A concise, professional title
+      - Description: A clear explanation of the competency (2-3 sentences)
+      - Business Impact: How this competency contributes to organizational success
+      - ${numberOfLevels || 4} proficiency levels with:
+        - Level Name: (e.g., Basic, Intermediate, Advanced, Expert)
+        - Level Description: A brief overview of capabilities at this level
+        - Behavioral Indicators: 3-5 specific, observable behaviors that demonstrate this level
+        - Development Suggestions: 2-3 activities to develop this competency level
+
+      Format the response as structured JSON that can be parsed programmatically with this exact schema:
+      {
+        "name": "Framework Name",
+        "description": "Framework Description",
+        "industry": "${industry}",
+        "jobFunction": "${jobFunction}",
+        "roleLevel": "${roleLevel}",
+        "competencies": [
+          {
+            "name": "Competency Name",
+            "description": "Competency Description",
+            "businessImpact": "Business Impact Description",
+            "type": "Competency Type",
+            "levels": [
+              {
+                "name": "Level Name",
+                "description": "Level Description",
+                "levelOrder": 1,
+                "behavioralIndicators": ["Indicator 1", "Indicator 2", "Indicator 3"],
+                "developmentSuggestions": ["Suggestion 1", "Suggestion 2"]
+              }
+            ]
+          }
+        ]
+      }
+      
+      IMPORTANT: Return ONLY the JSON object without any markdown formatting or explanation.
+      `;
+
+      await streamUpdate(
+        "Generating framework structure and core competencies..."
+      );
+
+      // Use Gemini 2.0 Flash as primary LLM
+      let competencyFramework;
       try {
-        const completion = await groq.chat.completions.create({
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are an expert in competency framework development and talent management. You must return only valid JSON without any markdown formatting or explanation.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          model: "llama-3.2-3b-preview",
-          temperature: 0.7,
-          max_tokens: 4000,
-          response_format: { type: "json_object" },
+        // Get the Gemini model
+        const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-flash",
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.95,
+            topK: 40,
+            maxOutputTokens: 4000,
+            responseMimeType: "application/json",
+          },
         });
 
-        const content = completion.choices[0].message.content;
+        await streamUpdate(
+          "Building competency levels and behavioral indicators..."
+        );
+
+        // Generate content
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        await streamUpdate("Finalizing framework details...");
+
         try {
-          competencyFramework = JSON.parse(content || "{}");
+          competencyFramework = JSON.parse(text);
         } catch (parseError) {
-          console.error("Error parsing Groq response:", parseError);
-          console.log("Raw Groq response:", content);
+          console.error("Error parsing Gemini response:", parseError);
+          console.log("Raw Gemini response:", text);
+          await streamUpdate(
+            "Error parsing AI response, trying backup model..."
+          );
+          throw new Error("Failed to parse Gemini response");
+        }
+      } catch (error) {
+        console.error("Gemini API error:", error);
+
+        await streamUpdate("Using alternative AI model for generation...");
+
+        // Fallback to Groq LLama model if Gemini fails
+        try {
+          const completion = await groq.chat.completions.create({
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are an expert in competency framework development and talent management. You must return only valid JSON without any markdown formatting or explanation.",
+              },
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            model: "llama-3.2-3b-preview",
+            temperature: 0.7,
+            max_tokens: 4000,
+            response_format: { type: "json_object" },
+          });
+
+          const content = completion.choices[0].message.content;
+          try {
+            competencyFramework = JSON.parse(content || "{}");
+          } catch (parseError) {
+            console.error("Error parsing Groq response:", parseError);
+            console.log("Raw Groq response:", content);
+            await streamUpdate(
+              "Failed to generate valid framework. Please try again."
+            );
+            await writer.close();
+            return response;
+          }
+        } catch (fallbackError) {
+          console.error("Fallback LLM error:", fallbackError);
+          await streamUpdate(
+            "Failed to generate competency framework. Please try again."
+          );
+          await writer.close();
+          return response;
+        }
+      }
+
+      // Cache the generated framework for future requests
+      frameworkCache.set(cacheKey, {
+        framework: competencyFramework,
+        timestamp: Date.now(),
+      });
+
+      await streamUpdate("Framework generated successfully!");
+      await streamResult(competencyFramework);
+      return response;
+    } else {
+      // Non-streaming response (original implementation)
+      // Create a cache key based on common parameters
+      const cacheKey = `${industry}|${jobFunction}|${roleLevel}|${numberOfCompetencies}|${numberOfLevels}`;
+
+      // Check if we have a cached framework for these parameters
+      const cachedFramework = getFrameworkFromCache(cacheKey);
+      if (cachedFramework) {
+        return NextResponse.json({ framework: cachedFramework });
+      }
+
+      // Construct additional context based on optional fields
+      let additionalContext = "";
+
+      if (competencyTypes && competencyTypes.length > 0) {
+        additionalContext += `Focus on the following competency types: ${competencyTypes.join(
+          ", "
+        )}.\n`;
+      }
+
+      if (numberOfLevels) {
+        additionalContext += `Include ${numberOfLevels} proficiency levels for each competency.\n`;
+      }
+
+      if (specificRequirements) {
+        additionalContext += `Specific requirements: ${specificRequirements}\n`;
+      }
+
+      if (organizationalValues) {
+        additionalContext += `Organizational values to incorporate: ${organizationalValues}\n`;
+      }
+
+      if (existingCompetencies) {
+        additionalContext += `Build upon or complement these existing competencies: ${existingCompetencies}\n`;
+      }
+
+      const prompt = `
+      You are an expert in competency framework development with deep knowledge of skills and behaviors across industries and roles.
+
+      Generate a comprehensive competency framework for a ${roleLevel} ${jobFunction} in the ${industry} industry.
+
+      The framework should include ${numberOfCompetencies} competencies that are:
+      1. Specific and measurable
+      2. Relevant to the role and industry
+      3. Structured with clear progression between levels
+      4. Actionable for development planning
+
+      ${additionalContext}
+
+      For each competency, provide:
+      - Name: A concise, professional title
+      - Description: A clear explanation of the competency (2-3 sentences)
+      - Business Impact: How this competency contributes to organizational success
+      - ${numberOfLevels || 4} proficiency levels with:
+        - Level Name: (e.g., Basic, Intermediate, Advanced, Expert)
+        - Level Description: A brief overview of capabilities at this level
+        - Behavioral Indicators: 3-5 specific, observable behaviors that demonstrate this level
+        - Development Suggestions: 2-3 activities to develop this competency level
+
+      Format the response as structured JSON that can be parsed programmatically with this exact schema:
+      {
+        "name": "Framework Name",
+        "description": "Framework Description",
+        "industry": "${industry}",
+        "jobFunction": "${jobFunction}",
+        "roleLevel": "${roleLevel}",
+        "competencies": [
+          {
+            "name": "Competency Name",
+            "description": "Competency Description",
+            "businessImpact": "Business Impact Description",
+            "type": "Competency Type",
+            "levels": [
+              {
+                "name": "Level Name",
+                "description": "Level Description",
+                "levelOrder": 1,
+                "behavioralIndicators": ["Indicator 1", "Indicator 2", "Indicator 3"],
+                "developmentSuggestions": ["Suggestion 1", "Suggestion 2"]
+              }
+            ]
+          }
+        ]
+      }
+      
+      IMPORTANT: Return ONLY the JSON object without any markdown formatting or explanation.
+      `;
+
+      // Use Gemini 2.0 Flash as primary LLM
+      let competencyFramework;
+      try {
+        // Get the Gemini model
+        const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-flash",
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.95,
+            topK: 40,
+            maxOutputTokens: 4000,
+            responseMimeType: "application/json",
+          },
+        });
+
+        // Generate content
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        try {
+          competencyFramework = JSON.parse(text);
+        } catch (parseError) {
+          console.error("Error parsing Gemini response:", parseError);
+          console.log("Raw Gemini response:", text);
+          throw new Error("Failed to parse Gemini response");
+        }
+      } catch (error) {
+        console.error("Gemini API error:", error);
+
+        // Fallback to Groq LLama model if Gemini fails
+        try {
+          const completion = await groq.chat.completions.create({
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are an expert in competency framework development and talent management. You must return only valid JSON without any markdown formatting or explanation.",
+              },
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            model: "llama-3.2-3b-preview",
+            temperature: 0.7,
+            max_tokens: 4000,
+            response_format: { type: "json_object" },
+          });
+
+          const content = completion.choices[0].message.content;
+          try {
+            competencyFramework = JSON.parse(content || "{}");
+          } catch (parseError) {
+            console.error("Error parsing Groq response:", parseError);
+            console.log("Raw Groq response:", content);
+            return NextResponse.json(
+              {
+                error:
+                  "Failed to parse competency framework from Groq response",
+              },
+              { status: 500 }
+            );
+          }
+        } catch (fallbackError) {
+          console.error("Fallback LLM error:", fallbackError);
           return NextResponse.json(
-            {
-              error: "Failed to parse competency framework from Groq response",
-            },
+            { error: "Failed to generate competency framework" },
             { status: 500 }
           );
         }
-      } catch (groqError) {
-        console.error("Competency framework generation error:", groqError);
-        return NextResponse.json(
-          { error: "Failed to generate competency framework" },
-          { status: 500 }
-        );
       }
-    }
 
-    // Return the generated framework without saving to database
-    return NextResponse.json({ framework: competencyFramework });
+      // Cache the generated framework for future requests
+      frameworkCache.set(cacheKey, {
+        framework: competencyFramework,
+        timestamp: Date.now(),
+      });
+
+      return NextResponse.json({ framework: competencyFramework });
+    }
   } catch (error) {
-    console.error("Error generating competency framework:", error);
-    return NextResponse.json(
-      { error: "Failed to generate competency framework" },
-      { status: 500 }
-    );
+    console.error("API error:", error);
+    if (wantsStream) {
+      await streamUpdate("An error occurred. Please try again later.");
+      await writer.close();
+      return new Response(streamController.readable, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    } else {
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
   }
 }
 
