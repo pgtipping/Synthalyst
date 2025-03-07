@@ -27,6 +27,7 @@ import {
   Loader2Icon,
   ChevronUpIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -116,14 +117,8 @@ export default function CompetencyManager() {
   const [frameworkNameEdit, setFrameworkNameEdit] = useState("");
   const [frameworkDescriptionEdit, setFrameworkDescriptionEdit] = useState("");
   const [activeTab, setActiveTab] = useState<
-    | "generator"
-    | "saved"
-    | "feedback"
-    | "search"
-    | "create"
-    | "recent"
-    | "results"
-  >("generator");
+    "search" | "create" | "recent" | "results"
+  >("create");
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
     null
   );
@@ -478,7 +473,7 @@ export default function CompetencyManager() {
         }
       });
 
-      setActiveTab("saved");
+      setActiveTab("results");
 
       alert("Framework saved successfully!");
     } catch (error) {
@@ -759,33 +754,27 @@ export default function CompetencyManager() {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Industry */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="industry" className="block font-medium">
-                      Industry/Domain <span className="text-red-500">*</span>
-                    </label>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <InfoIcon className="h-4 w-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Select the industry or domain for which you're
-                            creating the competency framework. This helps tailor
-                            competencies to industry-specific requirements.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Industry
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Select the industry or domain for which you&apos;re
+                          creating the competency framework. This helps tailor
+                          competencies to industry-specific requirements.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
                   <select
-                    id="industry"
                     name="industry"
                     value={formData.industry}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded"
                     required
                   >
                     <option value="">Select Industry</option>
@@ -795,428 +784,256 @@ export default function CompetencyManager() {
                       </option>
                     ))}
                   </select>
-                  {formData.industry === "Other" && (
-                    <input
-                      type="text"
-                      name="customIndustry"
-                      value={formData.customIndustry}
-                      onChange={handleInputChange}
-                      placeholder="Specify industry"
-                      className="w-full p-2 border rounded-md mt-2"
-                      required
-                    />
-                  )}
                 </div>
 
-                {/* Job Function */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="jobFunction" className="block font-medium">
-                      Job Function <span className="text-red-500">*</span>
-                    </label>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <InfoIcon className="h-4 w-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            The general category of work this role performs
-                            (e.g., Technical/Engineering,
-                            Leadership/Management). This determines the core
-                            competencies needed.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Job Function
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Specify the job function or role for which you&apos;re
+                          creating competencies. This ensures the framework
+                          addresses the specific skills needed for the role.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
                   <select
-                    id="jobFunction"
                     name="jobFunction"
                     value={formData.jobFunction}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded"
                     required
                   >
                     <option value="">Select Job Function</option>
-                    {jobFunctions.map((jobFunction) => (
-                      <option key={jobFunction} value={jobFunction}>
-                        {jobFunction}
+                    {jobFunctions.map((job) => (
+                      <option key={job} value={job}>
+                        {job}
                       </option>
                     ))}
                   </select>
-                  {formData.jobFunction === "Other" && (
-                    <input
-                      type="text"
-                      name="customJobFunction"
-                      value={formData.customJobFunction}
-                      onChange={handleInputChange}
-                      placeholder="Specify job function"
-                      className="w-full p-2 border rounded-md mt-2"
-                      required
-                    />
-                  )}
                 </div>
 
-                {/* Role Level */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="roleLevel" className="block font-medium">
-                      Role Level <span className="text-red-500">*</span>
-                    </label>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <InfoIcon className="h-4 w-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            The seniority or experience level of the role (e.g.,
-                            Entry Level, Senior, Manager). This affects the
-                            depth and complexity of competencies.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Role Level
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Indicate the seniority or experience level for the
+                          role. This helps calibrate the competency levels
+                          appropriately.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
                   <select
-                    id="roleLevel"
                     name="roleLevel"
                     value={formData.roleLevel}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded"
                     required
                   >
                     <option value="">Select Role Level</option>
-                    {roleLevels.map((roleLevel) => (
-                      <option key={roleLevel} value={roleLevel}>
-                        {roleLevel}
+                    {roleLevels.map((level) => (
+                      <option key={level} value={level}>
+                        {level}
                       </option>
                     ))}
                   </select>
-                  {formData.roleLevel === "Other" && (
-                    <input
-                      type="text"
-                      name="customRoleLevel"
-                      value={formData.customRoleLevel}
-                      onChange={handleInputChange}
-                      placeholder="Specify role level"
-                      className="w-full p-2 border rounded-md mt-2"
-                      required
-                    />
-                  )}
                 </div>
 
-                {/* Number of Competencies */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="numberOfCompetencies"
-                      className="block font-medium"
-                    >
-                      Number of Competencies{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <InfoIcon className="h-4 w-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Recommended range: 5-10 competencies for most roles.
-                            Too many can be overwhelming, too few may not cover
-                            all necessary skills.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Number of Competencies
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Choose how many competencies to include in your
+                          framework. Best practice is 6-12 for most roles.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
                   <input
                     type="number"
-                    id="numberOfCompetencies"
                     name="numberOfCompetencies"
                     value={formData.numberOfCompetencies}
                     onChange={(e) => handleNumberInputChange(e, 3, 15)}
                     min="3"
                     max="15"
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded"
                     required
                   />
                 </div>
 
-                {/* Toggle for optional fields - Progressive Disclosure */}
-                <div className="col-span-1 md:col-span-2 mt-4">
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowOptionalFields(!showOptionalFields)}
-                      className="w-full"
-                    >
-                      {showOptionalFields
-                        ? "Hide Optional Fields"
-                        : "Show Optional Fields"}
-                      {showOptionalFields ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="ml-2 h-4 w-4"
-                        >
-                          <path d="m18 15-6-6-6 6" />
-                        </svg>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="ml-2 h-4 w-4"
-                        >
-                          <path d="m6 9 6 6 6-6" />
-                        </svg>
-                      )}
-                    </Button>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Competency Types
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Select the types of competencies to include in your
+                          framework. A balanced framework typically includes
+                          both technical and behavioral competencies.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
+                  <div className="space-y-2 mt-2">
+                    {competencyTypeOptions.map((type) => (
+                      <div key={type} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={type}
+                          checked={formData.competencyTypes.includes(type)}
+                          onChange={() => handleCompetencyTypeChange(type)}
+                          className="mr-2"
+                        />
+                        <label htmlFor={type} className="text-sm">
+                          {type}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Optional fields help create more tailored and specific
-                    competency frameworks.
-                  </p>
                 </div>
 
-                {/* Optional Fields Section - Only shown when toggled */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Number of Proficiency Levels
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Specify how many proficiency levels each competency
+                          should have. Typically 3-5 levels work well.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
+                  <input
+                    type="number"
+                    name="numberOfLevels"
+                    value={formData.numberOfLevels}
+                    onChange={(e) => handleNumberInputChange(e, 2, 6)}
+                    min="2"
+                    max="6"
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowOptionalFields(!showOptionalFields)}
+                  className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                >
+                  {showOptionalFields ? (
+                    <>
+                      <ChevronDownIcon className="h-4 w-4 mr-1" />
+                      Hide Optional Fields
+                    </>
+                  ) : (
+                    <>
+                      <ChevronRightIcon className="h-4 w-4 mr-1" />
+                      Show Optional Fields
+                    </>
+                  )}
+                </button>
+
                 {showOptionalFields && (
-                  <div className="col-span-1 md:col-span-2 border-l-4 border-blue-200 pl-4 py-2 space-y-6">
-                    <h3 className="text-lg font-medium mb-4">
-                      Optional Fields
-                    </h3>
-
-                    {/* Competency Types */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="block font-medium">
-                          Competency Types
-                        </label>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <InfoIcon className="h-4 w-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">
-                                Select the types of competencies to include in
-                                your framework. A balanced framework typically
-                                includes both technical and behavioral
-                                competencies.
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {competencyTypeOptions.map((type) => (
-                          <div
-                            key={type}
-                            className="flex items-center space-x-2"
-                          >
-                            <input
-                              type="checkbox"
-                              id={`type-${type}`}
-                              checked={formData.competencyTypes.includes(type)}
-                              onChange={() => handleCompetencyTypeChange(type)}
-                              className="rounded"
-                            />
-                            <label htmlFor={`type-${type}`}>{type}</label>
-                          </div>
-                        ))}
-                      </div>
-                      {formData.competencyTypes.includes("Other") && (
-                        <input
-                          type="text"
-                          name="customCompetencyType"
-                          value={formData.customCompetencyType}
-                          onChange={handleInputChange}
-                          placeholder="Specify competency type"
-                          className="w-full p-2 border rounded-md mt-2"
-                        />
-                      )}
-                    </div>
-
-                    {/* Number of Proficiency Levels */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor="numberOfLevels"
-                          className="block font-medium"
-                        >
-                          Number of Proficiency Levels
-                        </label>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <InfoIcon className="h-4 w-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">
-                                Common scales: 3 levels (Basic, Intermediate,
-                                Advanced), 4 levels (adds Expert), or 5 levels
-                                (adds Mastery). More levels allow for finer
-                                progression tracking.
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                      <input
-                        type="number"
-                        id="numberOfLevels"
-                        name="numberOfLevels"
-                        value={formData.numberOfLevels}
-                        onChange={(e) => handleNumberInputChange(e, 2, 6)}
-                        min="2"
-                        max="6"
-                        className="w-full p-2 border rounded-md"
-                      />
-                    </div>
-
-                    {/* Specific Requirements */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor="specificRequirements"
-                          className="block font-medium"
-                        >
-                          Specific Requirements
-                        </label>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <InfoIcon className="h-4 w-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">
-                                Add any specific skills, knowledge areas, or
-                                requirements that are essential for this role.
-                                This helps tailor the framework to your
-                                organization's specific needs.
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                  <div className="mt-4 space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Specific Requirements
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Include any specific skills, knowledge, or
+                              requirements that are essential for this role.
+                              This helps tailor the framework to your
+                              organization&apos;s specific needs.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
                       <textarea
-                        id="specificRequirements"
                         name="specificRequirements"
                         value={formData.specificRequirements}
                         onChange={handleInputChange}
-                        placeholder="Enter any specific requirements or focus areas for this role..."
-                        className="w-full p-2 border rounded-md h-24"
-                      ></textarea>
+                        className="w-full p-2 border rounded h-24"
+                        placeholder="Enter any specific requirements or skills needed for this role..."
+                      />
                     </div>
 
-                    {/* Organizational Values */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor="organizationalValues"
-                          className="block font-medium"
-                        >
-                          Organizational Values
-                        </label>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <InfoIcon className="h-4 w-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">
-                                Include your organization's core values to
-                                ensure the competency framework aligns with your
-                                culture. This helps create competencies that
-                                reinforce your values.
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Organizational Values
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Include your organization&apos;s core values to
+                              ensure the competency framework aligns with your
+                              culture. This helps create competencies that
+                              reinforce your values.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
                       <textarea
-                        id="organizationalValues"
                         name="organizationalValues"
                         value={formData.organizationalValues}
                         onChange={handleInputChange}
-                        placeholder="Enter your organization's values to incorporate them into the competencies..."
-                        className="w-full p-2 border rounded-md h-24"
-                      ></textarea>
+                        className="w-full p-2 border rounded h-24"
+                        placeholder="Enter your organization's core values..."
+                      />
                     </div>
 
-                    {/* Existing Competencies */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor="existingCompetencies"
-                          className="block font-medium"
-                        >
-                          Existing Competencies
-                        </label>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <InfoIcon className="h-4 w-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">
-                                List any existing competencies you want to
-                                include or build upon. This ensures continuity
-                                with your current competency model.
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Existing Competencies
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              List any existing competencies you want to include
+                              or build upon in this framework.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
                       <textarea
-                        id="existingCompetencies"
                         name="existingCompetencies"
                         value={formData.existingCompetencies}
                         onChange={handleInputChange}
+                        className="w-full p-2 border rounded h-24"
                         placeholder="Enter any existing competencies you want to include..."
-                        className="w-full p-2 border rounded-md h-24"
-                      ></textarea>
-                      {formData.industry && industrySuggestions.length > 0 && (
-                        <div className="mt-2">
-                          <p className="text-sm font-medium mb-2">
-                            Industry-Specific Suggestions:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {getIndustrySuggestions().map(
-                              (suggestion, index) => (
-                                <Button
-                                  key={index}
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    addSuggestedCompetency(suggestion)
-                                  }
-                                  className="text-xs"
-                                >
-                                  {suggestion.name}
-                                </Button>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      />
                     </div>
                   </div>
                 )}
@@ -1308,7 +1125,7 @@ export default function CompetencyManager() {
                           </p>
                         </div>
                         <div>
-                          {activeCompetencyIndex === index ? (
+                          {index === activeCompetencyIndex ? (
                             <ChevronUpIcon className="h-5 w-5 text-gray-500" />
                           ) : (
                             <ChevronDownIcon className="h-5 w-5 text-gray-500" />
@@ -1316,7 +1133,7 @@ export default function CompetencyManager() {
                         </div>
                       </div>
 
-                      {activeCompetencyIndex === index && (
+                      {index === activeCompetencyIndex && (
                         <div className="p-4 border-t">
                           <p className="mb-3">{competency.description}</p>
                           <div className="mb-4">
@@ -1478,7 +1295,7 @@ export default function CompetencyManager() {
         </div>
         <Link
           href="/premium"
-          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-md hover:bg-white hover:text-blue-600 hover:border hover:border-blue-600 transition-all shadow-md"
+          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-md border border-transparent hover:bg-white hover:text-blue-600 hover:border-blue-600 transition-all shadow-md"
         >
           View Details
         </Link>
