@@ -67,6 +67,11 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Implemented framework generator form in the Competency Manager (2025-03-07)
+  - Connected the generator form to the main page UI
+  - Added all form fields with proper validation and styling
+  - Implemented industry-specific competency suggestions
+  - Created a seamless workflow between form submission and framework display
 - Completed integration of print-friendly view and search functionality in Competency Manager (2025-03-07)
   - Created a dedicated "Framework Actions" section with organized print, export, share, and premium features
   - Made the search functionality always visible in the saved frameworks tab for better discoverability

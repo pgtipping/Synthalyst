@@ -632,9 +632,306 @@ export default function CompetencyManager() {
   const renderTabContent = () => {
     if (activeTab === "generator") {
       return (
-        <div>
-          {/* Generator tab content */}
-          <div>Generator content goes here</div>
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Framework Generator</h2>
+          </div>
+
+          {framework ? (
+            // If a framework has been generated, show the framework details
+            renderFrameworkDetails()
+          ) : (
+            // Otherwise, show the generator form
+            <div className="border rounded-lg p-6 bg-background">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Industry */}
+                  <div className="space-y-2">
+                    <label htmlFor="industry" className="block font-medium">
+                      Industry/Domain <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="industry"
+                      name="industry"
+                      value={formData.industry}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="">Select Industry</option>
+                      {industries.map((industry) => (
+                        <option key={industry} value={industry}>
+                          {industry}
+                        </option>
+                      ))}
+                    </select>
+                    {formData.industry === "Other" && (
+                      <input
+                        type="text"
+                        name="customIndustry"
+                        value={formData.customIndustry}
+                        onChange={handleInputChange}
+                        placeholder="Specify industry"
+                        className="w-full p-2 border rounded-md mt-2"
+                        required
+                      />
+                    )}
+                  </div>
+
+                  {/* Job Function */}
+                  <div className="space-y-2">
+                    <label htmlFor="jobFunction" className="block font-medium">
+                      Job Function <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="jobFunction"
+                      name="jobFunction"
+                      value={formData.jobFunction}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="">Select Job Function</option>
+                      {jobFunctions.map((jobFunction) => (
+                        <option key={jobFunction} value={jobFunction}>
+                          {jobFunction}
+                        </option>
+                      ))}
+                    </select>
+                    {formData.jobFunction === "Other" && (
+                      <input
+                        type="text"
+                        name="customJobFunction"
+                        value={formData.customJobFunction}
+                        onChange={handleInputChange}
+                        placeholder="Specify job function"
+                        className="w-full p-2 border rounded-md mt-2"
+                        required
+                      />
+                    )}
+                  </div>
+
+                  {/* Role Level */}
+                  <div className="space-y-2">
+                    <label htmlFor="roleLevel" className="block font-medium">
+                      Role Level <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="roleLevel"
+                      name="roleLevel"
+                      value={formData.roleLevel}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="">Select Role Level</option>
+                      {roleLevels.map((roleLevel) => (
+                        <option key={roleLevel} value={roleLevel}>
+                          {roleLevel}
+                        </option>
+                      ))}
+                    </select>
+                    {formData.roleLevel === "Other" && (
+                      <input
+                        type="text"
+                        name="customRoleLevel"
+                        value={formData.customRoleLevel}
+                        onChange={handleInputChange}
+                        placeholder="Specify role level"
+                        className="w-full p-2 border rounded-md mt-2"
+                        required
+                      />
+                    )}
+                  </div>
+
+                  {/* Number of Competencies */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label
+                        htmlFor="numberOfCompetencies"
+                        className="block font-medium"
+                      >
+                        Number of Competencies{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <InfoIcon className="h-4 w-4 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Recommended range: 5-10 competencies for most
+                              roles. Too many can be overwhelming, too few may
+                              not cover all necessary skills.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <input
+                      type="number"
+                      id="numberOfCompetencies"
+                      name="numberOfCompetencies"
+                      value={formData.numberOfCompetencies}
+                      onChange={(e) => handleNumberInputChange(e, 3, 15)}
+                      min="3"
+                      max="15"
+                      className="w-full p-2 border rounded-md"
+                      required
+                    />
+                  </div>
+
+                  {/* Competency Types */}
+                  <div className="space-y-2 col-span-1 md:col-span-2">
+                    <label className="block font-medium">
+                      Competency Types (Optional)
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {competencyTypeOptions.map((type) => (
+                        <div key={type} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`type-${type}`}
+                            checked={formData.competencyTypes.includes(type)}
+                            onChange={() => handleCompetencyTypeChange(type)}
+                            className="rounded"
+                          />
+                          <label htmlFor={`type-${type}`}>{type}</label>
+                        </div>
+                      ))}
+                    </div>
+                    {formData.competencyTypes.includes("Other") && (
+                      <input
+                        type="text"
+                        name="customCompetencyType"
+                        value={formData.customCompetencyType}
+                        onChange={handleInputChange}
+                        placeholder="Specify competency type"
+                        className="w-full p-2 border rounded-md mt-2"
+                      />
+                    )}
+                  </div>
+
+                  {/* Number of Proficiency Levels */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label
+                        htmlFor="numberOfLevels"
+                        className="block font-medium"
+                      >
+                        Number of Proficiency Levels (Optional)
+                      </label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <InfoIcon className="h-4 w-4 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Common scales: 3 levels (Basic, Intermediate,
+                              Advanced), 4 levels (adds Expert), or 5 levels
+                              (adds Mastery).
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <input
+                      type="number"
+                      id="numberOfLevels"
+                      name="numberOfLevels"
+                      value={formData.numberOfLevels}
+                      onChange={(e) => handleNumberInputChange(e, 2, 6)}
+                      min="2"
+                      max="6"
+                      className="w-full p-2 border rounded-md"
+                    />
+                  </div>
+
+                  {/* Specific Requirements */}
+                  <div className="space-y-2 col-span-1 md:col-span-2">
+                    <label
+                      htmlFor="specificRequirements"
+                      className="block font-medium"
+                    >
+                      Specific Requirements (Optional)
+                    </label>
+                    <textarea
+                      id="specificRequirements"
+                      name="specificRequirements"
+                      value={formData.specificRequirements}
+                      onChange={handleInputChange}
+                      placeholder="Enter any specific requirements or focus areas for this role..."
+                      className="w-full p-2 border rounded-md h-24"
+                    ></textarea>
+                  </div>
+
+                  {/* Organizational Values */}
+                  <div className="space-y-2 col-span-1 md:col-span-2">
+                    <label
+                      htmlFor="organizationalValues"
+                      className="block font-medium"
+                    >
+                      Organizational Values (Optional)
+                    </label>
+                    <textarea
+                      id="organizationalValues"
+                      name="organizationalValues"
+                      value={formData.organizationalValues}
+                      onChange={handleInputChange}
+                      placeholder="Enter your organization's values to incorporate them into the competencies..."
+                      className="w-full p-2 border rounded-md h-24"
+                    ></textarea>
+                  </div>
+
+                  {/* Existing Competencies */}
+                  <div className="space-y-2 col-span-1 md:col-span-2">
+                    <label
+                      htmlFor="existingCompetencies"
+                      className="block font-medium"
+                    >
+                      Existing Competencies (Optional)
+                    </label>
+                    <textarea
+                      id="existingCompetencies"
+                      name="existingCompetencies"
+                      value={formData.existingCompetencies}
+                      onChange={handleInputChange}
+                      placeholder="Enter any existing competencies you want to include..."
+                      className="w-full p-2 border rounded-md h-24"
+                    ></textarea>
+                    {formData.industry && industrySuggestions.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-sm font-medium mb-2">
+                          Industry-Specific Suggestions:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {getIndustrySuggestions().map((suggestion, index) => (
+                            <Button
+                              key={index}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addSuggestedCompetency(suggestion)}
+                              className="text-xs"
+                            >
+                              {suggestion.name}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? "Generating..." : "Generate Framework"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       );
     }

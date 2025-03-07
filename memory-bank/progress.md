@@ -53,10 +53,14 @@
 - Added multiple visualization options for competency frameworks
 - Implemented framework management features
 - Created premium feature teasers to showcase upgrade value
+- Implemented framework generator form in the Competency Manager
+  - Connected the generator form to the main page UI
+  - Added all form fields with proper validation and styling
+  - Implemented industry-specific competency suggestions
+  - Created a seamless workflow between form submission and framework display
 
 ## Known Issues
 
-- Integration of print-friendly view and search functionality into the main page not yet complete
 - NextAuth debug warnings in development environment
 - Need to implement rate limiting for unauthenticated users
 - Consider caching for repeated plan requests
@@ -65,7 +69,6 @@
 - Admin interfaces for managing reference data not yet implemented
 - Remaining reference data API endpoints (job levels, job families, job titles, industries) not yet implemented
 - Seed data for reference data models not yet created
-- Standalone functionality of individual tools needs completion before integration
 
 ## Current Status
 
@@ -1332,9 +1335,14 @@ These improvements make the PDF output more professional and better suited for p
 
 ## Known Issues
 
-- Need to ensure all dynamic route handlers follow Next.js 15 requirements by using Promise<{ id: string }> for params
-- Need to implement proper error handling for API routes
-- Need to add comprehensive testing for all components
+- NextAuth debug warnings in development environment
+- Need to implement rate limiting for unauthenticated users
+- Consider caching for repeated plan requests
+- Need a standardized approach for organizational reference data
+- Backward compatibility testing framework needs to be established
+- Admin interfaces for managing reference data not yet implemented
+- Remaining reference data API endpoints (job levels, job families, job titles, industries) not yet implemented
+- Seed data for reference data models not yet created
 
 ## Next Steps
 
