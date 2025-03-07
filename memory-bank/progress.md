@@ -1,4 +1,4 @@
-# Progress Report - [2025-03-07 13:51:09]
+# Progress Report - [2025-03-07 18:30:45]
 
 ## What Works
 
@@ -32,6 +32,13 @@
 - Next.js updated to the latest version
 
 ## Current Issues
+
+- **Vercel Deployment Error** (2025-03-07 18:30:45)
+
+  - Build error in the Competency Manager page
+  - Error message: "`Tooltip` must be used within `TooltipProvider`"
+  - This is preventing successful deployment to production
+  - Priority: High (fix immediately to enable deployment)
 
 - TypeScript errors in test files (2025-03-07 12:47:09)
   - Several test files have TypeScript errors related to Next.js 15.2.0 compatibility

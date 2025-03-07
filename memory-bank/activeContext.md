@@ -1,4 +1,4 @@
-# Active Context - [2025-03-07 13:51:09]
+# Active Context - [2025-03-07 18:30:45]
 
 ## Current Focus
 
@@ -802,3 +802,7 @@ We've made a strategic shift in our development approach to prioritize standalon
 3. Implement the Interview Questions Generator enhancements
 4. Develop the Training Plan Creator improvements
 5. Develop the Competency Matrix Creator as a separate standalone tool
+
+## Deployment Issues
+
+- **Vercel Build Error**: We've encountered a build error in the Vercel deployment related to the Tooltip component in the Competency Manager page. The error indicates that the `Tooltip` component must be used within a `TooltipProvider`. This needs to be fixed to ensure successful deployment.
