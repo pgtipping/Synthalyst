@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description: "Edit user roles in the Synthalyst admin dashboard",
 };
 
+// This is a dynamic route, so we don't pre-generate any paths
+export const dynamicParams = true;
+
 export default async function EditUserPage({
   params,
 }: {

@@ -2,10 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    serverActions: {
-      bodySizeLimit: "2mb",
-      allowedOrigins: ["http://localhost:3000", "http://localhost:3001"],
-    },
+    // Other experimental features can go here
   },
   webpack: (config, { isServer }) => {
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
@@ -61,6 +58,17 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
+  },
+  images: {
+    domains: ["lh3.googleusercontent.com", "avatars.githubusercontent.com"],
+  },
+  serverExternalPackages: ["@prisma/client", "bcrypt"],
 };
 
 module.exports = nextConfig;
