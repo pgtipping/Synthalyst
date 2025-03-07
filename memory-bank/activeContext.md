@@ -67,6 +67,14 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Fixed JSON parsing error in Competency Manager (2025-03-07)
+
+  - Added helper function to clean JSON from markdown formatting
+  - Updated prompt to explicitly request pure JSON without markdown formatting
+  - Added response_format parameter to Groq API call to ensure JSON response
+  - Improved error handling with detailed logging for parsing failures
+  - Added try-catch blocks around JSON parsing to prevent unhandled exceptions
+
 - Fixed API errors in Competency Manager (2025-03-07)
 
   - Corrected Gemini API key environment variable reference from GOOGLE_API_KEY to GEMINI_API_KEY

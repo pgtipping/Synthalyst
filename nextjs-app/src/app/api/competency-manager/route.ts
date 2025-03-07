@@ -35,6 +35,25 @@ interface CompetencyFramework {
   competencies: Competency[];
 }
 
+// Helper function to clean JSON from markdown formatting
+function cleanJsonFromMarkdown(text: string): string {
+  // Remove markdown code block markers (```json and ```)
+  let cleaned = text.replace(/```json\s*/g, "").replace(/```\s*$/g, "");
+
+  // Remove any leading/trailing whitespace
+  cleaned = cleaned.trim();
+
+  // If the text starts with a backtick, remove everything up to the first {
+  if (cleaned.startsWith("`")) {
+    const firstBraceIndex = cleaned.indexOf("{");
+    if (firstBraceIndex !== -1) {
+      cleaned = cleaned.substring(firstBraceIndex);
+    }
+  }
+
+  return cleaned;
+}
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -131,6 +150,8 @@ export async function POST(request: Request) {
         }
       ]
     }
+    
+    IMPORTANT: Return ONLY the JSON object without any markdown formatting (no \`\`\`json or \`\`\` tags). The response should be a valid JSON string that can be directly parsed with JSON.parse().
     `;
 
     // Use Gemini 2.0 Flash as primary LLM
@@ -169,7 +190,7 @@ export async function POST(request: Request) {
             {
               role: "system",
               content:
-                "You are an expert in competency framework development and talent management.",
+                "You are an expert in competency framework development and talent management. Return responses in valid JSON format without markdown formatting.",
             },
             {
               role: "user",
@@ -179,6 +200,7 @@ export async function POST(request: Request) {
           model: "llama-3.2-3b-preview",
           temperature: 0.7,
           max_tokens: 4000,
+          response_format: { type: "json_object" },
         });
 
         response = {
@@ -207,12 +229,35 @@ export async function POST(request: Request) {
     if (response.data.candidates) {
       // Gemini response format
       const content = response.data.candidates[0].content.parts[0].text;
-      competencyFramework = JSON.parse(content);
+      const cleanedContent = cleanJsonFromMarkdown(content);
+      try {
+        competencyFramework = JSON.parse(cleanedContent);
+      } catch (parseError) {
+        console.error("Error parsing Gemini response:", parseError);
+        console.log("Raw content:", content);
+        console.log("Cleaned content:", cleanedContent);
+        return NextResponse.json(
+          {
+            error: "Failed to parse competency framework from Gemini response",
+          },
+          { status: 500 }
+        );
+      }
     } else if (response.data.choices) {
       // Groq response format
-      competencyFramework = JSON.parse(
-        response.data.choices[0].message.content
-      );
+      const content = response.data.choices[0].message.content;
+      const cleanedContent = cleanJsonFromMarkdown(content);
+      try {
+        competencyFramework = JSON.parse(cleanedContent);
+      } catch (parseError) {
+        console.error("Error parsing Groq response:", parseError);
+        console.log("Raw content:", content);
+        console.log("Cleaned content:", cleanedContent);
+        return NextResponse.json(
+          { error: "Failed to parse competency framework from Groq response" },
+          { status: 500 }
+        );
+      }
     } else {
       throw new Error("Unexpected API response format");
     }

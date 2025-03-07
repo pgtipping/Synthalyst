@@ -28,6 +28,12 @@
 
 ## Recent Achievements
 
+- Fixed JSON parsing error in Competency Manager
+  - Added helper function to clean JSON from markdown formatting
+  - Updated prompt to explicitly request pure JSON without markdown formatting
+  - Added response_format parameter to Groq API call to ensure JSON response
+  - Improved error handling with detailed logging for parsing failures
+  - Added try-catch blocks around JSON parsing to prevent unhandled exceptions
 - Fixed API errors in Competency Manager
   - Corrected Gemini API key environment variable reference from GOOGLE_API_KEY to GEMINI_API_KEY
   - Replaced direct axios calls to Groq API with the Groq SDK for better error handling and consistency
