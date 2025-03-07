@@ -122,6 +122,11 @@ export default function Header() {
     if (status === "authenticated" && session?.user) {
       const isAdmin = session.user.role === "ADMIN";
 
+      // Debug session and role
+      console.log("Session:", session);
+      console.log("User role:", session.user.role);
+      console.log("Is admin:", isAdmin);
+
       return (
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground hidden md:inline">
@@ -173,6 +178,11 @@ export default function Header() {
 
     if (status === "authenticated" && session?.user) {
       const isAdmin = session.user.role === "ADMIN";
+
+      // Debug session and role (mobile)
+      console.log("Mobile Session:", session);
+      console.log("Mobile User role:", session.user.role);
+      console.log("Mobile Is admin:", isAdmin);
 
       return (
         <>
