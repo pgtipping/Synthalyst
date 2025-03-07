@@ -45,31 +45,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate average rating
-    const ratings = framework.feedback.map((f) => f.rating);
     const averageRating =
-      ratings.length > 0
-        ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+      framework.feedback.length > 0
+        ? framework.feedback.reduce((sum, item) => sum + item.rating, 0) /
+          framework.feedback.length
         : null;
 
-    // Transform the data to include calculated fields
-    const transformedFramework = {
+    return NextResponse.json({
       ...framework,
-      feedback: undefined, // Remove raw feedback data
       averageRating,
-      feedbackCount: ratings.length,
-      competencies: framework.competencies.map((competency) => ({
-        ...competency,
-        levels: competency.levels.map((level) => ({
-          ...level,
-          behavioralIndicators: level.behavioralIndicators || [],
-          developmentSuggestions: level.developmentSuggestions || [],
-        })),
-      })),
-    };
-
-    return NextResponse.json(transformedFramework);
+      feedbackCount: framework.feedback.length,
+      feedback: undefined, // Don't expose individual feedback
+    });
   } catch (error) {
-    console.error("Error fetching framework:", error);
+    console.error("Error fetching public framework:", error);
     return NextResponse.json(
       { error: "Failed to fetch framework" },
       { status: 500 }

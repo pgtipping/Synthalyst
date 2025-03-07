@@ -2,80 +2,82 @@
 
 ## 2025-03-07
 
-[12:11:28.080] Running build in Washington, D.C., USA (East) – iad1
-[12:11:28.182] Cloning github.com/pgtipping/Synthalyst (Branch: main, Commit: 192c94f)
-[12:11:29.319] Cloning completed: 1.137s
-[12:11:40.088] Restored build cache from previous deployment (8DvcpiDNHLAUPjcAn1TrBRqUpQAM)
-[12:11:40.175] Running "vercel build"
-[12:11:40.831] Vercel CLI 41.2.2
-[12:11:41.159] Running "install" command: `npm install`...
-[12:11:47.315]
-[12:11:47.315] > nextjs-app@0.1.0 postinstall
-[12:11:47.315] > prisma generate
-[12:11:47.315]
-[12:11:47.720] Prisma schema loaded from prisma/schema.prisma
-[12:11:48.637]
-[12:11:48.637] ✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 505ms
-[12:11:48.637]
-[12:11:48.637] Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
-[12:11:48.638]
-[12:11:48.638] Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
-[12:11:48.638]
-[12:11:48.849]
-[12:11:48.849] up to date, audited 1471 packages in 7s
-[12:11:48.849]
-[12:11:48.849] 258 packages are looking for funding
-[12:11:48.850] run `npm fund` for details
-[12:11:48.872]
-[12:11:48.873] 6 vulnerabilities (3 moderate, 3 high)
-[12:11:48.873]
-[12:11:48.873] To address all issues possible (including breaking changes), run:
-[12:11:48.873] npm audit fix --force
-[12:11:48.873]
-[12:11:48.873] Some issues need review, and may require choosing
-[12:11:48.874] a different dependency.
-[12:11:48.874]
-[12:11:48.879] Run `npm audit` for details.
-[12:11:48.963] Detected Next.js version: 15.2.0
-[12:11:48.965] Running "prisma migrate deploy && prisma generate && next build"
-[12:11:49.416] Prisma schema loaded from prisma/schema.prisma
-[12:11:49.423] Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-noisy-mountain-a4gl2bkt-pooler.us-east-1.aws.neon.tech"
-[12:11:50.255]
-[12:11:50.256] 11 migrations found in prisma/migrations
-[12:11:50.256]
-[12:11:50.363]
-[12:11:50.363] No pending migrations to apply.
-[12:11:50.883] Prisma schema loaded from prisma/schema.prisma
-[12:11:51.711]
-[12:11:51.711] ✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 430ms
-[12:11:51.712]
-[12:11:51.712] Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
-[12:11:51.712]
-[12:11:51.712] Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
-[12:11:51.712]
-[12:11:52.523] ▲ Next.js 15.2.0
-[12:11:52.524]
-[12:11:52.596] Creating an optimized production build ...
-[12:12:07.524] ✓ Compiled successfully
-[12:12:07.531] Skipping linting
-[12:12:07.531] Checking validity of types ...
-[12:12:32.046] Collecting page data ...
-[12:12:37.749] Generating static pages (0/66) ...
-[12:12:38.783] Generating static pages (16/66)
-[12:12:38.877] Generating static pages (32/66)
-[12:12:39.448] Error occurred prerendering page "/competency-manager". Read more: https://nextjs.org/docs/messages/prerender-error
-[12:12:39.448] Error: `Tooltip` must be used within `TooltipProvider`
-[12:12:39.449] at /vercel/path1/.next/server/chunks/8302.js:1:16269
-[12:12:39.449] at M (/vercel/path1/.next/server/chunks/340.js:1:1143)
-[12:12:39.449] at nL (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:46773)
-[12:12:39.449] at nU (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:48548)
-[12:12:39.449] at nq (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:67434)
-[12:12:39.449] at nH (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:65009)
-[12:12:39.450] at nG (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:70865)
-[12:12:39.450] at nz (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:69548)
-[12:12:39.450] at nq (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:67701)
-[12:12:39.450] at nH (/vercel/path1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:76:65009)
-[12:12:39.450] Export encountered an error on /competency-manager/page: /competency-manager, exiting the build.
-[12:12:39.458] ⨯ Next.js build worker exited with code: 1 and signal: null
-[12:12:39.501] Error: Command "prisma migrate deploy && prisma generate && next build" exited with 1
-[12:12:39.826]
+[14:56:26.973] Running build in Washington, D.C., USA (East) – iad1
+[14:56:27.531] Cloning github.com/pgtipping/Synthalyst (Branch: main, Commit: aaac177)
+[14:56:28.918] Cloning completed: 1.385s
+[14:56:37.557] Restored build cache from previous deployment (5cmw6vyEJQcmm1y3kwi2WKbLNUNv)
+[14:56:37.676] Running "vercel build"
+[14:56:39.549] Vercel CLI 41.2.2
+[14:56:39.911] Running "install" command: `npm install`...
+[14:56:46.825]
+[14:56:46.825] > nextjs-app@0.1.0 postinstall
+[14:56:46.825] > prisma generate
+[14:56:46.826]
+[14:56:47.241] Prisma schema loaded from prisma/schema.prisma
+[14:56:48.129]
+[14:56:48.129] ✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 475ms
+[14:56:48.129]
+[14:56:48.129] Start by importing your Prisma Client (See: <https://pris.ly/d/importing-client>)
+[14:56:48.130]
+[14:56:48.130] Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: <https://pris.ly/tip-2-optimize>
+[14:56:48.130]
+[14:56:48.330]
+[14:56:48.330] added 20 packages, and audited 1491 packages in 8s
+[14:56:48.330]
+[14:56:48.331] 259 packages are looking for funding
+[14:56:48.331] run `npm fund` for details
+[14:56:48.342]
+[14:56:48.342] 6 vulnerabilities (3 moderate, 3 high)
+[14:56:48.343]
+[14:56:48.343] To address all issues possible (including breaking changes), run:
+[14:56:48.343] npm audit fix --force
+[14:56:48.343]
+[14:56:48.344] Some issues need review, and may require choosing
+[14:56:48.344] a different dependency.
+[14:56:48.344]
+[14:56:48.344] Run `npm audit` for details.
+[14:56:48.393] Detected Next.js version: 15.2.0
+[14:56:48.398] Running "prisma migrate deploy && prisma generate && next build"
+[14:56:48.825] Prisma schema loaded from prisma/schema.prisma
+[14:56:48.832] Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-noisy-mountain-a4gl2bkt-pooler.us-east-1.aws.neon.tech"
+[14:56:48.933]
+[14:56:48.934] 11 migrations found in prisma/migrations
+[14:56:48.934]
+[14:56:48.983]
+[14:56:48.983] No pending migrations to apply.
+[14:56:49.522] Prisma schema loaded from prisma/schema.prisma
+[14:56:50.350]
+[14:56:50.351] ✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 429ms
+[14:56:50.351]
+[14:56:50.351] Start by importing your Prisma Client (See: <https://pris.ly/d/importing-client>)
+[14:56:50.351]
+[14:56:50.351] Tip: Want to turn off tips and other hints? <https://pris.ly/tip-4-nohints>
+[14:56:50.351]
+[14:56:51.368] ▲ Next.js 15.2.0
+[14:56:51.369]
+[14:56:51.454] Creating an optimized production build ...
+[14:57:04.274] Failed to compile.
+[14:57:04.275]
+[14:57:04.275] ./src/app/competency-manager/shared/[id]/page.tsx
+[14:57:04.275] Error: [31mx[0m You are attempting to export "generateMetadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://
+[14:57:04.275] [31m|[0m nextjs.org/docs/app/api-reference/directives/use-client
+[14:57:04.276] [31m|[0m
+[14:57:04.276] [31m|[0m
+[14:57:04.277] ,-[[36;1;4m/vercel/path1/src/app/competency-manager/shared/[id]/page.tsx[0m:17:1]
+[14:57:04.277] [2m14[0m | };
+[14:57:04.277] [2m15[0m | }
+[14:57:04.277] [2m16[0m |
+[14:57:04.277] [2m17[0m | export async function generateMetadata({
+[14:57:04.277] : [35;1m ^^^^^^^^^^^^^^^^[0m
+[14:57:04.277] [2m18[0m | params,
+[14:57:04.277] [2m19[0m | }: SharedFrameworkPageProps): Promise<Metadata> {
+[14:57:04.277] [2m20[0m | const framework = await getFramework(params.id);
+[14:57:04.277] `----
+[14:57:04.277]
+[14:57:04.277] Import trace for requested module:
+[14:57:04.278] ./src/app/competency-manager/shared/[id]/page.tsx
+[14:57:04.278]
+[14:57:04.278]
+[14:57:04.278] > Build failed because of webpack errors
+[14:57:04.324] Error: Command "prisma migrate deploy && prisma generate && next build" exited with 1
+[14:57:04.835]
