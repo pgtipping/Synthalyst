@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,24 +11,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Copy, Check, Mail } from "lucide-react";
+import { Copy, Check, Mail, Share2, Globe, Lock } from "lucide-react";
 import { CompetencyFramework } from "../types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface SharingOptionsProps {
   framework: CompetencyFramework;
@@ -56,32 +55,42 @@ export default function SharingOptions({
     },
   });
 
-  const handlePublicToggle = async () => {
-    setIsUpdating(true);
+  const shareUrl = `${window.location.origin}/competency-manager/shared/${framework.id}`;
+
+  const handleCopyLink = async () => {
     try {
-      const newStatus = !isPublic;
-      await onUpdatePublicStatus(newStatus);
-      setIsPublic(newStatus);
-      toast.success(`Framework is now ${newStatus ? "public" : "private"}`);
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast.success("Link copied to clipboard");
+
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
     } catch (error) {
-      console.error("Error updating public status:", error);
-      toast.error("Failed to update sharing settings");
-    } finally {
-      setIsUpdating(false);
+      console.error("Failed to copy link:", error);
+      toast.error("Failed to copy link");
     }
   };
 
-  const copyShareLink = () => {
-    if (!framework.id) return;
+  const handlePublicToggle = async (checked: boolean) => {
+    setIsUpdating(true);
+    try {
+      await onUpdatePublicStatus(checked);
+      setIsPublic(checked);
 
-    const shareUrl = `${window.location.origin}/competency-manager/shared/${framework.id}`;
-    navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    toast.success("Share link copied to clipboard");
-
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+      if (checked) {
+        toast.success("Framework is now public");
+      } else {
+        toast.success("Framework is now private");
+      }
+    } catch (error) {
+      console.error("Failed to update public status:", error);
+      toast.error("Failed to update sharing settings");
+      // Revert the UI state since the API call failed
+      setIsPublic(!checked);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const onEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
@@ -107,38 +116,75 @@ export default function SharingOptions({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="public-toggle">Public Sharing</Label>
-          <FormDescription>
-            {isPremiumUser
-              ? "Make your framework publicly accessible with a share link"
-              : "Upgrade to premium to share your frameworks"}
-          </FormDescription>
-        </div>
+      <h3 className="text-lg font-medium">Sharing Options</h3>
+
+      <div className="flex items-center space-x-2">
         <Switch
           id="public-toggle"
           checked={isPublic}
           onCheckedChange={handlePublicToggle}
-          disabled={isUpdating || !isPremiumUser}
+          disabled={isUpdating}
         />
+        <Label htmlFor="public-toggle" className="cursor-pointer">
+          {isPublic ? (
+            <span className="flex items-center">
+              <Globe className="h-4 w-4 mr-2 text-green-500" />
+              Public
+            </span>
+          ) : (
+            <span className="flex items-center">
+              <Lock className="h-4 w-4 mr-2 text-gray-500" />
+              Private
+            </span>
+          )}
+        </Label>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={copyShareLink}
-          disabled={!isPublic || !framework.id || !isPremiumUser}
-        >
-          {copied ? (
-            <Check className="mr-2 h-4 w-4" />
-          ) : (
-            <Copy className="mr-2 h-4 w-4" />
-          )}
-          Copy Link
-        </Button>
+      <div className="text-sm text-gray-500">
+        {isPublic
+          ? "Anyone with the link can view this framework."
+          : "Only you can view this framework."}
+      </div>
 
+      {isPublic && (
+        <div className="mt-4 space-y-2">
+          <Label htmlFor="share-link">Share Link</Label>
+          <div className="flex space-x-2">
+            <Input
+              id="share-link"
+              value={shareUrl}
+              readOnly
+              className="flex-1"
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleCopyLink}
+              className="flex-shrink-0"
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+
+          <div className="flex mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center"
+              onClick={() => window.open(shareUrl, "_blank")}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Open Shared View
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
         <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
           <DialogTrigger asChild>
             <Button

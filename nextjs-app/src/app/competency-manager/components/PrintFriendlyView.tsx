@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
+import { CompetencyFramework } from "../types";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
-import { CompetencyFramework } from "../types";
 
 interface PrintFriendlyViewProps {
   framework: CompetencyFramework;
@@ -12,213 +12,123 @@ interface PrintFriendlyViewProps {
 export default function PrintFriendlyView({
   framework,
 }: PrintFriendlyViewProps) {
-  const [isPrinting, setIsPrinting] = useState(false);
-
   const handlePrint = () => {
-    setIsPrinting(true);
-
-    try {
-      // Create a print-friendly HTML representation of the framework
-      let printContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${framework.name} - Competency Framework</title>
-          <style>
-            @media print {
-              body {
-                font-family: Arial, sans-serif;
-                color: #000;
-                background: #fff;
-                margin: 0;
-                padding: 20px;
-              }
-              
-              h1 {
-                font-size: 24px;
-                margin-bottom: 10px;
-                color: #2563eb;
-              }
-              
-              h2 {
-                font-size: 20px;
-                margin-top: 20px;
-                margin-bottom: 10px;
-                color: #4b5563;
-              }
-              
-              h3 {
-                font-size: 16px;
-                margin-top: 15px;
-                margin-bottom: 5px;
-                color: #6b7280;
-              }
-              
-              p {
-                margin-bottom: 10px;
-              }
-              
-              .meta {
-                margin-bottom: 20px;
-                font-size: 14px;
-                color: #6b7280;
-              }
-              
-              .competency {
-                margin-bottom: 30px;
-                border: 1px solid #e5e7eb;
-                padding: 15px;
-                page-break-inside: avoid;
-              }
-              
-              .level {
-                margin-bottom: 15px;
-                padding-left: 15px;
-                border-left: 3px solid #3b82f6;
-              }
-              
-              .indicators, .suggestions {
-                margin-top: 10px;
-              }
-              
-              .indicators li, .suggestions li {
-                margin-bottom: 5px;
-              }
-              
-              .page-break {
-                page-break-after: always;
-              }
-              
-              .header {
-                position: running(header);
-                text-align: right;
-                font-size: 12px;
-                color: #9ca3af;
-              }
-              
-              .footer {
-                position: running(footer);
-                text-align: center;
-                font-size: 12px;
-                color: #9ca3af;
-              }
-              
-              @page {
-                margin: 2cm;
-                @top-right { content: element(header) }
-                @bottom-center { content: element(footer) }
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            ${framework.name} - Competency Framework
-          </div>
-          
-          <h1>${framework.name}</h1>
-          
-          <div class="meta">
-            <p><strong>Industry:</strong> ${framework.industry}</p>
-            <p><strong>Job Function:</strong> ${framework.jobFunction}</p>
-            <p><strong>Role Level:</strong> ${framework.roleLevel}</p>
-            <p><strong>Description:</strong> ${framework.description}</p>
-          </div>
-      `;
-
-      framework.competencies.forEach((competency, index) => {
-        // Add page break after every 2 competencies (except the last one)
-        const needsPageBreak =
-          index > 0 &&
-          index % 2 === 0 &&
-          index < framework.competencies.length - 1;
-
-        printContent += `
-          <div class="competency">
-            <h2>${competency.name} (${competency.type})</h2>
-            <p>${competency.description}</p>
-            <p><strong>Business Impact:</strong> ${competency.businessImpact}</p>
-        `;
-
-        competency.levels
-          .sort((a, b) => a.levelOrder - b.levelOrder)
-          .forEach((level) => {
-            printContent += `
-            <div class="level">
-              <h3>${level.name}</h3>
-              <p>${level.description}</p>
-              
-              <div class="indicators">
-                <strong>Behavioral Indicators:</strong>
-                <ul>
-                  ${level.behavioralIndicators
-                    .map((indicator) => `<li>${indicator}</li>`)
-                    .join("")}
-                </ul>
-              </div>
-              
-              <div class="suggestions">
-                <strong>Development Suggestions:</strong>
-                <ul>
-                  ${level.developmentSuggestions
-                    .map((suggestion) => `<li>${suggestion}</li>`)
-                    .join("")}
-                </ul>
-              </div>
-            </div>
-          `;
-          });
-
-        printContent += `</div>`;
-
-        if (needsPageBreak) {
-          printContent += `<div class="page-break"></div>`;
-        }
-      });
-
-      printContent += `
-          <div class="footer">
-            Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-          </div>
-        </body>
-        </html>
-      `;
-
-      // Open a new window with the print-friendly content
-      const printWindow = window.open("", "_blank");
-      if (printWindow) {
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-
-        // Wait for content to load before printing
-        printWindow.onload = function () {
-          printWindow.focus();
-          printWindow.print();
-          printWindow.onafterprint = function () {
-            printWindow.close();
-            setIsPrinting(false);
-          };
-        };
-      } else {
-        // If popup was blocked, inform the user
-        alert("Please allow popups to use the print feature.");
-        setIsPrinting(false);
-      }
-    } catch (error) {
-      console.error("Error generating print view:", error);
-      setIsPrinting(false);
-    }
+    window.print();
   };
 
   return (
-    <Button
-      variant="outline"
-      onClick={handlePrint}
-      disabled={isPrinting}
-      className="print:hidden"
-    >
-      <Printer className="mr-2 h-4 w-4" />
-      {isPrinting ? "Preparing..." : "Print View"}
-    </Button>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Print Framework</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handlePrint}
+          className="flex items-center print:hidden"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          Print
+        </Button>
+      </div>
+
+      <p className="text-sm text-gray-500 print:hidden">
+        Generate a print-friendly version of your competency framework.
+      </p>
+
+      {/* Print-friendly view (hidden until print) */}
+      <div
+        id="print-friendly-view"
+        className="mt-6 p-6 border rounded-lg bg-white print:p-0 print:border-0 print:mt-0"
+      >
+        <style jsx global>{`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            #print-friendly-view,
+            #print-friendly-view * {
+              visibility: visible;
+            }
+            #print-friendly-view {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+            }
+            @page {
+              size: A4;
+              margin: 2cm;
+            }
+          }
+        `}</style>
+
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold">{framework.name}</h1>
+          <p className="text-gray-600 mt-2">{framework.description}</p>
+          <div className="flex justify-center gap-4 mt-4 text-sm text-gray-500">
+            <span>Industry: {framework.industry}</span>
+            <span>Job Function: {framework.jobFunction}</span>
+            <span>Role Level: {framework.roleLevel}</span>
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          {framework.competencies.map((competency, index) => (
+            <div key={index} className="border-b pb-6">
+              <h2 className="text-xl font-semibold">{competency.name}</h2>
+              <p className="text-sm text-gray-500 mb-2">{competency.type}</p>
+              <p className="mb-4">{competency.description}</p>
+
+              <div className="mb-4">
+                <h3 className="text-lg font-medium mb-2">Business Impact</h3>
+                <p>{competency.businessImpact}</p>
+              </div>
+
+              <h3 className="text-lg font-medium mb-2">Proficiency Levels</h3>
+              <div className="space-y-4">
+                {competency.levels
+                  .sort((a, b) => a.levelOrder - b.levelOrder)
+                  .map((level, levelIndex) => (
+                    <div
+                      key={levelIndex}
+                      className="pl-4 border-l-2 border-gray-300"
+                    >
+                      <h4 className="font-medium">{level.name}</h4>
+                      <p className="text-sm mb-2">{level.description}</p>
+
+                      <div className="mb-2">
+                        <h5 className="text-sm font-medium">
+                          Behavioral Indicators
+                        </h5>
+                        <ul className="list-disc pl-5 text-sm">
+                          {level.behavioralIndicators.map((indicator, i) => (
+                            <li key={i}>{indicator}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h5 className="text-sm font-medium">
+                          Development Suggestions
+                        </h5>
+                        <ul className="list-disc pl-5 text-sm">
+                          {level.developmentSuggestions.map((suggestion, i) => (
+                            <li key={i}>{suggestion}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-8 text-sm text-gray-500">
+          <p>Generated with Synthalyst Competency Manager</p>
+          <p>{new Date().toLocaleDateString()}</p>
+        </div>
+      </div>
+    </div>
   );
 }

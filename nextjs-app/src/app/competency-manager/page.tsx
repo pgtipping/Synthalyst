@@ -30,6 +30,15 @@ import {
   Save as SaveIcon,
   Bookmark as BookmarkIcon,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+// Import the new components
+import ExportOptions from "./components/ExportOptions";
+import PrintFriendlyView from "./components/PrintFriendlyView";
+import SharingOptions from "./components/SharingOptions";
+import FeedbackMechanism from "./components/FeedbackMechanism";
+import PremiumFeatureTeasers from "./components/PremiumFeatureTeasers";
 
 // Lazy load the CompetencyVisualization component
 const CompetencyVisualization = dynamic(
@@ -558,10 +567,68 @@ export default function CompetencyManager() {
     return (
       <div className="space-y-6">
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-          <h3 className="text-xl font-semibold text-blue-800 mb-2">
-            {framework.name}
-          </h3>
-          <p className="text-gray-700 mb-4">{framework.description}</p>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-xl font-semibold text-blue-800">
+              {framework.name}
+            </h3>
+            {framework.id && (
+              <div className="flex space-x-2">
+                {editingFrameworkId ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={updateFrameworkDetails}
+                      className="flex items-center"
+                    >
+                      <SaveIcon className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={startEditing}
+                    className="flex items-center"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+          {editingFrameworkId ? (
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Framework Name
+                </label>
+                <Input
+                  value={frameworkNameEdit}
+                  onChange={(e) => setFrameworkNameEdit(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Description
+                </label>
+                <Textarea
+                  value={frameworkDescriptionEdit}
+                  onChange={(e) => setFrameworkDescriptionEdit(e.target.value)}
+                  className="w-full"
+                  rows={3}
+                />
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-700 mb-4">{framework.description}</p>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="font-medium text-gray-700">Industry:</span>{" "}
@@ -674,10 +741,74 @@ export default function CompetencyManager() {
           {framework ? (
             <div className="space-y-6">
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <h3 className="text-xl font-semibold text-blue-800 mb-2">
-                  {framework.name}
-                </h3>
-                <p className="text-gray-700 mb-4">{framework.description}</p>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-xl font-semibold text-blue-800">
+                    {framework.name}
+                  </h3>
+                  {framework.id && (
+                    <div className="flex space-x-2">
+                      {editingFrameworkId ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={updateFrameworkDetails}
+                            className="flex items-center"
+                          >
+                            <SaveIcon className="h-4 w-4 mr-2" />
+                            Save Changes
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={cancelEditing}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={startEditing}
+                          className="flex items-center"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {editingFrameworkId ? (
+                  <div className="space-y-3 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Framework Name
+                      </label>
+                      <Input
+                        value={frameworkNameEdit}
+                        onChange={(e) => setFrameworkNameEdit(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Description
+                      </label>
+                      <Textarea
+                        value={frameworkDescriptionEdit}
+                        onChange={(e) =>
+                          setFrameworkDescriptionEdit(e.target.value)
+                        }
+                        className="w-full"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-700 mb-4">{framework.description}</p>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="font-medium text-gray-700">Industry:</span>{" "}

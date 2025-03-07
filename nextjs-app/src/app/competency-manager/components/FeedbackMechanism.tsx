@@ -1,49 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { StarIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
-import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { StarIcon } from "lucide-react";
+import { CompetencyFramework } from "../types";
+import { toast } from "sonner";
 
 interface FeedbackMechanismProps {
-  frameworkId: string;
+  framework: CompetencyFramework;
 }
 
 export default function FeedbackMechanism({
-  frameworkId,
+  framework,
 }: FeedbackMechanismProps) {
-  const [rating, setRating] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [isPublicRating, setIsPublicRating] = useState(true);
-  const [llmQualityFeedback, setLlmQualityFeedback] = useState<
-    "good" | "needs_improvement" | null
-  >(null);
-  const [llmImprovementSuggestion, setLlmImprovementSuggestion] = useState("");
+  const [rating, setRating] = useState<number>(0);
+  const [hoveredRating, setHoveredRating] = useState<number>(0);
+  const [feedback, setFeedback] = useState<string>("");
+  const [isPublic, setIsPublic] = useState<boolean>(true);
+  const [llmQualityFeedback, setLlmQualityFeedback] = useState<string>("good");
+  const [llmImprovementSuggestion, setLlmImprovementSuggestion] =
+    useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
 
   const handleRatingClick = (value: number) => {
     setRating(value);
   };
 
-  const handleLlmQualityFeedback = (quality: "good" | "needs_improvement") => {
-    setLlmQualityFeedback(quality);
+  const handleRatingHover = (value: number) => {
+    setHoveredRating(value);
   };
 
-  const handleSubmit = async () => {
-    if (!rating) {
-      toast.error("Please provide a rating before submitting");
+  const handleRatingLeave = () => {
+    setHoveredRating(0);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (rating === 0) {
+      toast.error("Please select a rating before submitting");
       return;
     }
 
@@ -56,12 +55,13 @@ export default function FeedbackMechanism({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          frameworkId,
+          frameworkId: framework.id,
           rating,
           feedback,
-          isPublic: isPublicRating,
+          isPublic,
           llmQualityFeedback,
-          llmImprovementSuggestion,
+          llmImprovementSuggestion:
+            llmImprovementSuggestion || "No suggestions provided",
         }),
       });
 
@@ -70,11 +70,7 @@ export default function FeedbackMechanism({
       }
 
       toast.success("Thank you for your feedback!");
-      setRating(null);
-      setFeedback("");
-      setLlmQualityFeedback(null);
-      setLlmImprovementSuggestion("");
-      setShowForm(false);
+      setHasSubmitted(true);
     } catch (error) {
       console.error("Error submitting feedback:", error);
       toast.error("Failed to submit feedback. Please try again.");
@@ -83,147 +79,123 @@ export default function FeedbackMechanism({
     }
   };
 
+  if (hasSubmitted) {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Feedback</h3>
+        <div className="bg-green-50 border border-green-200 rounded-md p-4">
+          <p className="text-green-800">
+            Thank you for your feedback! Your input helps us improve our
+            AI-generated frameworks.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-6">
-      {!showForm ? (
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Rate this Framework</h3>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex items-center space-x-1">
+          {[1, 2, 3, 4, 5].map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => handleRatingClick(value)}
+              onMouseEnter={() => handleRatingHover(value)}
+              onMouseLeave={handleRatingLeave}
+              className="p-1 focus:outline-none"
+              aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+            >
+              <StarIcon
+                className={`h-8 w-8 ${
+                  (hoveredRating || rating) >= value
+                    ? "text-yellow-400 fill-yellow-400"
+                    : "text-gray-300"
+                }`}
+              />
+            </button>
+          ))}
+          <span className="ml-2 text-sm text-gray-500">
+            {rating > 0
+              ? `${rating} star${rating > 1 ? "s" : ""}`
+              : "Select a rating"}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="feedback">Your Feedback (Optional)</Label>
+          <Textarea
+            id="feedback"
+            placeholder="What did you think of this framework? How could it be improved?"
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            className="min-h-[100px]"
+          />
+        </div>
+
+        <div className="space-y-4 border-t pt-4">
+          <h4 className="font-medium">AI Quality Feedback</h4>
+          <p className="text-sm text-gray-500">
+            Help us improve our AI by providing specific feedback on the quality
+            of this framework.
+          </p>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="llm-quality" className="flex-1">
+                How would you rate the AI-generated content?
+              </Label>
+              <select
+                id="llm-quality"
+                value={llmQualityFeedback}
+                onChange={(e) => setLlmQualityFeedback(e.target.value)}
+                className="p-2 border rounded"
+                aria-label="AI content quality rating"
+              >
+                <option value="good">Good - Met my expectations</option>
+                <option value="needs_improvement">Needs Improvement</option>
+              </select>
+            </div>
+
+            {llmQualityFeedback === "needs_improvement" && (
+              <div className="space-y-2">
+                <Label htmlFor="llm-improvement">
+                  What could be improved about the AI-generated content?
+                </Label>
+                <Textarea
+                  id="llm-improvement"
+                  placeholder="Please provide specific suggestions for improvement..."
+                  value={llmImprovementSuggestion}
+                  onChange={(e) => setLlmImprovementSuggestion(e.target.value)}
+                  className="min-h-[80px]"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="public-feedback"
+            checked={isPublic}
+            onCheckedChange={setIsPublic}
+          />
+          <Label htmlFor="public-feedback">
+            Make my feedback public (without personal information)
+          </Label>
+        </div>
+
         <Button
-          variant="outline"
-          onClick={() => setShowForm(true)}
+          type="submit"
+          disabled={isSubmitting || rating === 0}
           className="w-full"
         >
-          Rate this AI-generated framework
+          {isSubmitting ? "Submitting..." : "Submit Feedback"}
         </Button>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Rate this AI-Generated Framework</CardTitle>
-            <CardDescription>
-              Your feedback helps us improve our AI framework generation
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="public-rating">Include in public ratings</Label>
-                <Switch
-                  id="public-rating"
-                  checked={isPublicRating}
-                  onCheckedChange={setIsPublicRating}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="rating">Framework Quality Rating</Label>
-                <div className="flex items-center mt-2 space-x-1">
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => handleRatingClick(value)}
-                      className="focus:outline-none"
-                      aria-label={`Rate ${value} stars`}
-                    >
-                      <StarIcon
-                        className={`w-8 h-8 ${
-                          rating && rating >= value
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="feedback">Public Feedback (Optional)</Label>
-                <Textarea
-                  id="feedback"
-                  placeholder="What did you think about this AI-generated framework?"
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  className="mt-2"
-                  rows={3}
-                />
-              </div>
-            </div>
-
-            <div className="border-t pt-4">
-              <h4 className="font-medium mb-2">
-                Help Improve Our AI (Private Feedback)
-              </h4>
-              <p className="text-sm text-gray-500 mb-4">
-                This feedback is only used to improve our AI and won't be shown
-                publicly
-              </p>
-
-              <div className="space-y-4">
-                <div>
-                  <Label>AI Quality Assessment</Label>
-                  <div className="flex space-x-2 mt-2">
-                    <Button
-                      type="button"
-                      variant={
-                        llmQualityFeedback === "good" ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => handleLlmQualityFeedback("good")}
-                      className="flex items-center"
-                    >
-                      <ThumbsUpIcon className="w-4 h-4 mr-2" />
-                      Good output
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={
-                        llmQualityFeedback === "needs_improvement"
-                          ? "default"
-                          : "outline"
-                      }
-                      size="sm"
-                      onClick={() =>
-                        handleLlmQualityFeedback("needs_improvement")
-                      }
-                      className="flex items-center"
-                    >
-                      <ThumbsDownIcon className="w-4 h-4 mr-2" />
-                      Needs improvement
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="llm-improvement">
-                    AI Improvement Suggestions
-                  </Label>
-                  <Textarea
-                    id="llm-improvement"
-                    placeholder="How could our AI generate better competency frameworks?"
-                    value={llmImprovementSuggestion}
-                    onChange={(e) =>
-                      setLlmImprovementSuggestion(e.target.value)
-                    }
-                    className="mt-2"
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() => setShowForm(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit Feedback"}
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
+      </form>
     </div>
   );
 }

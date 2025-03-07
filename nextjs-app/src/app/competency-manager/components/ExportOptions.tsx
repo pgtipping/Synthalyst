@@ -1,213 +1,239 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Download, FileJson, FileText, FileSpreadsheet } from "lucide-react";
+import { FileText, FileJson, FileSpreadsheet, Download } from "lucide-react";
 import { CompetencyFramework } from "../types";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface ExportOptionsProps {
   framework: CompetencyFramework;
 }
 
-interface CompetencyRow {
-  "Framework Name": string;
-  Industry: string;
-  "Job Function": string;
-  "Role Level": string;
-  "Competency Name": string;
-  "Competency Type": string;
-  "Competency Description": string;
-  "Business Impact": string;
-  "Level Name": string;
-  "Level Description": string;
-  "Level Order": number;
-  "Behavioral Indicators": string;
-  "Development Suggestions": string;
-}
-
 export default function ExportOptions({ framework }: ExportOptionsProps) {
-  const [isExporting, setIsExporting] = useState(false);
-
+  // Export to JSON
   const exportToJSON = () => {
-    setIsExporting(true);
-    try {
-      const jsonString = JSON.stringify(framework, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      saveAs(blob, `${framework.name.replace(/\s+/g, "_")}_framework.json`);
-    } catch (error) {
-      console.error("Error exporting to JSON:", error);
-    } finally {
-      setIsExporting(false);
-    }
+    if (!framework) return;
+
+    const dataStr = JSON.stringify(framework, null, 2);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const exportFileDefaultName = `${framework.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")}-competency-framework.json`;
+
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
   };
 
+  // Export to CSV
   const exportToCSV = () => {
-    setIsExporting(true);
-    try {
-      // Flatten the competency framework into rows for CSV
-      const rows: CompetencyRow[] = [];
+    if (!framework) return;
 
-      framework.competencies.forEach((competency) => {
-        competency.levels.forEach((level) => {
-          rows.push({
-            "Framework Name": framework.name,
-            Industry: framework.industry,
-            "Job Function": framework.jobFunction,
-            "Role Level": framework.roleLevel,
-            "Competency Name": competency.name,
-            "Competency Type": competency.type,
-            "Competency Description": competency.description,
-            "Business Impact": competency.businessImpact,
-            "Level Name": level.name,
-            "Level Description": level.description,
-            "Level Order": level.levelOrder,
-            "Behavioral Indicators": level.behavioralIndicators.join("; "),
-            "Development Suggestions": level.developmentSuggestions.join("; "),
-          });
-        });
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+
+    // Create framework overview sheet
+    const overviewData = [
+      ["Framework Name", framework.name],
+      ["Description", framework.description || ""],
+      ["Industry", framework.industry],
+      ["Job Function", framework.jobFunction],
+      ["Role Level", framework.roleLevel],
+      ["Number of Competencies", framework.competencies.length.toString()],
+    ];
+    const overviewWs = XLSX.utils.aoa_to_sheet(overviewData);
+    XLSX.utils.book_append_sheet(wb, overviewWs, "Framework Overview");
+
+    // Create competencies sheet
+    const competenciesData = [
+      ["Competency Name", "Type", "Description", "Business Impact"],
+    ];
+    framework.competencies.forEach((comp) => {
+      competenciesData.push([
+        comp.name,
+        comp.type,
+        comp.description,
+        comp.businessImpact,
+      ]);
+    });
+    const competenciesWs = XLSX.utils.aoa_to_sheet(competenciesData);
+    XLSX.utils.book_append_sheet(wb, competenciesWs, "Competencies");
+
+    // Create levels sheet
+    const levelsData = [
+      [
+        "Competency",
+        "Level",
+        "Description",
+        "Behavioral Indicators",
+        "Development Suggestions",
+      ],
+    ];
+    framework.competencies.forEach((comp) => {
+      comp.levels.forEach((level) => {
+        levelsData.push([
+          comp.name,
+          level.name,
+          level.description,
+          level.behavioralIndicators.join("\n"),
+          level.developmentSuggestions.join("\n"),
+        ]);
       });
+    });
+    const levelsWs = XLSX.utils.aoa_to_sheet(levelsData);
+    XLSX.utils.book_append_sheet(wb, levelsWs, "Proficiency Levels");
 
-      // Convert to worksheet
-      const worksheet = XLSX.utils.json_to_sheet(rows);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Competency Framework");
+    // Generate file name
+    const fileName = `${framework.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")}-competency-framework.xlsx`;
 
-      // Generate and save file
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "csv",
-        type: "array",
-      });
-      const blob = new Blob([excelBuffer], { type: "text/csv;charset=utf-8" });
-      saveAs(blob, `${framework.name.replace(/\s+/g, "_")}_framework.csv`);
-    } catch (error) {
-      console.error("Error exporting to CSV:", error);
-    } finally {
-      setIsExporting(false);
-    }
+    // Export to file
+    XLSX.writeFile(wb, fileName);
   };
 
+  // Export to PDF
   const exportToPDF = async () => {
-    setIsExporting(true);
+    if (!framework) return;
+
+    // Get the print-friendly view element
+    const printElement = document.getElementById("print-friendly-view");
+    if (!printElement) {
+      alert("Print view not available. Please try again.");
+      return;
+    }
+
+    // Show loading state
+    const loadingElement = document.createElement("div");
+    loadingElement.style.position = "fixed";
+    loadingElement.style.top = "0";
+    loadingElement.style.left = "0";
+    loadingElement.style.width = "100%";
+    loadingElement.style.height = "100%";
+    loadingElement.style.backgroundColor = "rgba(0,0,0,0.5)";
+    loadingElement.style.display = "flex";
+    loadingElement.style.justifyContent = "center";
+    loadingElement.style.alignItems = "center";
+    loadingElement.style.zIndex = "9999";
+    loadingElement.innerHTML =
+      '<div style="background: white; padding: 20px; border-radius: 5px;">Generating PDF...</div>';
+    document.body.appendChild(loadingElement);
+
     try {
-      // Create a simple HTML representation of the framework
-      let htmlContent = `
-        <html>
-        <head>
-          <title>${framework.name} - Competency Framework</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { color: #2563eb; }
-            h2 { color: #4b5563; margin-top: 20px; }
-            h3 { color: #6b7280; }
-            .competency { margin-bottom: 30px; border: 1px solid #e5e7eb; padding: 15px; border-radius: 5px; }
-            .level { margin-bottom: 15px; padding-left: 15px; border-left: 3px solid #3b82f6; }
-            .indicators, .suggestions { margin-top: 10px; }
-            .indicators li, .suggestions li { margin-bottom: 5px; }
-            .meta { color: #6b7280; font-size: 0.9em; margin-bottom: 20px; }
-          </style>
-        </head>
-        <body>
-          <h1>${framework.name}</h1>
-          <div class="meta">
-            <p><strong>Industry:</strong> ${framework.industry}</p>
-            <p><strong>Job Function:</strong> ${framework.jobFunction}</p>
-            <p><strong>Role Level:</strong> ${framework.roleLevel}</p>
-            <p><strong>Description:</strong> ${framework.description}</p>
-          </div>
-      `;
+      // Create a new PDF
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10; // margin in mm
 
-      framework.competencies.forEach((competency) => {
-        htmlContent += `
-          <div class="competency">
-            <h2>${competency.name} (${competency.type})</h2>
-            <p>${competency.description}</p>
-            <p><strong>Business Impact:</strong> ${competency.businessImpact}</p>
-        `;
-
-        competency.levels
-          .sort((a, b) => a.levelOrder - b.levelOrder)
-          .forEach((level) => {
-            htmlContent += `
-            <div class="level">
-              <h3>${level.name}</h3>
-              <p>${level.description}</p>
-              
-              <div class="indicators">
-                <strong>Behavioral Indicators:</strong>
-                <ul>
-                  ${level.behavioralIndicators
-                    .map((indicator) => `<li>${indicator}</li>`)
-                    .join("")}
-                </ul>
-              </div>
-              
-              <div class="suggestions">
-                <strong>Development Suggestions:</strong>
-                <ul>
-                  ${level.developmentSuggestions
-                    .map((suggestion) => `<li>${suggestion}</li>`)
-                    .join("")}
-                </ul>
-              </div>
-            </div>
-          `;
-          });
-
-        htmlContent += `</div>`;
+      // Capture the element as canvas
+      const canvas = await html2canvas(printElement, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
       });
 
-      htmlContent += `
-        </body>
-        </html>
-      `;
+      // Calculate the number of pages
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pageHeight = pdfHeight - margin * 2;
+      const pageCount = Math.ceil(imgHeight / pageHeight);
 
-      // Convert HTML to PDF using browser's print functionality
-      const printWindow = window.open("", "_blank");
-      if (printWindow) {
-        printWindow.document.write(htmlContent);
-        printWindow.document.close();
-        printWindow.onload = function () {
-          printWindow.print();
-          printWindow.close();
-        };
+      // Convert to image
+      const imgData = canvas.toDataURL("image/png");
+
+      // Add image to PDF, potentially across multiple pages
+      let position = 0;
+
+      for (let i = 0; i < pageCount; i++) {
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        const srcHeight = (canvas.height * pageHeight) / imgHeight;
+        const srcWidth = canvas.width;
+        const srcX = 0;
+        const srcY = position;
+
+        pdf.addImage(
+          imgData,
+          "PNG",
+          margin,
+          margin,
+          pdfWidth - margin * 2,
+          pageHeight,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          {
+            sourceX: srcX,
+            sourceY: srcY,
+            sourceWidth: srcWidth,
+            sourceHeight: srcHeight,
+          }
+        );
+
+        position += srcHeight;
       }
+
+      // Save the PDF
+      const fileName = `${framework.name
+        .toLowerCase()
+        .replace(/\s+/g, "-")}-competency-framework.pdf`;
+      pdf.save(fileName);
     } catch (error) {
-      console.error("Error exporting to PDF:", error);
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate PDF. Please try again.");
     } finally {
-      setIsExporting(false);
+      // Remove loading element
+      document.body.removeChild(loadingElement);
     }
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" disabled={isExporting}>
-          <Download className="mr-2 h-4 w-4" />
-          Export
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={exportToJSON}>
-          <FileJson className="mr-2 h-4 w-4" />
-          Export as JSON
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportToCSV}>
-          <FileSpreadsheet className="mr-2 h-4 w-4" />
-          Export as CSV
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportToPDF}>
-          <FileText className="mr-2 h-4 w-4" />
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Export Options</h3>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={exportToPDF}
+          className="flex items-center"
+        >
+          <FileText className="h-4 w-4 mr-2" />
           Export as PDF
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={exportToJSON}
+          className="flex items-center"
+        >
+          <FileJson className="h-4 w-4 mr-2" />
+          Export as JSON
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={exportToCSV}
+          className="flex items-center"
+        >
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          Export as Excel
+        </Button>
+      </div>
+      <p className="text-sm text-gray-500">
+        Export your framework in different formats for sharing or offline use.
+      </p>
+    </div>
   );
 }
