@@ -592,7 +592,10 @@ export default function CompetencyManager() {
                 </Button>
                 <PrintFriendlyView framework={framework} />
                 <ExportOptions framework={framework} />
-                <SharingOptions framework={framework} />
+                <SharingOptions
+                  framework={framework}
+                  onUpdatePublicStatus={updatePublicStatus}
+                />
                 <PremiumFeatureTeasers />
               </>
             )}
@@ -764,6 +767,49 @@ export default function CompetencyManager() {
   // Add this function to handle search results
   const handleSearchResults = (results: CompetencyFramework[]) => {
     setFilteredFrameworks(results);
+  };
+
+  const updatePublicStatus = async (isPublic: boolean) => {
+    if (!framework?.id) return;
+
+    try {
+      const response = await fetch(
+        `/api/competency-manager/frameworks/${framework.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            isPublic,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update framework public status");
+      }
+
+      // Update local state
+      setFramework((prev) => (prev ? { ...prev, isPublic } : null));
+
+      // Update in saved frameworks list
+      setSavedFrameworks((prev) =>
+        prev.map((f) =>
+          f.id === framework.id
+            ? {
+                ...f,
+                isPublic,
+              }
+            : f
+        )
+      );
+
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error updating public status:", error);
+      return Promise.reject(error);
+    }
   };
 
   return (

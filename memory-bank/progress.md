@@ -28,6 +28,7 @@
 
 ## Recent Achievements
 
+- Fixed SharingOptions component in Competency Manager by implementing the missing onUpdatePublicStatus function
 - Fixed Vercel deployment issues:
   - Corrected authOptions import path in competency-manager frameworks API route
   - Fixed type error in feedback route by using type assertion for rating values

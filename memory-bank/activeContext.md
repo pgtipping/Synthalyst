@@ -67,6 +67,7 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Fixed SharingOptions component in Competency Manager by implementing the missing onUpdatePublicStatus function (2025-03-07)
 - Fixed Vercel deployment issues:
   - Corrected authOptions import path in competency-manager frameworks API route (2025-03-07)
   - Fixed type error in feedback route by using type assertion for rating values (2025-03-07)
