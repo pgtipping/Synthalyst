@@ -67,12 +67,20 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Fixed Vercel deployment TypeScript error (2025-03-07)
+
+  - Added null check for Groq API response content with fallback to empty object
+  - Resolved "Type error: Argument of type 'string | null' is not assignable to parameter of type 'string'"
+  - Ensured JSON.parse can handle potentially null content from API responses
+  - Improved type safety in API route implementation
+
 - Fixed form context error in UI components (2025-03-07)
 
-  - Added null check for form context in useFormField hook
+  - Reordered null checks in useFormField hook to check fieldContext first
   - Improved error message to indicate that the hook must be used within a FormProvider
   - Prevented "Cannot destructure property 'getFieldState' of null" runtime error
   - Enhanced component stability for form-related UI elements
+  - Followed official react-hook-form patterns for context handling
 
 - Implemented proper SDK usage for LLM APIs in Competency Manager (2025-03-07)
 

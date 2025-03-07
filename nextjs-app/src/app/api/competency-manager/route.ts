@@ -190,7 +190,7 @@ export async function POST(request: Request) {
 
         const content = completion.choices[0].message.content;
         try {
-          competencyFramework = JSON.parse(content);
+          competencyFramework = JSON.parse(content || "{}");
         } catch (parseError) {
           console.error("Error parsing Groq response:", parseError);
           console.log("Raw Groq response:", content);
