@@ -8,12 +8,5 @@
   "env": {
     "NEXT_PUBLIC_VERCEL_ENV": "production"
   },
-  "outputDirectory": ".next",
-  "redirects": [
-    {
-      "source": "/auth/signup",
-      "destination": "/auth/signup",
-      "permanent": true
-    }
-  ]
+  "outputDirectory": ".next"
 }

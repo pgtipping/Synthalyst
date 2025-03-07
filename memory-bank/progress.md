@@ -220,6 +220,11 @@
   - Implemented toast notifications for success and error states in all framework operations
   - Used the project's toast migration utility to ensure consistent notification styling
   - Enhanced user feedback for framework operations (save, update, delete, public status change)
+- Fixed authentication redirect loop issue (2024-05-28 15:30:00)
+  - Identified and removed a circular redirect in vercel.json that was causing the "too many redirects" error
+  - The redirect was configured to redirect /auth/signup to /auth/signup, creating an infinite loop
+  - This fix will reduce the bounce rate by allowing users to successfully create accounts
+  - The issue only affected the production environment, which explains why it worked in local development
 
 ## Known Issues
 

@@ -3074,6 +3074,7 @@ export default async function handler(req: NextRequest) {
   </TooltipProvider>
   ```
 - If you have multiple tooltips in a component, wrap the entire component with a single TooltipProvider:
+
   ```tsx
   export default function MyComponent() {
     return (
@@ -3094,6 +3095,7 @@ export default async function handler(req: NextRequest) {
     );
   }
   ```
+
 - The Toaster component is already included in the root layout, so no need to add it to individual pages
 
 # API Response Handling Pattern - 2024-05-28 13:15:00
@@ -3138,3 +3140,15 @@ export default async function handler(req: NextRequest) {
   3. The response status is checked after parsing
   4. Error messages from the API are used when available
   5. Errors are properly logged for debugging
+
+## Vercel Configuration Best Practices - 2024-05-28
+
+When configuring redirects in vercel.json, be careful to avoid circular redirects:
+
+1. Never set the same path as both source and destination without additional conditions
+2. Always test redirects in a staging environment before deploying to production
+3. Use the Vercel deployment preview to test configuration changes
+4. Monitor for redirect loops after deployment using Vercel Analytics
+5. Consider using Next.js built-in redirects instead of Vercel redirects when possible
+
+Circular redirects can cause "too many redirects" errors and significantly increase bounce rates.

@@ -253,6 +253,12 @@ The Competency Manager feature is now complete with the following components imp
 
 - **Shifted development strategy to "Standalone First, Integration Second" approach (2025-03-06)**
 
+- Fixed authentication redirect loop issue (2024-05-28 15:30:00)
+  - Identified and removed a circular redirect in vercel.json that was causing the "too many redirects" error
+  - The redirect was configured to redirect /auth/signup to /auth/signup, creating an infinite loop
+  - This fix will reduce the bounce rate by allowing users to successfully create accounts
+  - The issue only affected the production environment, which explains why it worked in local development
+
 ## Next Steps
 
 1. Test the new features thoroughly, especially the streaming response and caching functionality
