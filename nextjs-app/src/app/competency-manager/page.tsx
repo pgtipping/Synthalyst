@@ -26,7 +26,21 @@ import {
   ChevronUp as ChevronUpIcon,
   ChevronDown as ChevronDownIcon,
   ChevronRight as ChevronRightIcon,
+  BarChart as BarChartIcon,
 } from "lucide-react";
+
+// Lazy load the CompetencyVisualization component
+const CompetencyVisualization = dynamic(
+  () => import("./components/CompetencyVisualization"),
+  {
+    loading: () => (
+      <div className="h-64 flex items-center justify-center">
+        Loading visualization...
+      </div>
+    ),
+    ssr: false, // Disable server-side rendering for Chart.js components
+  }
+);
 
 // We're only keeping the dynamic imports that are actually used
 // Other dynamic imports can be re-added when needed
@@ -58,8 +72,6 @@ export default function CompetencyManager() {
   const [industrySuggestions, setIndustrySuggestions] = useState<
     IndustryCompetencySuggestion[]
   >([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [editingFrameworkId, setEditingFrameworkId] = useState<string | null>(
     null
   );
@@ -71,13 +83,8 @@ export default function CompetencyManager() {
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
     null
   );
-  const [isDeleting, setIsDeleting] = useState(false);
   const [showVisualization, setShowVisualization] = useState(false);
-  const [filteredFrameworks, setFilteredFrameworks] = useState<
-    CompetencyFramework[]
-  >([]);
   const [countdown, setCountdown] = useState<number>(30);
-  const [loadingProgress, setLoadingProgress] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>(
     "Generating Framework"
   );
@@ -222,39 +229,6 @@ export default function CompetencyManager() {
   useEffect(() => {
     setIndustrySuggestions(industryCompetencySuggestions);
   }, []);
-
-  // Function to get suggestions for the selected industry
-  const getIndustrySuggestions = () => {
-    const selectedIndustry =
-      formData.industry === "Other"
-        ? formData.customIndustry
-        : formData.industry;
-    return (
-      industrySuggestions.find((item) => item.industry === selectedIndustry)
-        ?.suggestions || []
-    );
-  };
-
-  // Function to add a suggested competency to the existing competencies field
-  const addSuggestedCompetency = (suggestion: {
-    name: string;
-    type: string;
-    description: string;
-  }) => {
-    const currentText = formData.existingCompetencies;
-    const newText = currentText
-      ? `${currentText}, ${suggestion.name}`
-      : suggestion.name;
-    setFormData((prev) => ({ ...prev, existingCompetencies: newText }));
-
-    // Add the competency type if not already selected
-    if (!formData.competencyTypes.includes(suggestion.type)) {
-      setFormData((prev) => ({
-        ...prev,
-        competencyTypes: [...prev.competencyTypes, suggestion.type],
-      }));
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -422,36 +396,6 @@ export default function CompetencyManager() {
     }
   };
 
-  const deleteFramework = async (id: string) => {
-    if (!id || id !== deleteConfirmation) return;
-
-    setIsDeleting(true);
-
-    try {
-      const response = await fetch(
-        `/api/competency-manager/frameworks?id=${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete competency framework");
-      }
-
-      setFramework(null);
-      setDeleteConfirmation(null);
-
-      alert("Framework deleted successfully!");
-    } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Failed to delete framework"
-      );
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   const updateFrameworkDetails = async () => {
     if (!framework || !editingFrameworkId) return;
 
@@ -495,12 +439,10 @@ export default function CompetencyManager() {
 
     setFrameworkNameEdit(framework.name);
     setFrameworkDescriptionEdit(framework.description || "");
-    setIsEditing(true);
     setEditingFrameworkId(framework.id || null);
   };
 
   const cancelEditing = () => {
-    setIsEditing(false);
     setEditingFrameworkId(null);
   };
 
@@ -697,6 +639,30 @@ export default function CompetencyManager() {
                   </div>
                 </div>
               </div>
+
+              {/* Visualization toggle button */}
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowVisualization(!showVisualization)}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors"
+                >
+                  <BarChartIcon className="h-4 w-4" />
+                  {showVisualization
+                    ? "Hide Visualization"
+                    : "Show Visualization"}
+                </Button>
+              </div>
+
+              {/* Lazy-loaded visualization component */}
+              {showVisualization && framework.competencies.length > 0 && (
+                <div className="border rounded-lg p-4 bg-white">
+                  <CompetencyVisualization
+                    competencies={framework.competencies}
+                  />
+                </div>
+              )}
 
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold">Competencies</h3>
@@ -1220,7 +1186,7 @@ export default function CompetencyManager() {
 
   // Add this function to handle search results
   const handleSearchResults = (results: CompetencyFramework[]) => {
-    setFilteredFrameworks(results);
+    // Implementation...
   };
 
   const updatePublicStatus = async (isPublic: boolean) => {

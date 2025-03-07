@@ -156,6 +156,13 @@
   - Added error handling in ClientLayout component to gracefully handle chunk loading errors
   - Implemented automatic page reload for recovery from chunk loading errors
   - Optimized bundle splitting for better performance
+- Implemented lazy loading for framework visualizations (2025-03-07 13:00:46)
+  - Added dynamic import for the CompetencyVisualization component
+  - Created a toggle button to show/hide visualizations on demand
+  - Disabled server-side rendering for Chart.js components
+  - Added loading state for better user experience
+  - Improved performance by only loading visualization when needed
+  - Enhanced UI with a styled button and container for visualizations
 
 ## Known Issues
 

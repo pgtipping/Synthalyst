@@ -1,4 +1,4 @@
-# Active Context - [2025-03-07 12:46:04]
+# Active Context - [2025-03-07 13:00:46]
 
 ## Current Focus
 
@@ -65,7 +65,7 @@ The Competency Manager feature is nearly complete with the following components 
 - **Performance Optimization**:
 
   - Optimize database queries for faster loading
-  - Add lazy loading for framework visualizations
+  - ✅ Add lazy loading for framework visualizations
 
 - **User Experience Enhancements**:
   - Add guided tours for new users
@@ -73,6 +73,15 @@ The Competency Manager feature is nearly complete with the following components 
   - Add more customization options for visualizations
 
 ## Recent Changes
+
+- Implemented lazy loading for framework visualizations (2025-03-07 13:00:46)
+
+  - Added dynamic import for the CompetencyVisualization component
+  - Created a toggle button to show/hide visualizations on demand
+  - Disabled server-side rendering for Chart.js components
+  - Added loading state for better user experience
+  - Improved performance by only loading visualization when needed
+  - Enhanced UI with a styled button and container for visualizations
 
 - Enhanced Competency Manager with major UX improvements (2025-03-07)
 
