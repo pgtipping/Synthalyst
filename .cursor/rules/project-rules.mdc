@@ -24,5 +24,6 @@ alwaysApply: true
 - Always check folder before installing any package
 - focus ALL development in development folder (/nextjs-app)
 - update memory bank before staging files
+- programmatically determine the current date and time and use the date and time on headers in memory bank files to enable tracking and avoid duplicate headers.
 - stage and commit files from the root directory
 - ALWAYS stage files with "git add ."

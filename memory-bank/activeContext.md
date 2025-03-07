@@ -13,6 +13,7 @@
 - Minor formatting improvements in documentation
 - Competency Manager implementation
 - Reference data API implementation
+- **Strategic shift to "Standalone First, Integration Second" approach**
 
 ## Recent Changes
 
@@ -36,6 +37,7 @@
 - Created organizational reference data models (CompetencyCategory, JobLevel, JobFamily, JobTitle, Industry) (2025-03-06)
 - Implemented API endpoints for competency categories (2025-03-06)
 - Fixed NextAuth type definitions to include role property (2025-03-06)
+- **Shifted development strategy to "Standalone First, Integration Second" approach (2025-03-06)**
 
 ## Next Steps
 
@@ -44,33 +46,14 @@
 - Add error tracking for model fallback scenarios
 - Continue improving LLM output quality across all tools
 - Implement responsive design improvements for other components
-- Begin implementation of the integrated HR toolkit, starting with the competency data layer
-- Create seed data for common job levels, families, and competency categories
-- Implement competency extraction and standardization in the JD Developer
-- Add "Save Competencies" feature for premium users in JD Developer
-- **Database Schema Implementation**
-  - ✅ Create Prisma schema for competency frameworks, competencies, and levels
-  - ✅ Set up migrations for the new schema
-  - ✅ Implement organizational reference data models
-  - Create seed data for reference data models
-- **UI Component Development**
-  - Create the CompetencyGeneratorForm component with mandatory fields
-  - Implement dropdown components with "Other" options
-  - Add tooltips and validation
-  - Develop the form submission and loading states
-  - Implement reference data selection components
-- **LLM Integration**
-  - Set up the Gemini 2.0 Flash API connection
-  - Implement prompt construction logic
-  - Create response parsing and validation
-  - Develop fallback mechanisms
-- **API Endpoint Development**
-  - ✅ Create the competency generation endpoint
-  - ✅ Implement framework management endpoints
-  - ✅ Set up competency management endpoints
-  - ✅ Implement competency category API endpoints
-  - Implement remaining reference data API endpoints (job levels, job families, job titles, industries)
-  - Create seed data API endpoints
+- **Prioritize completion of standalone functionality for each HR tool**
+- **Ensure each tool delivers clear value without requiring integration**
+- **Add "Premium Teasers" for future integration features**
+- **Complete JD Developer standalone features**
+- **Complete Interview Questions Generator standalone features**
+- **Complete Training Plan Creator standalone features**
+- **Complete Competency Manager standalone features**
+- **Defer full implementation of integrated HR toolkit until standalone functionality is solid**
 
 ## Active Decisions
 
@@ -489,3 +472,55 @@ We've improved the TypeScript configuration for the scripts directory to enhance
 - Consider applying similar type safety improvements to other parts of the codebase
 - Review other TypeScript configuration files for potential enhancements
 - Document the custom type definition pattern in the project guidelines
+
+## Strategic Development Shift (2025-03-06)
+
+We've made a strategic shift in our development approach to prioritize standalone functionality before integration:
+
+1. ✅ ADOPTED: "Standalone First, Integration Second" Approach (2025-03-06)
+
+   - Prioritize completing core standalone functionality for each HR tool
+   - Ensure each tool delivers clear value to freemium users without requiring integration
+   - Polish the user experience of each standalone tool
+   - Add "Premium Teasers" that hint at integration features without disrupting core experience
+   - Defer full implementation of integration infrastructure until standalone apps are solid
+   - **Rationale**:
+     - Delivers immediate value to all users
+     - Creates stronger freemium-to-premium conversion funnel
+     - Reduces development complexity and risk
+     - Allows for more focused testing and quality assurance
+   - **Impact**:
+     - Clearer value proposition for freemium users
+     - More effective user acquisition strategy
+     - Reduced technical debt
+     - Better alignment with business model
+
+2. ✅ REVISED: Development Priorities (2025-03-06)
+
+   - **Priority 1**: Complete JD Developer standalone features
+     - Ensure all promised features work without requiring integration
+     - Polish UI/UX for best possible standalone experience
+     - Add "Premium Teaser" UI elements for future integration
+   - **Priority 2**: Complete Interview Questions Generator standalone features
+     - Enhance question quality and customization options
+     - Improve rubric generation and evaluation guidance
+     - Add "Premium Teaser" for competency-based questions
+   - **Priority 3**: Complete Training Plan Creator standalone features
+     - Enhance plan generation quality and customization
+     - Improve resource recommendations
+     - Add "Premium Teaser" for competency-based training
+   - **Priority 4**: Complete Competency Manager standalone features
+     - Ensure framework generation works perfectly without external inputs
+     - Implement saving, editing, and management features
+     - Add "Premium Teaser" for cross-tool integration
+   - **Priority 5**: Then implement integration infrastructure
+     - Develop competency data layer
+     - Implement reference data models and APIs
+     - Create integration points between tools
+
+3. ✅ MAINTAINED: Integration Planning (2025-03-06)
+   - Continue refining integration plans in the background
+   - Design standalone tools with integration in mind (compatible data structures)
+   - Preserve work done on competency data layer and reference data models
+   - Ensure backward compatibility strategy remains valid
+   - This preserves our investment in integration planning while prioritizing standalone functionality
