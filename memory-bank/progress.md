@@ -1,4 +1,4 @@
-# Progress Report - [2025-03-07]
+# Progress Report - [2025-03-07 12:47:09]
 
 ## What Works
 
@@ -30,6 +30,19 @@
 - Streaming framework generation responses
 - Framework caching for improved performance
 - Next.js updated to the latest version
+
+## Current Issues
+
+- TypeScript errors in test files (2025-03-07 12:47:09)
+  - Several test files have TypeScript errors related to Next.js 15.2.0 compatibility
+  - Most errors are in the API route test files, particularly in the training plan and 2Do task manager tests
+  - Common error patterns include:
+    - Incorrect parameter types for API route handlers (Promise<{ id: string }> vs { id: string })
+    - Missing type definitions for mock objects
+    - Implicit 'any' types in test files
+    - Incompatible mock implementations for NextRequest
+  - These errors don't affect the runtime functionality but should be fixed for proper type safety
+  - Priority: Medium (fix during the next testing-focused sprint)
 
 ## Recent Achievements
 

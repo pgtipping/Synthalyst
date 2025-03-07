@@ -2974,3 +2974,55 @@ export default async function handler(req: NextRequest) {
   - No separate response parameter (res)
 
 // ... existing code ...
+
+### 2Do Task Manager Implementation Pattern - 2025-03-07 12:48:30
+
+- The 2Do task manager is implemented as a Next.js app with the following components:
+
+  - React components for UI (TaskList, TaskForm, VoiceInput, CalendarView)
+  - API routes for CRUD operations on tasks
+  - LLM integration for processing voice input
+  - TypeScript interfaces for type safety
+
+- Key implementation patterns:
+
+  1. **Voice Input Processing**:
+
+     - Uses Web Speech API for voice recognition
+     - Sends transcript to server-side API
+     - Processes transcript with Llama 3.2 3B model via Groq API
+     - Extracts structured task information from natural language
+     - Returns JSON task data to client
+
+  2. **Task Management**:
+
+     - CRUD operations via RESTful API routes
+     - Prisma ORM for database access
+     - Zod schema validation for request data
+     - Transaction-based operations for data integrity
+     - Error handling with custom APIError class
+
+  3. **UI Components**:
+     - Tabs for different views (List, Calendar, Form)
+     - Card-based task display with priority color coding
+     - Form with validation for task creation/editing
+     - Calendar view for date-based task visualization
+     - Voice input button for natural language task creation
+
+- This pattern demonstrates effective integration of:
+
+  - Modern React patterns (hooks, context)
+  - Next.js API routes
+  - LLM capabilities for natural language processing
+  - TypeScript for type safety
+  - Prisma for database access
+  - Zod for validation
+
+- The implementation follows the project's AI Excellence Focus by:
+  - Using LLMs to process natural language input
+  - Providing a seamless voice-to-task experience
+  - Extracting structured data from unstructured input
+  - Demonstrating AI's ability to understand user intent
+  - Creating a natural, conversational interface for task management
+
+// ... existing code ...
