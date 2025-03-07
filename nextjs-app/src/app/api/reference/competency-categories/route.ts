@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     }
 
     // Check if user has admin role for creating reference data
-    if (session.user.role !== "admin") {
+    if (session.user?.role !== "admin") {
       return NextResponse.json(
         { error: "Admin privileges required" },
         { status: 403 }
@@ -104,7 +104,7 @@ export async function PUT(request: Request) {
     }
 
     // Check if user has admin role for updating reference data
-    if (session.user.role !== "admin") {
+    if (session.user?.role !== "admin") {
       return NextResponse.json(
         { error: "Admin privileges required" },
         { status: 403 }
@@ -183,7 +183,7 @@ export async function DELETE(request: Request) {
     }
 
     // Check if user has admin role for deleting reference data
-    if (session.user.role !== "admin") {
+    if (session.user?.role !== "admin") {
       return NextResponse.json(
         { error: "Admin privileges required" },
         { status: 403 }
