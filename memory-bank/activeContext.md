@@ -67,6 +67,11 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Fixed chunk loading error in the application (2025-03-07)
+  - Updated Next.js webpack configuration to optimize chunk loading
+  - Added error handling in ClientLayout component to gracefully handle chunk loading errors
+  - Implemented automatic page reload for recovery from chunk loading errors
+  - Optimized bundle splitting for better performance
 - Enhanced Competency Manager form with progressive disclosure and improved help system (2025-03-07)
   - Implemented true progressive disclosure by adding a collapsible section for optional fields
   - Added comprehensive tooltips to all form fields with detailed guidance

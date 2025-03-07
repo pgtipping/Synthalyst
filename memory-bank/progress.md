@@ -63,6 +63,11 @@
   - Added comprehensive tooltips to all form fields with detailed guidance
   - Improved the organization of the form to reduce initial complexity
   - Maintained all "Other" options in dropdowns for custom input
+- Fixed chunk loading error in the application
+  - Updated Next.js webpack configuration to optimize chunk loading
+  - Added error handling in ClientLayout component to gracefully handle chunk loading errors
+  - Implemented automatic page reload for recovery from chunk loading errors
+  - Optimized bundle splitting for better performance
 
 ## Known Issues
 
