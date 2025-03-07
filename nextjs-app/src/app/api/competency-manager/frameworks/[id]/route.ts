@@ -76,7 +76,20 @@ export async function PATCH(
 
     const resolvedParams = await params;
     const id = resolvedParams.id;
-    const { name, description } = await request.json();
+
+    // Safely parse the request body
+    let name, description;
+    try {
+      const body = await request.json();
+      name = body.name;
+      description = body.description;
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
 
     // Check if the framework exists
     const framework = await prisma.competencyFramework.findUnique({

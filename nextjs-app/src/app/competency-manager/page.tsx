@@ -40,6 +40,7 @@ import PrintFriendlyView from "./components/PrintFriendlyView";
 import SharingOptions from "./components/SharingOptions";
 import FeedbackMechanism from "./components/FeedbackMechanism";
 import PremiumFeatureTeasers from "./components/PremiumFeatureTeasers";
+import FrameworkSearch from "./components/FrameworkSearch";
 
 // Lazy load the CompetencyVisualization component
 const CompetencyVisualization = dynamic(
@@ -53,18 +54,6 @@ const CompetencyVisualization = dynamic(
     ssr: false, // Disable server-side rendering for Chart.js components
   }
 );
-
-// Lazy load the FrameworkSearch component
-const FrameworkSearch = dynamic(() => import("./components/FrameworkSearch"), {
-  loading: () => (
-    <div className="h-64 flex items-center justify-center">
-      Loading search...
-    </div>
-  ),
-});
-
-// We're only keeping the dynamic imports that are actually used
-// Other dynamic imports can be re-added when needed
 
 export default function CompetencyManager() {
   const [formData, setFormData] = useState<FormData>({
@@ -502,12 +491,14 @@ export default function CompetencyManager() {
     if (!framework || !editingFrameworkId) return;
 
     try {
+      // Create a copy of the framework with updated values
       const updatedFramework = {
         ...framework,
         name: frameworkNameEdit,
         description: frameworkDescriptionEdit,
       };
 
+      // Make the API request
       const response = await fetch(
         `/api/competency-manager/frameworks/${editingFrameworkId}`,
         {
@@ -522,27 +513,43 @@ export default function CompetencyManager() {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to update framework details");
+      // Parse the response data
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError);
+        data = { framework: updatedFramework };
       }
 
-      // Update the framework in state
-      setFramework(updatedFramework);
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update framework details");
+      }
+
+      // Update the framework in state with the response data or fallback to our local update
+      setFramework(data.framework || updatedFramework);
 
       // Exit edit mode
       setEditingFrameworkId(null);
 
+      // Show success toast
       toast({
         title: "Success",
         description: "Framework updated successfully!",
       });
     } catch (error) {
+      console.error("Error updating framework:", error);
+
+      // Show error toast
       toast({
         variant: "destructive",
         title: "Error",
         description:
           error instanceof Error ? error.message : "Failed to update framework",
       });
+
+      // Don't exit edit mode on error so user can try again
     }
   };
 
@@ -758,259 +765,241 @@ export default function CompetencyManager() {
   // Wrap the results tab content with TooltipProvider
   const renderResultsTab = () => {
     return (
-      <TooltipProvider>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-6">Generated Framework</h2>
-          {framework ? (
-            <div className="space-y-6">
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-xl font-semibold text-blue-800">
-                    {framework.name}
-                  </h3>
-                  {framework.id && (
-                    <div className="flex space-x-2">
-                      {editingFrameworkId ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={updateFrameworkDetails}
-                            className="flex items-center"
-                          >
-                            <SaveIcon className="h-4 w-4 mr-2" />
-                            Save Changes
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={cancelEditing}
-                          >
-                            Cancel
-                          </Button>
-                        </>
-                      ) : (
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold mb-6">Generated Framework</h2>
+        {framework ? (
+          <div className="space-y-6">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-xl font-semibold text-blue-800">
+                  {framework.name}
+                </h3>
+                {framework.id && (
+                  <div className="flex space-x-2">
+                    {editingFrameworkId ? (
+                      <>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={startEditing}
+                          onClick={updateFrameworkDetails}
                           className="flex items-center"
                         >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
+                          <SaveIcon className="h-4 w-4 mr-2" />
+                          Save Changes
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={cancelEditing}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={startEditing}
+                        className="flex items-center"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+              {editingFrameworkId ? (
+                <div className="space-y-3 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Framework Name
+                    </label>
+                    <Input
+                      value={frameworkNameEdit}
+                      onChange={(e) => setFrameworkNameEdit(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Description
+                    </label>
+                    <Textarea
+                      value={frameworkDescriptionEdit}
+                      onChange={(e) =>
+                        setFrameworkDescriptionEdit(e.target.value)
+                      }
+                      className="w-full"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-700 mb-4">{framework.description}</p>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-700">Industry:</span>{" "}
+                  <span className="text-gray-600">{framework.industry}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">
+                    Job Function:
+                  </span>{" "}
+                  <span className="text-gray-600">{framework.jobFunction}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Role Level:</span>{" "}
+                  <span className="text-gray-600">{framework.roleLevel}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Visualization toggle button */}
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowVisualization(!showVisualization)}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors"
+              >
+                <BarChartIcon className="h-4 w-4" />
+                {showVisualization
+                  ? "Hide Visualization"
+                  : "Show Visualization"}
+              </Button>
+            </div>
+
+            {/* Lazy-loaded visualization component */}
+            {showVisualization && framework.competencies.length > 0 && (
+              <div className="border rounded-lg p-4 bg-white">
+                <CompetencyVisualization
+                  competencies={framework.competencies}
+                />
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold">Competencies</h3>
+              {framework.competencies.map((competency, index) => (
+                <div key={index} className="border rounded-lg overflow-hidden">
+                  <div
+                    className="flex justify-between items-center p-4 bg-gray-50 cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveCompetencyIndex(
+                        index === activeCompetencyIndex ? null : index
+                      );
+                    }}
+                  >
+                    <div>
+                      <h4 className="font-medium text-lg">{competency.name}</h4>
+                      <p className="text-sm text-gray-600">{competency.type}</p>
+                    </div>
+                    <div>
+                      {index === activeCompetencyIndex ? (
+                        <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronDownIcon className="h-5 w-5 text-gray-500" />
                       )}
+                    </div>
+                  </div>
+
+                  {index === activeCompetencyIndex && (
+                    <div className="p-4 border-t">
+                      <p className="mb-3">{competency.description}</p>
+                      <div className="mb-4">
+                        <h5 className="font-medium text-gray-700 mb-1">
+                          Business Impact
+                        </h5>
+                        <p className="text-gray-600">
+                          {competency.businessImpact}
+                        </p>
+                      </div>
+
+                      <h5 className="font-medium text-gray-700 mb-2">
+                        Proficiency Levels
+                      </h5>
+                      <div className="space-y-4">
+                        {competency.levels
+                          .sort((a, b) => a.levelOrder - b.levelOrder)
+                          .map((level, levelIndex) => (
+                            <div
+                              key={levelIndex}
+                              className="bg-gray-50 p-3 rounded"
+                            >
+                              <h6 className="font-medium mb-1">{level.name}</h6>
+                              <p className="text-sm mb-2">
+                                {level.description}
+                              </p>
+
+                              <div className="mb-2">
+                                <h6 className="text-sm font-medium text-gray-700">
+                                  Behavioral Indicators
+                                </h6>
+                                <ul className="list-disc pl-5 text-sm text-gray-600">
+                                  {level.behavioralIndicators.map(
+                                    (indicator, i) => (
+                                      <li key={i}>{indicator}</li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+
+                              <div>
+                                <h6 className="text-sm font-medium text-gray-700">
+                                  Development Suggestions
+                                </h6>
+                                <ul className="list-disc pl-5 text-sm text-gray-600">
+                                  {level.developmentSuggestions.map(
+                                    (suggestion, i) => (
+                                      <li key={i}>{suggestion}</li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
                     </div>
                   )}
                 </div>
-                {editingFrameworkId ? (
-                  <div className="space-y-3 mb-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Framework Name
-                      </label>
-                      <Input
-                        value={frameworkNameEdit}
-                        onChange={(e) => setFrameworkNameEdit(e.target.value)}
-                        className="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Description
-                      </label>
-                      <Textarea
-                        value={frameworkDescriptionEdit}
-                        onChange={(e) =>
-                          setFrameworkDescriptionEdit(e.target.value)
-                        }
-                        className="w-full"
-                        rows={3}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-700 mb-4">{framework.description}</p>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-700">Industry:</span>{" "}
-                    <span className="text-gray-600">{framework.industry}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">
-                      Job Function:
-                    </span>{" "}
-                    <span className="text-gray-600">
-                      {framework.jobFunction}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">
-                      Role Level:
-                    </span>{" "}
-                    <span className="text-gray-600">{framework.roleLevel}</span>
-                  </div>
-                </div>
-              </div>
+              ))}
+            </div>
 
-              {/* Visualization toggle button */}
-              <div className="flex justify-end">
+            <div className="flex justify-between mt-6">
+              <Button variant="outline" onClick={() => setActiveTab("create")}>
+                Back to Generator
+              </Button>
+              <div className="flex space-x-2">
                 <Button
                   variant="outline"
-                  size="sm"
-                  onClick={() => setShowVisualization(!showVisualization)}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors"
+                  onClick={() => exportToJSON()}
+                  className="flex items-center"
                 >
-                  <BarChartIcon className="h-4 w-4" />
-                  {showVisualization
-                    ? "Hide Visualization"
-                    : "Show Visualization"}
+                  <FileTextIcon className="h-4 w-4 mr-2" />
+                  Export JSON
                 </Button>
-              </div>
-
-              {/* Lazy-loaded visualization component */}
-              {showVisualization && framework.competencies.length > 0 && (
-                <div className="border rounded-lg p-4 bg-white">
-                  <CompetencyVisualization
-                    competencies={framework.competencies}
-                  />
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold">Competencies</h3>
-                {framework.competencies.map((competency, index) => (
-                  <div
-                    key={index}
-                    className="border rounded-lg overflow-hidden"
-                  >
-                    <div
-                      className="flex justify-between items-center p-4 bg-gray-50 cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setActiveCompetencyIndex(
-                          index === activeCompetencyIndex ? null : index
-                        );
-                      }}
-                    >
-                      <div>
-                        <h4 className="font-medium text-lg">
-                          {competency.name}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {competency.type}
-                        </p>
-                      </div>
-                      <div>
-                        {index === activeCompetencyIndex ? (
-                          <ChevronUpIcon className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <ChevronDownIcon className="h-5 w-5 text-gray-500" />
-                        )}
-                      </div>
-                    </div>
-
-                    {index === activeCompetencyIndex && (
-                      <div className="p-4 border-t">
-                        <p className="mb-3">{competency.description}</p>
-                        <div className="mb-4">
-                          <h5 className="font-medium text-gray-700 mb-1">
-                            Business Impact
-                          </h5>
-                          <p className="text-gray-600">
-                            {competency.businessImpact}
-                          </p>
-                        </div>
-
-                        <h5 className="font-medium text-gray-700 mb-2">
-                          Proficiency Levels
-                        </h5>
-                        <div className="space-y-4">
-                          {competency.levels
-                            .sort((a, b) => a.levelOrder - b.levelOrder)
-                            .map((level, levelIndex) => (
-                              <div
-                                key={levelIndex}
-                                className="bg-gray-50 p-3 rounded"
-                              >
-                                <h6 className="font-medium mb-1">
-                                  {level.name}
-                                </h6>
-                                <p className="text-sm mb-2">
-                                  {level.description}
-                                </p>
-
-                                <div className="mb-2">
-                                  <h6 className="text-sm font-medium text-gray-700">
-                                    Behavioral Indicators
-                                  </h6>
-                                  <ul className="list-disc pl-5 text-sm text-gray-600">
-                                    {level.behavioralIndicators.map(
-                                      (indicator, i) => (
-                                        <li key={i}>{indicator}</li>
-                                      )
-                                    )}
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <h6 className="text-sm font-medium text-gray-700">
-                                    Development Suggestions
-                                  </h6>
-                                  <ul className="list-disc pl-5 text-sm text-gray-600">
-                                    {level.developmentSuggestions.map(
-                                      (suggestion, i) => (
-                                        <li key={i}>{suggestion}</li>
-                                      )
-                                    )}
-                                  </ul>
-                                </div>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-between mt-6">
                 <Button
-                  variant="outline"
-                  onClick={() => setActiveTab("create")}
+                  onClick={() => saveFramework()}
+                  className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  Back to Generator
+                  <SaveIcon className="h-4 w-4 mr-2" />
+                  Save Framework
                 </Button>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => exportToJSON()}
-                    className="flex items-center"
-                  >
-                    <FileTextIcon className="h-4 w-4 mr-2" />
-                    Export JSON
-                  </Button>
-                  <Button
-                    onClick={() => saveFramework()}
-                    className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <SaveIcon className="h-4 w-4 mr-2" />
-                    Save Framework
-                  </Button>
-                </div>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500">
-                No framework generated yet. Use the Create tab to generate a
-                framework.
-              </p>
-            </div>
-          )}
-        </div>
-      </TooltipProvider>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500">
+              No framework generated yet. Use the Create tab to generate a
+              framework.
+            </p>
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -1060,379 +1049,21 @@ export default function CompetencyManager() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "create":
-        return (
-          <TooltipProvider>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-2xl font-semibold mb-6">
-                Create Competency Framework
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      className="block text-sm font-medium mb-1"
-                      htmlFor="industry"
-                    >
-                      Industry
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs">
-                              Select the industry or domain for which
-                              you&apos;re creating the competency framework.
-                              This helps tailor competencies to
-                              industry-specific requirements.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </label>
-                    <select
-                      id="industry"
-                      name="industry"
-                      value={formData.industry}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      required
-                      aria-label="Select industry"
-                    >
-                      <option value="">Select Industry</option>
-                      {industries.map((industry) => (
-                        <option key={industry} value={industry}>
-                          {industry}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-medium mb-1"
-                      htmlFor="jobFunction"
-                    >
-                      Job Function
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs">
-                              Specify the job function or role for which
-                              you&apos;re creating competencies. This ensures
-                              the framework addresses the specific skills needed
-                              for the role.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </label>
-                    <select
-                      id="jobFunction"
-                      name="jobFunction"
-                      value={formData.jobFunction}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      required
-                      aria-label="Select job function"
-                    >
-                      <option value="">Select Job Function</option>
-                      {jobFunctions.map((job) => (
-                        <option key={job} value={job}>
-                          {job}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-medium mb-1"
-                      htmlFor="roleLevel"
-                    >
-                      Role Level
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs">
-                              Indicate the seniority or experience level for the
-                              role. This helps calibrate the competency levels
-                              appropriately.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </label>
-                    <select
-                      id="roleLevel"
-                      name="roleLevel"
-                      value={formData.roleLevel}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      required
-                      aria-label="Select role level"
-                    >
-                      <option value="">Select Role Level</option>
-                      {roleLevels.map((level) => (
-                        <option key={level} value={level}>
-                          {level}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-medium mb-1"
-                      htmlFor="numberOfCompetencies"
-                    >
-                      Number of Competencies
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs">
-                              Choose how many competencies to include in your
-                              framework. Best practice is 6-12 for most roles.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </label>
-                    <input
-                      id="numberOfCompetencies"
-                      type="number"
-                      name="numberOfCompetencies"
-                      value={formData.numberOfCompetencies}
-                      onChange={(e) => handleNumberInputChange(e, 3, 15)}
-                      min="3"
-                      max="15"
-                      className="w-full p-2 border rounded"
-                      required
-                      aria-label="Number of competencies"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Competency Types
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs">
-                              Select the types of competencies to include in
-                              your framework. A balanced framework typically
-                              includes both technical and behavioral
-                              competencies.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </label>
-                    <div className="space-y-2 mt-2">
-                      {competencyTypeOptions.map((type) => (
-                        <div key={type} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={type}
-                            checked={formData.competencyTypes.includes(type)}
-                            onChange={() => handleCompetencyTypeChange(type)}
-                            className="mr-2"
-                          />
-                          <label htmlFor={type} className="text-sm">
-                            {type}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-medium mb-1"
-                      htmlFor="numberOfLevels"
-                    >
-                      Number of Proficiency Levels
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs">
-                              Specify how many proficiency levels each
-                              competency should have. Typically 3-5 levels work
-                              well.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </label>
-                    <input
-                      id="numberOfLevels"
-                      type="number"
-                      name="numberOfLevels"
-                      value={formData.numberOfLevels}
-                      onChange={(e) => handleNumberInputChange(e, 2, 6)}
-                      min="2"
-                      max="6"
-                      className="w-full p-2 border rounded"
-                      required
-                      aria-label="Number of proficiency levels"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowOptionalFields(!showOptionalFields)}
-                    className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
-                  >
-                    {showOptionalFields ? (
-                      <>
-                        <ChevronDownIcon className="h-4 w-4 mr-1" />
-                        Hide Optional Fields
-                      </>
-                    ) : (
-                      <>
-                        <ChevronRightIcon className="h-4 w-4 mr-1" />
-                        Show Optional Fields
-                      </>
-                    )}
-                  </button>
-
-                  {showOptionalFields && (
-                    <div className="mt-4 space-y-6">
-                      <div>
-                        <label
-                          className="block text-sm font-medium mb-1"
-                          htmlFor="specificRequirements"
-                        >
-                          Specific Requirements
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="max-w-xs">
-                                  Include any specific skills, knowledge, or
-                                  requirements that are essential for this role.
-                                  This helps tailor the framework to your
-                                  organization&apos;s specific needs.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </label>
-                        <textarea
-                          id="specificRequirements"
-                          name="specificRequirements"
-                          value={formData.specificRequirements}
-                          onChange={handleInputChange}
-                          className="w-full p-2 border rounded h-24"
-                          placeholder="Enter any specific requirements or skills needed for this role..."
-                          aria-label="Specific requirements"
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          className="block text-sm font-medium mb-1"
-                          htmlFor="organizationalValues"
-                        >
-                          Organizational Values
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="max-w-xs">
-                                  Include your organization&apos;s core values
-                                  to ensure the competency framework aligns with
-                                  your culture. This helps create competencies
-                                  that reinforce your values.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </label>
-                        <textarea
-                          id="organizationalValues"
-                          name="organizationalValues"
-                          value={formData.organizationalValues}
-                          onChange={handleInputChange}
-                          className="w-full p-2 border rounded h-24"
-                          placeholder="Enter your organization's core values..."
-                          aria-label="Organizational values"
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          className="block text-sm font-medium mb-1"
-                          htmlFor="existingCompetencies"
-                        >
-                          Existing Competencies
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="max-w-xs">
-                                  List any existing competencies you want to
-                                  include or build upon in this framework.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </label>
-                        <textarea
-                          id="existingCompetencies"
-                          name="existingCompetencies"
-                          value={formData.existingCompetencies}
-                          onChange={handleInputChange}
-                          className="w-full p-2 border rounded h-24"
-                          placeholder="Enter any existing competencies you want to include..."
-                          aria-label="Existing competencies"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Generating..." : "Generate Framework"}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </TooltipProvider>
-        );
       case "search":
         return (
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-6">Saved Frameworks</h2>
 
+            {/* Search component */}
+            <FrameworkSearch
+              frameworks={savedFrameworks}
+              onSearchResults={handleSearchResults}
+            />
+
             {isLoadingSaved ? (
-              <div className="flex justify-center items-center h-64">
-                <Loader2Icon className="h-8 w-8 text-primary animate-spin" />
+              <div className="flex justify-center items-center py-12">
+                <Loader2Icon className="h-8 w-8 text-blue-600 animate-spin mr-2" />
+                <span>Loading saved frameworks...</span>
               </div>
             ) : savedFrameworksError ? (
               <div className="text-center py-8">
@@ -1446,12 +1077,7 @@ export default function CompetencyManager() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-6">
-                <FrameworkSearch
-                  frameworks={savedFrameworks}
-                  onSearchResults={handleSearchResults}
-                />
-
+              <div>
                 {savedFrameworks.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500">No saved frameworks found.</p>
@@ -1469,48 +1095,69 @@ export default function CompetencyManager() {
                       Frameworks ({savedFrameworks.length})
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {savedFrameworks.map((savedFramework) => (
+                      {savedFrameworks.map((fw) => (
                         <div
-                          key={savedFramework.id}
+                          key={fw.id}
                           className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                         >
-                          <h4 className="font-medium text-lg mb-2">
-                            {savedFramework.name}
-                          </h4>
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                            {savedFramework.description}
-                          </p>
-                          <div className="text-xs text-gray-500 mb-4">
-                            <span>{savedFramework.industry}</span> •
-                            <span>{savedFramework.jobFunction}</span> •
-                            <span>{savedFramework.roleLevel}</span>
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-medium text-blue-800">
+                              {fw.name}
+                            </h4>
+                            <div className="flex space-x-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setFramework(fw);
+                                  setActiveTab("results");
+                                }}
+                                className="h-8 w-8 p-0"
+                              >
+                                <FileTextIcon className="h-4 w-4" />
+                                <span className="sr-only">View</span>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteFramework(fw.id || "")}
+                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="lucide lucide-trash-2"
+                                >
+                                  <path d="M3 6h18" />
+                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                  <line x1="10" x2="10" y1="11" y2="17" />
+                                  <line x1="14" x2="14" y1="11" y2="17" />
+                                </svg>
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex justify-between items-center">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setFramework(savedFramework);
-                                setActiveTab("results");
-                              }}
-                            >
-                              View Details
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    "Are you sure you want to delete this framework?"
-                                  )
-                                ) {
-                                  deleteFramework(savedFramework.id || "");
-                                }
-                              }}
-                            >
-                              Delete
-                            </Button>
+                          <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                            {fw.description || "No description provided."}
+                          </p>
+                          <div className="flex flex-wrap gap-2 text-xs">
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {fw.industry}
+                            </span>
+                            <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                              {fw.jobFunction}
+                            </span>
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                              {fw.roleLevel}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -1532,24 +1179,22 @@ export default function CompetencyManager() {
         return renderResultsTab();
       default:
         return (
-          <TooltipProvider>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-2xl font-semibold mb-6">
-                Create Competency Framework
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Form content */}
-                {/* ... existing form fields ... */}
-              </form>
-            </div>
-          </TooltipProvider>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-6">
+              Create Competency Framework
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Form content */}
+              {/* ... existing form fields ... */}
+            </form>
+          </div>
         );
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <TooltipProvider>
+    <TooltipProvider>
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100 flex justify-between items-center">
           <div>
             <h2 className="text-lg font-medium text-blue-800">
@@ -1561,7 +1206,7 @@ export default function CompetencyManager() {
           </div>
           <Link
             href="/premium"
-            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-md border border-transparent hover:bg-white hover:text-blue-600 hover:border-blue-600 transition-all shadow-md"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
           >
             View Details
           </Link>
@@ -1614,31 +1259,18 @@ export default function CompetencyManager() {
           {/* Loading overlay */}
           {isLoading && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-                <div className="flex flex-col items-center text-center">
-                  <Loader2Icon className="h-12 w-12 text-primary animate-spin mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">
-                    {loadingMessage}
-                  </h3>
-                  <p className="text-gray-500 mb-4">
-                    {countdown > 0
-                      ? `Estimated time remaining: ${countdown} seconds`
-                      : "Taking longer than expected. Please wait..."}
-                  </p>
-                  <Progress
-                    value={countdown > 0 ? ((30 - countdown) / 30) * 100 : 100}
-                    className="w-full mb-4"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsLoading(false);
-                      setError("Operation cancelled by user");
-                    }}
-                  >
-                    Cancel
-                  </Button>
+              <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+                <div className="flex items-center justify-center mb-4">
+                  <Loader2Icon className="h-8 w-8 text-blue-600 animate-spin mr-2" />
+                  <h3 className="text-xl font-semibold">{loadingMessage}</h3>
                 </div>
+                <Progress
+                  value={(30 - countdown) * (100 / 30)}
+                  className="mb-2"
+                />
+                <p className="text-sm text-gray-500 text-center">
+                  This may take up to {countdown} seconds...
+                </p>
               </div>
             </div>
           )}
@@ -1657,7 +1289,7 @@ export default function CompetencyManager() {
             </div>
           )}
         </div>
-      </TooltipProvider>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
