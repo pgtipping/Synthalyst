@@ -28,6 +28,7 @@
 
 ## Recent Achievements
 
+- Enhanced framework search to show results in real-time as the user types
 - Fixed Vercel deployment issue by adding missing dependencies (file-saver and xlsx)
 - Implemented print-friendly view for competency frameworks
 - Added search functionality for saved frameworks with filtering options
