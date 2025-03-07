@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { Session } from "next-auth";
 import { Button } from "@/components/ui/button";
 import {
   Menu,
@@ -26,8 +27,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Extend the Session type to include role
+interface ExtendedSession extends Session {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role?: string;
+  } & Session["user"];
+}
+
 export default function Header() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession() as {
+    data: ExtendedSession | null;
+    status: "loading" | "authenticated" | "unauthenticated";
+  };
   const [menuOpen, setMenuOpen] = useState(false);
   const { toast } = useToast();
 
@@ -105,7 +120,7 @@ export default function Header() {
     }
 
     if (status === "authenticated" && session?.user) {
-      const isAdmin = session.user.email === "pgtipping1@gmail.com";
+      const isAdmin = session.user.role === "ADMIN";
 
       return (
         <div className="flex items-center gap-2">
@@ -157,7 +172,7 @@ export default function Header() {
     }
 
     if (status === "authenticated" && session?.user) {
-      const isAdmin = session.user.email === "pgtipping1@gmail.com";
+      const isAdmin = session.user.role === "ADMIN";
 
       return (
         <>

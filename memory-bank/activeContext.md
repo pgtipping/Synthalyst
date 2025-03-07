@@ -254,10 +254,17 @@ The Competency Manager feature is now complete with the following components imp
 - **Shifted development strategy to "Standalone First, Integration Second" approach (2025-03-06)**
 
 - Fixed authentication redirect loop issue (2024-05-28 15:30:00)
+
   - Identified and removed a circular redirect in vercel.json that was causing the "too many redirects" error
   - The redirect was configured to redirect /auth/signup to /auth/signup, creating an infinite loop
   - This fix will reduce the bounce rate by allowing users to successfully create accounts
   - The issue only affected the production environment, which explains why it worked in local development
+
+- Fixed admin page access issue (2024-05-28 16:00:00)
+  - Updated the Header component to check for user role instead of hardcoded email
+  - Added proper type definitions for the session to include the role property
+  - This ensures that any user with the ADMIN role can access the admin page
+  - The fix applies to both desktop and mobile navigation
 
 ## Next Steps
 

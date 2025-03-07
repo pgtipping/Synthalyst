@@ -225,6 +225,11 @@
   - The redirect was configured to redirect /auth/signup to /auth/signup, creating an infinite loop
   - This fix will reduce the bounce rate by allowing users to successfully create accounts
   - The issue only affected the production environment, which explains why it worked in local development
+- Fixed admin page access issue (2024-05-28 16:00:00)
+  - Updated the Header component to check for user role instead of hardcoded email
+  - Added proper type definitions for the session to include the role property
+  - This ensures that any user with the ADMIN role can access the admin page
+  - The fix applies to both desktop and mobile navigation
 
 ## Known Issues
 
