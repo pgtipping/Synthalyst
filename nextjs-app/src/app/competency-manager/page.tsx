@@ -18,6 +18,15 @@ import {
 } from "./types";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import {
+  SearchIcon,
+  PlusIcon,
+  ClockIcon,
+  FileTextIcon,
+  Loader2Icon,
+} from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 // Dynamically import the visualization component to avoid SSR issues with SVG
 const CompetencyVisualization = dynamic(
@@ -103,7 +112,13 @@ export default function CompetencyManager() {
   const [frameworkNameEdit, setFrameworkNameEdit] = useState("");
   const [frameworkDescriptionEdit, setFrameworkDescriptionEdit] = useState("");
   const [activeTab, setActiveTab] = useState<
-    "generator" | "saved" | "feedback"
+    | "generator"
+    | "saved"
+    | "feedback"
+    | "search"
+    | "create"
+    | "recent"
+    | "results"
   >("generator");
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
     null
@@ -115,6 +130,9 @@ export default function CompetencyManager() {
   >([]);
   const [countdown, setCountdown] = useState<number>(30);
   const [loadingProgress, setLoadingProgress] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState<string>(
+    "Generating Framework"
+  );
 
   const industries = [
     "Technology",
@@ -293,153 +311,97 @@ export default function CompetencyManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoadingMessage("Generating Framework");
+    setFramework(null);
     setError(null);
-    setCountdown(30); // Reset countdown to 30 seconds
 
     // Start countdown timer
+    let countdown = 30;
+    setCountdown(countdown);
+
     const countdownInterval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval);
-          return 0;
-        }
-        return prev - 1;
-      });
+      countdown -= 1;
+      setCountdown(countdown);
+
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+        setLoadingMessage(
+          "Still working... This may take a bit longer than expected"
+        );
+      }
     }, 1000);
 
     try {
-      // Prepare the request payload
-      const payload = {
-        industry:
-          formData.industry === "Other"
-            ? formData.customIndustry
-            : formData.industry,
-        jobFunction:
-          formData.jobFunction === "Other"
-            ? formData.customJobFunction
-            : formData.jobFunction,
-        roleLevel:
-          formData.roleLevel === "Other"
-            ? formData.customRoleLevel
-            : formData.roleLevel,
-        numberOfCompetencies: formData.numberOfCompetencies,
-        competencyTypes: formData.competencyTypes.includes("Other")
-          ? [
-              ...formData.competencyTypes.filter((type) => type !== "Other"),
-              formData.customCompetencyType,
-            ]
-          : formData.competencyTypes,
-        numberOfLevels: formData.numberOfLevels,
-        specificRequirements: formData.specificRequirements,
-        organizationalValues: formData.organizationalValues,
-        existingCompetencies: formData.existingCompetencies,
-        streaming: true, // Request streaming response
-      };
-
-      // Set a timeout to handle cases where the request takes too long
+      // Create a timeout promise that rejects after 45 seconds
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
-          reject(new Error("Request timed out. Please try again."));
-        }, 45000); // 45 seconds timeout
+          reject(new Error("Request timed out"));
+        }, 45000);
       });
 
-      // Use EventSource for streaming response
-      if (typeof EventSource !== "undefined") {
-        // Create a new EventSource connection
-        const fetchPromise = fetch("/api/competency-manager", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "text/event-stream",
-          },
-          body: JSON.stringify(payload),
-        });
+      // Create the fetch promise
+      const fetchPromise = fetch("/api/competency-manager", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          industry: formData.industry,
+          jobFunction: formData.jobFunction,
+          roleLevel: formData.roleLevel,
+          numberOfCompetencies: formData.numberOfCompetencies,
+          competencyTypes: formData.competencyTypes,
+          numberOfLevels: formData.numberOfLevels,
+          specificRequirements: formData.specificRequirements,
+          organizationalValues: formData.organizationalValues,
+          existingCompetencies: formData.existingCompetencies,
+        }),
+      });
 
-        // Race between fetch and timeout
-        const response = (await Promise.race([
-          fetchPromise,
-          timeoutPromise,
-        ])) as Response;
+      // Race the fetch against the timeout
+      const response = (await Promise.race([
+        fetchPromise,
+        timeoutPromise,
+      ])) as Response;
 
-        // Check if streaming is supported by the server
-        if (
-          response.headers.get("Content-Type")?.includes("text/event-stream")
-        ) {
-          const reader = response.body?.getReader();
-          const decoder = new TextDecoder();
-
-          if (!reader) {
-            throw new Error("Streaming not supported");
-          }
-
-          // Process the stream
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value);
-            const lines = chunk.split("\n\n");
-
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                try {
-                  const data = JSON.parse(line.substring(6));
-
-                  if (data.message) {
-                    // Update loading state with the message
-                    setLoadingProgress(data.message);
-                  } else if (data.framework) {
-                    // Final result with the framework
-                    clearInterval(countdownInterval); // Clear the countdown interval
-                    setFramework(data.framework);
-                    setActiveCompetencyIndex(0);
-                    setIsLoading(false);
-                    return;
-                  }
-                } catch (e) {
-                  console.error("Error parsing SSE data:", e);
-                }
-              }
-            }
-          }
-        } else {
-          // Fallback to regular JSON response
-          const data = await response.json();
-          clearInterval(countdownInterval); // Clear the countdown interval
-          setFramework(data.framework);
-          setActiveCompetencyIndex(0);
-        }
-      } else {
-        // Fallback for browsers not supporting EventSource
-        const fetchPromise = fetch("/api/competency-manager", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-
-        // Race between fetch and timeout
-        const response = (await Promise.race([
-          fetchPromise,
-          timeoutPromise,
-        ])) as Response;
-
-        if (!response.ok) {
-          throw new Error("Failed to generate competency framework");
-        }
-
-        const data = await response.json();
-        clearInterval(countdownInterval); // Clear the countdown interval
-        setFramework(data.framework);
-        setActiveCompetencyIndex(0);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate framework");
       }
+
+      const data = await response.json();
+      setFramework(data.framework);
+      setActiveTab("results");
+
+      // Save to recent frameworks
+      const recentFrameworks = JSON.parse(
+        localStorage.getItem("recentFrameworks") || "[]"
+      );
+
+      const newFramework = {
+        id: Date.now().toString(),
+        name: data.framework.name,
+        industry: data.framework.industry,
+        jobFunction: data.framework.jobFunction,
+        timestamp: new Date().toISOString(),
+        framework: data.framework,
+      };
+
+      localStorage.setItem(
+        "recentFrameworks",
+        JSON.stringify([newFramework, ...recentFrameworks].slice(0, 10))
+      );
     } catch (error) {
-      console.error("Generation error:", error);
-      setError(error instanceof Error ? error.message : "An error occurred");
+      console.error("Error generating framework:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate framework. Please try again."
+      );
     } finally {
-      clearInterval(countdownInterval); // Ensure interval is cleared
+      clearInterval(countdownInterval);
       setIsLoading(false);
+      setCountdown(0);
     }
   };
 
@@ -1577,105 +1539,102 @@ export default function CompetencyManager() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <Breadcrumb
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Tools", href: "/tools" },
-          { label: "Competency Manager", href: "#" },
-        ]}
-      />
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-medium text-blue-800">
+            Want faster, more customized frameworks?
+          </h2>
+          <p className="text-sm text-blue-600">
+            Upgrade to get premium benefits
+          </p>
+        </div>
+        <Link
+          href="/premium"
+          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-md hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md"
+        >
+          View Details
+        </Link>
+      </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold mb-6">Competency Manager</h1>
-
-        <div className="flex mb-6 border-b">
-          <button
-            className={`pb-2 px-4 ${
-              activeTab === "generator"
-                ? "border-b-2 border-blue-500 text-blue-500 font-medium"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("generator")}
-          >
-            Generator
-          </button>
-          <button
-            className={`pb-2 px-4 ${
-              activeTab === "saved"
-                ? "border-b-2 border-blue-500 text-blue-500 font-medium"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("saved")}
-          >
-            Saved Frameworks
-          </button>
-          <button
-            className={`pb-2 px-4 ${
-              activeTab === "feedback"
-                ? "border-b-2 border-blue-500 text-blue-500 font-medium"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("feedback")}
-          >
-            Analytics & Feedback
-          </button>
+      <div className="flex flex-col space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Competency Framework Manager</h1>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setActiveTab("search")}
+              className={activeTab === "search" ? "bg-muted" : ""}
+            >
+              <SearchIcon className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setActiveTab("create")}
+              className={activeTab === "create" ? "bg-muted" : ""}
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Create
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setActiveTab("recent")}
+              className={activeTab === "recent" ? "bg-muted" : ""}
+            >
+              <ClockIcon className="h-4 w-4 mr-2" />
+              Recent
+            </Button>
+            {framework && (
+              <Button
+                variant="outline"
+                onClick={() => setActiveTab("results")}
+                className={activeTab === "results" ? "bg-muted" : ""}
+              >
+                <FileTextIcon className="h-4 w-4 mr-2" />
+                Results
+              </Button>
+            )}
+          </div>
         </div>
 
+        {/* Main content area */}
+        {renderTabContent()}
+
+        {/* Loading overlay */}
         {isLoading && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
-              <div className="flex flex-col items-center">
-                <div className="relative w-24 h-24 mb-4">
-                  <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-200 rounded-full"></div>
-                  <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">
-                  Generating Framework
-                </h3>
-                <p className="text-gray-600 mb-2">
-                  {loadingProgress ||
-                    "Our AI is crafting a tailored competency framework for you..."}
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+              <div className="flex flex-col items-center text-center">
+                <Loader2Icon className="h-12 w-12 text-primary animate-spin mb-4" />
+                <h3 className="text-xl font-semibold mb-2">{loadingMessage}</h3>
+                <p className="text-gray-500 mb-4">
+                  {countdown > 0
+                    ? `Estimated time remaining: ${countdown} seconds`
+                    : "Taking longer than expected. Please wait..."}
                 </p>
-                <p className="text-sm text-gray-500">
-                  Time remaining: {countdown} seconds
-                </p>
-                {countdown === 0 && (
-                  <div className="mt-4">
-                    <p className="text-amber-600">
-                      This is taking longer than expected. Please wait or try
-                      again with different parameters.
-                    </p>
-                    <button
-                      onClick={() => setIsLoading(false)}
-                      className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
+                <Progress
+                  value={countdown > 0 ? ((30 - countdown) / 30) * 100 : 100}
+                  className="w-full mb-4"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsLoading(false);
+                    setError("Operation cancelled by user");
+                  }}
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
           </div>
         )}
 
+        {/* Error display */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
             <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">
                   Error generating framework
@@ -1685,8 +1644,6 @@ export default function CompetencyManager() {
             </div>
           </div>
         )}
-
-        {renderTabContent()}
       </div>
     </div>
   );
