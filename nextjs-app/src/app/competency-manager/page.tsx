@@ -113,6 +113,7 @@ export default function CompetencyManager() {
   const [filteredFrameworks, setFilteredFrameworks] = useState<
     CompetencyFramework[]
   >([]);
+  const [countdown, setCountdown] = useState<number>(30);
   const [loadingProgress, setLoadingProgress] = useState<string | null>(null);
 
   const industries = [
@@ -293,6 +294,18 @@ export default function CompetencyManager() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setCountdown(30); // Reset countdown to 30 seconds
+
+    // Start countdown timer
+    const countdownInterval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
     try {
       // Prepare the request payload
@@ -323,10 +336,17 @@ export default function CompetencyManager() {
         streaming: true, // Request streaming response
       };
 
+      // Set a timeout to handle cases where the request takes too long
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Request timed out. Please try again."));
+        }, 45000); // 45 seconds timeout
+      });
+
       // Use EventSource for streaming response
       if (typeof EventSource !== "undefined") {
         // Create a new EventSource connection
-        const response = await fetch("/api/competency-manager", {
+        const fetchPromise = fetch("/api/competency-manager", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -334,6 +354,12 @@ export default function CompetencyManager() {
           },
           body: JSON.stringify(payload),
         });
+
+        // Race between fetch and timeout
+        const response = (await Promise.race([
+          fetchPromise,
+          timeoutPromise,
+        ])) as Response;
 
         // Check if streaming is supported by the server
         if (
@@ -364,6 +390,7 @@ export default function CompetencyManager() {
                     setLoadingProgress(data.message);
                   } else if (data.framework) {
                     // Final result with the framework
+                    clearInterval(countdownInterval); // Clear the countdown interval
                     setFramework(data.framework);
                     setActiveCompetencyIndex(0);
                     setIsLoading(false);
@@ -378,12 +405,13 @@ export default function CompetencyManager() {
         } else {
           // Fallback to regular JSON response
           const data = await response.json();
+          clearInterval(countdownInterval); // Clear the countdown interval
           setFramework(data.framework);
           setActiveCompetencyIndex(0);
         }
       } else {
         // Fallback for browsers not supporting EventSource
-        const response = await fetch("/api/competency-manager", {
+        const fetchPromise = fetch("/api/competency-manager", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -391,17 +419,26 @@ export default function CompetencyManager() {
           body: JSON.stringify(payload),
         });
 
+        // Race between fetch and timeout
+        const response = (await Promise.race([
+          fetchPromise,
+          timeoutPromise,
+        ])) as Response;
+
         if (!response.ok) {
           throw new Error("Failed to generate competency framework");
         }
 
         const data = await response.json();
+        clearInterval(countdownInterval); // Clear the countdown interval
         setFramework(data.framework);
         setActiveCompetencyIndex(0);
       }
     } catch (error) {
+      console.error("Generation error:", error);
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
+      clearInterval(countdownInterval); // Ensure interval is cleared
       setIsLoading(false);
     }
   };
@@ -1601,8 +1638,22 @@ export default function CompetencyManager() {
                     "Our AI is crafting a tailored competency framework for you..."}
                 </p>
                 <p className="text-sm text-gray-500">
-                  This may take up to 30 seconds
+                  Time remaining: {countdown} seconds
                 </p>
+                {countdown === 0 && (
+                  <div className="mt-4">
+                    <p className="text-amber-600">
+                      This is taking longer than expected. Please wait or try
+                      again with different parameters.
+                    </p>
+                    <button
+                      onClick={() => setIsLoading(false)}
+                      className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
