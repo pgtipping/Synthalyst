@@ -1,5 +1,22 @@
 # Project Intelligence - 2024-02-27
 
+## Memory Bank Maintenance - 2024-03-07
+
+### Regular Documentation Updates - 2024-03-07
+
+- The memory bank requires regular updates to maintain accurate project context
+- Key files to update include:
+  - activeContext.md - Current focus and recent changes
+  - progress.md - What works, recent achievements, and what's left to build
+  - .cursorrules - Project-specific patterns and intelligence
+- When updating memory bank files:
+  - Use the current date in the format YYYY-MM-DD
+  - Ensure consistency in date formats across all files
+  - Add new sections at the top of the file for better visibility
+  - Maintain comprehensive project context for future reference
+- Memory bank updates should be committed to the repository to ensure they are available for future reference
+- The memory bank is the primary source of project context and should be maintained with precision
+
 ## AI Excellence Focus - 2024-03-08
 
 ### AI Quality First Pattern - 2024-03-08
