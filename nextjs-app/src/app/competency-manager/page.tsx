@@ -27,6 +27,8 @@ import {
   ChevronDown as ChevronDownIcon,
   ChevronRight as ChevronRightIcon,
   BarChart as BarChartIcon,
+  Save as SaveIcon,
+  Bookmark as BookmarkIcon,
 } from "lucide-react";
 
 // Lazy load the CompetencyVisualization component
@@ -41,6 +43,15 @@ const CompetencyVisualization = dynamic(
     ssr: false, // Disable server-side rendering for Chart.js components
   }
 );
+
+// Lazy load the FrameworkSearch component
+const FrameworkSearch = dynamic(() => import("./components/FrameworkSearch"), {
+  loading: () => (
+    <div className="h-64 flex items-center justify-center">
+      Loading search...
+    </div>
+  ),
+});
 
 // We're only keeping the dynamic imports that are actually used
 // Other dynamic imports can be re-added when needed
@@ -88,6 +99,14 @@ export default function CompetencyManager() {
   const [loadingMessage, setLoadingMessage] = useState<string>(
     "Generating Framework"
   );
+
+  const [savedFrameworks, setSavedFrameworks] = useState<CompetencyFramework[]>(
+    []
+  );
+  const [isLoadingSaved, setIsLoadingSaved] = useState(false);
+  const [savedFrameworksError, setSavedFrameworksError] = useState<
+    string | null
+  >(null);
 
   const industries = [
     "Technology",
@@ -229,6 +248,38 @@ export default function CompetencyManager() {
   useEffect(() => {
     setIndustrySuggestions(industryCompetencySuggestions);
   }, []);
+
+  // Load saved frameworks when the "saved" tab is selected
+  useEffect(() => {
+    if (activeTab === "search") {
+      loadSavedFrameworks();
+    }
+  }, [activeTab]);
+
+  // Function to load saved frameworks
+  const loadSavedFrameworks = async () => {
+    setIsLoadingSaved(true);
+    setSavedFrameworksError(null);
+
+    try {
+      const response = await fetch("/api/competency-manager/frameworks");
+
+      if (!response.ok) {
+        throw new Error("Failed to load saved frameworks");
+      }
+
+      const data = await response.json();
+      setSavedFrameworks(data.frameworks || []);
+    } catch (error) {
+      setSavedFrameworksError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load saved frameworks"
+      );
+    } finally {
+      setIsLoadingSaved(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -471,26 +522,6 @@ export default function CompetencyManager() {
       <TooltipContent>{content}</TooltipContent>
     </Tooltip>
   );
-
-  // Load saved frameworks on component mount
-  useEffect(() => {
-    const loadSavedFrameworks = async () => {
-      try {
-        const response = await fetch("/api/competency-manager/frameworks", {
-          method: "GET",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setFramework(data.frameworks[0] || null);
-        }
-      } catch (error) {
-        console.error("Failed to load saved frameworks:", error);
-      }
-    };
-
-    loadSavedFrameworks();
-  }, []);
 
   const renderFrameworkDetails = () => {
     if (!framework) return null;
@@ -768,7 +799,23 @@ export default function CompetencyManager() {
                 >
                   Back to Generator
                 </Button>
-                <Button onClick={() => saveFramework()}>Save Framework</Button>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => exportToJSON()}
+                    className="flex items-center"
+                  >
+                    <FileTextIcon className="h-4 w-4 mr-2" />
+                    Export JSON
+                  </Button>
+                  <Button
+                    onClick={() => saveFramework()}
+                    className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <SaveIcon className="h-4 w-4 mr-2" />
+                    Save Framework
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
@@ -782,6 +829,44 @@ export default function CompetencyManager() {
         </div>
       </TooltipProvider>
     );
+  };
+
+  // Handle search results
+  const handleSearchResults = (results: CompetencyFramework[]) => {
+    setSavedFrameworks(results);
+  };
+
+  const updatePublicStatus = async (isPublic: boolean) => {
+    if (!framework?.id) return;
+
+    try {
+      const response = await fetch(
+        `/api/competency-manager/frameworks/${framework.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            isPublic,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update framework public status");
+      }
+
+      // Update local state
+      setFramework((prev) => (prev ? { ...prev, isPublic } : null));
+
+      alert("Framework public status updated successfully!");
+    } catch (error) {
+      console.error("Error updating public status:", error);
+      alert(
+        "Failed to update framework public status. Please try again later."
+      );
+    }
   };
 
   const renderTabContent = () => {
@@ -1154,8 +1239,97 @@ export default function CompetencyManager() {
       case "search":
         return (
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-6">Search Frameworks</h2>
-            {/* Search content */}
+            <h2 className="text-2xl font-semibold mb-6">Saved Frameworks</h2>
+
+            {isLoadingSaved ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2Icon className="h-8 w-8 text-primary animate-spin" />
+              </div>
+            ) : savedFrameworksError ? (
+              <div className="text-center py-8">
+                <p className="text-red-500">{savedFrameworksError}</p>
+                <Button
+                  variant="outline"
+                  onClick={loadSavedFrameworks}
+                  className="mt-4"
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <FrameworkSearch
+                  frameworks={savedFrameworks}
+                  onSearchResults={handleSearchResults}
+                />
+
+                {savedFrameworks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No saved frameworks found.</p>
+                    <Button
+                      variant="outline"
+                      onClick={() => setActiveTab("create")}
+                      className="mt-4"
+                    >
+                      Create New Framework
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 mt-6">
+                    <h3 className="text-lg font-medium">
+                      Frameworks ({savedFrameworks.length})
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {savedFrameworks.map((savedFramework) => (
+                        <div
+                          key={savedFramework.id}
+                          className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                        >
+                          <h4 className="font-medium text-lg mb-2">
+                            {savedFramework.name}
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                            {savedFramework.description}
+                          </p>
+                          <div className="text-xs text-gray-500 mb-4">
+                            <span>{savedFramework.industry}</span> •
+                            <span>{savedFramework.jobFunction}</span> •
+                            <span>{savedFramework.roleLevel}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setFramework(savedFramework);
+                                setActiveTab("results");
+                              }}
+                            >
+                              View Details
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (
+                                  confirm(
+                                    "Are you sure you want to delete this framework?"
+                                  )
+                                ) {
+                                  deleteFramework(savedFramework.id || "");
+                                }
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
       case "recent":
@@ -1181,44 +1355,6 @@ export default function CompetencyManager() {
             </div>
           </TooltipProvider>
         );
-    }
-  };
-
-  // Add this function to handle search results
-  const handleSearchResults = (results: CompetencyFramework[]) => {
-    // Implementation...
-  };
-
-  const updatePublicStatus = async (isPublic: boolean) => {
-    if (!framework?.id) return;
-
-    try {
-      const response = await fetch(
-        `/api/competency-manager/frameworks/${framework.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            isPublic,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update framework public status");
-      }
-
-      // Update local state
-      setFramework((prev) => (prev ? { ...prev, isPublic } : null));
-
-      alert("Framework public status updated successfully!");
-    } catch (error) {
-      console.error("Error updating public status:", error);
-      alert(
-        "Failed to update framework public status. Please try again later."
-      );
     }
   };
 
@@ -1251,8 +1387,8 @@ export default function CompetencyManager() {
                 onClick={() => setActiveTab("search")}
                 className={activeTab === "search" ? "bg-muted" : ""}
               >
-                <SearchIcon className="h-4 w-4 mr-2" />
-                Search
+                <BookmarkIcon className="h-4 w-4 mr-2" />
+                Saved
               </Button>
               <Button
                 variant="outline"

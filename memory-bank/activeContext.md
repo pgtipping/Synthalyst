@@ -1,4 +1,4 @@
-# Active Context - [2025-03-07 13:00:46]
+# Active Context - [2025-03-07 13:18:56]
 
 ## Current Focus
 
@@ -73,6 +73,17 @@ The Competency Manager feature is nearly complete with the following components 
   - Add more customization options for visualizations
 
 ## Recent Changes
+
+- Integrated FrameworkSearch component and implemented Saved Frameworks tab (2025-03-07 13:18:56)
+
+  - Added proper integration of the FrameworkSearch component in the Saved Frameworks tab
+  - Implemented loading state for saved frameworks with error handling
+  - Created a grid view of saved frameworks with view and delete options
+  - Enhanced the Save Framework button with icon and improved styling
+  - Added Export JSON button to the framework results view
+  - Improved the tab navigation with more descriptive icons
+  - Implemented dynamic loading of saved frameworks when the Saved tab is selected
+  - Maintained backward compatibility with existing functionality
 
 - Implemented lazy loading for framework visualizations (2025-03-07 13:00:46)
 
