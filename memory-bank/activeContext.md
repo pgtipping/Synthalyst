@@ -67,6 +67,14 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Simplified JSON handling in Competency Manager (2025-03-07)
+
+  - Removed complex JSON cleaning function in favor of built-in LLM capabilities
+  - Added responseFormat: "JSON" parameter to Gemini API call
+  - Enhanced system prompt to explicitly require pure JSON output
+  - Improved error handling with consolidated try-catch block
+  - Reduced code complexity while maintaining robust error reporting
+
 - Fixed JSON parsing error in Competency Manager (2025-03-07)
 
   - Added helper function to clean JSON from markdown formatting

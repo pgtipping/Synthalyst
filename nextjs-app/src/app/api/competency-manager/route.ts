@@ -35,25 +35,6 @@ interface CompetencyFramework {
   competencies: Competency[];
 }
 
-// Helper function to clean JSON from markdown formatting
-function cleanJsonFromMarkdown(text: string): string {
-  // Remove markdown code block markers (```json and ```)
-  let cleaned = text.replace(/```json\s*/g, "").replace(/```\s*$/g, "");
-
-  // Remove any leading/trailing whitespace
-  cleaned = cleaned.trim();
-
-  // If the text starts with a backtick, remove everything up to the first {
-  if (cleaned.startsWith("`")) {
-    const firstBraceIndex = cleaned.indexOf("{");
-    if (firstBraceIndex !== -1) {
-      cleaned = cleaned.substring(firstBraceIndex);
-    }
-  }
-
-  return cleaned;
-}
-
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -151,7 +132,7 @@ export async function POST(request: Request) {
       ]
     }
     
-    IMPORTANT: Return ONLY the JSON object without any markdown formatting (no \`\`\`json or \`\`\` tags). The response should be a valid JSON string that can be directly parsed with JSON.parse().
+    IMPORTANT: Return ONLY the JSON object without any markdown formatting or explanation.
     `;
 
     // Use Gemini 2.0 Flash as primary LLM
@@ -172,6 +153,8 @@ export async function POST(request: Request) {
             topP: 0.95,
             topK: 40,
           },
+          // Request JSON response format
+          responseFormat: "JSON",
         },
         {
           headers: {
@@ -190,7 +173,7 @@ export async function POST(request: Request) {
             {
               role: "system",
               content:
-                "You are an expert in competency framework development and talent management. Return responses in valid JSON format without markdown formatting.",
+                "You are an expert in competency framework development and talent management. You must return only valid JSON without any markdown formatting or explanation.",
             },
             {
               role: "user",
@@ -226,48 +209,31 @@ export async function POST(request: Request) {
     // Parse the response based on which API was used
     let competencyFramework;
 
-    if (response.data.candidates) {
-      // Gemini response format
-      const content = response.data.candidates[0].content.parts[0].text;
-      const cleanedContent = cleanJsonFromMarkdown(content);
-      try {
-        competencyFramework = JSON.parse(cleanedContent);
-      } catch (parseError) {
-        console.error("Error parsing Gemini response:", parseError);
-        console.log("Raw content:", content);
-        console.log("Cleaned content:", cleanedContent);
-        return NextResponse.json(
-          {
-            error: "Failed to parse competency framework from Gemini response",
-          },
-          { status: 500 }
-        );
+    try {
+      if (response.data.candidates) {
+        // Gemini response format
+        const content = response.data.candidates[0].content.parts[0].text;
+        competencyFramework = JSON.parse(content);
+      } else if (response.data.choices) {
+        // Groq response format
+        const content = response.data.choices[0].message.content;
+        competencyFramework = JSON.parse(content);
+      } else {
+        throw new Error("Unexpected API response format");
       }
-    } else if (response.data.choices) {
-      // Groq response format
-      const content = response.data.choices[0].message.content;
-      const cleanedContent = cleanJsonFromMarkdown(content);
-      try {
-        competencyFramework = JSON.parse(cleanedContent);
-      } catch (parseError) {
-        console.error("Error parsing Groq response:", parseError);
-        console.log("Raw content:", content);
-        console.log("Cleaned content:", cleanedContent);
-        return NextResponse.json(
-          { error: "Failed to parse competency framework from Groq response" },
-          { status: 500 }
-        );
-      }
-    } else {
-      throw new Error("Unexpected API response format");
+    } catch (parseError) {
+      console.error("Error parsing LLM response:", parseError);
+      console.log("Raw response:", JSON.stringify(response.data));
+      return NextResponse.json(
+        { error: "Failed to parse competency framework from LLM response" },
+        { status: 500 }
+      );
     }
 
     // Return the generated framework without saving to database
-    return NextResponse.json({
-      framework: competencyFramework,
-    });
+    return NextResponse.json({ framework: competencyFramework });
   } catch (error) {
-    console.error("Competency framework generation error:", error);
+    console.error("Error generating competency framework:", error);
     return NextResponse.json(
       { error: "Failed to generate competency framework" },
       { status: 500 }

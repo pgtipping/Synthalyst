@@ -28,6 +28,12 @@
 
 ## Recent Achievements
 
+- Simplified JSON handling in Competency Manager
+  - Removed complex JSON cleaning function in favor of built-in LLM capabilities
+  - Added responseFormat: "JSON" parameter to Gemini API call
+  - Enhanced system prompt to explicitly require pure JSON output
+  - Improved error handling with consolidated try-catch block
+  - Reduced code complexity while maintaining robust error reporting
 - Fixed JSON parsing error in Competency Manager
   - Added helper function to clean JSON from markdown formatting
   - Updated prompt to explicitly request pure JSON without markdown formatting
