@@ -152,8 +152,8 @@ export async function GET(request: Request) {
       5: 0,
     };
 
-    feedback.forEach((item: { rating: 1 | 2 | 3 | 4 | 5 }) => {
-      ratingCounts[item.rating]++;
+    feedback.forEach((item) => {
+      ratingCounts[item.rating as 1 | 2 | 3 | 4 | 5]++;
     });
 
     // Get LLM improvement data (for internal use)

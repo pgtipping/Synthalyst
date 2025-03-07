@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the implementation of the competency reference data system, which serves as the foundation for the integrated HR toolkit. The reference data system provides standardized organizational data structures that support all HR tools, enabling cross-tool integration and data sharing.
+This document outlines the implementation of the competency reference data system. The reference data system provides standardized organizational data structures that support all HR tools, enabling cross-tool integration and data sharing.
 
 ## Database Schema
 

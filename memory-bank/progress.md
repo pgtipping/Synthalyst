@@ -28,6 +28,9 @@
 
 ## Recent Achievements
 
+- Fixed Vercel deployment issues:
+  - Corrected authOptions import path in competency-manager frameworks API route
+  - Fixed type error in feedback route by using type assertion for rating values
 - Enhanced framework search to show results in real-time as the user types
 - Fixed Vercel deployment issue by adding missing dependencies (file-saver and xlsx)
 - Implemented print-friendly view for competency frameworks

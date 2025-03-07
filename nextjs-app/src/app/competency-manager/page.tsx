@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { InfoIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import {
   CompetencyFramework,
   CompetencyLevel,
@@ -55,6 +55,18 @@ const TopAIFrameworks = dynamic(() => import("./components/TopAIFrameworks"), {
   ssr: false,
 });
 
+// Dynamically import the new components
+const PrintFriendlyView = dynamic(
+  () => import("./components/PrintFriendlyView"),
+  {
+    ssr: false,
+  }
+);
+
+const FrameworkSearch = dynamic(() => import("./components/FrameworkSearch"), {
+  ssr: false,
+});
+
 export default function CompetencyManager() {
   const [formData, setFormData] = useState<FormData>({
     industry: "",
@@ -98,6 +110,10 @@ export default function CompetencyManager() {
   );
   const [isDeleting, setIsDeleting] = useState(false);
   const [showVisualization, setShowVisualization] = useState(false);
+  const [filteredFrameworks, setFilteredFrameworks] = useState<
+    CompetencyFramework[]
+  >([]);
+  const [showSearch, setShowSearch] = useState(false);
 
   const industries = [
     "Technology",
@@ -554,23 +570,37 @@ export default function CompetencyManager() {
     loadSavedFrameworks();
   }, []);
 
-  const renderFrameworkDetails = (framework: CompetencyFramework) => {
-    return (
-      <div className="mt-4">
-        {/* ... existing code ... */}
+  const renderFrameworkDetails = () => {
+    if (!framework) return null;
 
-        {/* Add the feedback components */}
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Framework Feedback</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <FeedbackMechanism frameworkId={framework.id || ""} />
-            </div>
-            <div>
-              <FeedbackAnalytics frameworkId={framework.id || ""} />
-            </div>
+    return (
+      <div className="mt-6 space-y-6">
+        <div className="flex flex-wrap justify-between items-center gap-4">
+          <h2 className="text-2xl font-bold">
+            {isEditing ? "Edit Framework" : framework.name}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {!isEditing && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowVisualization(!showVisualization)}
+                >
+                  {showVisualization
+                    ? "Hide Visualization"
+                    : "Show Visualization"}
+                </Button>
+                <PrintFriendlyView framework={framework} />
+                <ExportOptions framework={framework} />
+                <SharingOptions framework={framework} />
+                <PremiumFeatureTeasers />
+              </>
+            )}
           </div>
         </div>
+
+        {/* Rest of the framework details */}
+        {/* ... existing code ... */}
       </div>
     );
   };
@@ -588,78 +618,96 @@ export default function CompetencyManager() {
 
     if (activeTab === "saved") {
       return (
-        <div className="bg-white shadow sm:rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Your Saved Frameworks</h2>
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Saved Frameworks</h2>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowSearch(!showSearch)}
+              >
+                {showSearch ? "Hide Search" : "Search Frameworks"}
+              </Button>
+            </div>
+          </div>
 
-          {savedFrameworks.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">
-                You haven't saved any frameworks yet. Generate a framework to
-                get started.
+          {showSearch && (
+            <FrameworkSearch
+              frameworks={savedFrameworks}
+              onSearchResults={handleSearchResults}
+            />
+          )}
+
+          {(showSearch ? filteredFrameworks : savedFrameworks).length === 0 ? (
+            <div className="text-center p-8 border rounded-lg">
+              <p className="text-muted-foreground">
+                {showSearch
+                  ? "No frameworks match your search criteria."
+                  : "You haven't saved any frameworks yet."}
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedFrameworks.map((fw) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(showSearch ? filteredFrameworks : savedFrameworks).map((fw) => (
                 <div
                   key={fw.id}
-                  className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg mb-1 truncate">
-                      {fw.name}
-                    </h3>
-                    <div className="flex items-center text-xs text-gray-500 mb-2">
-                      <span className="mr-2">{fw.industry}</span>
-                      <span>•</span>
-                      <span className="mx-2">{fw.jobFunction}</span>
-                      <span>•</span>
-                      <span className="ml-2">{fw.roleLevel}</span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {fw.description || "No description provided."}
+                  <h3 className="text-lg font-semibold mb-2">{fw.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {fw.description}
+                  </p>
+                  <div className="text-sm text-muted-foreground mb-4">
+                    <p>
+                      <span className="font-medium">Industry:</span>{" "}
+                      {fw.industry}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
-                        {fw.competencies.length} competencies
-                      </span>
-                      <div className="space-x-1">
-                        <button
-                          onClick={() => {
-                            setFramework(fw);
-                            setActiveCompetencyIndex(0);
-                            setActiveTab("generator");
-                          }}
-                          className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                        >
-                          View
-                        </button>
-                        {deleteConfirmation === fw.id ? (
-                          <div className="flex items-center mt-2">
-                            <button
-                              onClick={() => deleteFramework(fw.id!)}
-                              disabled={isDeleting}
-                              className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-                            >
-                              {isDeleting ? "Deleting..." : "Confirm"}
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirmation(null)}
-                              className="px-2 py-1 text-xs ml-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setDeleteConfirmation(fw.id!)}
-                            className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                    <p>
+                      <span className="font-medium">Job Function:</span>{" "}
+                      {fw.jobFunction}
+                    </p>
+                    <p>
+                      <span className="font-medium">Role Level:</span>{" "}
+                      {fw.roleLevel}
+                    </p>
+                    <p>
+                      <span className="font-medium">Competencies:</span>{" "}
+                      {fw.competencies.length}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setFramework(fw);
+                        setActiveCompetencyIndex(0);
+                        setActiveTab("generator");
+                        setShowVisualization(false);
+                      }}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setFramework(fw);
+                        setFrameworkNameEdit(fw.name);
+                        setFrameworkDescriptionEdit(fw.description);
+                        setEditingFrameworkId(fw.id || null);
+                        setIsEditing(true);
+                        setActiveTab("generator");
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => setDeleteConfirmation(fw.id || null)}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -711,6 +759,11 @@ export default function CompetencyManager() {
         </div>
       </div>
     );
+  };
+
+  // Add this function to handle search results
+  const handleSearchResults = (results: CompetencyFramework[]) => {
+    setFilteredFrameworks(results);
   };
 
   return (

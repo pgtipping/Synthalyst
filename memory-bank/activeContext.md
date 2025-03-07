@@ -67,6 +67,9 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Fixed Vercel deployment issues:
+  - Corrected authOptions import path in competency-manager frameworks API route (2025-03-07)
+  - Fixed type error in feedback route by using type assertion for rating values (2025-03-07)
 - Enhanced framework search to show results in real-time as the user types
 - Fixed Vercel deployment issue by adding missing dependencies (file-saver and xlsx)
 - Implemented print-friendly view for competency frameworks
