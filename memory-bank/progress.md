@@ -28,6 +28,10 @@
 
 ## Recent Achievements
 
+- Completed integration of print-friendly view and search functionality in Competency Manager
+  - Created a dedicated "Framework Actions" section with organized print, export, share, and premium features
+  - Made the search functionality always visible in the saved frameworks tab for better discoverability
+  - Improved the UI organization and user experience
 - Fixed SharingOptions component in Competency Manager by implementing the missing onUpdatePublicStatus function
 - Fixed Vercel deployment issues:
   - Corrected authOptions import path in competency-manager frameworks API route

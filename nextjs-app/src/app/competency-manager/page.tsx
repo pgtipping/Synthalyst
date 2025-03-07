@@ -113,7 +113,6 @@ export default function CompetencyManager() {
   const [filteredFrameworks, setFilteredFrameworks] = useState<
     CompetencyFramework[]
   >([]);
-  const [showSearch, setShowSearch] = useState(false);
 
   const industries = [
     "Technology",
@@ -590,13 +589,34 @@ export default function CompetencyManager() {
                     ? "Hide Visualization"
                     : "Show Visualization"}
                 </Button>
-                <PrintFriendlyView framework={framework} />
-                <ExportOptions framework={framework} />
-                <SharingOptions
-                  framework={framework}
-                  onUpdatePublicStatus={updatePublicStatus}
-                />
-                <PremiumFeatureTeasers />
+
+                {/* Create a dedicated section for export and sharing options */}
+                <div className="w-full mt-4 p-4 border rounded-lg bg-background">
+                  <h3 className="text-lg font-medium mb-3">
+                    Framework Actions
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Print</h4>
+                      <PrintFriendlyView framework={framework} />
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Export</h4>
+                      <ExportOptions framework={framework} />
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Share</h4>
+                      <SharingOptions
+                        framework={framework}
+                        onUpdatePublicStatus={updatePublicStatus}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Premium Features</h4>
+                      <PremiumFeatureTeasers />
+                    </div>
+                  </div>
+                </div>
               </>
             )}
           </div>
@@ -625,33 +645,33 @@ export default function CompetencyManager() {
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Saved Frameworks</h2>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowSearch(!showSearch)}
-              >
-                {showSearch ? "Hide Search" : "Search Frameworks"}
-              </Button>
+              {/* Remove the conditional button for showing/hiding search */}
             </div>
           </div>
 
-          {showSearch && (
-            <FrameworkSearch
-              frameworks={savedFrameworks}
-              onSearchResults={handleSearchResults}
-            />
-          )}
+          {/* Always show the search component */}
+          <FrameworkSearch
+            frameworks={savedFrameworks}
+            onSearchResults={handleSearchResults}
+          />
 
-          {(showSearch ? filteredFrameworks : savedFrameworks).length === 0 ? (
+          {(filteredFrameworks.length > 0
+            ? filteredFrameworks
+            : savedFrameworks
+          ).length === 0 ? (
             <div className="text-center p-8 border rounded-lg">
               <p className="text-muted-foreground">
-                {showSearch
+                {filteredFrameworks.length > 0
                   ? "No frameworks match your search criteria."
                   : "You haven't saved any frameworks yet."}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(showSearch ? filteredFrameworks : savedFrameworks).map((fw) => (
+              {(filteredFrameworks.length > 0
+                ? filteredFrameworks
+                : savedFrameworks
+              ).map((fw) => (
                 <div
                   key={fw.id}
                   className="border rounded-lg p-4 hover:shadow-md transition-shadow"
