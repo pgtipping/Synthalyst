@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { prisma } from "@/lib/prisma";
 
 // GET a specific framework
 export async function GET(
@@ -41,15 +41,15 @@ export async function GET(
       );
     }
 
-    // Check if the user has permission to view this framework
-    if (framework.userId !== session.user.id && !framework.isPublic) {
+    // Check if the user is the owner of the framework
+    if (framework.userId !== session.user.id) {
       return NextResponse.json(
-        { error: "You don't have permission to view this framework" },
+        { error: "You don't have permission to access this framework" },
         { status: 403 }
       );
     }
 
-    return NextResponse.json({ framework });
+    return NextResponse.json(framework);
   } catch (error) {
     console.error("Error fetching framework:", error);
     return NextResponse.json(
@@ -92,7 +92,7 @@ export async function PATCH(
       );
     }
 
-    // Check if the user has permission to update this framework
+    // Check if the user is the owner of the framework
     if (framework.userId !== session.user.id) {
       return NextResponse.json(
         { error: "You don't have permission to update this framework" },

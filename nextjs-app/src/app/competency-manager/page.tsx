@@ -17,10 +17,25 @@ import {
   IndustryCompetencySuggestion,
 } from "./types";
 import dynamic from "next/dynamic";
+import { Button } from "@/components/ui/button";
 
 // Dynamically import the visualization component to avoid SSR issues with SVG
 const CompetencyVisualization = dynamic(
   () => import("./components/CompetencyVisualization"),
+  { ssr: false }
+);
+
+// Dynamically import the new components
+const ExportOptions = dynamic(() => import("./components/ExportOptions"), {
+  ssr: false,
+});
+
+const SharingOptions = dynamic(() => import("./components/SharingOptions"), {
+  ssr: false,
+});
+
+const PremiumFeatureTeasers = dynamic(
+  () => import("./components/PremiumFeatureTeasers"),
   { ssr: false }
 );
 

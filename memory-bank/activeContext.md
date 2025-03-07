@@ -561,3 +561,22 @@ We've made a strategic shift in our development approach to prioritize standalon
    - Preserve work done on competency data layer and reference data models
    - Ensure backward compatibility strategy remains valid
    - This preserves our investment in integration planning while prioritizing standalone functionality
+
+## Recent Changes - [2025-03-07]
+
+- Implemented industry-specific competency suggestions API endpoint
+- Added enhanced export functionality for competency frameworks (JSON, CSV, PDF)
+- Created framework sharing options with public/private toggle
+- Implemented premium feature teasers for integration with other HR tools
+- Added shared framework viewing page for publicly shared frameworks
+- Fixed prisma import issues in API routes
+
+## Next Steps
+
+1. Complete any remaining standalone features for the competency manager
+   - Add more visualization options
+   - Enhance the competency matrix creation functionality
+   - Improve the UI/UX for mobile devices
+2. Move on to enhancing the JD Developer tool according to the standalone-first strategy
+3. Implement the Interview Questions Generator enhancements
+4. Develop the Training Plan Creator improvements
