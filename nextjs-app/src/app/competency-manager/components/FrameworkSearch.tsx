@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -48,26 +48,8 @@ export default function FrameworkSearch({
   const jobFunctions = [...new Set(frameworks.map((f) => f.jobFunction))];
   const roleLevels = [...new Set(frameworks.map((f) => f.roleLevel))];
 
-  // Load saved searches from localStorage on component mount
-  useEffect(() => {
-    const savedSearchesFromStorage = localStorage.getItem(
-      "savedFrameworkSearches"
-    );
-    if (savedSearchesFromStorage) {
-      setSavedSearches(JSON.parse(savedSearchesFromStorage));
-    }
-  }, []);
-
-  // Save searches to localStorage when they change
-  useEffect(() => {
-    localStorage.setItem(
-      "savedFrameworkSearches",
-      JSON.stringify(savedSearches)
-    );
-  }, [savedSearches]);
-
   // Apply filters and search
-  const applySearch = () => {
+  const applySearch = useCallback(() => {
     let results = [...frameworks];
 
     // Apply text search
@@ -136,20 +118,51 @@ export default function FrameworkSearch({
 
     // Send results to parent component
     onSearchResults(results);
-  };
+  }, [
+    frameworks,
+    searchTerm,
+    industryFilter,
+    jobFunctionFilter,
+    roleLevelFilter,
+    dateFilter,
+    onSearchResults,
+  ]);
+
+  // Load saved searches from localStorage on component mount
+  useEffect(() => {
+    const savedSearchesFromStorage = localStorage.getItem(
+      "savedFrameworkSearches"
+    );
+    if (savedSearchesFromStorage) {
+      setSavedSearches(JSON.parse(savedSearchesFromStorage));
+    }
+  }, []);
+
+  // Save searches to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem(
+      "savedFrameworkSearches",
+      JSON.stringify(savedSearches)
+    );
+  }, [savedSearches]);
+
+  // Apply search whenever any filter changes
+  useEffect(() => {
+    applySearch();
+  }, [applySearch]);
 
   // Clear all filters
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearchTerm("");
     setIndustryFilter("");
     setJobFunctionFilter("");
     setRoleLevelFilter("");
     setDateFilter("");
-    onSearchResults(frameworks); // Reset to show all frameworks
-  };
+    // No need to call onSearchResults directly as the useEffect will handle it
+  }, []);
 
   // Save current search
-  const saveSearch = () => {
+  const saveSearch = useCallback(() => {
     if (!savedSearchName.trim()) return;
 
     const newSavedSearch = {
@@ -166,28 +179,40 @@ export default function FrameworkSearch({
     setSavedSearches([...savedSearches, newSavedSearch]);
     setSavedSearchName("");
     setShowSaveSearch(false);
-  };
+  }, [
+    savedSearchName,
+    searchTerm,
+    industryFilter,
+    jobFunctionFilter,
+    roleLevelFilter,
+    dateFilter,
+    savedSearches,
+  ]);
 
   // Load a saved search
-  const loadSavedSearch = (index: number) => {
-    const savedSearch = savedSearches[index];
-    setSearchTerm(savedSearch.filters.searchTerm || "");
-    setIndustryFilter(savedSearch.filters.industryFilter || "");
-    setJobFunctionFilter(savedSearch.filters.jobFunctionFilter || "");
-    setRoleLevelFilter(savedSearch.filters.roleLevelFilter || "");
-    setDateFilter(savedSearch.filters.dateFilter || "");
-
-    // Apply the search immediately
-    setTimeout(applySearch, 0);
-  };
+  const loadSavedSearch = useCallback(
+    (index: number) => {
+      const savedSearch = savedSearches[index];
+      setSearchTerm(savedSearch.filters.searchTerm || "");
+      setIndustryFilter(savedSearch.filters.industryFilter || "");
+      setJobFunctionFilter(savedSearch.filters.jobFunctionFilter || "");
+      setRoleLevelFilter(savedSearch.filters.roleLevelFilter || "");
+      setDateFilter(savedSearch.filters.dateFilter || "");
+      // No need to call applySearch directly as the useEffect will handle it
+    },
+    [savedSearches]
+  );
 
   // Delete a saved search
-  const deleteSavedSearch = (index: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering the parent onClick
-    const updatedSearches = [...savedSearches];
-    updatedSearches.splice(index, 1);
-    setSavedSearches(updatedSearches);
-  };
+  const deleteSavedSearch = useCallback(
+    (index: number, e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent triggering the parent onClick
+      const updatedSearches = [...savedSearches];
+      updatedSearches.splice(index, 1);
+      setSavedSearches(updatedSearches);
+    },
+    [savedSearches]
+  );
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-background">
@@ -287,17 +312,13 @@ export default function FrameworkSearch({
       {/* Action buttons */}
       <div className="flex flex-wrap gap-2 justify-between">
         <div className="flex flex-wrap gap-2">
-          <Button onClick={applySearch} className="flex items-center">
-            <Search className="mr-2 h-4 w-4" />
-            Search
-          </Button>
           <Button
             variant="outline"
             onClick={clearFilters}
             className="flex items-center"
           >
             <X className="mr-2 h-4 w-4" />
-            Clear
+            Clear Filters
           </Button>
         </div>
         <Button
