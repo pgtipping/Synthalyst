@@ -67,6 +67,10 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Fixed Vercel deployment issue by adding missing dependencies (file-saver and xlsx)
+- Implemented print-friendly view for competency frameworks
+- Added search functionality for saved frameworks with filtering options
+- Added saved search feature for frequent queries
 - Enhanced competency manager with user feedback mechanisms
 - Added analytics dashboard for framework ratings
 - Created Top AI-Generated Frameworks showcase
@@ -78,12 +82,11 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Next Steps
 
-1. Complete any remaining standalone features for the competency manager
-   - Implement print-friendly view for competency frameworks
-   - Add search functionality for saved frameworks
-2. Move on to enhancing the JD Developer tool according to the standalone-first strategy
-3. Implement the Interview Questions Generator enhancements
-4. Develop the Training Plan Creator improvements
+1. Complete integration of the print-friendly view and search functionality into the main page
+2. Test the new features thoroughly
+3. Move on to enhancing the JD Developer tool according to the standalone-first strategy
+4. Implement the Interview Questions Generator enhancements
+5. Develop the Training Plan Creator improvements
 
 ## Active Decisions
 

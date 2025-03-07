@@ -28,6 +28,10 @@
 
 ## Recent Achievements
 
+- Fixed Vercel deployment issue by adding missing dependencies (file-saver and xlsx)
+- Implemented print-friendly view for competency frameworks
+- Added search functionality for saved frameworks with filtering options
+- Added saved search feature for frequent queries
 - Enhanced Competency Manager with user feedback mechanisms
 - Added analytics dashboard for framework ratings
 - Created Top AI-Generated Frameworks showcase
@@ -43,8 +47,7 @@
 
 ## Known Issues
 
-- Print-friendly view for competency frameworks not yet implemented
-- Search functionality for saved frameworks not yet implemented
+- Integration of print-friendly view and search functionality into the main page not yet complete
 - NextAuth debug warnings in development environment
 - Need to implement rate limiting for unauthenticated users
 - Consider caching for repeated plan requests
@@ -57,7 +60,7 @@
 
 ## Current Status
 
-- Competency Manager is nearly complete with core functionality, visualization options, management features, export/sharing options, premium teasers, and user feedback mechanisms
+- Competency Manager is nearly complete with core functionality, visualization options, management features, export/sharing options, premium teasers, user feedback mechanisms, print-friendly view, and search functionality
 - Training plan generation is fully functional
 - Authentication removed where not necessary
 - Model fallback system working as expected
@@ -73,8 +76,8 @@
 
 ## In Progress
 
-- Print-friendly view for competency frameworks
-- Search functionality for saved frameworks
+- Integration of print-friendly view and search functionality into the main page
+- Testing of new features
 - Design of the competency data layer
 - Organizational reference data schema and management
 - Competency extraction and standardization service design
