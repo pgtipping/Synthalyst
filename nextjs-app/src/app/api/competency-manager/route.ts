@@ -89,6 +89,14 @@ export async function POST(request: Request) {
     await writer.close();
   };
 
+  // Helper function to handle errors in streaming mode
+  const streamError = async (errorMessage: string) => {
+    await writer.write(
+      encoder.encode(`data: ${JSON.stringify({ error: errorMessage })}\n\n`)
+    );
+    await writer.close();
+  };
+
   // Check if client supports streaming
   const acceptHeader = request.headers.get("accept") || "";
   const wantsStream = acceptHeader.includes("text/event-stream");
@@ -97,10 +105,21 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      if (wantsStream) {
+        await streamError("Authentication required");
+        return new Response(streamController.readable, {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
+        });
+      } else {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 }
+        );
+      }
     }
 
     const {
@@ -130,7 +149,9 @@ export async function POST(request: Request) {
       });
 
       // Process continues asynchronously after returning the response
-      streamUpdate("Starting framework generation process...");
+      streamUpdate("Starting framework generation process...").catch(
+        console.error
+      );
 
       // Create a cache key based on common parameters
       const cacheKey = `${industry}|${jobFunction}|${roleLevel}|${numberOfCompetencies}|${numberOfLevels}`;
@@ -138,10 +159,19 @@ export async function POST(request: Request) {
       // Check if we have a cached framework for these parameters
       const cachedFramework = getFrameworkFromCache(cacheKey);
       if (cachedFramework) {
-        await streamUpdate("Found cached framework, returning immediately.");
-        await streamResult(cachedFramework);
+        await streamUpdate(
+          "Found cached framework, returning immediately."
+        ).catch(console.error);
+        await streamResult(cachedFramework).catch(console.error);
         return response;
       }
+
+      // Set a timeout for the LLM generation
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("LLM generation timed out"));
+        }, 40000); // 40 seconds timeout
+      });
 
       // Construct additional context based on optional fields
       let additionalContext = "";
@@ -168,7 +198,9 @@ export async function POST(request: Request) {
         additionalContext += `Build upon or complement these existing competencies: ${existingCompetencies}\n`;
       }
 
-      await streamUpdate("Analyzing industry and role requirements...");
+      await streamUpdate("Analyzing industry and role requirements...").catch(
+        console.error
+      );
 
       const prompt = `
       You are an expert in competency framework development with deep knowledge of skills and behaviors across industries and roles.
@@ -224,7 +256,7 @@ export async function POST(request: Request) {
 
       await streamUpdate(
         "Generating framework structure and core competencies..."
-      );
+      ).catch(console.error);
 
       // Use Gemini 2.0 Flash as primary LLM
       let competencyFramework;
@@ -243,14 +275,17 @@ export async function POST(request: Request) {
 
         await streamUpdate(
           "Building competency levels and behavioral indicators..."
-        );
+        ).catch(console.error);
 
-        // Generate content
-        const result = await model.generateContent(prompt);
+        // Generate content with timeout
+        const generatePromise = model.generateContent(prompt);
+        const result = await Promise.race([generatePromise, timeoutPromise]);
         const response = await result.response;
         const text = response.text();
 
-        await streamUpdate("Finalizing framework details...");
+        await streamUpdate("Finalizing framework details...").catch(
+          console.error
+        );
 
         try {
           competencyFramework = JSON.parse(text);
@@ -259,33 +294,38 @@ export async function POST(request: Request) {
           console.log("Raw Gemini response:", text);
           await streamUpdate(
             "Error parsing AI response, trying backup model..."
-          );
+          ).catch(console.error);
           throw new Error("Failed to parse Gemini response");
         }
       } catch (error) {
         console.error("Gemini API error:", error);
 
-        await streamUpdate("Using alternative AI model for generation...");
+        await streamUpdate(
+          "Using alternative AI model for generation..."
+        ).catch(console.error);
 
         // Fallback to Groq LLama model if Gemini fails
         try {
-          const completion = await groq.chat.completions.create({
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are an expert in competency framework development and talent management. You must return only valid JSON without any markdown formatting or explanation.",
-              },
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-            model: "llama-3.2-3b-preview",
-            temperature: 0.7,
-            max_tokens: 4000,
-            response_format: { type: "json_object" },
-          });
+          const completion = await Promise.race([
+            groq.chat.completions.create({
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You are an expert in competency framework development and talent management. You must return only valid JSON without any markdown formatting or explanation.",
+                },
+                {
+                  role: "user",
+                  content: prompt,
+                },
+              ],
+              model: "llama-3.2-3b-preview",
+              temperature: 0.7,
+              max_tokens: 4000,
+              response_format: { type: "json_object" },
+            }),
+            timeoutPromise,
+          ]);
 
           const content = completion.choices[0].message.content;
           try {
@@ -295,7 +335,7 @@ export async function POST(request: Request) {
             console.log("Raw Groq response:", content);
             await streamUpdate(
               "Failed to generate valid framework. Please try again."
-            );
+            ).catch(console.error);
             await writer.close();
             return response;
           }
@@ -303,7 +343,7 @@ export async function POST(request: Request) {
           console.error("Fallback LLM error:", fallbackError);
           await streamUpdate(
             "Failed to generate competency framework. Please try again."
-          );
+          ).catch(console.error);
           await writer.close();
           return response;
         }
@@ -315,8 +355,10 @@ export async function POST(request: Request) {
         timestamp: Date.now(),
       });
 
-      await streamUpdate("Framework generated successfully!");
-      await streamResult(competencyFramework);
+      await streamUpdate("Framework generated successfully!").catch(
+        console.error
+      );
+      await streamResult(competencyFramework).catch(console.error);
       return response;
     } else {
       // Non-streaming response (original implementation)
@@ -328,6 +370,13 @@ export async function POST(request: Request) {
       if (cachedFramework) {
         return NextResponse.json({ framework: cachedFramework });
       }
+
+      // Set a timeout for the LLM generation
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("LLM generation timed out"));
+        }, 40000); // 40 seconds timeout
+      });
 
       // Construct additional context based on optional fields
       let additionalContext = "";
@@ -421,8 +470,9 @@ export async function POST(request: Request) {
           },
         });
 
-        // Generate content
-        const result = await model.generateContent(prompt);
+        // Generate content with timeout
+        const generatePromise = model.generateContent(prompt);
+        const result = await Promise.race([generatePromise, timeoutPromise]);
         const response = await result.response;
         const text = response.text();
 
@@ -438,23 +488,26 @@ export async function POST(request: Request) {
 
         // Fallback to Groq LLama model if Gemini fails
         try {
-          const completion = await groq.chat.completions.create({
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are an expert in competency framework development and talent management. You must return only valid JSON without any markdown formatting or explanation.",
-              },
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-            model: "llama-3.2-3b-preview",
-            temperature: 0.7,
-            max_tokens: 4000,
-            response_format: { type: "json_object" },
-          });
+          const completion = await Promise.race([
+            groq.chat.completions.create({
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You are an expert in competency framework development and talent management. You must return only valid JSON without any markdown formatting or explanation.",
+                },
+                {
+                  role: "user",
+                  content: prompt,
+                },
+              ],
+              model: "llama-3.2-3b-preview",
+              temperature: 0.7,
+              max_tokens: 4000,
+              response_format: { type: "json_object" },
+            }),
+            timeoutPromise,
+          ]);
 
           const content = completion.choices[0].message.content;
           try {
@@ -490,8 +543,9 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("API error:", error);
     if (wantsStream) {
-      await streamUpdate("An error occurred. Please try again later.");
-      await writer.close();
+      await streamError("An error occurred. Please try again later.").catch(
+        console.error
+      );
       return new Response(streamController.readable, {
         headers: {
           "Content-Type": "text/event-stream",
