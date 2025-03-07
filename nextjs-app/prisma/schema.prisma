@@ -71,6 +71,7 @@ model User {
   trainingPlans   TrainingPlan[]
   preferences     UserPreferences?
   competencyMatrices CompetencyMatrix[]
+  frameworkFeedback CompetencyFrameworkFeedback[]
 }
 
 model Profile {
@@ -298,8 +299,11 @@ model CompetencyFramework {
   userId      String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  averageRating Float?     // New field for average rating
+  feedbackCount Int        @default(0) // New field for feedback count
   user        User         @relation(fields: [userId], references: [id])
   competencies Competency[]
+  feedback    CompetencyFrameworkFeedback[] // New relation to feedback
   // New field for industry reference
   industryId  String?
   industryRef Industry?    @relation(fields: [industryId], references: [id])
@@ -557,4 +561,23 @@ model ContactSubmissionReply {
 
   @@index([submissionId])
   @@index([sentAt])
+}
+
+// New model for competency framework feedback
+model CompetencyFrameworkFeedback {
+  id                      String       @id @default(cuid())
+  rating                  Int          // 1-5 star rating
+  feedback                String       @db.Text // Optional feedback text
+  isPublic                Boolean      @default(true) // Whether the feedback is public
+  llmQualityFeedback      String?      // "good" or "needs_improvement"
+  llmImprovementSuggestion String      @db.Text // Suggestions for improving the LLM
+  frameworkId             String
+  userId                  String?      // Optional user ID (can be anonymous)
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+  framework               CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  user                    User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([frameworkId])
+  @@index([userId])
 }
