@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileQuestion, Briefcase, GraduationCap, Grid3X3 } from "lucide-react";
+import Link from "next/link";
 
 export default function PremiumFeatureTeasers() {
   // This would be determined by user subscription status
@@ -144,7 +145,7 @@ export default function PremiumFeatureTeasers() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
               <CardTitle className="text-base">
-                Create Competency Matrix
+                Use in Competency Matrix
               </CardTitle>
               <Badge
                 variant="outline"
@@ -154,7 +155,7 @@ export default function PremiumFeatureTeasers() {
               </Badge>
             </div>
             <CardDescription>
-              Build role-based competency matrices for your organization
+              Add this framework to your organization's competency matrix
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-2">
@@ -167,11 +168,12 @@ export default function PremiumFeatureTeasers() {
           </CardContent>
           <CardFooter>
             <Button
+              asChild
               variant="outline"
               className="w-full"
               disabled={!isPremiumUser}
             >
-              Create Competency Matrix
+              <Link href="/competency-matrix">Open Competency Matrix</Link>
             </Button>
           </CardFooter>
         </Card>
@@ -187,7 +189,7 @@ export default function PremiumFeatureTeasers() {
             <li>• Extract competencies directly from job descriptions</li>
             <li>• Generate interview questions based on competencies</li>
             <li>• Create training plans to develop competencies</li>
-            <li>• Build organization-wide competency matrices</li>
+            <li>• Use frameworks in your organization's competency matrix</li>
             <li>• Share frameworks with your team</li>
           </ul>
           <Button

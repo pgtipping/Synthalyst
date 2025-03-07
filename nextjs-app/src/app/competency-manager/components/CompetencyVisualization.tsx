@@ -1,7 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Competency } from "../types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PieChart, BarChart, RadarIcon, Grid3X3 } from "lucide-react";
+
+// Define the types locally if the import is not working
+interface CompetencyLevel {
+  id?: string;
+  name: string;
+  description: string;
+  levelOrder: number;
+  behavioralIndicators: string[];
+  developmentSuggestions: string[];
+  competencyId?: string;
+}
+
+interface Competency {
+  id?: string;
+  name: string;
+  description: string;
+  businessImpact: string;
+  type: string;
+  levels: CompetencyLevel[];
+  frameworkId?: string;
+  categoryId?: string;
+  industryId?: string;
+}
 
 interface CompetencyVisualizationProps {
   competencies: Competency[];
@@ -11,7 +35,7 @@ export default function CompetencyVisualization({
   competencies,
 }: CompetencyVisualizationProps) {
   const [visualizationType, setVisualizationType] = useState<
-    "radar" | "heatmap" | "matrix"
+    "radar" | "heatmap" | "distribution" | "levels"
   >("radar");
 
   // Group competencies by type
@@ -101,11 +125,9 @@ export default function CompetencyVisualization({
                     y={labelY}
                     textAnchor={textAnchor}
                     dominantBaseline="middle"
-                    fontSize="12"
-                    fontWeight="500"
-                    fill="#4b5563"
+                    className="text-xs font-medium fill-gray-700"
                   >
-                    {point.name}
+                    {competencies[i].name}
                   </text>
                 </g>
               );
@@ -117,155 +139,304 @@ export default function CompetencyVisualization({
   };
 
   const renderHeatmap = () => {
+    // Group competencies by type
+    const groupedCompetencies: Record<string, Competency[]> = {};
+    competencyTypes.forEach((type) => {
+      groupedCompetencies[type] = competencies.filter(
+        (comp) => comp.type === type
+      );
+    });
+
     return (
       <div className="mt-6">
         <h3 className="text-lg font-medium mb-4">Competency Heatmap</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Competency
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                {Array.from({ length: 5 }, (_, i) => (
-                  <th
-                    key={i}
-                    className="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Level {i + 1}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {competencies.map((comp, i) => {
-                return (
-                  <tr key={i}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {comp.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {comp.type}
-                    </td>
-                    {Array.from({ length: 5 }, (_, j) => {
-                      const level = comp.levels.find(
-                        (l) => l.levelOrder === j + 1
-                      );
-                      return (
-                        <td
-                          key={j}
-                          className="px-6 py-4 whitespace-nowrap text-sm text-center"
-                          style={{
-                            backgroundColor: level
-                              ? getColorForLevel(j + 1, 5)
-                              : "#f9fafb",
-                          }}
-                        >
-                          {level ? level.name : "-"}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="space-y-6">
+          {Object.entries(groupedCompetencies).map(([type, comps]) => (
+            <div key={type} className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3">{type} Competencies</h4>
+              <div className="grid grid-cols-1 gap-3">
+                {comps.map((comp) => {
+                  const maxLevel = Math.max(
+                    ...comp.levels.map((l: CompetencyLevel) => l.levelOrder)
+                  );
+                  return (
+                    <div key={comp.name} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">{comp.name}</span>
+                        <span className="text-xs text-gray-500">
+                          {comp.levels.length} levels
+                        </span>
+                      </div>
+                      <div className="flex h-8 rounded-md overflow-hidden">
+                        {comp.levels
+                          .sort(
+                            (a: CompetencyLevel, b: CompetencyLevel) =>
+                              a.levelOrder - b.levelOrder
+                          )
+                          .map((level: CompetencyLevel) => (
+                            <div
+                              key={level.name}
+                              className="flex-1 flex items-center justify-center text-xs text-white font-medium"
+                              style={{
+                                backgroundColor: getColorForLevel(
+                                  level.levelOrder,
+                                  maxLevel
+                                ),
+                              }}
+                              title={`${level.name}: ${level.description}`}
+                            >
+                              {level.levelOrder}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
   };
 
-  const renderCompetencyMatrix = () => {
+  const renderDistribution = () => {
+    // Count competencies by type
+    const typeCounts: Record<string, number> = {};
+    competencyTypes.forEach((type) => {
+      typeCounts[type] = competencies.filter(
+        (comp) => comp.type === type
+      ).length;
+    });
+
+    // Calculate percentages
+    const total = competencies.length;
+    const typePercentages = Object.entries(typeCounts).map(([type, count]) => ({
+      type,
+      count,
+      percentage: Math.round((count / total) * 100),
+    }));
+
+    // Sort by count (descending)
+    typePercentages.sort((a, b) => b.count - a.count);
+
+    // Chart dimensions
+    const width = 400;
+    const height = 300;
+    const barHeight = 40;
+    const barGap = 20;
+    const maxBarWidth = width - 150;
+
     return (
-      <div className="mt-6">
-        <h3 className="text-lg font-medium mb-4">Competency Matrix by Type</h3>
-        {competencyTypes.map((type) => {
-          const typeCompetencies = competencies.filter(
-            (comp) => comp.type === type
-          );
-          return (
-            <div key={type} className="mb-8">
-              <h4 className="text-md font-medium mb-3">{type}</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {typeCompetencies.map((comp, i) => (
-                  <div
-                    key={i}
-                    className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+      <div className="flex flex-col items-center mt-6">
+        <h3 className="text-lg font-medium mb-4">
+          Competency Type Distribution
+        </h3>
+        <div className="relative" style={{ width, height }}>
+          <svg width={width} height={height}>
+            {typePercentages.map((item, i) => {
+              const barWidth = (item.count / total) * maxBarWidth;
+              const y = i * (barHeight + barGap) + 10;
+
+              return (
+                <g key={item.type}>
+                  {/* Bar */}
+                  <rect
+                    x={100}
+                    y={y}
+                    width={barWidth}
+                    height={barHeight}
+                    rx={4}
+                    fill="#3b82f6"
+                    opacity={0.7 + (0.3 * i) / typePercentages.length}
+                  />
+
+                  {/* Type label */}
+                  <text
+                    x={95}
+                    y={y + barHeight / 2}
+                    textAnchor="end"
+                    dominantBaseline="middle"
+                    className="text-sm font-medium fill-gray-700"
                   >
-                    <h5 className="font-semibold mb-2">{comp.name}</h5>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {comp.description}
-                    </p>
-                    <div className="space-y-1">
-                      {comp.levels.map((level, j) => (
-                        <div
-                          key={j}
-                          className="text-xs py-1 px-2 rounded"
-                          style={{
-                            backgroundColor: getColorForLevel(
-                              level.levelOrder,
-                              comp.levels.length
-                            ),
-                          }}
-                        >
-                          {level.name}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
+                    {item.type}
+                  </text>
+
+                  {/* Count and percentage */}
+                  <text
+                    x={barWidth + 110}
+                    y={y + barHeight / 2}
+                    dominantBaseline="middle"
+                    className="text-sm fill-gray-700"
+                  >
+                    {item.count} ({item.percentage}%)
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+    );
+  };
+
+  const renderLevelDistribution = () => {
+    // Get all unique level names across all competencies
+    const allLevels = new Set<string>();
+    competencies.forEach((comp) => {
+      comp.levels.forEach((level: CompetencyLevel) => {
+        allLevels.add(level.name);
+      });
+    });
+
+    // Sort levels by typical order
+    const commonLevelOrder = [
+      "Novice",
+      "Beginner",
+      "Basic",
+      "Foundational",
+      "Intermediate",
+      "Proficient",
+      "Advanced",
+      "Expert",
+      "Master",
+    ];
+
+    const sortedLevels = Array.from(allLevels).sort((a, b) => {
+      const aIndex = commonLevelOrder.findIndex((level) =>
+        a.toLowerCase().includes(level.toLowerCase())
+      );
+      const bIndex = commonLevelOrder.findIndex((level) =>
+        b.toLowerCase().includes(level.toLowerCase())
+      );
+
+      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      return a.localeCompare(b);
+    });
+
+    // Count competencies for each level
+    const levelCounts: Record<string, number> = {};
+    sortedLevels.forEach((level) => {
+      levelCounts[level] = 0;
+      competencies.forEach((comp) => {
+        if (comp.levels.some((l) => l.name === level)) {
+          levelCounts[level]++;
+        }
+      });
+    });
+
+    // Chart dimensions
+    const width = 400;
+    const height = 300;
+    const barWidth = 40;
+    const barGap = 20;
+    const maxBarHeight = height - 80;
+
+    return (
+      <div className="flex flex-col items-center mt-6">
+        <h3 className="text-lg font-medium mb-4">Level Distribution</h3>
+        <div className="relative" style={{ width, height }}>
+          <svg width={width} height={height}>
+            {/* X-axis */}
+            <line
+              x1={50}
+              y1={height - 40}
+              x2={width - 20}
+              y2={height - 40}
+              stroke="#e5e7eb"
+              strokeWidth="1"
+            />
+
+            {Object.entries(levelCounts).map(([level, count], i) => {
+              const x = i * (barWidth + barGap) + 70;
+              const barHeight = (count / competencies.length) * maxBarHeight;
+              const y = height - 40 - barHeight;
+
+              return (
+                <g key={level}>
+                  {/* Bar */}
+                  <rect
+                    x={x}
+                    y={y}
+                    width={barWidth}
+                    height={barHeight}
+                    rx={4}
+                    fill="#3b82f6"
+                    opacity={0.6 + (0.4 * i) / Object.keys(levelCounts).length}
+                  />
+
+                  {/* Level label */}
+                  <text
+                    x={x + barWidth / 2}
+                    y={height - 25}
+                    textAnchor="middle"
+                    className="text-xs fill-gray-700"
+                  >
+                    {level}
+                  </text>
+
+                  {/* Count */}
+                  <text
+                    x={x + barWidth / 2}
+                    y={y - 5}
+                    textAnchor="middle"
+                    className="text-xs fill-gray-700"
+                  >
+                    {count}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="bg-white shadow sm:rounded-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Competency Visualization</h2>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setVisualizationType("radar")}
-            className={`px-3 py-1 text-sm rounded ${
-              visualizationType === "radar"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Radar Chart
-          </button>
-          <button
-            onClick={() => setVisualizationType("heatmap")}
-            className={`px-3 py-1 text-sm rounded ${
-              visualizationType === "heatmap"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Heatmap
-          </button>
-          <button
-            onClick={() => setVisualizationType("matrix")}
-            className={`px-3 py-1 text-sm rounded ${
-              visualizationType === "matrix"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Matrix
-          </button>
-        </div>
-      </div>
-
-      {visualizationType === "radar" && renderRadarChart()}
-      {visualizationType === "heatmap" && renderHeatmap()}
-      {visualizationType === "matrix" && renderCompetencyMatrix()}
+    <div className="w-full">
+      <Tabs
+        defaultValue="radar"
+        value={visualizationType}
+        onValueChange={(value) =>
+          setVisualizationType(
+            value as "radar" | "heatmap" | "distribution" | "levels"
+          )
+        }
+      >
+        <TabsList className="grid grid-cols-4 mb-4">
+          <TabsTrigger value="radar" className="flex items-center">
+            <RadarIcon className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Radar</span>
+          </TabsTrigger>
+          <TabsTrigger value="heatmap" className="flex items-center">
+            <Grid3X3 className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Heatmap</span>
+          </TabsTrigger>
+          <TabsTrigger value="distribution" className="flex items-center">
+            <PieChart className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Types</span>
+          </TabsTrigger>
+          <TabsTrigger value="levels" className="flex items-center">
+            <BarChart className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Levels</span>
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="radar" className="mt-0">
+          {renderRadarChart()}
+        </TabsContent>
+        <TabsContent value="heatmap" className="mt-0">
+          {renderHeatmap()}
+        </TabsContent>
+        <TabsContent value="distribution" className="mt-0">
+          {renderDistribution()}
+        </TabsContent>
+        <TabsContent value="levels" className="mt-0">
+          {renderLevelDistribution()}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
