@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Groq } from "groq-sdk";
+
+// Initialize Gemini client
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 // Initialize Groq client
 const groq = new Groq({
@@ -136,33 +139,32 @@ export async function POST(request: Request) {
     `;
 
     // Use Gemini 2.0 Flash as primary LLM
-    let response;
+    let competencyFramework;
     try {
-      response = await axios.post(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
-        {
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: prompt }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 4000,
-            topP: 0.95,
-            topK: 40,
-          },
-          // Request JSON response format
-          responseFormat: "JSON",
+      // Get the Gemini model
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.95,
+          topK: 40,
+          maxOutputTokens: 4000,
+          responseMimeType: "application/json",
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": process.env.GEMINI_API_KEY || "",
-          },
-        }
-      );
+      });
+
+      // Generate content
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      try {
+        competencyFramework = JSON.parse(text);
+      } catch (parseError) {
+        console.error("Error parsing Gemini response:", parseError);
+        console.log("Raw Gemini response:", text);
+        throw new Error("Failed to parse Gemini response");
+      }
     } catch (error) {
       console.error("Gemini API error:", error);
 
@@ -186,17 +188,19 @@ export async function POST(request: Request) {
           response_format: { type: "json_object" },
         });
 
-        response = {
-          data: {
-            choices: [
-              {
-                message: {
-                  content: completion.choices[0].message.content,
-                },
-              },
-            ],
-          },
-        };
+        const content = completion.choices[0].message.content;
+        try {
+          competencyFramework = JSON.parse(content);
+        } catch (parseError) {
+          console.error("Error parsing Groq response:", parseError);
+          console.log("Raw Groq response:", content);
+          return NextResponse.json(
+            {
+              error: "Failed to parse competency framework from Groq response",
+            },
+            { status: 500 }
+          );
+        }
       } catch (groqError) {
         console.error("Competency framework generation error:", groqError);
         return NextResponse.json(
@@ -204,30 +208,6 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-    }
-
-    // Parse the response based on which API was used
-    let competencyFramework;
-
-    try {
-      if (response.data.candidates) {
-        // Gemini response format
-        const content = response.data.candidates[0].content.parts[0].text;
-        competencyFramework = JSON.parse(content);
-      } else if (response.data.choices) {
-        // Groq response format
-        const content = response.data.choices[0].message.content;
-        competencyFramework = JSON.parse(content);
-      } else {
-        throw new Error("Unexpected API response format");
-      }
-    } catch (parseError) {
-      console.error("Error parsing LLM response:", parseError);
-      console.log("Raw response:", JSON.stringify(response.data));
-      return NextResponse.json(
-        { error: "Failed to parse competency framework from LLM response" },
-        { status: 500 }
-      );
     }
 
     // Return the generated framework without saving to database

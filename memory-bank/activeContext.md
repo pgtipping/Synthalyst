@@ -67,6 +67,14 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Implemented proper SDK usage for LLM APIs in Competency Manager (2025-03-07)
+
+  - Replaced direct axios calls with official Google Generative AI SDK
+  - Updated to use the latest Gemini 1.5 Flash model
+  - Properly configured response format using responseMimeType parameter
+  - Improved error handling with specific error messages for each API
+  - Simplified code by leveraging SDK features and removing redundant parsing logic
+
 - Simplified JSON handling in Competency Manager (2025-03-07)
 
   - Removed complex JSON cleaning function in favor of built-in LLM capabilities
