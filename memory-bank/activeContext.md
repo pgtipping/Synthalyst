@@ -67,6 +67,13 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Fixed form context error in UI components (2025-03-07)
+
+  - Added null check for form context in useFormField hook
+  - Improved error message to indicate that the hook must be used within a FormProvider
+  - Prevented "Cannot destructure property 'getFieldState' of null" runtime error
+  - Enhanced component stability for form-related UI elements
+
 - Implemented proper SDK usage for LLM APIs in Competency Manager (2025-03-07)
 
   - Replaced direct axios calls with official Google Generative AI SDK
