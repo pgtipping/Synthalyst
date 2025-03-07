@@ -25,7 +25,10 @@
     "logs": "./scripts/check-vercel-logs.sh",
     "signup-logs": "./scripts/check-signup-errors.sh",
     "apply-migrations": "node --experimental-modules scripts/apply-prod-migrations.mjs",
-    "process-mdx": "ts-node scripts/process-mdx-posts.ts"
+    "process-mdx": "ts-node scripts/process-mdx-posts.ts",
+    "create-variant": "node scripts/create-variant.js",
+    "migrate-components": "node scripts/migrate-components.js",
+    "component-audit": "node scripts/component-audit.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
