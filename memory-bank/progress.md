@@ -28,6 +28,11 @@
 
 ## Recent Achievements
 
+- Fixed API errors in Competency Manager
+  - Corrected Gemini API key environment variable reference from GOOGLE_API_KEY to GEMINI_API_KEY
+  - Replaced direct axios calls to Groq API with the Groq SDK for better error handling and consistency
+  - Added proper error handling for API failures to prevent cascading errors
+  - Ensured consistent API integration patterns across the application
 - Completed integration of print-friendly view and search functionality in Competency Manager
   - Created a dedicated "Framework Actions" section with organized print, export, share, and premium features
   - Made the search functionality always visible in the saved frameworks tab for better discoverability

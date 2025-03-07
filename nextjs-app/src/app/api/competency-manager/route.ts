@@ -3,6 +3,12 @@ import axios from "axios";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { Groq } from "groq-sdk";
+
+// Initialize Groq client
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 interface CompetencyLevel {
   name: string;
@@ -149,7 +155,7 @@ export async function POST(request: Request) {
         {
           headers: {
             "Content-Type": "application/json",
-            "x-goog-api-key": process.env.GOOGLE_API_KEY || "",
+            "x-goog-api-key": process.env.GEMINI_API_KEY || "",
           },
         }
       );
@@ -157,10 +163,8 @@ export async function POST(request: Request) {
       console.error("Gemini API error:", error);
 
       // Fallback to Groq LLama model if Gemini fails
-      response = await axios.post(
-        "https://api.groq.com/v1/chat/completions",
-        {
-          model: "llama-3.2-3b-preview",
+      try {
+        const completion = await groq.chat.completions.create({
           messages: [
             {
               role: "system",
@@ -172,16 +176,29 @@ export async function POST(request: Request) {
               content: prompt,
             },
           ],
-          max_tokens: 4000,
+          model: "llama-3.2-3b-preview",
           temperature: 0.7,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-            "Content-Type": "application/json",
+          max_tokens: 4000,
+        });
+
+        response = {
+          data: {
+            choices: [
+              {
+                message: {
+                  content: completion.choices[0].message.content,
+                },
+              },
+            ],
           },
-        }
-      );
+        };
+      } catch (groqError) {
+        console.error("Competency framework generation error:", groqError);
+        return NextResponse.json(
+          { error: "Failed to generate competency framework" },
+          { status: 500 }
+        );
+      }
     }
 
     // Parse the response based on which API was used

@@ -67,41 +67,71 @@ The Competency Manager feature is nearly complete with the following components 
 
 ## Recent Changes
 
+- Fixed API errors in Competency Manager (2025-03-07)
+
+  - Corrected Gemini API key environment variable reference from GOOGLE_API_KEY to GEMINI_API_KEY
+  - Replaced direct axios calls to Groq API with the Groq SDK for better error handling and consistency
+  - Added proper error handling for API failures to prevent cascading errors
+  - Ensured consistent API integration patterns across the application
+
 - Fixed chunk loading error in the application (2025-03-07)
+
   - Updated Next.js webpack configuration to optimize chunk loading
   - Added error handling in ClientLayout component to gracefully handle chunk loading errors
   - Implemented automatic page reload for recovery from chunk loading errors
   - Optimized bundle splitting for better performance
+
 - Enhanced Competency Manager form with progressive disclosure and improved help system (2025-03-07)
+
   - Implemented true progressive disclosure by adding a collapsible section for optional fields
   - Added comprehensive tooltips to all form fields with detailed guidance
   - Improved the organization of the form to reduce initial complexity
   - Maintained all "Other" options in dropdowns for custom input
+
 - Implemented framework generator form in the Competency Manager (2025-03-07)
+
   - Connected the generator form to the main page UI
   - Added all form fields with proper validation and styling
   - Implemented industry-specific competency suggestions
   - Created a seamless workflow between form submission and framework display
+
 - Completed integration of print-friendly view and search functionality in Competency Manager (2025-03-07)
+
   - Created a dedicated "Framework Actions" section with organized print, export, share, and premium features
   - Made the search functionality always visible in the saved frameworks tab for better discoverability
   - Improved the UI organization and user experience
+
 - Fixed SharingOptions component in Competency Manager by implementing the missing onUpdatePublicStatus function (2025-03-07)
+
 - Fixed Vercel deployment issues:
+
   - Corrected authOptions import path in competency-manager frameworks API route (2025-03-07)
   - Fixed type error in feedback route by using type assertion for rating values (2025-03-07)
+
 - Enhanced framework search to show results in real-time as the user types
+
 - Fixed Vercel deployment issue by adding missing dependencies (file-saver and xlsx)
+
 - Implemented print-friendly view for competency frameworks
+
 - Added search functionality for saved frameworks with filtering options
+
 - Added saved search feature for frequent queries
+
 - Enhanced competency manager with user feedback mechanisms
+
 - Added analytics dashboard for framework ratings
+
 - Created Top AI-Generated Frameworks showcase
+
 - Implemented visualization components with responsive design
+
 - Added export options for competency frameworks (JSON, PDF, CSV)
+
 - Implemented sharing options for competency frameworks
+
 - Fixed Next.js 15 compatibility issues in API routes
+
 - Enhanced competency manager with industry-specific competency suggestions
 
 ## Next Steps
