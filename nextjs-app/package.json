@@ -19,6 +19,7 @@
     "test-signup-direct": "ts-node scripts/test-signup-direct.ts",
     "test-signup-api-local": "ts-node scripts/test-signup-api-local.ts",
     "test-prod-signup-api-direct": "ts-node scripts/test-prod-signup-api-direct.ts",
+    "assign-admin": "ts-node src/scripts/assign-admin-role.ts",
     "deploy": "./scripts/deploy-with-logging.sh",
     "logs": "./scripts/check-vercel-logs.sh",
     "signup-logs": "./scripts/check-signup-errors.sh",
