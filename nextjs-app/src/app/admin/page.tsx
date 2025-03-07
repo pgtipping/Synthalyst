@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { MessageSquare, AlertCircle } from "lucide-react";
+import { MessageSquare, AlertCircle, Users } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | Synthalyst",
@@ -27,6 +27,12 @@ export default async function AdminPage() {
   // Calculate total unresolved (new + in-progress)
   const unresolvedCount =
     (countsByStatus["new"] || 0) + (countsByStatus["in-progress"] || 0);
+
+  // Get count of users
+  const userCount = await prisma.user.count();
+  const adminCount = await prisma.user.count({
+    where: { role: "ADMIN" },
+  });
 
   return (
     <div className="space-y-6">
@@ -76,6 +82,36 @@ export default async function AdminPage() {
             className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
             View Submissions
+          </Link>
+        </div>
+
+        {/* User Management Card */}
+        <div className="bg-card rounded-lg shadow-sm p-6 border">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-xl font-semibold">User Management</h2>
+            <Users className="h-5 w-5 text-primary" />
+          </div>
+
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Total Users</span>
+              <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                {userCount}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Admins</span>
+              <span className="px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
+                {adminCount}
+              </span>
+            </div>
+          </div>
+
+          <Link
+            href="/admin/users"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Manage Users
           </Link>
         </div>
 
