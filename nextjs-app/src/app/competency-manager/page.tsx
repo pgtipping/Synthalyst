@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/lib/toast-migration";
 
 // Import the new components
 import ExportOptions from "./components/ExportOptions";
@@ -311,11 +312,17 @@ export default function CompetencyManager() {
         setFramework(null);
       }
 
-      alert("Framework deleted successfully!");
+      toast({
+        title: "Success",
+        description: "Framework deleted successfully!",
+      });
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Failed to delete framework"
-      );
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete framework",
+      });
     }
   };
 
@@ -477,11 +484,17 @@ export default function CompetencyManager() {
       setFramework(data.framework);
       setActiveTab("results");
 
-      alert("Framework saved successfully!");
+      toast({
+        title: "Success",
+        description: "Framework saved successfully!",
+      });
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Failed to save framework"
-      );
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to save framework",
+      });
     }
   };
 
@@ -513,13 +526,23 @@ export default function CompetencyManager() {
         throw new Error("Failed to update framework details");
       }
 
+      // Update the framework in state
       setFramework(updatedFramework);
 
-      alert("Framework updated successfully!");
+      // Exit edit mode
+      setEditingFrameworkId(null);
+
+      toast({
+        title: "Success",
+        description: "Framework updated successfully!",
+      });
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Failed to update framework"
-      );
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to update framework",
+      });
     }
   };
 
@@ -1020,12 +1043,18 @@ export default function CompetencyManager() {
       // Update local state
       setFramework((prev) => (prev ? { ...prev, isPublic } : null));
 
-      alert("Framework public status updated successfully!");
+      toast({
+        title: "Success",
+        description: "Framework public status updated successfully!",
+      });
     } catch (error) {
       console.error("Error updating public status:", error);
-      alert(
-        "Failed to update framework public status. Please try again later."
-      );
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          "Failed to update framework public status. Please try again later.",
+      });
     }
   };
 

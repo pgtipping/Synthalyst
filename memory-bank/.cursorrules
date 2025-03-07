@@ -3026,3 +3026,31 @@ export default async function handler(req: NextRequest) {
   - Creating a natural, conversational interface for task management
 
 // ... existing code ...
+
+# Toast Notification Pattern - 2024-05-28 12:30:00
+
+- Always use toast notifications instead of browser alerts for user feedback
+- Import toast from the toast migration utility: `import { toast } from "@/lib/toast-migration"`
+- Use the following pattern for success notifications:
+  ```typescript
+  toast({
+    title: "Success",
+    description: "Operation completed successfully!",
+  });
+  ```
+- Use the following pattern for error notifications:
+  ```typescript
+  toast({
+    variant: "destructive",
+    title: "Error",
+    description: error instanceof Error ? error.message : "Operation failed",
+  });
+  ```
+- Toast notifications should be used for:
+  - Successful operations (create, update, delete)
+  - Failed operations with appropriate error messages
+  - Important status changes (e.g., public/private status)
+  - Completion of long-running operations
+- Never use browser alerts (`window.alert()`) as they block the UI and provide a poor user experience
+- The Toaster component is already included in the root layout, so no need to add it to individual pages
+- For components that need to display toast notifications, follow the pattern in the Competency Manager

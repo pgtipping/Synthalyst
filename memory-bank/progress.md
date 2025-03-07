@@ -33,6 +33,8 @@
 - Streaming framework generation responses
 - Framework caching for improved performance
 - Next.js updated to the latest version
+- Improved toast notifications for user feedback in Competency Manager
+- Fixed "Save Changes" functionality in framework editing
 
 ## Current Issues
 
@@ -203,6 +205,12 @@
   - Implemented print-friendly view
   - Added feedback mechanism for framework quality
   - Created premium feature teasers and premium page
+- Improved Competency Manager UX with toast notifications (2024-05-28 12:30:00)
+  - Replaced browser alerts with modern toast notifications for better user experience
+  - Fixed the "Save Changes" button functionality to properly exit edit mode after saving
+  - Implemented toast notifications for success and error states in all framework operations
+  - Used the project's toast migration utility to ensure consistent notification styling
+  - Enhanced user feedback for framework operations (save, update, delete, public status change)
 
 ## Known Issues
 
