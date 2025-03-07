@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 // GET a specific framework
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -18,7 +18,8 @@ export async function GET(
       );
     }
 
-    const id = params.id;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
     const framework = await prisma.competencyFramework.findUnique({
       where: {
@@ -61,7 +62,7 @@ export async function GET(
 // PATCH (update) a framework
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -73,7 +74,8 @@ export async function PATCH(
       );
     }
 
-    const id = params.id;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
     const { name, description } = await request.json();
 
     // Check if the framework exists
