@@ -12,6 +12,8 @@
     "test:watch": "dotenv -e .env.test -- jest --watch",
     "test:coverage": "dotenv -e .env.test -- jest --coverage",
     "postinstall": "prisma generate",
+    "migrate": "node scripts/run-migrations.js",
+    "check-db": "node scripts/check-db-connection.js",
     "test-db": "ts-node scripts/test-db-connection.ts",
     "test-prod-db": "ts-node scripts/test-prod-db.ts",
     "test-prod-db-user": "ts-node scripts/test-prod-db-user-query.ts",
