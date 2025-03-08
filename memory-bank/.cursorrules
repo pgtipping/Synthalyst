@@ -1,5 +1,26 @@
 # Project Intelligence - 2024-02-27
 
+## Platform Focus Refinement - 2025-03-08
+
+### Business Tools Focus Pattern - 2025-03-08
+
+- The platform is focused on providing productivity tools and business process enhancements
+- Developer-focused tools like Model Comparison have been removed as they don't align with the platform's purpose
+- Key principles to follow:
+  1. Every tool should directly enhance business productivity or processes
+  2. Tools should be designed for end-users, not developers or AI researchers
+  3. Focus on practical applications rather than technical demonstrations
+  4. Prioritize tools that solve real business problems
+- When evaluating new tools or features, always ask:
+  - "Does this directly help business users accomplish their goals?"
+  - "Is this focused on practical application rather than technical demonstration?"
+  - "Would a typical business user find this valuable?"
+- Common patterns for business tool development:
+  - Design for simplicity and ease of use
+  - Focus on clear, actionable outputs
+  - Prioritize integration with business workflows
+  - Ensure outputs are in business-friendly formats (PDF, Excel, etc.)
+
 ## AI Excellence Focus - 2024-03-08
 
 ### AI Quality First Pattern - 2024-03-08

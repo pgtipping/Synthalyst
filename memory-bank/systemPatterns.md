@@ -1,4 +1,4 @@
-# System Patterns - 2024-03-01
+# System Patterns - 2025-03-08
 
 ## Architecture Overview
 
@@ -56,6 +56,23 @@ nextjs-app/
 │   ├── hooks/             # Custom React hooks
 │   └── middleware.ts      # Global middleware
 ```
+
+## Navigation Structure
+
+### Main Navigation
+
+- **Header Component**: Contains primary navigation links and tools dropdown
+- **Primary Links**: Home, About, Services, Tools, Blog, Contact
+- **Tools Dropdown**: Contains links to productivity and business process tools
+- **Focus**: End-user productivity tools and business process enhancements
+- **Removed**: Developer-focused tools like Model Comparison that don't align with platform purpose
+
+### Tools Organization
+
+- Tools are defined in the Header component's `tools` array
+- Each tool has an icon, title, and href
+- Tools are displayed in both desktop dropdown and mobile menu
+- "View All Tools" link directs to comprehensive tools page
 
 ### Next.js App Router Conventions
 

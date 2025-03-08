@@ -1,4 +1,4 @@
-# Active Context - [2025-03-08 21:30:00]
+# Active Context - [2025-03-08 22:30:00]
 
 ## Current Focus
 
@@ -7,6 +7,20 @@
 - **JD Developer and Training Plan Creator Production Issue Fix**: Fixed a critical issue with the JD Developer and Training Plan Creator features in production related to the crypto module. Added polyfills for Node.js core modules in the browser environment and implemented a custom PDFRenderer component to ensure proper functionality.
 
 - **Competency Manager Enhancement**: Currently focused on completing the standalone competency manager with industry-specific suggestions, visualization options, and improved framework management features. This aligns with our standalone-first strategy by ensuring the tool delivers maximum value without requiring integration with other tools.
+
+- **Platform Focus Refinement**: Removed developer-focused tools that don't align with the platform's core purpose of providing productivity tools and business process enhancements.
+
+- Removed Model Comparison tool (2025-03-08 22:30:00)
+
+  - Removed the Model Comparison entry from the tools array in the Header component
+  - Deleted all Model Comparison related files:
+    - `nextjs-app/src/app/model-comparison/page.tsx`
+    - `nextjs-app/src/app/model-comparison/layout.tsx`
+    - `nextjs-app/src/app/api/model-comparison/route.ts`
+    - `nextjs-app/src/lib/modelComparison.ts`
+    - `nextjs-app/src/types/modelComparison.ts`
+  - Removed unused BarChart2 icon import
+  - Committed changes with message "Remove Model Comparison tool"
 
 - Fixed SHA224 crypto module issue in JD Developer and Training Plan Creator (2025-03-08 21:30:00)
 
