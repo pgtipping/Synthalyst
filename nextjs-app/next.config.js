@@ -8,25 +8,27 @@ const nextConfig = {
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
 
     // Add fallbacks for node modules that aren't available in the browser
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false,
-      crypto: "crypto-browserify",
-      stream: "stream-browserify",
-      buffer: "buffer",
-      util: "util",
-    };
-
-    // Add buffer polyfill
     if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: "crypto-browserify",
+        stream: "stream-browserify",
+        buffer: "buffer",
+        util: "util",
+        http: "stream-http",
+        https: "https-browserify",
+        os: "os-browserify/browser",
+        zlib: "browserify-zlib",
+      };
+
+      // Add buffer and process polyfills
       config.plugins = [
         ...(config.plugins || []),
-        // Add buffer polyfill
         new webpack.ProvidePlugin({
           Buffer: ["buffer", "Buffer"],
         }),
-        // Add process polyfill
         new webpack.ProvidePlugin({
           process: "process/browser",
         }),
