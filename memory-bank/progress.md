@@ -60,6 +60,16 @@
 
 ## Recent Achievements
 
+- Moved utility scripts from root to development directory (2025-03-07 23:30:00)
+
+  - Moved create-variant.js, migrate-components.js, and component-audit.js from root scripts/ to nextjs-app/scripts/
+  - Added script entries to package.json for the utility scripts
+  - Fixed path references in the scripts to work with the new location
+  - Ensured all development activities are focused in the development folder (/nextjs-app)
+  - Improved project organization and adherence to project rules
+  - Fixed linter warnings in the scripts by updating import statements
+  - Maintained script functionality while improving project structure
+
 - Implemented collapsible sections in competency framework display (2025-03-07)
   - Added details/summary elements for each competency
   - Reduced initial page length for better user experience

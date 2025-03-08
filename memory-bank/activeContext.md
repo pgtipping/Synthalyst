@@ -77,6 +77,14 @@ The Competency Manager feature is now complete with the following components imp
 
 ## Recent Changes
 
+- Moved utility scripts from root to development directory (2025-03-07 23:30:00)
+
+  - Moved create-variant.js, migrate-components.js, and component-audit.js from root scripts/ to nextjs-app/scripts/
+  - Added script entries to package.json for the utility scripts
+  - Fixed path references in the scripts to work with the new location
+  - Ensured all development activities are focused in the development folder (/nextjs-app)
+  - Improved project organization and adherence to project rules
+
 - Added missing UI components to Competency Manager (2025-03-07 19:45:30)
 
   - Added Edit button and functionality for saved frameworks
