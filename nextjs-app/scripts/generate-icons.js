@@ -1,99 +1,106 @@
+import sharp from "sharp";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import sharp from "sharp";
 
 // Get the directory name
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Define the icon sizes we need
-const iconSizes = [
-  16, 32, 48, 64, 72, 96, 120, 128, 144, 152, 180, 192, 384, 512,
+// Source logo
+const sourceLogo = path.join(__dirname, "../public/icons/logo-high-res.png");
+
+// Ensure the directories exist
+const iconDirs = [
+  path.join(__dirname, "../public/icons/favicon"),
+  path.join(__dirname, "../public/icons/apple-touch-icon"),
+  path.join(__dirname, "../public/icons/android-chrome"),
 ];
 
-// Define the favicon sizes
-const faviconSizes = [16, 32, 48];
-
-// Define the Apple touch icon sizes
-const appleTouchIconSizes = [57, 60, 72, 76, 114, 120, 144, 152, 180];
-
-// Define the Android icon sizes
-const androidIconSizes = [36, 48, 72, 96, 144, 192, 512];
-
-// Define the Microsoft icon sizes
-const msIconSizes = [70, 144, 150, 310];
-
-// Path to the SVG logo
-const svgLogoPath = path.join(__dirname, "../public/icons/logo.svg");
-
-// Output directory for the icons
-const outputDir = path.join(__dirname, "../public/icons");
-
-// Ensure the output directory exists
-if (!fs.existsSync(outputDir)) {
-  fs.mkdirSync(outputDir, { recursive: true });
-}
-
-// Function to generate PNG icons from SVG
-async function generateIcons() {
-  try {
-    // Read the SVG file
-    const svgBuffer = fs.readFileSync(svgLogoPath);
-
-    // Generate all icon sizes
-    for (const size of iconSizes) {
-      await sharp(svgBuffer)
-        .resize(size, size)
-        .png()
-        .toFile(path.join(outputDir, `icon-${size}x${size}.png`));
-
-      console.log(`Generated icon-${size}x${size}.png`);
-    }
-
-    // Generate favicon.ico (we'll just use the 32x32 PNG for now)
-    await sharp(svgBuffer)
-      .resize(32, 32)
-      .png()
-      .toFile(path.join(outputDir, "../favicon.ico"));
-
-    console.log("Generated favicon.ico");
-
-    // Generate Apple touch icons
-    for (const size of appleTouchIconSizes) {
-      await sharp(svgBuffer)
-        .resize(size, size)
-        .png()
-        .toFile(path.join(outputDir, `apple-touch-icon-${size}x${size}.png`));
-
-      console.log(`Generated apple-touch-icon-${size}x${size}.png`);
-    }
-
-    // Generate Android icons
-    for (const size of androidIconSizes) {
-      await sharp(svgBuffer)
-        .resize(size, size)
-        .png()
-        .toFile(path.join(outputDir, `android-icon-${size}x${size}.png`));
-
-      console.log(`Generated android-icon-${size}x${size}.png`);
-    }
-
-    // Generate Microsoft icons
-    for (const size of msIconSizes) {
-      await sharp(svgBuffer)
-        .resize(size, size)
-        .png()
-        .toFile(path.join(outputDir, `ms-icon-${size}x${size}.png`));
-
-      console.log(`Generated ms-icon-${size}x${size}.png`);
-    }
-
-    console.log("All icons generated successfully!");
-  } catch (error) {
-    console.error("Error generating icons:", error);
+iconDirs.forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
-}
+});
 
-// Run the icon generation
-generateIcons();
+// Generate favicon icons
+const faviconSizes = [16, 32, 48, 64];
+faviconSizes.forEach((size) => {
+  sharp(sourceLogo)
+    .resize(size, size)
+    .toFile(
+      path.join(
+        __dirname,
+        `../public/icons/favicon/favicon-${size}x${size}.png`
+      )
+    )
+    .then(() => console.log(`Generated favicon-${size}x${size}.png`))
+    .catch((err) =>
+      console.error(`Error generating favicon-${size}x${size}.png:`, err)
+    );
+});
+
+// Generate Apple touch icons
+const appleTouchIconSizes = [57, 60, 72, 76, 114, 120, 144, 152, 180];
+appleTouchIconSizes.forEach((size) => {
+  sharp(sourceLogo)
+    .resize(size, size)
+    .toFile(
+      path.join(
+        __dirname,
+        `../public/icons/apple-touch-icon/apple-touch-icon-${size}x${size}.png`
+      )
+    )
+    .then(() => console.log(`Generated apple-touch-icon-${size}x${size}.png`))
+    .catch((err) =>
+      console.error(
+        `Error generating apple-touch-icon-${size}x${size}.png:`,
+        err
+      )
+    );
+});
+
+// Generate Android chrome icons
+const androidChromeSizes = [36, 48, 72, 96, 144, 192, 384, 512];
+androidChromeSizes.forEach((size) => {
+  sharp(sourceLogo)
+    .resize(size, size)
+    .toFile(
+      path.join(
+        __dirname,
+        `../public/icons/android-chrome/android-chrome-${size}x${size}.png`
+      )
+    )
+    .then(() => console.log(`Generated android-chrome-${size}x${size}.png`))
+    .catch((err) =>
+      console.error(`Error generating android-chrome-${size}x${size}.png:`, err)
+    );
+});
+
+// Generate Open Graph and Twitter images
+const socialMediaSizes = [
+  { width: 1200, height: 630, name: "og-image.png" },
+  { width: 1200, height: 600, name: "twitter-image.png" },
+];
+
+socialMediaSizes.forEach(({ width, height, name }) => {
+  sharp(sourceLogo)
+    .resize({
+      width,
+      height,
+      fit: "contain",
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    })
+    .toFile(path.join(__dirname, `../public/icons/${name}`))
+    .then(() => console.log(`Generated ${name}`))
+    .catch((err) => console.error(`Error generating ${name}:`, err));
+});
+
+// Generate a favicon.ico file (multi-size ICO file)
+sharp(sourceLogo)
+  .resize(32, 32)
+  .toFile(path.join(__dirname, "../public/favicon.ico"))
+  .then(() => console.log("Generated favicon.ico"))
+  .catch((err) => console.error("Error generating favicon.ico:", err));
+
+console.log("Icon generation process completed!");
