@@ -4,7 +4,7 @@ const nextConfig = {
   experimental: {
     // Other experimental features can go here
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
 
     // Add fallbacks for node modules that aren't available in the browser
@@ -12,7 +12,26 @@ const nextConfig = {
       ...config.resolve.fallback,
       fs: false,
       path: false,
+      crypto: "crypto-browserify",
+      stream: "stream-browserify",
+      buffer: "buffer",
+      util: "util",
     };
+
+    // Add buffer polyfill
+    if (!isServer) {
+      config.plugins = [
+        ...(config.plugins || []),
+        // Add buffer polyfill
+        new webpack.ProvidePlugin({
+          Buffer: ["buffer", "Buffer"],
+        }),
+        // Add process polyfill
+        new webpack.ProvidePlugin({
+          process: "process/browser",
+        }),
+      ];
+    }
 
     // Only apply chunk optimization for client-side bundles
     if (!isServer) {
