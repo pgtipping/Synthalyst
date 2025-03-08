@@ -1,4 +1,4 @@
-# Project Intelligence - 2024-02-27
+# Project Intelligence - 2025-03-09
 
 ## Platform Focus Refinement - 2025-03-08
 
@@ -3225,3 +3225,25 @@ This approach ensures that access control is maintainable, scalable, and secure.
 - Implement proper loading and error states for all components
 - Use React hooks for state management and side effects
 - Implement proper type safety for all components
+
+### UI Animation Guidelines - 2025-03-09
+
+#### Subtle Animation Pattern - 2025-03-09
+
+- Animations should be subtle and professional, not flashy or distracting
+- Use longer intervals (3+ seconds) between animation changes
+- Choose color schemes that align with the brand identity (blues, blacks)
+- Implement proper cleanup to prevent memory leaks
+- Use React's useId() hook for stable IDs in SVG elements
+- Add aria-labels to animated elements for accessibility
+- Test animations on both high and low-end devices to ensure performance
+
+#### Logo Animation Implementation - 2025-03-09
+
+- The Synthalyst logo uses a subtle gradient animation with two shades of blue and black
+- Colors rotate positions every 3 seconds in a continuous cycle
+- The animation is implemented in the SynthalystLogoAnimated component
+- The component uses the "use client" directive as it requires client-side interactivity
+- The animation is implemented using setTimeout and requestAnimationFrame
+- The component includes proper cleanup in useEffect to prevent memory leaks
+- The original SynthalystLogo component has been removed to avoid conflicts

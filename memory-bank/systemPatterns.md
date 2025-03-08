@@ -701,3 +701,51 @@ The application implements role-based access control (RBAC) to manage access to 
    - Admin users can view all users in the system
    - Admin users can change the role of any user
    - The user management interface is accessible only to users with the `ADMIN` role
+
+# System Patterns - 2025-03-09
+
+## UI Animation Patterns (2025-03-09)
+
+### Logo Animation Pattern
+
+- **Stable ID Generation**:
+
+  - Use React's `useId()` hook to generate stable IDs for SVG elements
+  - Replace random ID generation with deterministic IDs to prevent hydration errors
+  - Format IDs by removing colons from useId() output for SVG compatibility
+
+- **Color Rotation Animation**:
+
+  - Define a set of color patterns to rotate through
+  - Use setTimeout with requestAnimationFrame for smooth transitions
+  - Implement proper cleanup with useRef and useEffect
+  - Track component mounted state to prevent memory leaks
+
+- **Professional Animation Timing**:
+
+  - Use longer intervals (3+ seconds) for subtle, non-distracting animations
+  - Implement gradual transitions rather than abrupt changes
+  - Choose color schemes that align with brand identity
+
+- **SVG Gradient Animation**:
+  - Use linearGradient with multiple color stops
+  - Animate by changing the stopColor values
+  - Maintain consistent gradient structure while changing colors
+
+### Client-Side Animation Best Practices
+
+- **"use client" Directive**:
+
+  - Mark components with animations as client components
+  - Keep animations isolated to prevent unnecessary client-side rendering
+
+- **Performance Optimization**:
+
+  - Use setTimeout instead of setInterval to prevent timing issues
+  - Implement throttling for resource-intensive animations
+  - Use refs to store animation state instead of state updates when possible
+
+- **Accessibility Considerations**:
+  - Add aria-label to animated elements
+  - Ensure animations don't interfere with screen readers
+  - Keep animations subtle to avoid distracting users with cognitive disabilities
