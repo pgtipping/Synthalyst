@@ -21,9 +21,7 @@ export default function SharedFrameworkClient({
     async function fetchFramework() {
       try {
         setIsLoading(true);
-        const response = await fetch(
-          `/api/competency-manager/public-frameworks?id=${id}`
-        );
+        const response = await fetch(`/api/competency-manager/shared/${id}`);
 
         if (!response.ok) {
           if (response.status === 404) {

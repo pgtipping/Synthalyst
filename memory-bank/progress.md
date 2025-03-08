@@ -309,6 +309,9 @@
 
 ## Recent Updates
 
+- Fixed shared framework view by updating API endpoint in client component (2025-03-08 16:00:00)
+- Fixed SharingOptions component by passing the updatePublicStatus function as onUpdatePublicStatus prop (2025-03-08 15:00:00)
+- Fixed missing FeedbackAnalytics import in Competency Manager (2025-03-08 14:00:00)
 - Fixed missing handleSaveFrameworkEdit function in Competency Manager (2025-03-08 13:30:00)
 - Fixed missing handleEditFramework function in Competency Manager (2025-03-08 13:00:00)
 - Fixed infinite loop in FrameworkSearch component by removing applySearch from dependency array (2025-03-08 12:30:00)

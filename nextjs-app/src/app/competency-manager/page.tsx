@@ -47,6 +47,7 @@ import SharingOptions from "./components/SharingOptions";
 import FeedbackMechanism from "./components/FeedbackMechanism";
 import PremiumFeatureTeasers from "./components/PremiumFeatureTeasers";
 import FrameworkSearch from "./components/FrameworkSearch";
+import FeedbackAnalytics from "./components/FeedbackAnalytics";
 
 // Lazy load the CompetencyVisualization component
 const CompetencyVisualization = dynamic(
@@ -1708,7 +1709,10 @@ export default function CompetencyManager() {
                     </div>
 
                     <div className="border rounded-md p-4">
-                      <SharingOptions framework={framework} />
+                      <SharingOptions
+                        framework={framework}
+                        onUpdatePublicStatus={updatePublicStatus}
+                      />
                     </div>
 
                     <div className="border rounded-md p-4">
@@ -1878,7 +1882,10 @@ export default function CompetencyManager() {
                       </div>
 
                       <div className="border rounded-md p-4">
-                        <SharingOptions framework={framework} />
+                        <SharingOptions
+                          framework={framework}
+                          onUpdatePublicStatus={updatePublicStatus}
+                        />
                       </div>
 
                       <div className="border rounded-md p-4">
