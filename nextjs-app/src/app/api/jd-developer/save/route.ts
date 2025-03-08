@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { createHash } from "@/lib/crypto-server";
+import { createHash } from "@/lib/hash.js";
 
 const saveSchema = z.object({
   title: z.string(),

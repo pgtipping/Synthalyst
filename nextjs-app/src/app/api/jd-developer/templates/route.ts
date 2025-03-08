@@ -3,7 +3,7 @@ import { prisma, testPrismaConnection, withRetry } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { createHash } from "@/lib/crypto-server";
+import { createHash } from "@/lib/hash.js";
 
 // Helper function to remove duplicates
 async function removeDuplicateTemplates() {

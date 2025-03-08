@@ -1,4 +1,4 @@
-import { createHashSync } from "./crypto-browser";
+import { createHash } from "./hash.js";
 import { prisma } from "./prisma";
 import type { JobDescription, JobDescriptionDB } from "@/types/jobDescription";
 
@@ -51,7 +51,7 @@ interface NewTemplateResult {
 type TemplateResult = VersionResult | DuplicateResult | NewTemplateResult;
 
 const generateContentHash = (content: string): string => {
-  return createHashSync(content);
+  return createHash(content);
 };
 
 export const parseJobDescription = (

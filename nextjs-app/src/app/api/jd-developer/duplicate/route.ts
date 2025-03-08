@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createHash } from "@/lib/crypto-server";
+import { createHash } from "@/lib/hash.js";
 
 export async function POST(request: Request) {
   try {
