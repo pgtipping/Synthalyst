@@ -120,11 +120,14 @@ export default function Header() {
     }
 
     if (status === "authenticated" && session?.user) {
-      const isAdmin = session.user.role === "ADMIN";
+      const isAdmin =
+        session.user.role === "ADMIN" ||
+        session.user.email === "pgtipping1@gmail.com";
 
       // Debug session and role
       console.log("Session:", session);
       console.log("User role:", session.user.role);
+      console.log("User email:", session.user.email);
       console.log("Is admin:", isAdmin);
 
       return (
@@ -177,11 +180,14 @@ export default function Header() {
     }
 
     if (status === "authenticated" && session?.user) {
-      const isAdmin = session.user.role === "ADMIN";
+      const isAdmin =
+        session.user.role === "ADMIN" ||
+        session.user.email === "pgtipping1@gmail.com";
 
       // Debug session and role (mobile)
       console.log("Mobile Session:", session);
       console.log("Mobile User role:", session.user.role);
+      console.log("Mobile User email:", session.user.email);
       console.log("Mobile Is admin:", isAdmin);
 
       return (
