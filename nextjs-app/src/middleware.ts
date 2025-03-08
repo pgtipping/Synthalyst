@@ -19,7 +19,6 @@ const ALL_TOOL_PATHS = [
   "/learning-content",
   "/knowledge-gpt",
   "/competency-manager",
-  "/model-comparison",
   "/the-synth",
 ];
 
@@ -145,7 +144,6 @@ function isComingSoonRoute(pathname: string) {
     "/2do",
     "/learning-content",
     "/knowledge-gpt",
-    "/model-comparison",
     "/the-synth",
     "/blog",
   ];
@@ -165,7 +163,6 @@ export const config = {
     "/2do/:path*",
     "/learning-content/:path*",
     "/knowledge-gpt/:path*",
-    "/model-comparison/:path*",
     "/the-synth/:path*",
     "/blog/:path*",
 
@@ -173,7 +170,6 @@ export const config = {
     "/2do",
     "/learning-content",
     "/knowledge-gpt",
-    "/model-comparison",
     "/the-synth",
     "/blog",
   ],

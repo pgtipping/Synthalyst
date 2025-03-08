@@ -25,7 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import SynthalystLogo from "./SynthalystLogo";
+import SynthalystLogoAnimated from "./SynthalystLogoAnimated";
 
 // Extend the Session type to include role
 interface ExtendedSession extends Session {
@@ -234,7 +234,7 @@ export default function Header() {
       <div className="container flex h-24 max-w-6xl items-center">
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
-            <SynthalystLogo />
+            <SynthalystLogoAnimated />
           </Link>
         </div>
 
