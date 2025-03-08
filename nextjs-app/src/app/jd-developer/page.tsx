@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 
 // Component that safely uses useSearchParams inside a Suspense boundary
 function JDDeveloperContent() {
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const searchParams = useSearchParams();
   const tabParam = searchParams?.get("tab");
   const [activeTab, setActiveTab] = useState<string>(tabParam || "form");
@@ -26,16 +26,28 @@ function JDDeveloperContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Debug information
+  useEffect(() => {
+    console.log("JD Developer Page Loaded");
+    console.log("Session Status:", sessionStatus);
+    console.log("Environment:", process.env.NODE_ENV);
+    console.log("Tab Parameter:", tabParam);
+  }, [sessionStatus, tabParam]);
+
   const fetchTemplates = async () => {
     try {
       setIsLoading(true);
       const startTime = Date.now();
 
+      console.log("Fetching templates...");
       const response = await fetch("/api/jd-developer/templates");
       if (!response.ok) {
-        throw new Error("Failed to fetch templates");
+        throw new Error(
+          `Failed to fetch templates: ${response.status} ${response.statusText}`
+        );
       }
       const data = await response.json();
+      console.log("Templates fetched:", data.templates.length);
       setTemplates(data.templates);
 
       // Ensure loading state is shown for at least 500ms for a smoother transition
@@ -45,7 +57,9 @@ function JDDeveloperContent() {
       }
     } catch (error) {
       console.error("Error fetching templates:", error);
-      setError("Failed to fetch templates");
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch templates"
+      );
       toast({
         title: "Error",
         description: "Failed to fetch templates",
