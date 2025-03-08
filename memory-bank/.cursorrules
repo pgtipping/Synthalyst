@@ -3165,3 +3165,42 @@ When implementing role-based access control in Next.js applications:
 6. Consider implementing a permissions system for more granular control beyond roles
 
 This approach ensures that access control is maintainable, scalable, and secure.
+
+# Cursor Rules - [2025-03-08 21:30:00]
+
+## Project Patterns
+
+### PDF Generation with React-PDF - [2025-03-08 21:30:00]
+
+- Use the custom PDFRenderer component for all PDF generation to ensure proper error handling and consistent behavior
+- Always include proper polyfills for Node.js core modules when using react-pdf in a browser environment
+- The PDFRenderer component handles loading states, error states, and PDF rendering in a consistent way
+- Import PDFRenderer from '@/components/PDFRenderer' and use it with the appropriate document props
+
+### Next.js Configuration for Browser Compatibility - [2025-03-08 21:30:00]
+
+- When using Node.js core modules in the browser, ensure proper fallbacks are configured in next.config.js
+- Required polyfills for PDF generation: crypto-browserify, stream-browserify, buffer, util, path-browserify
+- Configure webpack to provide Buffer and process globals
+- Add module aliases in package.json for Node.js core modules
+
+### SHA224 Crypto Module Fix - [2025-03-08 21:30:00]
+
+- If encountering "Cannot set properties of undefined (setting 'SHA224')" error:
+  1. Ensure crypto-browserify is properly configured as a fallback for the crypto module
+  2. Add the encoding package to fix issues with react-pdf
+  3. Use the custom PDFRenderer component for PDF generation
+  4. Disable minification in webpack configuration if necessary
+
+### Next.js 15 Configuration - [2025-03-08 21:30:00]
+
+- Remove swcMinify option from next.config.js as it's no longer recognized in Next.js 15
+- Use the transpilePackages option for packages that need to be transpiled
+- Configure proper module fallbacks for browser compatibility
+
+### React Component Structure - [2025-03-08 20:00:00]
+
+- Use functional components with TypeScript interfaces for props
+- Implement proper loading and error states for all components
+- Use React hooks for state management and side effects
+- Implement proper type safety for all components
