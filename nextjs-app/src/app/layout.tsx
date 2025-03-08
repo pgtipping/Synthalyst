@@ -184,9 +184,6 @@ export const metadata: Metadata = {
     creator: "@synthalyst",
     images: ["/icons/twitter-image.png"],
   },
-  verification: {
-    google: "google-site-verification-code", // Replace with actual verification code
-  },
 };
 
 export default function RootLayout({
@@ -200,6 +197,10 @@ export default function RootLayout({
         <link rel="canonical" href="https://synthalyst.com" />
         <link rel="alternate" hrefLang="en" href="https://synthalyst.com" />
         <meta name="theme-color" content="#4285F4" />
+        <meta
+          name="google-site-verification"
+          content="google-site-verification-code"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${moonDance.variable} antialiased`}
