@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { createHashSync } from "@/lib/crypto-browser";
+import { createHash } from "@/lib/crypto-server";
 
 const saveSchema = z.object({
   title: z.string(),
@@ -55,7 +55,7 @@ const saveSchema = z.object({
 
 // Function to generate content hash
 function generateContentHash(content: string): string {
-  return createHashSync(content);
+  return createHash(content);
 }
 
 export async function POST(request: Request) {

@@ -3,7 +3,7 @@ import { prisma, testPrismaConnection, withRetry } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { createHashSync } from "@/lib/crypto-browser";
+import { createHash } from "@/lib/crypto-server";
 
 // Helper function to remove duplicates
 async function removeDuplicateTemplates() {
@@ -298,7 +298,7 @@ export async function POST(request: Request) {
     // Generate content hash
     let contentHash = "";
     try {
-      contentHash = createHashSync(
+      contentHash = createHash(
         typeof templateContent === "string"
           ? templateContent
           : JSON.stringify(templateContent)
