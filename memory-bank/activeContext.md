@@ -912,3 +912,8 @@ We've made a strategic shift in our development approach to prioritize standalon
   - Removed the '4 level' label and restored the chevron icon for competency collapsing
 
 - Added missing FeedbackAnalytics import in Competency Manager (2023-03-09 11:30:00)
+
+- Reverted font size change in Competency Manager (2023-03-09 13:00:00)
+  - Removed global style that was increasing font size by 1px
+  - Restored original container structure and styling
+  - Maintained all other UI improvements
