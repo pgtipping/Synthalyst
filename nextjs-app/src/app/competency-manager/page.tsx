@@ -10,29 +10,35 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { InfoIcon, Edit } from "lucide-react";
 import {
-  CompetencyFramework,
-  FormData,
-  IndustryCompetencySuggestion,
-} from "./types";
-import { Progress } from "@/components/ui/progress";
-import {
-  Search as SearchIcon,
-  Plus as PlusIcon,
-  Clock as ClockIcon,
-  FileText as FileTextIcon,
-  Loader2 as Loader2Icon,
-  ChevronUp as ChevronUpIcon,
-  ChevronDown as ChevronDownIcon,
-  ChevronRight as ChevronRightIcon,
-  BarChart as BarChartIcon,
-  Save as SaveIcon,
-  Bookmark as BookmarkIcon,
+  InfoIcon,
+  Edit,
+  Plus,
+  Clock,
+  FileText,
+  Loader2,
+  ChevronUp,
+  ChevronDown,
+  ChevronRight,
+  BarChart,
+  Save,
+  Bookmark,
+  Search,
+  Trash,
+  Share,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/lib/toast-migration";
+import {
+  Switch,
+  SwitchTrigger,
+  SwitchThumb,
+  SwitchDescription,
+  SwitchLabel,
+} from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 
 // Import the new components
 import ExportOptions from "./components/ExportOptions";
@@ -56,7 +62,7 @@ const CompetencyVisualization = dynamic(
 );
 
 export default function CompetencyManager() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     industry: "",
     customIndustry: "",
     jobFunction: "",
@@ -611,7 +617,7 @@ export default function CompetencyManager() {
                       onClick={updateFrameworkDetails}
                       className="flex items-center"
                     >
-                      <SaveIcon className="h-4 w-4 mr-2" />
+                      <Save className="h-4 w-4 mr-2" />
                       Save Changes
                     </Button>
                     <Button variant="ghost" size="sm" onClick={cancelEditing}>
@@ -694,9 +700,9 @@ export default function CompetencyManager() {
                 </div>
                 <div>
                   {index === activeCompetencyIndex ? (
-                    <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+                    <ChevronUp className="h-5 w-5 text-gray-500" />
                   ) : (
-                    <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                    <ChevronDown className="h-5 w-5 text-gray-500" />
                   )}
                 </div>
               </div>
@@ -784,7 +790,7 @@ export default function CompetencyManager() {
                           onClick={updateFrameworkDetails}
                           className="flex items-center"
                         >
-                          <SaveIcon className="h-4 w-4 mr-2" />
+                          <Save className="h-4 w-4 mr-2" />
                           Save Changes
                         </Button>
                         <Button
@@ -864,7 +870,7 @@ export default function CompetencyManager() {
                 onClick={() => setShowVisualization(!showVisualization)}
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors"
               >
-                <BarChartIcon className="h-4 w-4" />
+                <BarChart className="h-4 w-4" />
                 {showVisualization
                   ? "Hide Visualization"
                   : "Show Visualization"}
@@ -899,9 +905,9 @@ export default function CompetencyManager() {
                     </div>
                     <div>
                       {index === activeCompetencyIndex ? (
-                        <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+                        <ChevronUp className="h-5 w-5 text-gray-500" />
                       ) : (
-                        <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
                       )}
                     </div>
                   </div>
@@ -978,14 +984,14 @@ export default function CompetencyManager() {
                   onClick={() => exportToJSON()}
                   className="flex items-center"
                 >
-                  <FileTextIcon className="h-4 w-4 mr-2" />
+                  <FileText className="h-4 w-4 mr-2" />
                   Export JSON
                 </Button>
                 <Button
                   onClick={() => saveFramework()}
                   className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  <SaveIcon className="h-4 w-4 mr-2" />
+                  <Save className="h-4 w-4 mr-2" />
                   Save Framework
                 </Button>
               </div>
@@ -1051,12 +1057,12 @@ export default function CompetencyManager() {
     switch (activeTab) {
       case "create":
         return (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-6">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">
               Create Competency Framework
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label
                     className="block text-sm font-medium mb-1"
@@ -1275,12 +1281,12 @@ export default function CompetencyManager() {
                 >
                   {showOptionalFields ? (
                     <>
-                      <ChevronDownIcon className="h-4 w-4 mr-1" />
+                      <ChevronDown className="h-4 w-4 mr-1" />
                       Hide Optional Fields
                     </>
                   ) : (
                     <>
-                      <ChevronRightIcon className="h-4 w-4 mr-1" />
+                      <ChevronRight className="h-4 w-4 mr-1" />
                       Show Optional Fields
                     </>
                   )}
@@ -1392,244 +1398,583 @@ export default function CompetencyManager() {
         );
       case "search":
         return (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-6">Saved Frameworks</h2>
-
-            {/* Search component */}
-            <FrameworkSearch
-              frameworks={savedFrameworks}
-              onSearchResults={handleSearchResults}
-            />
-
-            {isLoadingSaved ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2Icon className="h-8 w-8 text-blue-600 animate-spin mr-2" />
-                <span>Loading saved frameworks...</span>
-              </div>
-            ) : savedFrameworksError ? (
-              <div className="text-center py-8">
-                <p className="text-red-500">{savedFrameworksError}</p>
-                <Button
-                  variant="outline"
-                  onClick={loadSavedFrameworks}
-                  className="mt-4"
-                >
-                  Try Again
-                </Button>
-              </div>
-            ) : (
-              <div>
-                {savedFrameworks.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">No saved frameworks found.</p>
-                    <Button
-                      variant="outline"
-                      onClick={() => setActiveTab("create")}
-                      className="mt-4"
-                    >
-                      Create New Framework
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4 mt-6">
-                    <h3 className="text-lg font-medium">
-                      Frameworks ({savedFrameworks.length})
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {savedFrameworks.map((fw) => (
-                        <div
-                          key={fw.id}
-                          className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-medium text-blue-800">
-                              {fw.name}
-                            </h4>
-                            <div className="flex space-x-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setFramework(fw);
-                                  setActiveTab("results");
-                                }}
-                                className="h-8 w-8 p-0"
-                              >
-                                <FileTextIcon className="h-4 w-4" />
-                                <span className="sr-only">View</span>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => deleteFramework(fw.id || "")}
-                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="lucide lucide-trash-2"
-                                >
-                                  <path d="M3 6h18" />
-                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                  <line x1="10" x2="10" y1="11" y2="17" />
-                                  <line x1="14" x2="14" y1="11" y2="17" />
-                                </svg>
-                                <span className="sr-only">Delete</span>
-                              </Button>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                            {fw.description || "No description provided."}
-                          </p>
-                          <div className="flex flex-wrap gap-2 text-xs">
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                              {fw.industry}
-                            </span>
-                            <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                              {fw.jobFunction}
-                            </span>
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                              {fw.roleLevel}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">
+              Search Competency Frameworks
+            </h2>
+            <FrameworkSearch onSearchResults={handleSearchResults} />
           </div>
         );
       case "recent":
         return (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-6">Recent Frameworks</h2>
-            {/* Recent frameworks content */}
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">
+              Your Frameworks
+            </h2>
+            {isLoadingSaved ? (
+              <div className="flex justify-center items-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              </div>
+            ) : savedFrameworksError ? (
+              <div className="p-4 bg-red-50 text-red-700 rounded-md">
+                <p>{savedFrameworksError}</p>
+              </div>
+            ) : savedFrameworks.length === 0 ? (
+              <div className="text-center p-8">
+                <p className="text-gray-500 mb-4">
+                  You haven&apos;t created any frameworks yet.
+                </p>
+                <Button
+                  onClick={() => setActiveTab("create")}
+                  className="flex items-center mx-auto"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Framework
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {savedFrameworks.map((fw) => (
+                    <div
+                      key={fw.id}
+                      className="border rounded-md p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium text-lg truncate pr-2">
+                          {fw.name}
+                        </h3>
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => handleEditFramework(fw.id!)}
+                            className="text-blue-500 hover:text-blue-700"
+                            aria-label={`Edit ${fw.name}`}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirmation(fw.id!)}
+                            className="text-red-500 hover:text-red-700"
+                            aria-label={`Delete ${fw.name}`}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1 mb-2 line-clamp-2">
+                        {fw.description || "No description provided"}
+                      </p>
+                      <div className="flex flex-wrap text-xs text-gray-500 mt-2 gap-2">
+                        <span className="bg-gray-100 px-2 py-1 rounded">
+                          {fw.industry}
+                        </span>
+                        <span className="bg-gray-100 px-2 py-1 rounded">
+                          {fw.jobFunction}
+                        </span>
+                        <span className="bg-gray-100 px-2 py-1 rounded">
+                          {fw.roleLevel}
+                        </span>
+                      </div>
+                      <div className="mt-3 pt-3 border-t flex justify-between items-center">
+                        <span className="text-xs text-gray-500">
+                          {fw.competencies?.length || 0} competencies
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(fw.createdAt!).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         );
       case "results":
-        return renderResultsTab();
-      default:
         return (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-6">
-              Create Competency Framework
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Form content */}
-              {/* ... existing form fields ... */}
-            </form>
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-0">
+                {framework?.name || "Competency Framework"}
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveTab("create")}
+                  className="flex items-center"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Framework
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveTab("recent")}
+                  className="flex items-center"
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  Your Frameworks
+                </Button>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-12 w-12 animate-spin text-blue-500 mb-4" />
+                <p className="text-lg text-gray-700">{loadingMessage}</p>
+                {countdown > 0 && (
+                  <div className="mt-4 w-full max-w-md">
+                    <div className="flex justify-between text-sm text-gray-500 mb-1">
+                      <span>Generating...</span>
+                      <span>{countdown}s</span>
+                    </div>
+                    <Progress value={(30 - countdown) * (100 / 30)} />
+                  </div>
+                )}
+              </div>
+            ) : error ? (
+              <div className="p-6 bg-red-50 text-red-700 rounded-md">
+                <h3 className="text-lg font-medium mb-2">Error</h3>
+                <p>{error}</p>
+                <Button
+                  onClick={() => setActiveTab("create")}
+                  className="mt-4"
+                  variant="outline"
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : framework ? (
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+                  <div className="flex-1 min-w-0">
+                    {editingFrameworkId ? (
+                      <div className="space-y-4 border p-4 rounded-md">
+                        <div>
+                          <label
+                            htmlFor="framework-name"
+                            className="block text-sm font-medium mb-1"
+                          >
+                            Framework Name
+                          </label>
+                          <Input
+                            id="framework-name"
+                            value={frameworkNameEdit}
+                            onChange={(e) =>
+                              setFrameworkNameEdit(e.target.value)
+                            }
+                            className="w-full"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="framework-description"
+                            className="block text-sm font-medium mb-1"
+                          >
+                            Description
+                          </label>
+                          <Textarea
+                            id="framework-description"
+                            value={frameworkDescriptionEdit}
+                            onChange={(e) =>
+                              setFrameworkDescriptionEdit(e.target.value)
+                            }
+                            className="w-full"
+                            rows={3}
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingFrameworkId(null)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={handleSaveFrameworkEdit}
+                            disabled={!frameworkNameEdit.trim()}
+                          >
+                            Save Changes
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-medium">
+                              {framework.name}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              {framework.description ||
+                                "No description provided"}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditFramework(framework.id!)}
+                            className="flex items-center"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                          <div className="bg-gray-50 p-2 rounded">
+                            <span className="font-medium">Industry:</span>{" "}
+                            {framework.industry}
+                          </div>
+                          <div className="bg-gray-50 p-2 rounded">
+                            <span className="font-medium">Job Function:</span>{" "}
+                            {framework.jobFunction}
+                          </div>
+                          <div className="bg-gray-50 p-2 rounded">
+                            <span className="font-medium">Role Level:</span>{" "}
+                            {framework.roleLevel}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <div className="flex items-center">
+                            <Switch
+                              id="public-framework"
+                              checked={framework.isPublic}
+                              onCheckedChange={updatePublicStatus}
+                            />
+                            <Label
+                              htmlFor="public-framework"
+                              className="ml-2 text-sm"
+                            >
+                              Public Framework
+                            </Label>
+                          </div>
+                          {framework.isPublic && (
+                            <div className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                              <Link
+                                href={`/competency-manager/shared?id=${framework.id}`}
+                                target="_blank"
+                                className="flex items-center"
+                              >
+                                <Share className="h-3 w-3 mr-1" />
+                                View Public Link
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="md:w-1/3 space-y-6">
+                    <div className="border rounded-md p-4">
+                      <PrintFriendlyView framework={framework} />
+                    </div>
+
+                    <div className="border rounded-md p-4">
+                      <ExportOptions framework={framework} />
+                    </div>
+
+                    <div className="border rounded-md p-4">
+                      <SharingOptions framework={framework} />
+                    </div>
+
+                    <div className="border rounded-md p-4">
+                      <FeedbackMechanism framework={framework} />
+                    </div>
+
+                    <div className="border rounded-md p-4">
+                      <FeedbackAnalytics frameworkId={framework.id} />
+                    </div>
+
+                    <div className="border rounded-md p-4">
+                      <PremiumFeatureTeasers />
+                    </div>
+                  </div>
+                </div>
+
+                {showVisualization && (
+                  <div className="border rounded-md p-4">
+                    <CompetencyVisualization framework={framework} />
+                  </div>
+                )}
+
+                <div className="border-t pt-6">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex-1 min-w-0">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-medium mb-2">
+                          Competencies
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          This framework contains{" "}
+                          {framework.competencies.length} competencies across
+                          different areas.
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        {framework.competencies.map((competency, index) => (
+                          <div
+                            key={index}
+                            className={`border rounded-md overflow-hidden ${
+                              activeCompetencyIndex === index
+                                ? "border-blue-500"
+                                : ""
+                            }`}
+                          >
+                            <div
+                              className={`flex justify-between items-center p-3 cursor-pointer ${
+                                activeCompetencyIndex === index
+                                  ? "bg-blue-50"
+                                  : "hover:bg-gray-50"
+                              }`}
+                              onClick={() =>
+                                setActiveCompetencyIndex(
+                                  activeCompetencyIndex === index ? null : index
+                                )
+                              }
+                            >
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium truncate">
+                                  {competency.name}
+                                </h4>
+                                <p className="text-xs text-gray-500">
+                                  {competency.type}
+                                </p>
+                              </div>
+                              <div className="flex items-center">
+                                <span className="text-xs bg-gray-100 px-2 py-1 rounded mr-2">
+                                  {competency.levels.length} levels
+                                </span>
+                                {activeCompetencyIndex === index ? (
+                                  <ChevronUp className="h-5 w-5 text-gray-400" />
+                                ) : (
+                                  <ChevronDown className="h-5 w-5 text-gray-400" />
+                                )}
+                              </div>
+                            </div>
+
+                            {activeCompetencyIndex === index && (
+                              <div className="p-4 border-t bg-white">
+                                <div className="space-y-4">
+                                  <div>
+                                    <h5 className="text-sm font-medium">
+                                      Description
+                                    </h5>
+                                    <p className="text-sm mt-1">
+                                      {competency.description}
+                                    </p>
+                                  </div>
+
+                                  <div>
+                                    <h5 className="text-sm font-medium">
+                                      Business Impact
+                                    </h5>
+                                    <p className="text-sm mt-1">
+                                      {competency.businessImpact}
+                                    </p>
+                                  </div>
+
+                                  <div>
+                                    <h5 className="text-sm font-medium mb-2">
+                                      Proficiency Levels
+                                    </h5>
+                                    <div className="space-y-3">
+                                      {competency.levels
+                                        .sort(
+                                          (a, b) => a.levelOrder - b.levelOrder
+                                        )
+                                        .map((level, levelIndex) => (
+                                          <div
+                                            key={levelIndex}
+                                            className="border rounded-md p-3"
+                                          >
+                                            <h6 className="font-medium">
+                                              {level.name}
+                                            </h6>
+                                            <p className="text-sm mt-1">
+                                              {level.description}
+                                            </p>
+
+                                            <div className="mt-3 pt-2 border-t">
+                                              <h6 className="text-xs font-medium mb-1">
+                                                Behavioral Indicators
+                                              </h6>
+                                              <ul className="text-xs list-disc pl-5 space-y-1">
+                                                {level.behavioralIndicators.map(
+                                                  (indicator, i) => (
+                                                    <li key={i}>{indicator}</li>
+                                                  )
+                                                )}
+                                              </ul>
+                                            </div>
+
+                                            <div className="mt-3 pt-2 border-t">
+                                              <h6 className="text-xs font-medium mb-1">
+                                                Development Suggestions
+                                              </h6>
+                                              <ul className="text-xs list-disc pl-5 space-y-1">
+                                                {level.developmentSuggestions.map(
+                                                  (suggestion, i) => (
+                                                    <li key={i}>
+                                                      {suggestion}
+                                                    </li>
+                                                  )
+                                                )}
+                                              </ul>
+                                            </div>
+                                          </div>
+                                        ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="md:w-1/3 space-y-6">
+                      <div className="border rounded-md p-4">
+                        <PrintFriendlyView framework={framework} />
+                      </div>
+
+                      <div className="border rounded-md p-4">
+                        <ExportOptions framework={framework} />
+                      </div>
+
+                      <div className="border rounded-md p-4">
+                        <SharingOptions framework={framework} />
+                      </div>
+
+                      <div className="border rounded-md p-4">
+                        <FeedbackMechanism framework={framework} />
+                      </div>
+
+                      <div className="border rounded-md p-4">
+                        <FeedbackAnalytics frameworkId={framework.id} />
+                      </div>
+
+                      <div className="border rounded-md p-4">
+                        <PremiumFeatureTeasers />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
         );
+      default:
+        return null;
     }
   };
 
   return (
     <TooltipProvider>
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100 flex justify-between items-center">
-          <div>
-            <h2 className="text-lg font-medium text-blue-800">
-              Want faster, more customized frameworks?
-            </h2>
-            <p className="text-sm text-blue-600">
-              Upgrade to get premium benefits
-            </p>
-          </div>
-          <Link
-            href="/premium"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            View Details
-          </Link>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+            Competency Manager
+          </h1>
+          <p className="text-gray-600 max-w-3xl">
+            Create, manage, and share competency frameworks for your
+            organization. Define competencies, proficiency levels, and
+            development paths tailored to your industry and roles.
+          </p>
         </div>
 
-        <div className="flex flex-col space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Competency Framework Manager</h1>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => setActiveTab("search")}
-                className={activeTab === "search" ? "bg-muted" : ""}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2 border-b">
+            <button
+              className={`px-3 py-2 text-sm font-medium flex items-center ${
+                activeTab === "create"
+                  ? "border-b-2 border-blue-500 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveTab("create")}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Create</span>
+              <span className="sm:hidden">New</span>
+            </button>
+            <button
+              className={`px-3 py-2 text-sm font-medium flex items-center ${
+                activeTab === "search"
+                  ? "border-b-2 border-blue-500 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveTab("search")}
+            >
+              <Search className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Search</span>
+              <span className="sm:hidden">Find</span>
+            </button>
+            <button
+              className={`px-3 py-2 text-sm font-medium flex items-center ${
+                activeTab === "recent"
+                  ? "border-b-2 border-blue-500 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => {
+                setActiveTab("recent");
+                loadSavedFrameworks();
+              }}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Your Frameworks</span>
+              <span className="sm:hidden">Yours</span>
+            </button>
+            {framework && (
+              <button
+                className={`px-3 py-2 text-sm font-medium flex items-center ${
+                  activeTab === "results"
+                    ? "border-b-2 border-blue-500 text-blue-600"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                onClick={() => setActiveTab("results")}
               >
-                <BookmarkIcon className="h-4 w-4 mr-2" />
-                Saved
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setActiveTab("create")}
-                className={activeTab === "create" ? "bg-muted" : ""}
-              >
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Create
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setActiveTab("recent")}
-                className={activeTab === "recent" ? "bg-muted" : ""}
-              >
-                <ClockIcon className="h-4 w-4 mr-2" />
-                Recent
-              </Button>
-              {framework && (
+                <FileText className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Current Framework</span>
+                <span className="sm:hidden">Current</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {renderTabContent()}
+
+        {/* Delete confirmation dialog */}
+        {deleteConfirmation && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h3 className="text-lg font-medium mb-4">Confirm Deletion</h3>
+              <p className="mb-6">
+                Are you sure you want to delete this framework? This action
+                cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-2">
                 <Button
                   variant="outline"
-                  onClick={() => setActiveTab("results")}
-                  className={activeTab === "results" ? "bg-muted" : ""}
+                  onClick={() => setDeleteConfirmation(null)}
                 >
-                  <FileTextIcon className="h-4 w-4 mr-2" />
-                  Results
+                  Cancel
                 </Button>
-              )}
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteFramework(deleteConfirmation)}
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
           </div>
-
-          {/* Main content area */}
-          {renderTabContent()}
-
-          {/* Loading overlay */}
-          {isLoading && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-                <div className="flex items-center justify-center mb-4">
-                  <Loader2Icon className="h-8 w-8 text-blue-600 animate-spin mr-2" />
-                  <h3 className="text-xl font-semibold">{loadingMessage}</h3>
-                </div>
-                <Progress
-                  value={(30 - countdown) * (100 / 30)}
-                  className="mb-2"
-                />
-                <p className="text-sm text-gray-500 text-center">
-                  This may take up to {countdown} seconds...
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Error display */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
-                    Error generating framework
-                  </h3>
-                  <p className="text-sm text-red-700 mt-1">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </TooltipProvider>
   );

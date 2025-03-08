@@ -1,214 +1,332 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { StarIcon, SparklesIcon } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
-interface FeedbackStatistics {
-  totalFeedback: number;
-  averageRating: number;
-  ratingCounts: {
-    1: number;
-    2: number;
-    3: number;
-    4: number;
-    5: number;
-  };
-}
-
-interface FeedbackItem {
-  id: string;
+interface FeedbackData {
   rating: number;
-  feedback: string;
-  createdAt: string;
-  userId: string | null;
-  isPublic: boolean;
+  count: number;
+  percentage: number;
 }
 
 interface FeedbackAnalyticsProps {
-  frameworkId: string;
+  frameworkId?: string;
+  showGlobalStats?: boolean;
 }
 
 export default function FeedbackAnalytics({
   frameworkId,
+  showGlobalStats = false,
 }: FeedbackAnalyticsProps) {
-  const [statistics, setStatistics] = useState<FeedbackStatistics | null>(null);
-  const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
+  const [feedbackStats, setFeedbackStats] = useState<{
+    averageRating: number;
+    totalFeedback: number;
+    ratingDistribution: FeedbackData[];
+    qualityFeedback: { good: number; needsImprovement: number };
+    recentFeedback: Array<{
+      rating: number;
+      feedback: string;
+      createdAt: string;
+    }>;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+
   useEffect(() => {
-    const fetchFeedback = async () => {
+    const fetchFeedbackStats = async () => {
+      setIsLoading(true);
+      setError(null);
+
       try {
-        setIsLoading(true);
-        const response = await fetch(
-          `/api/competency-manager/feedback?frameworkId=${frameworkId}`
-        );
+        const url = frameworkId
+          ? `/api/competency-manager/feedback?frameworkId=${frameworkId}`
+          : "/api/competency-manager/feedback";
+
+        const response = await fetch(url);
 
         if (!response.ok) {
-          throw new Error("Failed to fetch feedback");
+          throw new Error("Failed to fetch feedback statistics");
         }
 
         const data = await response.json();
-        setStatistics(data.statistics);
-        setFeedback(data.feedback);
-      } catch (error) {
-        console.error("Error fetching feedback:", error);
-        setError("Failed to load feedback data");
+        setFeedbackStats(data);
+      } catch (err) {
+        console.error("Error fetching feedback stats:", err);
+        setError("Failed to load feedback statistics. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (frameworkId) {
-      fetchFeedback();
-    }
+    fetchFeedbackStats();
   }, [frameworkId]);
 
   if (isLoading) {
     return (
-      <div className="p-4 text-center">
-        <p>Loading feedback data...</p>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+        </div>
+        <Skeleton className="h-64" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 text-center text-red-500">
+      <div className="p-4 bg-red-50 text-red-800 rounded-md">
         <p>{error}</p>
       </div>
     );
   }
 
-  if (!statistics || statistics.totalFeedback === 0) {
+  if (!feedbackStats) {
     return (
-      <div className="p-4 text-center">
-        <p>No ratings available for this AI-generated framework yet.</p>
+      <div className="p-4 bg-gray-50 text-gray-500 rounded-md">
+        <p>No feedback data available.</p>
       </div>
     );
   }
 
-  // Filter for public feedback only
-  const publicFeedback = feedback.filter((item) => item.isPublic);
-
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center">
-            <SparklesIcon className="w-5 h-5 mr-2 text-blue-500" />
-            <CardTitle>AI Framework Ratings</CardTitle>
-          </div>
-          <CardDescription>
-            Based on {statistics.totalFeedback} user ratings
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <span className="text-3xl font-bold mr-2">
-                {statistics.averageRating.toFixed(1)}
-              </span>
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <StarIcon
-                    key={star}
-                    className={`w-5 h-5 ${
-                      star <= Math.round(statistics.averageRating)
-                        ? "text-yellow-400 fill-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-            <span className="text-sm text-gray-500">
-              {statistics.totalFeedback}{" "}
-              {statistics.totalFeedback === 1 ? "rating" : "ratings"}
-            </span>
-          </div>
+      <h3 className="text-xl font-semibold">
+        {showGlobalStats
+          ? "Global Feedback Analytics"
+          : "Framework Feedback Analytics"}
+      </h3>
 
-          <div className="space-y-3">
-            {[5, 4, 3, 2, 1].map((rating) => {
-              const count =
-                statistics.ratingCounts[rating as 1 | 2 | 3 | 4 | 5];
-              const percentage =
-                statistics.totalFeedback > 0
-                  ? (count / statistics.totalFeedback) * 100
-                  : 0;
-
-              return (
-                <div key={rating} className="flex items-center">
-                  <div className="flex items-center w-12">
-                    <span className="text-sm mr-1">{rating}</span>
-                    <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  </div>
-                  <Progress
-                    value={percentage}
-                    className="h-2 flex-1 mx-2"
-                    aria-label={`${rating} star ratings: ${percentage.toFixed(
-                      1
-                    )}%`}
-                  />
-                  <span className="text-sm text-gray-500 w-12 text-right">
-                    {count}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {publicFeedback.length > 0 && (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardHeader>
-            <div className="flex items-center">
-              <SparklesIcon className="w-5 h-5 mr-2 text-blue-500" />
-              <CardTitle>User Comments on AI Output</CardTitle>
-            </div>
-            <CardDescription>
-              What users think about this AI-generated framework
-            </CardDescription>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Average Rating
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {publicFeedback
-                .filter((item) => item.feedback.trim() !== "")
-                .map((item) => (
-                  <div key={item.id} className="border-b pb-4 last:border-0">
-                    <div className="flex items-center mb-2">
-                      <div className="flex mr-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <StarIcon
-                            key={star}
-                            className={`w-4 h-4 ${
-                              star <= item.rating
-                                ? "text-yellow-400 fill-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-sm">{item.feedback}</p>
-                  </div>
-                ))}
+            <div className="flex items-center">
+              <span className="text-3xl font-bold">
+                {feedbackStats.averageRating.toFixed(1)}
+              </span>
+              <span className="text-yellow-400 ml-2">★</span>
+              <span className="text-sm text-gray-500 ml-2">/ 5.0</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Based on {feedbackStats.totalFeedback}{" "}
+              {feedbackStats.totalFeedback === 1 ? "review" : "reviews"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Quality Assessment
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span>Good</span>
+                <span>
+                  {Math.round(
+                    (feedbackStats.qualityFeedback.good /
+                      feedbackStats.totalFeedback) *
+                      100
+                  )}
+                  %
+                </span>
+              </div>
+              <Progress
+                value={
+                  (feedbackStats.qualityFeedback.good /
+                    feedbackStats.totalFeedback) *
+                  100
+                }
+                className="h-2"
+              />
+
+              <div className="flex justify-between text-xs">
+                <span>Needs Improvement</span>
+                <span>
+                  {Math.round(
+                    (feedbackStats.qualityFeedback.needsImprovement /
+                      feedbackStats.totalFeedback) *
+                      100
+                  )}
+                  %
+                </span>
+              </div>
+              <Progress
+                value={
+                  (feedbackStats.qualityFeedback.needsImprovement /
+                    feedbackStats.totalFeedback) *
+                  100
+                }
+                className="h-2"
+              />
             </div>
           </CardContent>
         </Card>
-      )}
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Feedback
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              {feedbackStats.totalFeedback}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {showGlobalStats ? "Across all frameworks" : "For this framework"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="distribution" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="distribution">Rating Distribution</TabsTrigger>
+          <TabsTrigger value="recent">Recent Feedback</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="distribution" className="pt-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+                    <div className="w-full md:w-1/2 h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={feedbackStats.ratingDistribution}
+                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="rating" />
+                          <YAxis />
+                          <RechartsTooltip
+                            formatter={(value, name) => [
+                              `${value} reviews`,
+                              "Count",
+                            ]}
+                            labelFormatter={(label) => `${label} stars`}
+                          />
+                          <Bar dataKey="count" fill="#8884d8" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="w-full md:w-1/2 h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={feedbackStats.ratingDistribution}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) =>
+                              `${name}: ${(percent * 100).toFixed(0)}%`
+                            }
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="count"
+                            nameKey="rating"
+                          >
+                            {feedbackStats.ratingDistribution.map(
+                              (entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={COLORS[index % COLORS.length]}
+                                />
+                              )
+                            )}
+                          </Pie>
+                          <RechartsTooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="grid grid-cols-5 gap-2 mt-4">
+                {feedbackStats.ratingDistribution.map((item) => (
+                  <div key={item.rating} className="text-center">
+                    <div className="text-sm font-medium">{item.rating} ★</div>
+                    <div className="text-xs text-gray-500">{item.count}</div>
+                    <div className="text-xs text-gray-500">
+                      ({item.percentage}%)
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="recent" className="pt-4">
+          <Card>
+            <CardContent className="pt-6">
+              {feedbackStats.recentFeedback.length > 0 ? (
+                <div className="space-y-4">
+                  {feedbackStats.recentFeedback.map((item, index) => (
+                    <div key={index} className="p-3 bg-gray-50 rounded-md">
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center">
+                          <span className="text-yellow-400">
+                            {"★".repeat(item.rating)}
+                            <span className="text-gray-300">
+                              {"★".repeat(5 - item.rating)}
+                            </span>
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <p className="text-sm">
+                        {item.feedback || "No comment provided."}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-gray-500 py-8">
+                  No feedback comments available.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <div className="text-xs text-gray-500 text-center">
+        Feedback data is updated in real-time as users provide ratings and
+        comments.
+      </div>
     </div>
   );
 }

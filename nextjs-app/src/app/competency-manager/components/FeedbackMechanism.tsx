@@ -98,27 +98,31 @@ export default function FeedbackMechanism({
       <h3 className="text-lg font-medium">Rate this Framework</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex items-center space-x-1">
-          {[1, 2, 3, 4, 5].map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => handleRatingClick(value)}
-              onMouseEnter={() => handleRatingHover(value)}
-              onMouseLeave={handleRatingLeave}
-              className="p-1 focus:outline-none"
-              aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
-            >
-              <StarIcon
-                className={`h-8 w-8 ${
-                  (hoveredRating || rating) >= value
-                    ? "text-yellow-400 fill-yellow-400"
-                    : "text-gray-300"
-                }`}
-              />
-            </button>
-          ))}
-          <span className="ml-2 text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+          <div className="flex items-center space-x-1">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => handleRatingClick(value)}
+                onMouseEnter={() => handleRatingHover(value)}
+                onMouseLeave={handleRatingLeave}
+                onTouchStart={() => handleRatingHover(value)}
+                onTouchEnd={handleRatingLeave}
+                className="p-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full touch-manipulation"
+                aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+              >
+                <StarIcon
+                  className={`h-6 w-6 sm:h-8 sm:w-8 ${
+                    (hoveredRating || rating) >= value
+                      ? "text-yellow-400 fill-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+          <span className="text-sm text-gray-500">
             {rating > 0
               ? `${rating} star${rating > 1 ? "s" : ""}`
               : "Select a rating"}
@@ -132,7 +136,7 @@ export default function FeedbackMechanism({
             placeholder="What did you think of this framework? How could it be improved?"
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            className="min-h-[100px]"
+            className="min-h-[100px] w-full"
           />
         </div>
 
@@ -143,16 +147,16 @@ export default function FeedbackMechanism({
             of this framework.
           </p>
 
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="llm-quality" className="flex-1">
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0">
+              <Label htmlFor="llm-quality" className="sm:flex-1">
                 How would you rate the AI-generated content?
               </Label>
               <select
                 id="llm-quality"
                 value={llmQualityFeedback}
                 onChange={(e) => setLlmQualityFeedback(e.target.value)}
-                className="p-2 border rounded"
+                className="p-2 border rounded w-full sm:w-auto"
                 aria-label="AI content quality rating"
               >
                 <option value="good">Good - Met my expectations</option>
@@ -170,7 +174,7 @@ export default function FeedbackMechanism({
                   placeholder="Please provide specific suggestions for improvement..."
                   value={llmImprovementSuggestion}
                   onChange={(e) => setLlmImprovementSuggestion(e.target.value)}
-                  className="min-h-[80px]"
+                  className="min-h-[80px] w-full"
                 />
               </div>
             )}
@@ -183,7 +187,7 @@ export default function FeedbackMechanism({
             checked={isPublic}
             onCheckedChange={setIsPublic}
           />
-          <Label htmlFor="public-feedback">
+          <Label htmlFor="public-feedback" className="text-sm">
             Make my feedback public (without personal information)
           </Label>
         </div>

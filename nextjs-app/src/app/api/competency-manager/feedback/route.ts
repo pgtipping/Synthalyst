@@ -49,17 +49,17 @@ export async function POST(request: Request) {
     // Create the feedback
     const newFeedback = await prisma.competencyFrameworkFeedback.create({
       data: {
-        frameworkId,
         rating,
         feedback: feedback || "",
-        userId: session?.user?.id || null,
-        isPublic: isPublic,
-        llmQualityFeedback: llmQualityFeedback || null,
+        isPublic,
+        llmQualityFeedback: llmQualityFeedback || "good",
         llmImprovementSuggestion: llmImprovementSuggestion || "",
+        frameworkId,
+        userId: session?.user?.id || null,
       },
     });
 
-    // Update the framework's average rating
+    // Update the framework's average rating and feedback count
     const allFeedback = await prisma.competencyFrameworkFeedback.findMany({
       where: {
         frameworkId,
@@ -69,24 +69,25 @@ export async function POST(request: Request) {
       },
     });
 
-    const totalRating = allFeedback.reduce(
-      (sum: number, item: { rating: number }) => sum + item.rating,
-      0
-    );
+    const totalRating = allFeedback.reduce((sum, item) => sum + item.rating, 0);
     const averageRating = totalRating / allFeedback.length;
+    const feedbackCount = allFeedback.length;
 
     await prisma.competencyFramework.update({
       where: {
         id: frameworkId,
       },
       data: {
-        averageRating: averageRating,
-        feedbackCount: allFeedback.length,
+        averageRating,
+        feedbackCount,
       },
     });
 
     return NextResponse.json(
-      { message: "Feedback submitted successfully", feedback: newFeedback },
+      {
+        message: "Feedback submitted successfully",
+        feedback: newFeedback,
+      },
       { status: 201 }
     );
   } catch (error) {
@@ -98,83 +99,177 @@ export async function POST(request: Request) {
   }
 }
 
-// GET all feedback for a competency framework
+// GET feedback for a competency framework
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const frameworkId = searchParams.get("frameworkId");
 
-    if (!frameworkId) {
-      return NextResponse.json(
-        { error: "Framework ID is required" },
-        { status: 400 }
-      );
-    }
+    // If frameworkId is provided, get feedback for that specific framework
+    if (frameworkId) {
+      // Get all feedback for the framework
+      const feedbackItems = await prisma.competencyFrameworkFeedback.findMany({
+        where: {
+          frameworkId,
+          isPublic: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          rating: true,
+          feedback: true,
+          createdAt: true,
+          isPublic: true,
+          llmQualityFeedback: true,
+          userId: true,
+        },
+      });
 
-    // Check if the framework exists
-    const framework = await prisma.competencyFramework.findUnique({
-      where: {
-        id: frameworkId,
-      },
-    });
+      // Calculate statistics
+      const totalFeedback = feedbackItems.length;
+      let averageRating = 0;
 
-    if (!framework) {
-      return NextResponse.json(
-        { error: "Framework not found" },
-        { status: 404 }
-      );
-    }
-
-    // Get all feedback for the framework
-    const feedback = await prisma.competencyFrameworkFeedback.findMany({
-      where: {
-        frameworkId,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    // Calculate statistics
-    const totalFeedback = feedback.length;
-    const totalRating = feedback.reduce(
-      (sum: number, item: { rating: number }) => sum + item.rating,
-      0
-    );
-    const averageRating = totalFeedback > 0 ? totalRating / totalFeedback : 0;
-
-    // Count ratings by value
-    const ratingCounts = {
-      1: 0,
-      2: 0,
-      3: 0,
-      4: 0,
-      5: 0,
-    };
-
-    feedback.forEach((item) => {
-      ratingCounts[item.rating as 1 | 2 | 3 | 4 | 5]++;
-    });
-
-    // Get LLM improvement data (for internal use)
-    const llmFeedback = feedback
-      .filter((item) => item.llmQualityFeedback)
-      .map((item) => ({
-        qualityFeedback: item.llmQualityFeedback,
-        improvementSuggestion: item.llmImprovementSuggestion,
-        rating: item.rating,
-        createdAt: item.createdAt,
+      // Initialize rating distribution
+      const ratingDistribution = [1, 2, 3, 4, 5].map((rating) => ({
+        rating,
+        count: 0,
+        percentage: 0,
       }));
 
-    return NextResponse.json({
-      feedback,
-      statistics: {
-        totalFeedback,
+      // Count quality feedback types
+      const qualityFeedback = {
+        good: 0,
+        needsImprovement: 0,
+      };
+
+      if (totalFeedback > 0) {
+        // Calculate total rating
+        const totalRating = feedbackItems.reduce(
+          (sum, item) => sum + item.rating,
+          0
+        );
+        averageRating = totalRating / totalFeedback;
+
+        // Count ratings by value
+        feedbackItems.forEach((item) => {
+          const ratingIndex = item.rating - 1;
+          ratingDistribution[ratingIndex].count += 1;
+
+          // Count quality feedback
+          if (item.llmQualityFeedback === "good") {
+            qualityFeedback.good += 1;
+          } else if (item.llmQualityFeedback === "needs_improvement") {
+            qualityFeedback.needsImprovement += 1;
+          }
+        });
+
+        // Calculate percentages
+        ratingDistribution.forEach((item) => {
+          item.percentage = parseFloat(
+            ((item.count / totalFeedback) * 100).toFixed(1)
+          );
+        });
+      }
+
+      // Get recent feedback with comments
+      const recentFeedback = feedbackItems
+        .filter((item) => item.feedback.trim() !== "")
+        .slice(0, 5)
+        .map((item) => ({
+          rating: item.rating,
+          feedback: item.feedback,
+          createdAt: item.createdAt.toISOString(),
+        }));
+
+      return NextResponse.json({
         averageRating,
-        ratingCounts,
-      },
-      llmFeedback,
-    });
+        totalFeedback,
+        ratingDistribution,
+        qualityFeedback,
+        recentFeedback,
+      });
+    }
+    // If no frameworkId, return global statistics
+    else {
+      // Get all public feedback
+      const allFeedback = await prisma.competencyFrameworkFeedback.findMany({
+        where: {
+          isPublic: true,
+        },
+        select: {
+          rating: true,
+          llmQualityFeedback: true,
+          feedback: true,
+          createdAt: true,
+        },
+      });
+
+      const totalFeedback = allFeedback.length;
+      let averageRating = 0;
+
+      // Initialize rating distribution
+      const ratingDistribution = [1, 2, 3, 4, 5].map((rating) => ({
+        rating,
+        count: 0,
+        percentage: 0,
+      }));
+
+      // Count quality feedback types
+      const qualityFeedback = {
+        good: 0,
+        needsImprovement: 0,
+      };
+
+      if (totalFeedback > 0) {
+        // Calculate total rating
+        const totalRating = allFeedback.reduce(
+          (sum, item) => sum + item.rating,
+          0
+        );
+        averageRating = totalRating / totalFeedback;
+
+        // Count ratings by value
+        allFeedback.forEach((item) => {
+          const ratingIndex = item.rating - 1;
+          ratingDistribution[ratingIndex].count += 1;
+
+          // Count quality feedback
+          if (item.llmQualityFeedback === "good") {
+            qualityFeedback.good += 1;
+          } else if (item.llmQualityFeedback === "needs_improvement") {
+            qualityFeedback.needsImprovement += 1;
+          }
+        });
+
+        // Calculate percentages
+        ratingDistribution.forEach((item) => {
+          item.percentage = parseFloat(
+            ((item.count / totalFeedback) * 100).toFixed(1)
+          );
+        });
+      }
+
+      // Get recent feedback with comments
+      const recentFeedback = allFeedback
+        .filter((item) => item.feedback.trim() !== "")
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, 10)
+        .map((item) => ({
+          rating: item.rating,
+          feedback: item.feedback,
+          createdAt: item.createdAt.toISOString(),
+        }));
+
+      return NextResponse.json({
+        averageRating,
+        totalFeedback,
+        ratingDistribution,
+        qualityFeedback,
+        recentFeedback,
+      });
+    }
   } catch (error) {
     console.error("Error fetching feedback:", error);
     return NextResponse.json(

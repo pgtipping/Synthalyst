@@ -11,11 +11,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 import { CompetencyFramework } from "../types";
+import { toast } from "sonner";
 
 interface FrameworkSearchProps {
-  frameworks: CompetencyFramework[];
+  frameworks?: CompetencyFramework[];
   onSearchResults: (results: CompetencyFramework[]) => void;
 }
 
@@ -24,10 +25,10 @@ export default function FrameworkSearch({
   onSearchResults,
 }: FrameworkSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [industryFilter, setIndustryFilter] = useState("");
-  const [jobFunctionFilter, setJobFunctionFilter] = useState("");
-  const [roleLevelFilter, setRoleLevelFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [industryFilter, setIndustryFilter] = useState("all");
+  const [jobFunctionFilter, setJobFunctionFilter] = useState("all");
+  const [roleLevelFilter, setRoleLevelFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
   const [savedSearches, setSavedSearches] = useState<
     {
       name: string;
@@ -42,15 +43,52 @@ export default function FrameworkSearch({
   >([]);
   const [savedSearchName, setSavedSearchName] = useState("");
   const [showSaveSearch, setShowSaveSearch] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [allFrameworks, setAllFrameworks] = useState<CompetencyFramework[]>(
+    frameworks || []
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch frameworks if not provided as props
+  useEffect(() => {
+    const fetchFrameworks = async () => {
+      if (frameworks) {
+        setAllFrameworks(frameworks);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/competency-manager/frameworks");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch frameworks");
+        }
+
+        const data = await response.json();
+        setAllFrameworks(data.frameworks || []);
+      } catch (err) {
+        console.error("Error fetching frameworks:", err);
+        setError("Failed to load frameworks. Please try again.");
+        toast.error("Failed to load frameworks");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFrameworks();
+  }, [frameworks]);
 
   // Extract unique values for filter dropdowns
-  const industries = [...new Set(frameworks.map((f) => f.industry))];
-  const jobFunctions = [...new Set(frameworks.map((f) => f.jobFunction))];
-  const roleLevels = [...new Set(frameworks.map((f) => f.roleLevel))];
+  const industries = [...new Set(allFrameworks.map((f) => f.industry))];
+  const jobFunctions = [...new Set(allFrameworks.map((f) => f.jobFunction))];
+  const roleLevels = [...new Set(allFrameworks.map((f) => f.roleLevel))];
 
   // Apply filters and search
   const applySearch = useCallback(() => {
-    let results = [...frameworks];
+    let results = [...allFrameworks];
 
     // Apply text search
     if (searchTerm) {
@@ -58,7 +96,7 @@ export default function FrameworkSearch({
       results = results.filter(
         (framework) =>
           framework.name.toLowerCase().includes(searchLower) ||
-          framework.description.toLowerCase().includes(searchLower) ||
+          (framework.description?.toLowerCase() || "").includes(searchLower) ||
           framework.competencies.some(
             (comp) =>
               comp.name.toLowerCase().includes(searchLower) ||
@@ -119,7 +157,7 @@ export default function FrameworkSearch({
     // Send results to parent component
     onSearchResults(results);
   }, [
-    frameworks,
+    allFrameworks,
     searchTerm,
     industryFilter,
     jobFunctionFilter,
@@ -146,15 +184,20 @@ export default function FrameworkSearch({
     );
   }, [savedSearches]);
 
-  // Apply search whenever any filter changes
+  // Apply search whenever any filter changes or when frameworks are loaded
   useEffect(() => {
-    applySearch();
+    if (allFrameworks.length > 0 && !isLoading) {
+      applySearch();
+    }
   }, [
+    allFrameworks,
     searchTerm,
     industryFilter,
     jobFunctionFilter,
     roleLevelFilter,
     dateFilter,
+    isLoading,
+    applySearch,
   ]);
 
   // Clear all filters
@@ -200,10 +243,10 @@ export default function FrameworkSearch({
     (index: number) => {
       const savedSearch = savedSearches[index];
       setSearchTerm(savedSearch.filters.searchTerm || "");
-      setIndustryFilter(savedSearch.filters.industryFilter || "");
-      setJobFunctionFilter(savedSearch.filters.jobFunctionFilter || "");
-      setRoleLevelFilter(savedSearch.filters.roleLevelFilter || "");
-      setDateFilter(savedSearch.filters.dateFilter || "");
+      setIndustryFilter(savedSearch.filters.industryFilter || "all");
+      setJobFunctionFilter(savedSearch.filters.jobFunctionFilter || "all");
+      setRoleLevelFilter(savedSearch.filters.roleLevelFilter || "all");
+      setDateFilter(savedSearch.filters.dateFilter || "all");
       // No need to call applySearch directly as the useEffect will handle it
     },
     [savedSearches]
@@ -219,6 +262,30 @@ export default function FrameworkSearch({
     },
     [savedSearches]
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+        <p className="text-gray-500">Loading frameworks...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 text-red-700 rounded-md">
+        <p>{error}</p>
+        <Button
+          onClick={() => window.location.reload()}
+          variant="outline"
+          className="mt-2"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-background">
