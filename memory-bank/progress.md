@@ -309,6 +309,12 @@
 
 ## Recent Updates
 
+- Restructured Competency Manager view for better organization (2025-03-08 17:00:00)
+  - Moved competencies section up near title and description
+  - Simplified the right sidebar to reduce duplication
+  - Kept only essential components: print button, export options, sharing options, and feedback mechanism
+  - Removed duplicate preview and analytics sections
+  - Improved overall layout and user experience
 - Fixed shared framework view by updating API endpoint in client component (2025-03-08 16:00:00)
 - Fixed SharingOptions component by passing the updatePublicStatus function as onUpdatePublicStatus prop (2025-03-08 15:00:00)
 - Fixed missing FeedbackAnalytics import in Competency Manager (2025-03-08 14:00:00)

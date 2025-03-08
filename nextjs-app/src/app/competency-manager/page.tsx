@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,12 @@ import {
   Search,
   Trash,
   Share,
+  Printer,
+  AlertCircle,
+  ArrowRight,
+  Check,
+  Eye,
+  Settings,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,6 +46,8 @@ import {
 } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CompetencyFramework, IndustryCompetencySuggestion } from "./types";
 
 // Import the new components
 import ExportOptions from "./components/ExportOptions";
@@ -48,6 +57,7 @@ import FeedbackMechanism from "./components/FeedbackMechanism";
 import PremiumFeatureTeasers from "./components/PremiumFeatureTeasers";
 import FrameworkSearch from "./components/FrameworkSearch";
 import FeedbackAnalytics from "./components/FeedbackAnalytics";
+import CompetencyVisualization from "./components/CompetencyVisualization";
 
 // Lazy load the CompetencyVisualization component
 const CompetencyVisualization = dynamic(
@@ -639,32 +649,18 @@ export default function CompetencyManager() {
             </h3>
             {framework.id && (
               <div className="flex space-x-2">
-                {editingFrameworkId ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={updateFrameworkDetails}
-                      className="flex items-center"
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Changes
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={cancelEditing}>
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={startEditing}
-                    className="flex items-center"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={updateFrameworkDetails}
+                  className="flex items-center"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+                <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                  Cancel
+                </Button>
               </div>
             )}
           </div>
@@ -1577,10 +1573,10 @@ export default function CompetencyManager() {
               </div>
             ) : framework ? (
               <div className="space-y-6">
-                <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+                <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex-1 min-w-0">
-                    {editingFrameworkId ? (
-                      <div className="space-y-4 border p-4 rounded-md">
+                    {editingFrameworkId === framework.id ? (
+                      <div className="space-y-4">
                         <div>
                           <label
                             htmlFor="framework-name"
@@ -1632,82 +1628,208 @@ export default function CompetencyManager() {
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-medium">
-                              {framework.name}
+                      <div className="space-y-6">
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="text-lg font-medium">
+                                {framework.name}
+                              </h3>
+                              <p className="text-sm text-gray-500">
+                                {framework.description ||
+                                  "No description provided"}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditFramework(framework.id!)}
+                              className="flex items-center"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                            <div className="bg-gray-50 p-2 rounded">
+                              <span className="font-medium">Industry:</span>{" "}
+                              {framework.industry}
+                            </div>
+                            <div className="bg-gray-50 p-2 rounded">
+                              <span className="font-medium">Job Function:</span>{" "}
+                              {framework.jobFunction}
+                            </div>
+                            <div className="bg-gray-50 p-2 rounded">
+                              <span className="font-medium">Role Level:</span>{" "}
+                              {framework.roleLevel}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Competencies Section - Moved Up */}
+                        <div className="space-y-4">
+                          <div className="mb-4">
+                            <h3 className="text-lg font-medium mb-2">
+                              Competencies
                             </h3>
                             <p className="text-sm text-gray-500">
-                              {framework.description ||
-                                "No description provided"}
+                              This framework contains{" "}
+                              {framework.competencies.length} competencies
+                              across different areas.
                             </p>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditFramework(framework.id!)}
-                            className="flex items-center"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-                          <div className="bg-gray-50 p-2 rounded">
-                            <span className="font-medium">Industry:</span>{" "}
-                            {framework.industry}
-                          </div>
-                          <div className="bg-gray-50 p-2 rounded">
-                            <span className="font-medium">Job Function:</span>{" "}
-                            {framework.jobFunction}
-                          </div>
-                          <div className="bg-gray-50 p-2 rounded">
-                            <span className="font-medium">Role Level:</span>{" "}
-                            {framework.roleLevel}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2 items-center">
-                          <div className="flex items-center">
-                            <Switch
-                              id="public-framework"
-                              checked={framework.isPublic}
-                              onCheckedChange={updatePublicStatus}
-                            />
-                            <Label
-                              htmlFor="public-framework"
-                              className="ml-2 text-sm"
+                          {framework.competencies.map((competency) => (
+                            <details
+                              key={competency.id}
+                              className="border rounded-lg overflow-hidden"
                             >
-                              Public Framework
-                            </Label>
-                          </div>
-                          {framework.isPublic && (
-                            <div className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
-                              <Link
-                                href={`/competency-manager/shared?id=${framework.id}`}
-                                target="_blank"
-                                className="flex items-center"
-                              >
-                                <Share className="h-3 w-3 mr-1" />
-                                View Public Link
-                              </Link>
-                            </div>
-                          )}
+                              <summary className="flex justify-between items-center p-4 cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                <div>
+                                  <h4 className="font-medium">
+                                    {competency.name}
+                                  </h4>
+                                  <p className="text-xs text-gray-500">
+                                    {competency.type}
+                                  </p>
+                                </div>
+                                <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                  {competency.levels.length} Levels
+                                </div>
+                              </summary>
+                              <div className="p-4 space-y-4">
+                                <p className="text-sm">
+                                  {competency.description}
+                                </p>
+                                {competency.businessImpact && (
+                                  <div>
+                                    <h5 className="text-sm font-medium mb-1">
+                                      Business Impact
+                                    </h5>
+                                    <p className="text-sm">
+                                      {competency.businessImpact}
+                                    </p>
+                                  </div>
+                                )}
+
+                                <h5 className="text-sm font-medium mt-4 mb-2">
+                                  Proficiency Levels
+                                </h5>
+                                <div className="space-y-4">
+                                  {competency.levels
+                                    .sort((a, b) => a.levelOrder - b.levelOrder)
+                                    .map((level) => (
+                                      <div
+                                        key={level.id}
+                                        className="bg-gray-50 p-3 rounded"
+                                      >
+                                        <h5 className="font-medium mb-1">
+                                          {level.name}
+                                        </h5>
+                                        <p className="text-sm mb-2">
+                                          {level.description}
+                                        </p>
+
+                                        {level.behavioralIndicators &&
+                                          level.behavioralIndicators.length >
+                                            0 && (
+                                            <div className="mt-2">
+                                              <h6 className="text-xs font-medium mb-1">
+                                                Behavioral Indicators
+                                              </h6>
+                                              <ul className="text-xs list-disc pl-4 space-y-1">
+                                                {level.behavioralIndicators.map(
+                                                  (indicator, idx) => (
+                                                    <li key={idx}>
+                                                      {indicator}
+                                                    </li>
+                                                  )
+                                                )}
+                                              </ul>
+                                            </div>
+                                          )}
+
+                                        {level.developmentSuggestions &&
+                                          level.developmentSuggestions.length >
+                                            0 && (
+                                            <div className="mt-2">
+                                              <h6 className="text-xs font-medium mb-1">
+                                                Development Suggestions
+                                              </h6>
+                                              <ul className="text-xs list-disc pl-4 space-y-1">
+                                                {level.developmentSuggestions.map(
+                                                  (suggestion, idx) => (
+                                                    <li key={idx}>
+                                                      {suggestion}
+                                                    </li>
+                                                  )
+                                                )}
+                                              </ul>
+                                            </div>
+                                          )}
+                                      </div>
+                                    ))}
+                                </div>
+                              </div>
+                            </details>
+                          ))}
                         </div>
+
+                        {showVisualization && (
+                          <div className="border rounded-md p-4">
+                            <CompetencyVisualization framework={framework} />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
 
                   <div className="md:w-1/3 space-y-6">
+                    {/* Print Button */}
                     <div className="border rounded-md p-4">
-                      <PrintFriendlyView framework={framework} />
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-medium">Print Framework</h3>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.print()}
+                          className="flex items-center print:hidden"
+                        >
+                          <Printer className="h-4 w-4 mr-2" />
+                          Print
+                        </Button>
+                      </div>
                     </div>
 
+                    {/* Public/Private Toggle */}
+                    <div className="border rounded-md p-4">
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">
+                          Framework Visibility
+                        </h3>
+                        <div className="flex items-center">
+                          <Switch
+                            id="public-framework-toggle"
+                            checked={framework.isPublic}
+                            onCheckedChange={updatePublicStatus}
+                          />
+                          <Label
+                            htmlFor="public-framework-toggle"
+                            className="ml-2 text-sm"
+                          >
+                            {framework.isPublic ? "Public" : "Private"}{" "}
+                            Framework
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Export Options */}
                     <div className="border rounded-md p-4">
                       <ExportOptions framework={framework} />
                     </div>
 
+                    {/* Sharing Options */}
                     <div className="border rounded-md p-4">
                       <SharingOptions
                         framework={framework}
@@ -1715,190 +1837,9 @@ export default function CompetencyManager() {
                       />
                     </div>
 
+                    {/* Feedback Mechanism */}
                     <div className="border rounded-md p-4">
                       <FeedbackMechanism framework={framework} />
-                    </div>
-
-                    <div className="border rounded-md p-4">
-                      <FeedbackAnalytics frameworkId={framework.id} />
-                    </div>
-
-                    <div className="border rounded-md p-4">
-                      <PremiumFeatureTeasers />
-                    </div>
-                  </div>
-                </div>
-
-                {showVisualization && (
-                  <div className="border rounded-md p-4">
-                    <CompetencyVisualization framework={framework} />
-                  </div>
-                )}
-
-                <div className="border-t pt-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="flex-1 min-w-0">
-                      <div className="mb-4">
-                        <h3 className="text-lg font-medium mb-2">
-                          Competencies
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          This framework contains{" "}
-                          {framework.competencies.length} competencies across
-                          different areas.
-                        </p>
-                      </div>
-
-                      <div className="space-y-1">
-                        {framework.competencies.map((competency, index) => (
-                          <div
-                            key={index}
-                            className={`border rounded-md overflow-hidden ${
-                              activeCompetencyIndex === index
-                                ? "border-blue-500"
-                                : ""
-                            }`}
-                          >
-                            <div
-                              className={`flex justify-between items-center p-3 cursor-pointer ${
-                                activeCompetencyIndex === index
-                                  ? "bg-blue-50"
-                                  : "hover:bg-gray-50"
-                              }`}
-                              onClick={() =>
-                                setActiveCompetencyIndex(
-                                  activeCompetencyIndex === index ? null : index
-                                )
-                              }
-                            >
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium truncate">
-                                  {competency.name}
-                                </h4>
-                                <p className="text-xs text-gray-500">
-                                  {competency.type}
-                                </p>
-                              </div>
-                              <div className="flex items-center">
-                                <span className="text-xs bg-gray-100 px-2 py-1 rounded mr-2">
-                                  {competency.levels.length} levels
-                                </span>
-                                {activeCompetencyIndex === index ? (
-                                  <ChevronUp className="h-5 w-5 text-gray-400" />
-                                ) : (
-                                  <ChevronDown className="h-5 w-5 text-gray-400" />
-                                )}
-                              </div>
-                            </div>
-
-                            {activeCompetencyIndex === index && (
-                              <div className="p-4 border-t bg-white">
-                                <div className="space-y-4">
-                                  <div>
-                                    <h5 className="text-sm font-medium">
-                                      Description
-                                    </h5>
-                                    <p className="text-sm mt-1">
-                                      {competency.description}
-                                    </p>
-                                  </div>
-
-                                  <div>
-                                    <h5 className="text-sm font-medium">
-                                      Business Impact
-                                    </h5>
-                                    <p className="text-sm mt-1">
-                                      {competency.businessImpact}
-                                    </p>
-                                  </div>
-
-                                  <div>
-                                    <h5 className="text-sm font-medium mb-2">
-                                      Proficiency Levels
-                                    </h5>
-                                    <div className="space-y-3">
-                                      {competency.levels
-                                        .sort(
-                                          (a, b) => a.levelOrder - b.levelOrder
-                                        )
-                                        .map((level, levelIndex) => (
-                                          <div
-                                            key={levelIndex}
-                                            className="border rounded-md p-3"
-                                          >
-                                            <h6 className="font-medium">
-                                              {level.name}
-                                            </h6>
-                                            <p className="text-sm mt-1">
-                                              {level.description}
-                                            </p>
-
-                                            <div className="mt-3 pt-2 border-t">
-                                              <h6 className="text-xs font-medium mb-1">
-                                                Behavioral Indicators
-                                              </h6>
-                                              <ul className="text-xs list-disc pl-5 space-y-1">
-                                                {level.behavioralIndicators.map(
-                                                  (indicator, i) => (
-                                                    <li key={i}>{indicator}</li>
-                                                  )
-                                                )}
-                                              </ul>
-                                            </div>
-
-                                            <div className="mt-3 pt-2 border-t">
-                                              <h6 className="text-xs font-medium mb-1">
-                                                Development Suggestions
-                                              </h6>
-                                              <ul className="text-xs list-disc pl-5 space-y-1">
-                                                {level.developmentSuggestions.map(
-                                                  (suggestion, i) => (
-                                                    <li key={i}>
-                                                      {suggestion}
-                                                    </li>
-                                                  )
-                                                )}
-                                              </ul>
-                                            </div>
-                                          </div>
-                                        ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="md:w-1/3 space-y-6">
-                      <div className="border rounded-md p-4">
-                        <PrintFriendlyView framework={framework} />
-                      </div>
-
-                      <div className="border rounded-md p-4">
-                        <ExportOptions framework={framework} />
-                      </div>
-
-                      <div className="border rounded-md p-4">
-                        <SharingOptions
-                          framework={framework}
-                          onUpdatePublicStatus={updatePublicStatus}
-                        />
-                      </div>
-
-                      <div className="border rounded-md p-4">
-                        <FeedbackMechanism framework={framework} />
-                      </div>
-
-                      <div className="border rounded-md p-4">
-                        <FeedbackAnalytics frameworkId={framework.id} />
-                      </div>
-
-                      <div className="border rounded-md p-4">
-                        <PremiumFeatureTeasers />
-                      </div>
                     </div>
                   </div>
                 </div>
