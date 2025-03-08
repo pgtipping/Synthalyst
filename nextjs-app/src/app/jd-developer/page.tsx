@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/lib/toast-migration";
@@ -13,6 +14,32 @@ import type { JobDescription } from "@/types/jobDescription";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ClientComponentWrapper } from "@/components/wrappers/ClientComponentWrapper";
 import { Button } from "@/components/ui/button";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+
+// Fallback component to display when an error occurs
+function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+  return (
+    <div className="container py-10">
+      <div className="flex flex-col items-center justify-center min-h-[50vh] px-4">
+        <h1 className="text-3xl font-bold mb-4">JD Developer Error</h1>
+        <p className="text-lg mb-2 text-center">
+          We encountered an issue while loading the Job Description Developer.
+        </p>
+        <p className="text-sm mb-8 text-muted-foreground text-center">
+          Error details: {error.message || "Unknown error"}
+        </p>
+        <div className="flex gap-4">
+          <Button onClick={resetErrorBoundary} variant="default">
+            Try again
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/">Return to Home</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Component that safely uses useSearchParams inside a Suspense boundary
 function JDDeveloperContent() {
@@ -197,11 +224,13 @@ function JDDeveloperContent() {
   );
 }
 
-// Main component that wraps the content in a Suspense boundary
+// Main component that wraps the content in a Suspense boundary and error boundary
 export default function JDDeveloperPage() {
   return (
-    <ClientComponentWrapper loadingText="Loading JD Developer...">
-      <JDDeveloperContent />
-    </ClientComponentWrapper>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <ClientComponentWrapper loadingText="Loading JD Developer...">
+        <JDDeveloperContent />
+      </ClientComponentWrapper>
+    </ErrorBoundary>
   );
 }
