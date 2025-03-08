@@ -17,7 +17,6 @@ import {
   Code,
   Sparkles,
   Users,
-  BarChart2,
 } from "lucide-react";
 import { useToast } from "@/lib/toast-migration";
 import {
@@ -102,11 +101,6 @@ export default function Header() {
       icon: <Users className="w-4 h-4 mr-2" />,
       title: "Competency Manager",
       href: "/competency-manager",
-    },
-    {
-      icon: <BarChart2 className="w-4 h-4 mr-2" />,
-      title: "Model Comparison",
-      href: "/model-comparison",
     },
   ];
 
