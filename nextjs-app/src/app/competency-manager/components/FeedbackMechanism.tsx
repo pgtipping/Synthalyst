@@ -97,9 +97,10 @@ export default function FeedbackMechanism({
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Rate this Framework</h3>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-          <div className="flex items-center space-x-1">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Star Rating */}
+        <div className="flex flex-col space-y-2">
+          <div className="flex justify-center">
             {[1, 2, 3, 4, 5].map((value) => (
               <button
                 key={value}
@@ -113,7 +114,7 @@ export default function FeedbackMechanism({
                 aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
               >
                 <StarIcon
-                  className={`h-6 w-6 sm:h-8 sm:w-8 ${
+                  className={`h-8 w-8 ${
                     (hoveredRating || rating) >= value
                       ? "text-yellow-400 fill-yellow-400"
                       : "text-gray-300"
@@ -122,13 +123,14 @@ export default function FeedbackMechanism({
               </button>
             ))}
           </div>
-          <span className="text-sm text-gray-500">
+          <div className="text-center text-sm text-gray-500">
             {rating > 0
               ? `${rating} star${rating > 1 ? "s" : ""}`
               : "Select a rating"}
-          </span>
+          </div>
         </div>
 
+        {/* Feedback Textarea */}
         <div className="space-y-2">
           <Label htmlFor="feedback">Your Feedback (Optional)</Label>
           <Textarea
@@ -136,10 +138,11 @@ export default function FeedbackMechanism({
             placeholder="What did you think of this framework? How could it be improved?"
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            className="min-h-[100px] w-full"
+            className="min-h-[100px] w-full resize-y"
           />
         </div>
 
+        {/* AI Quality Feedback */}
         <div className="space-y-4 border-t pt-4">
           <h4 className="font-medium">AI Quality Feedback</h4>
           <p className="text-sm text-gray-500">
@@ -147,16 +150,16 @@ export default function FeedbackMechanism({
             of this framework.
           </p>
 
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0">
-              <Label htmlFor="llm-quality" className="sm:flex-1">
+          <div className="space-y-4">
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="llm-quality" className="font-medium">
                 How would you rate the AI-generated content?
               </Label>
               <select
                 id="llm-quality"
                 value={llmQualityFeedback}
                 onChange={(e) => setLlmQualityFeedback(e.target.value)}
-                className="p-2 border rounded w-full sm:w-auto"
+                className="px-3 py-2 border rounded w-full text-sm h-10"
                 aria-label="AI content quality rating"
               >
                 <option value="excellent">Excellent - Blew my mind</option>
@@ -175,14 +178,15 @@ export default function FeedbackMechanism({
                   placeholder="Please provide specific suggestions for improvement..."
                   value={llmImprovementSuggestion}
                   onChange={(e) => setLlmImprovementSuggestion(e.target.value)}
-                  className="min-h-[80px] w-full"
+                  className="min-h-[80px] w-full resize-y"
                 />
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        {/* Public Feedback Toggle */}
+        <div className="flex items-center space-x-2 py-2">
           <Switch
             id="public-feedback"
             checked={isPublic}
@@ -193,10 +197,11 @@ export default function FeedbackMechanism({
           </Label>
         </div>
 
+        {/* Submit Button */}
         <Button
           type="submit"
           disabled={isSubmitting || rating === 0}
-          className="w-full"
+          className="w-full bg-blue-400 hover:bg-blue-500 text-white"
         >
           {isSubmitting ? "Submitting..." : "Submit Feedback"}
         </Button>

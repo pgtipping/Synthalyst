@@ -2,6 +2,7 @@
   "name": "nextjs-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
@@ -28,7 +29,10 @@
     "process-mdx": "ts-node scripts/process-mdx-posts.ts",
     "create-variant": "node scripts/create-variant.js",
     "migrate-components": "node scripts/migrate-components.js",
-    "component-audit": "node scripts/component-audit.js"
+    "component-audit": "node scripts/component-audit.js",
+    "generate-icons": "node scripts/generate-icons.js",
+    "generate-social-images": "node scripts/generate-social-images.js",
+    "generate-all-assets": "npm run generate-icons && npm run generate-social-images"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
@@ -146,6 +150,7 @@
     "msw": "^2.7.3",
     "node-fetch": "^2.7.0",
     "shadcn": "^2.4.0-canary.11",
+    "sharp": "^0.33.5",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",

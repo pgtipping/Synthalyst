@@ -26,6 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SynthalystLogo from "./SynthalystLogo";
 
 // Extend the Session type to include role
 interface ExtendedSession extends Session {
@@ -236,10 +237,10 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-6xl items-center">
-        <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="text-xl font-bold text-primary">Synthalyst</span>
+      <div className="container flex h-24 max-w-6xl items-center">
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center">
+            <SynthalystLogo />
           </Link>
         </div>
 
@@ -253,8 +254,8 @@ export default function Header() {
         </button>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <nav className="flex items-center space-x-6">
+        <div className="hidden md:flex md:items-center md:justify-between md:flex-1">
+          <nav className="flex items-center space-x-8 ml-12">
             <Link
               href="/about"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -277,7 +278,10 @@ export default function Header() {
               <DropdownMenuContent align="start" className="w-56">
                 {tools.map((tool, index) => (
                   <DropdownMenuItem key={index} asChild>
-                    <Link href={tool.href} className="flex items-center">
+                    <Link
+                      href={tool.href}
+                      className="flex items-center text-black"
+                    >
                       {tool.icon}
                       <span>{tool.title}</span>
                     </Link>
@@ -317,7 +321,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {menuOpen && (
-          <div className="absolute top-14 left-0 right-0 bg-background border-b md:hidden">
+          <div className="absolute top-24 left-0 right-0 bg-background border-b md:hidden">
             <nav className="container flex flex-col space-y-4 p-4">
               <Link
                 href="/about"
@@ -341,7 +345,7 @@ export default function Header() {
                   <Link
                     key={index}
                     href={tool.href}
-                    className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+                    className="flex items-center text-sm text-black hover:text-black/80 transition-colors py-1"
                     onClick={() => setMenuOpen(false)}
                   >
                     {tool.icon}

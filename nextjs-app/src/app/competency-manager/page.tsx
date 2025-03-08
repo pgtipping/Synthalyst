@@ -1,8 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,30 +21,16 @@ import {
   ChevronRight,
   BarChart,
   Save,
-  Bookmark,
   Search,
   Trash,
-  Share,
-  Printer,
-  AlertCircle,
-  ArrowRight,
-  Check,
-  Eye,
-  Settings,
+  FileSearch,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/lib/toast-migration";
-import {
-  Switch,
-  SwitchTrigger,
-  SwitchThumb,
-  SwitchDescription,
-  SwitchLabel,
-} from "@/components/ui/switch";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompetencyFramework, IndustryCompetencySuggestion } from "./types";
 
 // Import the new components
@@ -54,14 +38,16 @@ import ExportOptions from "./components/ExportOptions";
 import PrintFriendlyView from "./components/PrintFriendlyView";
 import SharingOptions from "./components/SharingOptions";
 import FeedbackMechanism from "./components/FeedbackMechanism";
-import PremiumFeatureTeasers from "./components/PremiumFeatureTeasers";
 import FrameworkSearch from "./components/FrameworkSearch";
-import FeedbackAnalytics from "./components/FeedbackAnalytics";
-import CompetencyVisualization from "./components/CompetencyVisualization";
 
 // Lazy load the CompetencyVisualization component
 const CompetencyVisualization = dynamic(
-  () => import("./components/CompetencyVisualization"),
+  () =>
+    import("./components/CompetencyVisualization").then((mod) => ({
+      default: (props: { framework: CompetencyFramework }) => (
+        <mod.default competencies={props.framework.competencies} />
+      ),
+    })),
   {
     loading: () => (
       <div className="h-64 flex items-center justify-center">
@@ -73,6 +59,12 @@ const CompetencyVisualization = dynamic(
 );
 
 export default function CompetencyManager() {
+  // State for the active tab
+  const [activeTab, setActiveTab] = useState<
+    "create" | "results" | "search" | "recent"
+  >("create");
+
+  // State for the framework data
   const [formData, setFormData] = useState({
     industry: "",
     customIndustry: "",
@@ -81,7 +73,7 @@ export default function CompetencyManager() {
     roleLevel: "",
     customRoleLevel: "",
     numberOfCompetencies: 5,
-    competencyTypes: [],
+    competencyTypes: [] as string[],
     customCompetencyType: "",
     numberOfLevels: 4,
     specificRequirements: "",
@@ -89,34 +81,40 @@ export default function CompetencyManager() {
     existingCompetencies: "",
   });
 
-  const [framework, setFramework] = useState<CompetencyFramework | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showOptionalFields, setShowOptionalFields] = useState(false);
-  const [activeCompetencyIndex, setActiveCompetencyIndex] = useState<
-    number | null
-  >(0);
-  const [industrySuggestions, setIndustrySuggestions] = useState<
-    IndustryCompetencySuggestion[]
-  >([]);
+  // State for editing framework
   const [editingFrameworkId, setEditingFrameworkId] = useState<string | null>(
     null
   );
   const [frameworkNameEdit, setFrameworkNameEdit] = useState("");
   const [frameworkDescriptionEdit, setFrameworkDescriptionEdit] = useState("");
-  const [activeTab, setActiveTab] = useState<
-    "search" | "create" | "recent" | "results"
-  >("create");
-  const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
-    null
-  );
-  const [showVisualization, setShowVisualization] = useState(false);
-  const [countdown, setCountdown] = useState<number>(30);
-  const [loadingMessage, setLoadingMessage] = useState<string>("");
 
+  // UI state
+  const [showOptionalFields, setShowOptionalFields] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Framework data
+  const [framework, setFramework] = useState<CompetencyFramework | null>(null);
   const [savedFrameworks, setSavedFrameworks] = useState<CompetencyFramework[]>(
     []
   );
+
+  // Delete confirmation
+  const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
+    null
+  );
+
+  // Loading state
+  const [loadingMessage, setLoadingMessage] = useState(
+    "Generating your competency framework..."
+  );
+  const [countdown, setCountdown] = useState(0);
+
+  const [showVisualization, setShowVisualization] = useState(false);
+  const [activeCompetencyIndex, setActiveCompetencyIndex] = useState<
+    number | null
+  >(0);
+
   const [isLoadingSaved, setIsLoadingSaved] = useState(false);
   const [savedFrameworksError, setSavedFrameworksError] = useState<
     string | null
@@ -259,16 +257,11 @@ export default function CompetencyManager() {
     },
   ];
 
+  // Load industry suggestions and saved frameworks on component mount
   useEffect(() => {
-    setIndustrySuggestions(industryCompetencySuggestions);
+    // Load saved frameworks
+    loadSavedFrameworks();
   }, []);
-
-  // Load saved frameworks when the "saved" tab is selected
-  useEffect(() => {
-    if (activeTab === "search") {
-      loadSavedFrameworks();
-    }
-  }, [activeTab]);
 
   // Function to load saved frameworks
   const loadSavedFrameworks = async () => {
@@ -308,25 +301,30 @@ export default function CompetencyManager() {
         throw new Error("Failed to delete framework");
       }
 
-      // Remove the deleted framework from the state
-      setSavedFrameworks((prev) => prev.filter((f) => f.id !== id));
-
-      // If the currently viewed framework is the one being deleted, clear it
-      if (framework?.id === id) {
-        setFramework(null);
-      }
+      // Remove the deleted framework from the list
+      setSavedFrameworks((prev) =>
+        prev.filter((framework) => framework.id !== id)
+      );
 
       toast({
         title: "Success",
         description: "Framework deleted successfully!",
       });
+
+      // If the currently viewed framework is the one being deleted, clear it
+      if (framework?.id === id) {
+        setFramework(null);
+      }
     } catch (error) {
+      console.error("Error deleting framework:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to delete framework",
+        description: "Failed to delete framework. Please try again later.",
       });
+    } finally {
+      // Clear the delete confirmation
+      setDeleteConfirmation(null);
     }
   };
 
@@ -573,12 +571,20 @@ export default function CompetencyManager() {
     updateFrameworkDetails();
   };
 
-  const startEditing = () => {
-    if (!framework) return;
+  const startEditing = (fw?: CompetencyFramework | null) => {
+    const frameworkToEdit = fw || framework;
+    if (!frameworkToEdit) return;
 
-    setFrameworkNameEdit(framework.name);
-    setFrameworkDescriptionEdit(framework.description || "");
-    setEditingFrameworkId(framework.id || null);
+    // Set the framework to edit
+    setFramework(frameworkToEdit);
+
+    // Set the editing values
+    setFrameworkNameEdit(frameworkToEdit.name);
+    setFrameworkDescriptionEdit(frameworkToEdit.description || "");
+    setEditingFrameworkId(frameworkToEdit.id || null);
+
+    // Switch to the results tab to show the editing interface
+    setActiveTab("results");
   };
 
   const cancelEditing = () => {
@@ -601,30 +607,6 @@ export default function CompetencyManager() {
     }
   };
 
-  const handleEditFramework = (id: string) => {
-    // Find the framework with the given id
-    const frameworkToEdit = savedFrameworks.find((fw) => fw.id === id);
-
-    if (frameworkToEdit) {
-      // Set the framework to edit
-      setFramework(frameworkToEdit);
-
-      // Set the editing values
-      setFrameworkNameEdit(frameworkToEdit.name);
-      setFrameworkDescriptionEdit(frameworkToEdit.description || "");
-      setEditingFrameworkId(id);
-
-      // Switch to the results tab to show the framework details
-      setActiveTab("results");
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Framework not found",
-      });
-    }
-  };
-
   const exportToJSON = () => {
     if (!framework) return;
 
@@ -640,413 +622,6 @@ export default function CompetencyManager() {
     linkElement.setAttribute("href", dataUri);
     linkElement.setAttribute("download", exportFileDefaultName);
     linkElement.click();
-  };
-
-  const renderTooltip = (content: string) => (
-    <Tooltip>
-      <TooltipTrigger>
-        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
-      </TooltipTrigger>
-      <TooltipContent>{content}</TooltipContent>
-    </Tooltip>
-  );
-
-  const renderFrameworkDetails = () => {
-    if (!framework) return null;
-
-    return (
-      <div className="space-y-6">
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-xl font-semibold text-blue-800">
-              {framework.name}
-            </h3>
-            {framework.id && (
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={updateFrameworkDetails}
-                  className="flex items-center"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </Button>
-                <Button variant="ghost" size="sm" onClick={cancelEditing}>
-                  Cancel
-                </Button>
-              </div>
-            )}
-          </div>
-          {editingFrameworkId ? (
-            <div className="space-y-3 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Framework Name
-                </label>
-                <Input
-                  value={frameworkNameEdit}
-                  onChange={(e) => setFrameworkNameEdit(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Description
-                </label>
-                <Textarea
-                  value={frameworkDescriptionEdit}
-                  onChange={(e) => setFrameworkDescriptionEdit(e.target.value)}
-                  className="w-full"
-                  rows={3}
-                />
-              </div>
-            </div>
-          ) : (
-            <p className="text-gray-700 mb-4">{framework.description}</p>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-gray-700">Industry:</span>{" "}
-              <span className="text-gray-600">{framework.industry}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-700">Job Function:</span>{" "}
-              <span className="text-gray-600">{framework.jobFunction}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-700">Role Level:</span>{" "}
-              <span className="text-gray-600">{framework.roleLevel}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold">Competencies</h3>
-          {framework.competencies.map((competency, index) => (
-            <div key={index} className="border rounded-lg overflow-hidden">
-              <div
-                className="flex justify-between items-center p-4 bg-gray-50 cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveCompetencyIndex(
-                    index === activeCompetencyIndex ? null : index
-                  );
-                }}
-              >
-                <div>
-                  <h4 className="font-medium text-lg">{competency.name}</h4>
-                  <p className="text-sm text-gray-600">{competency.type}</p>
-                </div>
-                <div>
-                  {index === activeCompetencyIndex ? (
-                    <ChevronUp className="h-5 w-5 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-500" />
-                  )}
-                </div>
-              </div>
-
-              {index === activeCompetencyIndex && (
-                <div className="p-4 border-t">
-                  <p className="mb-3">{competency.description}</p>
-                  <div className="mb-4">
-                    <h5 className="font-medium text-gray-700 mb-1">
-                      Business Impact
-                    </h5>
-                    <p className="text-gray-600">{competency.businessImpact}</p>
-                  </div>
-
-                  <h5 className="font-medium text-gray-700 mb-2">
-                    Proficiency Levels
-                  </h5>
-                  <div className="space-y-4">
-                    {competency.levels
-                      .sort((a, b) => a.levelOrder - b.levelOrder)
-                      .map((level, levelIndex) => (
-                        <div
-                          key={levelIndex}
-                          className="bg-gray-50 p-3 rounded"
-                        >
-                          <h6 className="font-medium mb-1">{level.name}</h6>
-                          <p className="text-sm mb-2">{level.description}</p>
-
-                          <div className="mb-2">
-                            <h6 className="text-sm font-medium text-gray-700">
-                              Behavioral Indicators
-                            </h6>
-                            <ul className="list-disc pl-5 text-sm text-gray-600">
-                              {level.behavioralIndicators.map(
-                                (indicator, i) => (
-                                  <li key={i}>{indicator}</li>
-                                )
-                              )}
-                            </ul>
-                          </div>
-
-                          <div>
-                            <h6 className="text-sm font-medium text-gray-700">
-                              Development Suggestions
-                            </h6>
-                            <ul className="list-disc pl-5 text-sm text-gray-600">
-                              {level.developmentSuggestions.map(
-                                (suggestion, i) => (
-                                  <li key={i}>{suggestion}</li>
-                                )
-                              )}
-                            </ul>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // Wrap the results tab content with TooltipProvider
-  const renderResultsTab = () => {
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-6">Generated Framework</h2>
-        {framework ? (
-          <div className="space-y-6">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-xl font-semibold text-blue-800">
-                  {framework.name}
-                </h3>
-                {framework.id && (
-                  <div className="flex space-x-2">
-                    {editingFrameworkId ? (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={updateFrameworkDetails}
-                          className="flex items-center"
-                        >
-                          <Save className="h-4 w-4 mr-2" />
-                          Save Changes
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={cancelEditing}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={startEditing}
-                        className="flex items-center"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-              {editingFrameworkId ? (
-                <div className="space-y-3 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Framework Name
-                    </label>
-                    <Input
-                      value={frameworkNameEdit}
-                      onChange={(e) => setFrameworkNameEdit(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Description
-                    </label>
-                    <Textarea
-                      value={frameworkDescriptionEdit}
-                      onChange={(e) =>
-                        setFrameworkDescriptionEdit(e.target.value)
-                      }
-                      className="w-full"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-700 mb-4">{framework.description}</p>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-gray-700">Industry:</span>{" "}
-                  <span className="text-gray-600">{framework.industry}</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">
-                    Job Function:
-                  </span>{" "}
-                  <span className="text-gray-600">{framework.jobFunction}</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Role Level:</span>{" "}
-                  <span className="text-gray-600">{framework.roleLevel}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Visualization toggle button */}
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowVisualization(!showVisualization)}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors"
-              >
-                <BarChart className="h-4 w-4" />
-                {showVisualization
-                  ? "Hide Visualization"
-                  : "Show Visualization"}
-              </Button>
-            </div>
-
-            {/* Lazy-loaded visualization component */}
-            {showVisualization && framework.competencies.length > 0 && (
-              <div className="border rounded-lg p-4 bg-white">
-                <CompetencyVisualization
-                  competencies={framework.competencies}
-                />
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">Competencies</h3>
-              {framework.competencies.map((competency, index) => (
-                <div key={index} className="border rounded-lg overflow-hidden">
-                  <div
-                    className="flex justify-between items-center p-4 bg-gray-50 cursor-pointer"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setActiveCompetencyIndex(
-                        index === activeCompetencyIndex ? null : index
-                      );
-                    }}
-                  >
-                    <div>
-                      <h4 className="font-medium text-lg">{competency.name}</h4>
-                      <p className="text-sm text-gray-600">{competency.type}</p>
-                    </div>
-                    <div>
-                      {index === activeCompetencyIndex ? (
-                        <ChevronUp className="h-5 w-5 text-gray-500" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-gray-500" />
-                      )}
-                    </div>
-                  </div>
-
-                  {index === activeCompetencyIndex && (
-                    <div className="p-4 border-t">
-                      <p className="mb-3">{competency.description}</p>
-                      <div className="mb-4">
-                        <h5 className="font-medium text-gray-700 mb-1">
-                          Business Impact
-                        </h5>
-                        <p className="text-gray-600">
-                          {competency.businessImpact}
-                        </p>
-                      </div>
-
-                      <h5 className="font-medium text-gray-700 mb-2">
-                        Proficiency Levels
-                      </h5>
-                      <div className="space-y-4">
-                        {competency.levels
-                          .sort((a, b) => a.levelOrder - b.levelOrder)
-                          .map((level, levelIndex) => (
-                            <div
-                              key={levelIndex}
-                              className="bg-gray-50 p-3 rounded"
-                            >
-                              <h6 className="font-medium mb-1">{level.name}</h6>
-                              <p className="text-sm mb-2">
-                                {level.description}
-                              </p>
-
-                              <div className="mb-2">
-                                <h6 className="text-sm font-medium text-gray-700">
-                                  Behavioral Indicators
-                                </h6>
-                                <ul className="list-disc pl-5 text-sm text-gray-600">
-                                  {level.behavioralIndicators.map(
-                                    (indicator, i) => (
-                                      <li key={i}>{indicator}</li>
-                                    )
-                                  )}
-                                </ul>
-                              </div>
-
-                              <div>
-                                <h6 className="text-sm font-medium text-gray-700">
-                                  Development Suggestions
-                                </h6>
-                                <ul className="list-disc pl-5 text-sm text-gray-600">
-                                  {level.developmentSuggestions.map(
-                                    (suggestion, i) => (
-                                      <li key={i}>{suggestion}</li>
-                                    )
-                                  )}
-                                </ul>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={() => setActiveTab("create")}>
-                Back to Generator
-              </Button>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => exportToJSON()}
-                  className="flex items-center"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Export JSON
-                </Button>
-                <Button
-                  onClick={() => saveFramework()}
-                  className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Framework
-                </Button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-500">
-              No framework generated yet. Use the Create tab to generate a
-              framework.
-            </p>
-          </div>
-        )}
-      </div>
-    );
   };
 
   // Handle search results
@@ -1490,14 +1065,51 @@ export default function CompetencyManager() {
                             className="text-blue-500 hover:text-blue-700"
                             aria-label={`View ${fw.name}`}
                           >
-                            <Eye className="h-4 w-4" />
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <FileSearch className="h-4 w-4" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>View Framework</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              startEditing(fw);
+                            }}
+                            className="text-green-500 hover:text-green-700 mx-1"
+                            aria-label={`Edit ${fw.name}`}
+                          >
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Edit className="h-4 w-4" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Edit Framework</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </button>
                           <button
                             onClick={() => setDeleteConfirmation(fw.id!)}
                             className="text-red-500 hover:text-red-700"
                             aria-label={`Delete ${fw.name}`}
                           >
-                            <Trash className="h-4 w-4" />
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Trash className="h-4 w-4" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Delete Framework</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </button>
                         </div>
                       </div>
@@ -1660,7 +1272,16 @@ export default function CompetencyManager() {
                               onClick={() => handleViewFramework(framework.id!)}
                               className="flex items-center"
                             >
-                              <Eye className="h-4 w-4" />
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <FileSearch className="h-4 w-4" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>View Framework</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             </Button>
                           </div>
 
@@ -1799,22 +1420,6 @@ export default function CompetencyManager() {
                   </div>
 
                   <div className="md:w-1/3 space-y-6">
-                    {/* Print Button */}
-                    <div className="border rounded-md p-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium">Print Framework</h3>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.print()}
-                          className="flex items-center print:hidden"
-                        >
-                          <Printer className="h-4 w-4 mr-2" />
-                          Print
-                        </Button>
-                      </div>
-                    </div>
-
                     {/* Public/Private Toggle */}
                     <div className="border rounded-md p-4">
                       <div className="space-y-4">
@@ -1842,6 +1447,9 @@ export default function CompetencyManager() {
                     <div className="border rounded-md p-4">
                       <ExportOptions framework={framework} />
                     </div>
+
+                    {/* Add PrintFriendlyView component */}
+                    {framework && <PrintFriendlyView framework={framework} />}
 
                     {/* Sharing Options */}
                     <div className="border rounded-md p-4">
@@ -1958,7 +1566,7 @@ export default function CompetencyManager() {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => handleDeleteFramework(deleteConfirmation)}
+                  onClick={() => deleteFramework(deleteConfirmation)}
                 >
                   Delete
                 </Button>

@@ -102,9 +102,30 @@ export default function PrintFriendlyView({
               page-break-after: always;
             }
           }
+          .print-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4a86e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+          }
+          .print-button:hover {
+            background-color: #3a76d8;
+          }
+          @media print {
+            .print-button {
+              display: none;
+            }
+          }
         </style>
       </head>
       <body>
+        <button class="print-button" onclick="window.print()">Print Framework</button>
+        
         <h1>${framework.name}</h1>
         <p>${framework.description || ""}</p>
         <div class="header-info">
@@ -181,14 +202,7 @@ export default function PrintFriendlyView({
     printWindow.document.write(printContent);
     printWindow.document.close();
 
-    // Wait for the content to load before printing
-    printWindow.onload = function () {
-      printWindow.print();
-      // Close the window after printing (optional)
-      // printWindow.onafterprint = function() {
-      //   printWindow.close();
-      // };
-    };
+    // No need to automatically trigger print - user can click the button in the new window
   };
 
   return (

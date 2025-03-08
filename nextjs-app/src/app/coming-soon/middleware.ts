@@ -6,6 +6,7 @@ const PRODUCTION_READY_TOOLS = [
   "/jd-developer",
   "/interview-questions",
   "/training-plan",
+  "/competency-manager",
 ];
 
 // List of all tool paths to check against
@@ -19,6 +20,7 @@ const ALL_TOOL_PATHS = [
   "/competency-manager",
   "/model-comparison",
   "/the-synth",
+  "/blog",
 ];
 
 // Non-tool paths that should always be accessible
@@ -27,7 +29,6 @@ const ALWAYS_ACCESSIBLE_PATHS = [
   "/about",
   "/services",
   "/contact",
-  "/blog",
   "/get-started",
   "/auth",
   "/login",
@@ -97,15 +98,15 @@ export const config = {
     "/2do/:path*",
     "/learning-content/:path*",
     "/knowledge-gpt/:path*",
-    "/competency-manager/:path*",
     "/model-comparison/:path*",
     "/the-synth/:path*",
+    "/blog/:path*",
     // Also match the root paths
     "/2do",
     "/learning-content",
     "/knowledge-gpt",
-    "/competency-manager",
     "/model-comparison",
     "/the-synth",
+    "/blog",
   ],
 };

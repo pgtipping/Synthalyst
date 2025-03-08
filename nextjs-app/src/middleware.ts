@@ -7,6 +7,7 @@ const PRODUCTION_READY_TOOLS = [
   "/jd-developer",
   "/interview-questions",
   "/training-plan",
+  "/competency-manager",
 ];
 
 // List of all tool paths to check against
@@ -28,7 +29,6 @@ const ALWAYS_ACCESSIBLE_PATHS = [
   "/about",
   "/services",
   "/contact",
-  "/blog",
   "/get-started",
   "/auth",
   "/login",
@@ -145,9 +145,9 @@ function isComingSoonRoute(pathname: string) {
     "/2do",
     "/learning-content",
     "/knowledge-gpt",
-    "/competency-manager",
     "/model-comparison",
     "/the-synth",
+    "/blog",
   ];
 
   return comingSoonRoutes.some(
@@ -165,16 +165,16 @@ export const config = {
     "/2do/:path*",
     "/learning-content/:path*",
     "/knowledge-gpt/:path*",
-    "/competency-manager/:path*",
     "/model-comparison/:path*",
     "/the-synth/:path*",
+    "/blog/:path*",
 
     // Root paths for Coming Soon
     "/2do",
     "/learning-content",
     "/knowledge-gpt",
-    "/competency-manager",
     "/model-comparison",
     "/the-synth",
+    "/blog",
   ],
 };

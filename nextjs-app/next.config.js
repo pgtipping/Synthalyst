@@ -71,4 +71,4 @@ const nextConfig = {
   serverExternalPackages: ["@prisma/client", "bcrypt"],
 };
 
-module.exports = nextConfig;
+export default nextConfig;
