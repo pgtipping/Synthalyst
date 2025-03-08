@@ -571,6 +571,30 @@ export default function CompetencyManager() {
     setEditingFrameworkId(null);
   };
 
+  const handleEditFramework = (id: string) => {
+    // Find the framework with the given id
+    const frameworkToEdit = savedFrameworks.find((fw) => fw.id === id);
+
+    if (frameworkToEdit) {
+      // Set the framework to edit
+      setFramework(frameworkToEdit);
+
+      // Set the editing values
+      setFrameworkNameEdit(frameworkToEdit.name);
+      setFrameworkDescriptionEdit(frameworkToEdit.description || "");
+      setEditingFrameworkId(id);
+
+      // Switch to the results tab to show the framework details
+      setActiveTab("results");
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Framework not found",
+      });
+    }
+  };
+
   const exportToJSON = () => {
     if (!framework) return;
 
