@@ -227,7 +227,17 @@ function JDDeveloperContent() {
 // Main component that wraps the content in a Suspense boundary and error boundary
 export default function JDDeveloperPage() {
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={(error) => {
+        // Log the error to the console with additional context
+        console.error("JD Developer Error:", error);
+        console.error("Error Stack:", error.stack);
+
+        // You could also send this to an error reporting service
+        // reportErrorToService(error);
+      }}
+    >
       <ClientComponentWrapper loadingText="Loading JD Developer...">
         <JDDeveloperContent />
       </ClientComponentWrapper>
