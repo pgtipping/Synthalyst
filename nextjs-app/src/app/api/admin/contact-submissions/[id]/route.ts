@@ -32,9 +32,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if the user's email is the admin email
-    const userEmail = session.user.email;
-    if (userEmail !== "pgtipping1@gmail.com") {
+    // Check if the user has admin role or is the admin email
+    if (
+      session.user.role !== "ADMIN" &&
+      session.user.email !== "pgtipping1@gmail.com"
+    ) {
       return NextResponse.json(
         { error: "Forbidden: Admin access required" },
         { status: 403 }
