@@ -1868,117 +1868,104 @@ export default function CompetencyManager() {
 
   return (
     <TooltipProvider>
-      <div className="container mx-auto py-8">
-        <style jsx global>{`
-          .competency-manager {
-            font-size: 17px; /* Increased from default 16px */
-          }
-          .competency-manager h1 {
-            font-size: 2.25rem;
-          }
-          .competency-manager h2 {
-            font-size: 1.875rem;
-          }
-          .competency-manager h3 {
-            font-size: 1.5rem;
-          }
-          .competency-manager h4 {
-            font-size: 1.25rem;
-          }
-          .competency-manager p,
-          .competency-manager li {
-            font-size: 17px;
-          }
-        `}</style>
-        <div className="competency-manager">
-          <h1 className="text-3xl font-bold mb-8">Competency Manager</h1>
-          <div className="mb-6">
-            <div className="flex flex-wrap gap-2 border-b">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+            Competency Manager
+          </h1>
+          <p className="text-gray-600 max-w-3xl">
+            Create, manage, and share competency frameworks for your
+            organization. Define competencies, proficiency levels, and
+            development paths tailored to your industry and roles.
+          </p>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2 border-b">
+            <button
+              className={`px-3 py-2 text-sm font-medium flex items-center ${
+                activeTab === "create"
+                  ? "border-b-2 border-blue-500 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveTab("create")}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Create</span>
+              <span className="sm:hidden">New</span>
+            </button>
+            <button
+              className={`px-3 py-2 text-sm font-medium flex items-center ${
+                activeTab === "search"
+                  ? "border-b-2 border-blue-500 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveTab("search")}
+            >
+              <Search className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Search</span>
+              <span className="sm:hidden">Find</span>
+            </button>
+            <button
+              className={`px-3 py-2 text-sm font-medium flex items-center ${
+                activeTab === "recent"
+                  ? "border-b-2 border-blue-500 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => {
+                setActiveTab("recent");
+                loadSavedFrameworks();
+              }}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Your Frameworks</span>
+              <span className="sm:hidden">Yours</span>
+            </button>
+            {framework && (
               <button
                 className={`px-3 py-2 text-sm font-medium flex items-center ${
-                  activeTab === "create"
+                  activeTab === "results"
                     ? "border-b-2 border-blue-500 text-blue-600"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
-                onClick={() => setActiveTab("create")}
+                onClick={() => setActiveTab("results")}
               >
-                <Plus className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Create</span>
-                <span className="sm:hidden">New</span>
+                <FileText className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Current Framework</span>
+                <span className="sm:hidden">Current</span>
               </button>
-              <button
-                className={`px-3 py-2 text-sm font-medium flex items-center ${
-                  activeTab === "search"
-                    ? "border-b-2 border-blue-500 text-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-                onClick={() => setActiveTab("search")}
-              >
-                <Search className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Search</span>
-                <span className="sm:hidden">Find</span>
-              </button>
-              <button
-                className={`px-3 py-2 text-sm font-medium flex items-center ${
-                  activeTab === "recent"
-                    ? "border-b-2 border-blue-500 text-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-                onClick={() => {
-                  setActiveTab("recent");
-                  loadSavedFrameworks();
-                }}
-              >
-                <Clock className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Your Frameworks</span>
-                <span className="sm:hidden">Yours</span>
-              </button>
-              {framework && (
-                <button
-                  className={`px-3 py-2 text-sm font-medium flex items-center ${
-                    activeTab === "results"
-                      ? "border-b-2 border-blue-500 text-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("results")}
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Current Framework</span>
-                  <span className="sm:hidden">Current</span>
-                </button>
-              )}
-            </div>
+            )}
           </div>
+        </div>
 
-          {renderTabContent()}
+        {renderTabContent()}
 
-          {/* Delete confirmation dialog */}
-          {deleteConfirmation && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                <h3 className="text-lg font-medium mb-4">Confirm Deletion</h3>
-                <p className="mb-6">
-                  Are you sure you want to delete this framework? This action
-                  cannot be undone.
-                </p>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setDeleteConfirmation(null)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleDeleteFramework(deleteConfirmation)}
-                  >
-                    Delete
-                  </Button>
-                </div>
+        {/* Delete confirmation dialog */}
+        {deleteConfirmation && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h3 className="text-lg font-medium mb-4">Confirm Deletion</h3>
+              <p className="mb-6">
+                Are you sure you want to delete this framework? This action
+                cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteConfirmation(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteFramework(deleteConfirmation)}
+                >
+                  Delete
+                </Button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );
