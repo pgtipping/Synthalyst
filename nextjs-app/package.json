@@ -153,6 +153,7 @@
     "babel-jest": "^29.7.0",
     "bcrypt": "^5.1.1",
     "dotenv-cli": "^8.0.0",
+    "encoding": "^0.1.13",
     "eslint": "^9",
     "eslint-config-next": "^15.2.0",
     "identity-obj-proxy": "^3.0.0",

@@ -1,97 +1,98 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Eye,
+  Trash2,
+  FileText,
+  Copy,
+  Pencil,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { toast } from "@/lib/toast-migration";
-import { Download, Copy, Trash2 } from "lucide-react";
 import type { JobDescription } from "@/types/jobDescription";
-import JobDescriptionView from "./JobDescriptionView";
-import { pdf } from "@react-pdf/renderer";
 import JobDescriptionPDF from "@/components/JobDescriptionPDF";
+import PDFRenderer from "@/components/PDFRenderer";
 
 interface SavedJDsProps {
   onUseAsTemplate: (jd: JobDescription) => void;
 }
 
 export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
-  const { data: session } = useSession();
+  const router = useRouter();
+  const [savedJDs, setSavedJDs] = useState<JobDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [savedJDs, setSavedJDs] = useState<JobDescription[]>([]);
-  const [selectedJD, setSelectedJD] = useState<JobDescription | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isDuplicating, setIsDuplicating] = useState<string | null>(null);
+
+  const fetchSavedJDs = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/jd-developer/saved");
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch saved job descriptions: ${response.status} ${response.statusText}`
+        );
+      }
+      const data = await response.json();
+      setSavedJDs(data.jobDescriptions);
+    } catch (error) {
+      console.error("Error fetching saved job descriptions:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch saved job descriptions"
+      );
+      toast({
+        title: "Error",
+        description: "Failed to fetch saved job descriptions",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchSavedJDs = async () => {
-      if (!session?.user?.email) {
-        setError("Please sign in to view saved job descriptions");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch("/api/jd-developer/saved");
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || "Failed to fetch saved job descriptions"
-          );
-        }
-        const data = await response.json();
-        setSavedJDs(data.jobDescriptions);
-      } catch (error) {
-        console.error("Error fetching saved job descriptions:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch saved job descriptions"
-        );
-        if (
-          error instanceof Error &&
-          error.message === "Authentication required"
-        ) {
-          window.location.reload(); // Refresh the page to trigger re-authentication
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchSavedJDs();
-  }, [session]);
+  }, []);
 
   const handleDelete = async (id: string) => {
     try {
-      // Find the job description to get its title
-      const jobToDelete = savedJDs.find((jd) => jd.id === id);
-      if (!jobToDelete) return;
-
-      const response = await fetch(`/api/jd-developer/delete?id=${id}`, {
-        method: "DELETE",
+      setIsDeleting(id);
+      const response = await fetch(`/api/jd-developer/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete job description");
+        throw new Error(
+          `Failed to delete job description: ${response.status} ${response.statusText}`
+        );
       }
 
       // Remove the deleted JD from the state
       setSavedJDs((prevJDs) => prevJDs.filter((jd) => jd.id !== id));
-      setSelectedJD(null);
 
       toast({
-        title: "Job Description Deleted",
-        description: `"${jobToDelete.title}" has been deleted successfully.`,
+        title: "Success",
+        description: "Job description deleted successfully",
       });
     } catch (error) {
       console.error("Error deleting job description:", error);
@@ -103,43 +104,15 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
             : "Failed to delete job description",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleExport = async (jd: JobDescription) => {
-    try {
-      // Generate PDF blob
-      const blob = await pdf(<JobDescriptionPDF jd={jd} />).toBlob();
-
-      // Create a URL for the blob
-      const url = URL.createObjectURL(blob);
-
-      // Create filename
-      const exportFileDefaultName = `${jd.title
-        .toLowerCase()
-        .replace(/\s+/g, "-")}-${jd.id}.pdf`;
-
-      // Create and click download link
-      const linkElement = document.createElement("a");
-      linkElement.setAttribute("href", url);
-      linkElement.setAttribute("download", exportFileDefaultName);
-      linkElement.click();
-
-      // Clean up
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
-      toast({
-        title: "Error",
-        description: "Failed to export job description as PDF",
-        variant: "destructive",
-      });
+    } finally {
+      setIsDeleting(null);
     }
   };
 
   const handleDuplicate = async (jd: JobDescription) => {
     try {
-      const response = await fetch("/api/jd-developer/duplicate", {
+      setIsDuplicating(jd.id);
+      const response = await fetch(`/api/jd-developer/duplicate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -148,160 +121,177 @@ export default function SavedJDs({ onUseAsTemplate }: SavedJDsProps) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to duplicate job description");
+        throw new Error(
+          `Failed to duplicate job description: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
+
+      // Add the duplicated JD to the state
       setSavedJDs((prevJDs) => [data.jobDescription, ...prevJDs]);
+
       toast({
         title: "Success",
-        description: "Job description duplicated successfully.",
+        description: "Job description duplicated successfully",
       });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to duplicate job description";
+    } catch (error) {
+      console.error("Error duplicating job description:", error);
       toast({
         title: "Error",
-        description: errorMessage,
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to duplicate job description",
         variant: "destructive",
       });
+    } finally {
+      setIsDuplicating(null);
     }
   };
 
   const handleEdit = (jd: JobDescription) => {
-    // TODO: Implement edit functionality
-    console.log("Editing job description:", jd.id);
-    toast({
-      title: "Coming Soon",
-      description: "Edit functionality will be available soon.",
-    });
+    // Navigate to the edit page
+    router.push(`/jd-developer/edit/${jd.id}`);
   };
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-lg">Loading saved job descriptions...</span>
       </div>
     );
   }
 
   if (error) {
-    return <div className="p-4 bg-red-50 text-red-700 rounded-md">{error}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <h3 className="text-xl font-semibold mb-2">Error Loading Data</h3>
+        <p className="text-muted-foreground mb-4 text-center max-w-md">
+          {error}
+        </p>
+        <Button onClick={fetchSavedJDs}>Try Again</Button>
+      </div>
+    );
   }
 
   if (savedJDs.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">No saved job descriptions found.</p>
+      <div className="text-center py-12">
+        <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-xl font-semibold mb-2">
+          No Saved Job Descriptions
+        </h3>
+        <p className="text-muted-foreground mb-6">
+          You haven&apos;t saved any job descriptions yet. Create and save a job
+          description to see it here.
+        </p>
+        <Button
+          onClick={() => {
+            const tabSwitchEvent = new CustomEvent("switchTab", {
+              detail: "form",
+            });
+            window.dispatchEvent(tabSwitchEvent);
+          }}
+        >
+          Create Job Description
+        </Button>
       </div>
     );
   }
 
   return (
-    <>
-      <ScrollArea className="h-[600px] pr-4">
-        <div className="space-y-4">
-          {savedJDs.map((jd) => (
-            <Card key={jd.id} className="w-full">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-xl">{jd.title}</CardTitle>
-                    <CardDescription>
-                      {jd.department && `${jd.department} • `}
-                      {jd.location && `${jd.location} • `}
-                      {jd.employmentType}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {jd.metadata.industry && (
-                      <Badge variant="outline">{jd.metadata.industry}</Badge>
-                    )}
-                    {jd.metadata.level && (
-                      <Badge variant="outline">{jd.metadata.level}</Badge>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {jd.description}
-                </p>
-                {jd.description.length > 150 && (
-                  <Button
-                    variant="link"
-                    className="p-0 h-auto mt-2"
-                    onClick={() => setSelectedJD(jd)}
-                  >
-                    View Details
-                  </Button>
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDuplicate(jd)}
-                  className="flex items-center"
-                >
-                  <Copy className="w-4 h-4 mr-2" />
-                  Duplicate
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleExport(jd)}
-                  className="flex items-center"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(jd.id)}
-                  className="flex items-center"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => onUseAsTemplate(jd)}
-                >
-                  Use as Template
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </ScrollArea>
+    <div>
+      <h2 className="text-xl font-semibold mb-4">
+        Your Saved Job Descriptions
+      </h2>
+      <Card>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {savedJDs.map((jd) => (
+                <TableRow key={jd.id}>
+                  <TableCell className="font-medium">{jd.title}</TableCell>
+                  <TableCell>{jd.department || "N/A"}</TableCell>
+                  <TableCell>
+                    {new Date(jd.metadata.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => onUseAsTemplate(jd)}
+                      title="Use as Template"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
 
-      {selectedJD && (
-        <JobDescriptionView
-          jd={selectedJD}
-          isOpen={!!selectedJD}
-          onClose={() => setSelectedJD(null)}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onExport={handleExport}
-          onDuplicate={handleDuplicate}
-        />
-      )}
-    </>
+                    <PDFRenderer
+                      document={<JobDescriptionPDF jd={jd} />}
+                      fileName={`${jd.title
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}-${jd.id}.pdf`}
+                    >
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        title="Export as PDF"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    </PDFRenderer>
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleDuplicate(jd)}
+                      disabled={isDuplicating === jd.id}
+                      title="Duplicate"
+                    >
+                      {isDuplicating === jd.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleEdit(jd)}
+                      title="Edit"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleDelete(jd.id)}
+                      disabled={isDeleting === jd.id}
+                      title="Delete"
+                    >
+                      {isDeleting === jd.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+    </div>
   );
 }

@@ -33,12 +33,18 @@ const nextConfig = {
           process: "process/browser",
         }),
       ];
+
+      // Disable minification to fix SHA224 error with react-pdf
+      if (config.optimization) {
+        config.optimization.minimize = false;
+      }
     }
 
     // Only apply chunk optimization for client-side bundles
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
+        minimize: false, // Disable minification to fix SHA224 error
         splitChunks: {
           chunks: "all",
           cacheGroups: {

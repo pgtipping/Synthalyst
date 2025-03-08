@@ -57,6 +57,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Session } from "next-auth";
+import PDFRenderer from "@/components/PDFRenderer";
 
 // Updated schema with mandatory and optional fields
 const formSchema = z.object({
@@ -287,43 +288,28 @@ export default function PlanForm({
   };
 
   const handleDownloadPDF = async () => {
-    if (generatedPlan) {
-      try {
-        setIsDownloading(true);
-        // Generate PDF blob
-        const blob = await pdf(
-          <TrainingPlanPDF
-            title={form.getValues("title")}
-            content={generatedPlan.content}
-            resources={generatedPlan.resources}
-            createdAt={new Date().toISOString()}
-          />
-        ).toBlob();
+    if (!generatedPlan) return;
 
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${form.getValues("title").replace(/\s+/g, "-")}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+    try {
+      setIsDownloading(true);
 
-        toast({
-          title: "PDF downloaded",
-          description: "The training plan has been downloaded as a PDF.",
-        });
-      } catch (error: unknown) {
-        console.error("Error generating PDF:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to generate PDF",
-        });
-      } finally {
-        setIsDownloading(false);
-      }
+      // Create a filename
+      const filename = `${form.getValues("title").replace(/\s+/g, "-")}.pdf`;
+
+      // Show success toast
+      toast({
+        title: "PDF Generated",
+        description: "Your training plan PDF has been generated successfully.",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -454,67 +440,51 @@ export default function PlanForm({
           />
         )}
 
-        <div className="flex justify-end space-x-2 mt-4">
+        <div className="flex flex-wrap gap-2 mt-4">
           <Button
             variant="outline"
             size="sm"
-            onClick={async () => {
-              try {
-                // Generate PDF blob
-                const blob = await pdf(
-                  <TrainingPlanPDF
-                    title={form.getValues("title")}
-                    content={plan.content}
-                    resources={plan.resources}
-                    createdAt={new Date().toISOString()}
-                  />
-                ).toBlob();
-
-                // Create download link
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `${form
-                  .getValues("title")
-                  .replace(/\s+/g, "-")}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                toast({
-                  title: "PDF downloaded",
-                  description:
-                    "The training plan has been downloaded as a PDF.",
-                });
-              } catch (error) {
-                console.error("Error exporting PDF:", error);
-                toast({
-                  variant: "destructive",
-                  title: "Error",
-                  description: "Failed to export training plan as PDF",
-                });
-              }
-            }}
+            onClick={handleCopyToClipboard}
+            disabled={isCopying}
           >
-            <Download className="h-4 w-4 mr-2" />
-            Download PDF
+            {isCopying ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Copying...
+              </>
+            ) : (
+              <>
+                <Copy className="mr-2 h-4 w-4" />
+                Copy to Clipboard
+              </>
+            )}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              navigator.clipboard.writeText(plan.content);
-              toast({
-                title: "Copied to clipboard",
-                description:
-                  "The training plan has been copied to your clipboard.",
-              });
-            }}
+
+          <PDFRenderer
+            document={
+              <TrainingPlanPDF
+                title={form.getValues("title")}
+                content={plan.content}
+                resources={plan.resources}
+                createdAt={new Date().toISOString()}
+              />
+            }
+            fileName={`${form.getValues("title").replace(/\s+/g, "-")}.pdf`}
           >
-            <Copy className="h-4 w-4 mr-2" />
-            Copy to Clipboard
-          </Button>
+            <Button variant="outline" size="sm" disabled={isDownloading}>
+              {isDownloading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
+                </>
+              )}
+            </Button>
+          </PDFRenderer>
         </div>
       </div>
     );
@@ -948,19 +918,31 @@ export default function PlanForm({
                   </>
                 )}
               </Button>
-              <Button onClick={handleDownloadPDF} disabled={isDownloading}>
-                {isDownloading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Preparing PDF...
-                  </>
-                ) : (
-                  <>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download PDF
-                  </>
-                )}
-              </Button>
+              <PDFRenderer
+                document={
+                  <TrainingPlanPDF
+                    title={form.getValues("title")}
+                    content={generatedPlan.content}
+                    resources={generatedPlan.resources}
+                    createdAt={new Date().toISOString()}
+                  />
+                }
+                fileName={`${form.getValues("title").replace(/\s+/g, "-")}.pdf`}
+              >
+                <Button variant="outline" size="sm" disabled={isDownloading}>
+                  {isDownloading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download PDF
+                    </>
+                  )}
+                </Button>
+              </PDFRenderer>
             </CardFooter>
           </Card>
         </div>
