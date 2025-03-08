@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description: "View and manage contact form submissions",
 };
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 // Define the ContactSubmission interface with the new fields
 interface ContactSubmission {
   id: string;

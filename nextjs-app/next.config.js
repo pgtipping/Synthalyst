@@ -96,6 +96,9 @@ const nextConfig = {
     domains: ["lh3.googleusercontent.com", "avatars.githubusercontent.com"],
   },
   serverExternalPackages: ["@prisma/client", "bcrypt"],
+  // Skip database-dependent pages during static generation
+  staticPageGenerationTimeout: 120,
+  output: "standalone",
 };
 
 export default nextConfig;

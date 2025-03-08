@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build",
+    "build": "node scripts/handle-db-build.js && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "dotenv -e .env.test -- jest",
