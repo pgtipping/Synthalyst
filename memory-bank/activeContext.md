@@ -901,3 +901,14 @@ We've made a strategic shift in our development approach to prioritize standalon
   - Implemented toast notifications for success and error states in all framework operations
   - Used the project's toast migration utility to ensure consistent notification styling
   - Enhanced user feedback for framework operations (save, update, delete, public status change)
+
+- Fixed UI issues in Competency Manager (2023-03-09 12:00:00)
+
+  - Changed the edit icon to view icon in the "Your Frameworks" page so frameworks open in view mode instead of edit mode
+  - Fixed print framework functionality to generate a properly formatted preview
+  - Removed the "Open Shared Preview" button from sharing options
+  - Added "Excellent - Blew my mind" option to the AI quality feedback rating scale
+  - Increased the font size on the page by 1px for better readability
+  - Removed the '4 level' label and restored the chevron icon for competency collapsing
+
+- Added missing FeedbackAnalytics import in Competency Manager (2023-03-09 11:30:00)

@@ -159,6 +159,7 @@ export default function FeedbackMechanism({
                 className="p-2 border rounded w-full sm:w-auto"
                 aria-label="AI content quality rating"
               >
+                <option value="excellent">Excellent - Blew my mind</option>
                 <option value="good">Good - Met my expectations</option>
                 <option value="needs_improvement">Needs Improvement</option>
               </select>

@@ -147,39 +147,36 @@ export default function SharingOptions({
       </div>
 
       {isPublic && (
-        <div className="mt-4 space-y-2">
-          <Label htmlFor="share-link">Share Link</Label>
-          <div className="flex space-x-2">
-            <Input
-              id="share-link"
-              value={shareUrl}
-              readOnly
-              className="flex-1"
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleCopyLink}
-              className="flex-shrink-0"
-            >
-              {copied ? (
-                <Check className="h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-
-          <div className="flex mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center"
-              onClick={() => window.open(shareUrl, "_blank")}
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              Open Shared View
-            </Button>
+        <div className="mt-4 p-4 bg-gray-50 rounded-md">
+          <div className="flex flex-col space-y-2">
+            <p className="text-sm font-medium">Share this link:</p>
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={shareUrl}
+                readOnly
+                className="flex-1 p-2 text-sm border rounded-md bg-white"
+                onClick={(e) => e.currentTarget.select()}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center"
+                onClick={handleCopyLink}
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       )}
