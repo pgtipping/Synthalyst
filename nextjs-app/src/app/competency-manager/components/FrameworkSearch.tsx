@@ -197,8 +197,7 @@ export default function FrameworkSearch({
     roleLevelFilter,
     dateFilter,
     isLoading,
-    applySearch,
-  ]);
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clear all filters
   const clearFilters = useCallback(() => {

@@ -306,3 +306,11 @@
 - Remaining reference data API endpoints
 - Seed data for reference data models
 - Completion of standalone functionality for each HR tool
+
+## Recent Updates
+
+- Fixed infinite loop in FrameworkSearch component by removing applySearch from dependency array (2025-03-08 12:30:00)
+- Fixed FrameworkSearch component error by making frameworks prop optional and adding API fetch capability (2025-03-08 12:00:00)
+- Enhanced the FrameworkSearch component to handle cases when frameworks are not provided as props
+- Added loading state and error handling to FrameworkSearch component
+- Improved null checking in FrameworkSearch to prevent "Cannot read properties of undefined" errors

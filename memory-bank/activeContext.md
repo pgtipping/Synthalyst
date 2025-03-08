@@ -6,6 +6,12 @@
 
 - **Competency Manager Enhancement**: Currently focused on completing the standalone competency manager with industry-specific suggestions, visualization options, and improved framework management features. This aligns with our standalone-first strategy by ensuring the tool delivers maximum value without requiring integration with other tools.
 
+- Fixed infinite loop in FrameworkSearch component by removing applySearch from dependency array (2025-03-08 12:30:00)
+- Fixed FrameworkSearch component error by making frameworks prop optional and adding API fetch capability (2025-03-08 12:00:00)
+- Enhanced the FrameworkSearch component to handle cases when frameworks are not provided as props
+- Added loading state and error handling to FrameworkSearch component
+- Improved null checking in FrameworkSearch to prevent "Cannot read properties of undefined" errors
+
 ## Competency Manager Feature Status
 
 The Competency Manager feature is now complete with the following components implemented:
