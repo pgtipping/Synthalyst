@@ -309,6 +309,7 @@
 
 ## Recent Updates
 
+- Fixed missing handleSaveFrameworkEdit function in Competency Manager (2025-03-08 13:30:00)
 - Fixed missing handleEditFramework function in Competency Manager (2025-03-08 13:00:00)
 - Fixed infinite loop in FrameworkSearch component by removing applySearch from dependency array (2025-03-08 12:30:00)
 - Fixed FrameworkSearch component error by making frameworks prop optional and adding API fetch capability (2025-03-08 12:00:00)

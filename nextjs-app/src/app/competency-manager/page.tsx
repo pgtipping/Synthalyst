@@ -559,6 +559,11 @@ export default function CompetencyManager() {
     }
   };
 
+  // Add handleSaveFrameworkEdit function
+  const handleSaveFrameworkEdit = () => {
+    updateFrameworkDetails();
+  };
+
   const startEditing = () => {
     if (!framework) return;
 
