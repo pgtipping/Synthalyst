@@ -6,6 +6,11 @@
 
 - **Competency Manager Enhancement**: Currently focused on completing the standalone competency manager with industry-specific suggestions, visualization options, and improved framework management features. This aligns with our standalone-first strategy by ensuring the tool delivers maximum value without requiring integration with other tools.
 
+- Restored loading animation with countdown for framework generation (2025-03-08 18:00:00)
+  - Re-implemented the countdown timer during framework generation
+  - Added progress bar that fills as the countdown progresses
+  - Restored the loading message that updates when the countdown completes
+  - Enhanced user experience by providing visual feedback during generation
 - Restructured Competency Manager view for better organization (2025-03-08 17:00:00)
   - Moved competencies section up near title and description
   - Simplified the right sidebar to reduce duplication

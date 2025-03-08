@@ -90,7 +90,7 @@ export default function CompetencyManager() {
   });
 
   const [framework, setFramework] = useState<CompetencyFramework | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [activeCompetencyIndex, setActiveCompetencyIndex] = useState<
@@ -112,9 +112,7 @@ export default function CompetencyManager() {
   );
   const [showVisualization, setShowVisualization] = useState(false);
   const [countdown, setCountdown] = useState<number>(30);
-  const [loadingMessage, setLoadingMessage] = useState<string>(
-    "Generating Framework"
-  );
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
 
   const [savedFrameworks, setSavedFrameworks] = useState<CompetencyFramework[]>(
     []
