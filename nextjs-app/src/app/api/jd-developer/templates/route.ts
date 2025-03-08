@@ -3,7 +3,7 @@ import { prisma, testPrismaConnection, withRetry } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import crypto from "crypto";
+import { createHashSync } from "@/lib/crypto-browser";
 
 // Helper function to remove duplicates
 async function removeDuplicateTemplates() {
@@ -298,14 +298,11 @@ export async function POST(request: Request) {
     // Generate content hash
     let contentHash = "";
     try {
-      contentHash = crypto
-        .createHash("sha256")
-        .update(
-          typeof templateContent === "string"
-            ? templateContent
-            : JSON.stringify(templateContent)
-        )
-        .digest("hex");
+      contentHash = createHashSync(
+        typeof templateContent === "string"
+          ? templateContent
+          : JSON.stringify(templateContent)
+      );
       logger.info("Generated content hash", { contentHash });
     } catch (error) {
       logger.warn("Failed to generate content hash", error);

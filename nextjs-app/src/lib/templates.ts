@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { createHashSync } from "./crypto-browser";
 import { prisma } from "./prisma";
 import type { JobDescription, JobDescriptionDB } from "@/types/jobDescription";
 
@@ -51,7 +51,7 @@ interface NewTemplateResult {
 type TemplateResult = VersionResult | DuplicateResult | NewTemplateResult;
 
 const generateContentHash = (content: string): string => {
-  return crypto.createHash("sha256").update(content).digest("hex");
+  return createHashSync(content);
 };
 
 export const parseJobDescription = (
