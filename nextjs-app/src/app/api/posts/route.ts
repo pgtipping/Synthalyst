@@ -1,30 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createHandler, successResponse } from "@/lib/api/handler";
+import { NextRequest } from "next/server";
+import {
+  createHandler,
+  successResponse,
+  errorResponse,
+} from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import {
   CreatePostInput,
-  PostQueryInput,
-  createPostSchema,
   postQuerySchema,
+  createPostSchema,
 } from "@/lib/validations/post";
 import { ConflictError } from "@/lib/errors";
 import slugify from "slugify";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
-
-const postSchema = z.object({
-  title: z.string(),
-  content: z.string(),
-  excerpt: z.string().optional(),
-  coverImage: z.string().optional(),
-  categoryIds: z.array(z.string()).optional(),
-  tagIds: z.array(z.string()).optional(),
-  authorEmail: z.string().email(),
-  published: z.boolean().default(false),
-  featured: z.boolean().default(false),
-});
-
-type PostInput = z.infer<typeof postSchema>;
 
 export const GET = createHandler(async (req: NextRequest) => {
   const url = new URL(req.url);
@@ -228,16 +216,13 @@ export const POST = createHandler<CreatePostInput>(
   }
 );
 
-export async function PUT(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+export const PUT = createHandler(
+  async (req: NextRequest) => {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Post ID is required" },
-        { status: 400 }
-      );
+      return errorResponse("Post ID is required", "BAD_REQUEST", 400);
     }
 
     const {
@@ -249,7 +234,7 @@ export async function PUT(request: Request) {
       tags,
       published,
       featured,
-    } = await request.json();
+    } = await req.json();
 
     const post = await prisma.post.update({
       where: { id },
@@ -289,38 +274,29 @@ export async function PUT(request: Request) {
       },
     });
 
-    return NextResponse.json({ post });
-  } catch (error) {
-    console.error("Error updating post:", error);
-    return NextResponse.json(
-      { error: "Failed to update post" },
-      { status: 500 }
-    );
+    return successResponse({ post });
+  },
+  {
+    requireAuth: true,
   }
-}
+);
 
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+export const DELETE = createHandler(
+  async (req: NextRequest) => {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Post ID is required" },
-        { status: 400 }
-      );
+      return errorResponse("Post ID is required", "BAD_REQUEST", 400);
     }
 
     await prisma.post.delete({
       where: { id },
     });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting post:", error);
-    return NextResponse.json(
-      { error: "Failed to delete post" },
-      { status: 500 }
-    );
+    return successResponse({ success: true });
+  },
+  {
+    requireAuth: true,
   }
-}
+);

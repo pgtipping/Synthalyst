@@ -145,7 +145,6 @@ function isComingSoonRoute(pathname: string) {
     "/learning-content",
     "/knowledge-gpt",
     "/the-synth",
-    "/blog",
   ];
 
   return comingSoonRoutes.some(
@@ -164,13 +163,11 @@ export const config = {
     "/learning-content/:path*",
     "/knowledge-gpt/:path*",
     "/the-synth/:path*",
-    "/blog/:path*",
 
     // Root paths for Coming Soon
     "/2do",
     "/learning-content",
     "/knowledge-gpt",
     "/the-synth",
-    "/blog",
   ],
 };
