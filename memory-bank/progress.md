@@ -438,11 +438,20 @@
   - Fixed undefined API URL errors in blog functionality
 
 - Updated blog content categories in ContentGuide component (2025-03-09 21:30:00)
+
   - Updated the content categories in the ContentGuide component to match the categories defined in content_creation-guide.md
   - Replaced previous categories with: Innovation & Tech, Professional Growth, Learning Lab, Productivity & Tools, Industry Insights, and Community Corner
   - Added appropriate descriptions and example topics for each category
   - Enhanced the user experience for blog creators with more accurate category guidance
   - Ensured consistency between the content creation guide and the blog creation interface
+
+- Fixed ContentGuide component UI issues (2025-03-09 21:45:00)
+  - Added overflow-hidden to the parent Card component to prevent content from extending beyond boundaries
+  - Added max-w-full to all TabsContent elements to ensure proper width constraints
+  - Implemented break-words on text content to prevent overflow of long words
+  - Added overflow-x-auto to the TabsList to ensure tabs are scrollable on smaller screens
+  - Wrapped tab content in divs with break-words class for consistent text wrapping
+  - Improved mobile responsiveness and overall user experience
 
 ## Known Issues
 

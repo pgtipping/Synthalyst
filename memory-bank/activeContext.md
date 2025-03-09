@@ -32,6 +32,8 @@
 
 - **Blog Content Categories Update**: Updated the content categories in the ContentGuide component to match the categories defined in content_creation-guide.md. The categories now include Innovation & Tech, Professional Growth, Learning Lab, Productivity & Tools, Industry Insights, and Community Corner, with appropriate descriptions and example topics for each.
 
+- **ContentGuide UI Fix**: Fixed overflow issues in the ContentGuide component by adding proper overflow handling, word-break properties, and ensuring all content stays within its container. This improves the mobile responsiveness and overall user experience of the blog creation interface.
+
 ## Recent Changes
 
 - **Blog Post Dynamic Route Fix** (2025-03-09 19:34:00)
