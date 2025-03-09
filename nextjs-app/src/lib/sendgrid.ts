@@ -1,6 +1,7 @@
 import sgMail from "@sendgrid/mail";
+// Restore the Prisma import since we now have the Newsletter model
+import { prisma } from "@/lib/prisma";
 // Remove unused imports since we're using mock data for now
-// import { prisma } from "@/lib/prisma";
 // import { PrismaClient } from "@prisma/client";
 
 // Set your SendGrid API key
@@ -207,30 +208,19 @@ export const generateToken = (): string => {
  */
 export async function getActiveSubscribers(): Promise<{ email: string }[]> {
   try {
-    // Since we're still setting up the database schema, we'll return mock data for now
-    // This will be replaced with actual database queries once the schema is finalized
-
-    // Mock data for development
-    return [
-      { email: "test1@example.com" },
-      { email: "test2@example.com" },
-      { email: "test3@example.com" },
-    ];
-
-    // Once the database schema is finalized, uncomment this code:
-    /*
+    // Use the actual Newsletter model instead of mock data
     const subscribers = await prisma.newsletter.findMany({
       where: {
-        active: true,
         confirmed: true,
+        active: true,
+        unsubscribed: false,
       },
       select: {
         email: true,
       },
     });
-    
+
     return subscribers;
-    */
   } catch (error) {
     console.error("Error fetching active subscribers:", error);
     return [];

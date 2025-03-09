@@ -571,3 +571,21 @@ model NewsletterSubscriber {
   source       String?   // Where the user subscribed from (e.g., "blog", "homepage")
   tags         String[]  // For segmentation
 }
+
+model Newsletter {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  confirmed    Boolean   @default(false)
+  active       Boolean   @default(true)
+  unsubscribed Boolean   @default(false)
+  token        String?
+  tokenExpiry  DateTime?
+  tags         String[]
+  source       String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([email])
+  @@index([confirmed, active, unsubscribed])
+}

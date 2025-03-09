@@ -1,65 +1,93 @@
-import { NextRequest } from "next/server";
-import {
-  createHandler,
-  successResponse,
-  errorResponse,
-} from "@/lib/api/handler";
-import { z } from "zod";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { generateToken, sendConfirmationEmail } from "@/lib/sendgrid";
+import { z } from "zod";
 
+// Email validation schema
 const subscribeSchema = z.object({
-  email: z.string().email("Please provide a valid email address"),
+  email: z.string().email("Invalid email address"),
+  source: z.string().optional(),
+  name: z.string().optional(),
 });
 
-type SubscribeInput = z.infer<typeof subscribeSchema>;
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
 
-export const POST = createHandler<SubscribeInput>(
-  async (req: NextRequest, _params, body) => {
-    if (!body) {
-      return errorResponse("Request body is required", "BAD_REQUEST", 400);
+    // Validate the request body
+    const result = subscribeSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: result.error.format() },
+        { status: 400 }
+      );
     }
 
-    try {
-      const { email } = body;
+    const { email, source, name } = result.data;
 
-      // Check if email already exists
-      const existingSubscriber = await prisma.newsletterSubscriber.findUnique({
-        where: { email },
-      });
+    // Check if the email is already subscribed
+    const existingSubscriber = await prisma.newsletter.findUnique({
+      where: { email },
+    });
 
-      if (existingSubscriber) {
-        // If already subscribed but not confirmed, we could resend confirmation
-        // For now, just return success to avoid revealing if email exists
-        return successResponse({
-          message: "Thank you for subscribing to our newsletter!",
-        });
+    if (existingSubscriber) {
+      // If already confirmed, return success
+      if (existingSubscriber.confirmed) {
+        return NextResponse.json(
+          { message: "You are already subscribed to our newsletter" },
+          { status: 200 }
+        );
       }
 
-      // Create new subscriber
-      await prisma.newsletterSubscriber.create({
+      // If not confirmed, generate a new token and send confirmation email
+      const token = generateToken();
+      const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      await prisma.newsletter.update({
+        where: { email },
         data: {
-          email,
-          subscribedAt: new Date(),
-          // In a real implementation, you might set confirmed: false
-          // and send a confirmation email with a token
-          confirmed: true,
-          source: body.source || "api",
+          token,
+          tokenExpiry,
         },
       });
 
-      return successResponse({
-        message: "Thank you for subscribing to our newsletter!",
-      });
-    } catch (error) {
-      console.error("Newsletter subscription error:", error);
-      return errorResponse(
-        "Failed to process subscription",
-        "INTERNAL_SERVER_ERROR",
-        500
+      await sendConfirmationEmail(email, token);
+
+      return NextResponse.json(
+        { message: "Confirmation email sent. Please check your inbox." },
+        { status: 200 }
       );
     }
-  },
-  {
-    validationSchema: subscribeSchema,
+
+    // Create a new subscriber
+    const token = generateToken();
+    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await prisma.newsletter.create({
+      data: {
+        email,
+        name,
+        source,
+        token,
+        tokenExpiry,
+        tags: source ? [source] : [],
+      },
+    });
+
+    // Send confirmation email
+    await sendConfirmationEmail(email, token);
+
+    return NextResponse.json(
+      {
+        message: "Subscription initiated. Please check your email to confirm.",
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error subscribing to newsletter:", error);
+    return NextResponse.json(
+      { error: "Failed to subscribe to newsletter" },
+      { status: 500 }
+    );
   }
-);
+}
