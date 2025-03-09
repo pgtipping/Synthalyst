@@ -9,13 +9,12 @@ import { z } from "zod";
 
 // Define the valid categories
 const VALID_CATEGORIES = [
-  "AI & Technology",
-  "Business Strategy",
-  "HR & Talent",
+  "Innovation & Tech",
+  "Professional Growth",
+  "Learning Lab",
   "Productivity & Tools",
-  "Learning & Development",
-  "Future of Work",
-  "Case Studies",
+  "Industry Insights",
+  "Community Corner",
 ] as const;
 
 // Create a type for the valid categories
@@ -38,26 +37,26 @@ type GenerateBlogInput = z.infer<typeof generateBlogSchema>;
 
 // Category-specific guidance for the LLM
 const CATEGORY_GUIDANCE: Record<BlogCategory, string> = {
-  "AI & Technology": `
+  "Innovation & Tech": `
 - Focus on practical applications of AI and emerging technologies
 - Include specific examples of tools or technologies in action
 - Discuss both benefits and potential challenges
 - Consider ethical implications where relevant
 - Include forward-looking predictions about technology evolution
 `,
-  "Business Strategy": `
-- Provide actionable strategic insights for business leaders
-- Include real-world examples of successful strategies
-- Consider different business sizes and contexts
+  "Professional Growth": `
+- Provide actionable insights for career advancement
+- Include strategies for skill development and professional improvement
+- Consider different career stages and contexts
 - Balance theoretical frameworks with practical implementation steps
-- Address current business challenges and opportunities
+- Address current workplace challenges and opportunities
 `,
-  "HR & Talent": `
-- Focus on practical solutions for HR professionals
-- Include insights on recruitment, retention, and development
-- Consider diverse workplace contexts and challenges
-- Reference current workplace trends and research
-- Provide actionable steps for improving HR processes
+  "Learning Lab": `
+- Focus on educational approaches, methodologies, and learning technologies
+- Include insights on training methodologies and curriculum design
+- Consider different learning contexts and preferences
+- Reference current research in learning science
+- Provide practical implementation steps for educators and learners
 `,
   "Productivity & Tools": `
 - Highlight specific tools and methodologies that enhance productivity
@@ -66,26 +65,19 @@ const CATEGORY_GUIDANCE: Record<BlogCategory, string> = {
 - Focus on measurable productivity improvements
 - Address common productivity challenges and solutions
 `,
-  "Learning & Development": `
-- Focus on effective learning methodologies and approaches
-- Include insights on skill development and knowledge acquisition
-- Consider different learning contexts and preferences
-- Reference current research in learning science
-- Provide practical implementation steps for L&D professionals
+  "Industry Insights": `
+- Provide analysis and perspectives on industry trends and developments
+- Include market analysis and trend forecasts
+- Consider diverse industry contexts and challenges
+- Reference current research and expert opinions
+- Provide actionable insights for industry professionals
 `,
-  "Future of Work": `
-- Explore emerging workplace trends and their implications
-- Balance speculation with evidence-based predictions
-- Consider diverse perspectives and industries
-- Address both challenges and opportunities in future work models
-- Include actionable steps for preparing for workplace evolution
-`,
-  "Case Studies": `
-- Focus on detailed, real-world examples
-- Include specific challenges, solutions, and outcomes
-- Provide context about the organization or situation
-- Extract generalizable lessons and insights
-- Include metrics and measurable results where possible
+  "Community Corner": `
+- Highlight stories, contributions, and insights from the community
+- Include user success stories and guest contributions
+- Consider diverse community perspectives and experiences
+- Focus on community building and engagement
+- Provide opportunities for community participation and feedback
 `,
 };
 

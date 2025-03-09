@@ -56,9 +56,9 @@ export default function ContentGuide() {
 
             <div className="overflow-hidden">
               <Tabs defaultValue="voice">
-                <div className="overflow-x-auto md:overflow-visible">
+                <div className="overflow-x-auto sm:overflow-visible">
                   <TabsList
-                    className="w-full justify-start border-b px-6 flex-wrap overflow-x-auto md:overflow-visible"
+                    className="w-full justify-start border-b px-6 flex-wrap overflow-x-auto sm:overflow-visible"
                     role="tablist"
                   >
                     <TabsTrigger value="voice">Style & Tone</TabsTrigger>

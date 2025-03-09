@@ -19,13 +19,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define the blog categories
 const BLOG_CATEGORIES = [
-  { name: "AI & Technology", value: "ai-technology" },
-  { name: "Business Strategy", value: "business-strategy" },
-  { name: "HR & Talent", value: "hr-talent" },
+  { name: "Innovation & Tech", value: "innovation-tech" },
+  { name: "Professional Growth", value: "professional-growth" },
+  { name: "Learning Lab", value: "learning-lab" },
   { name: "Productivity & Tools", value: "productivity-tools" },
-  { name: "Learning & Development", value: "learning-development" },
-  { name: "Future of Work", value: "future-of-work" },
-  { name: "Case Studies", value: "case-studies" },
+  { name: "Industry Insights", value: "industry-insights" },
+  { name: "Community Corner", value: "community-corner" },
 ];
 
 interface CreatePostForm {
