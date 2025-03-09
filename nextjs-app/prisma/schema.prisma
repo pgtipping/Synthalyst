@@ -542,32 +542,32 @@ model ContactSubmission {
 }
 
 model ContactSubmissionReply {
-  id           String            @id @default(cuid())
-  submissionId String
-  subject      String
-  message      String
-  sentBy       String
-  sentAt       DateTime          @default(now())
-  submission   ContactSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-
-  @@index([submissionId])
-  @@index([sentAt])
+  id                  String            @id @default(cuid())
+  content             String
+  createdAt           DateTime          @default(now())
+  contactSubmissionId String
+  contactSubmission   ContactSubmission @relation(fields: [contactSubmissionId], references: [id], onDelete: Cascade)
 }
 
 model CompetencyFrameworkFeedback {
-  id                       String              @id @default(cuid())
-  rating                   Int
-  feedback                 String
-  frameworkId              String
-  userId                   String?
-  createdAt                DateTime            @default(now())
-  updatedAt                DateTime            @updatedAt
-  isPublic                 Boolean             @default(true)
-  llmImprovementSuggestion String
-  llmQualityFeedback       String?
-  framework                CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
-  user                     User?               @relation(fields: [userId], references: [id])
+  id                    String              @id @default(cuid())
+  frameworkId           String
+  framework             CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  rating                Int
+  feedback              String?
+  createdAt             DateTime            @default(now())
+  userId                String?
+  user                  User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
 
-  @@index([frameworkId])
-  @@index([userId])
+model NewsletterSubscriber {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  subscribedAt DateTime  @default(now())
+  confirmed    Boolean   @default(false)
+  confirmedAt  DateTime?
+  unsubscribed Boolean   @default(false)
+  unsubscribedAt DateTime?
+  source       String?   // Where the user subscribed from (e.g., "blog", "homepage")
+  tags         String[]  // For segmentation
 }

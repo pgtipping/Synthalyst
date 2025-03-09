@@ -9,6 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 // Import original components
 import ClientLayout from "@/components/ClientLayout";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -209,6 +210,7 @@ export default function RootLayout({
         <ClientLayout>
           <Header />
           <main>{children}</main>
+          <Footer />
           <Toaster />
           <Analytics />
           <SpeedInsights />

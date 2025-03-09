@@ -26,7 +26,9 @@ import {
   Settings,
   RefreshCw,
   UserPlus,
+  Mail,
 } from "lucide-react";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 export default function Home() {
   // Reorganize features by AI capability
@@ -637,6 +639,33 @@ export default function Home() {
                 Learn more about our AI quality standards →
               </Link>
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto max-w-4xl px-4">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
+              <Mail className="w-6 h-6 text-primary" />
+            </div>
+            <h2 className="text-3xl font-bold mb-2">
+              Stay Ahead with Synthalyst
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Subscribe to our newsletter for the latest AI insights, tool
+              updates, and exclusive content to help you maximize productivity.
+            </p>
+          </div>
+
+          <div className="max-w-xl mx-auto">
+            <NewsletterSignup
+              variant="card"
+              title="Join Our Newsletter"
+              description="Get weekly updates on AI advancements, new features, and productivity tips."
+              className="shadow-lg"
+            />
           </div>
         </div>
       </section>

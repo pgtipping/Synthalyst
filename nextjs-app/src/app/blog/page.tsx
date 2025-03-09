@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { getValidImageUrl } from "@/lib/utils";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 interface Post {
   id: string;
@@ -329,6 +330,16 @@ export default function BlogPage() {
               )}
             </div>
           )}
+        </section>
+
+        {/* Newsletter Signup */}
+        <section className="mb-12">
+          <NewsletterSignup
+            variant="inline"
+            title="Stay Updated with The Synth Blog"
+            description="Subscribe to our newsletter to receive the latest insights, tools, and resources directly to your inbox."
+            className="w-full"
+          />
         </section>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
