@@ -58,7 +58,7 @@ export default function NewsletterSignup({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          source: variant,
+          source: `${variant}-${window.location.pathname}`,
         }),
       });
 
