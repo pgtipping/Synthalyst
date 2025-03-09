@@ -27,14 +27,170 @@ The platform's fusion of content, commerce, AI-powered tools, and advisory servi
 - Displays live counts (e.g., downloads, clients, visitors, etc.) and client testimonials.
 - Provides social media links for external engagement.
 
-### Blog Page
+### Blog Page - The Synth Blog
 
 - Supports blog postings with a comments section for user interaction.
 - Includes links to related articles, referenced content, and other relevant APP pages.
+- blogs should be globally accessible to all users whether or not they are logged in.
+- only authenticated users should be able to create new blogs.
+- all blog posts on The Synth Blog should follow this guide: [content_creation_guide.md](guides/content_creation-guide.md)
+- users should be able to choose to generate blog posts using llm.
+- LLM should be properly prompted to follow the guide when creating blog posts for users
+- authenticated users should be made aware of the content creation guide for The Synth Blog
+- blog creation should be guided by an llm to ensure consistency and quality.
+- when users create a new blog post without the use of an LLM, LLM should provide feedback to the user on the blog post creation page on adherence to the guide.
+- feedback should be in form of a score on adherence to the guide, and tips to the user on how to improve the blog post to achieve a higher score.
+- scores on adherence to the guide for each published blog post should be displayed on the admin dashboard.
+- admins should be able to delete blog posts that do not follow the guide and provide feedback to the user who created the blog post.
+- blogs should be able to be edited and deleted by the user who created them.
+- blogs should be able to be shared on social media.
+- blog posts should be able to be tagged with keywords.
+- blog creation page requires the integration of a rich text editor with capability to add images, videos, and embeds from X, Youtube, etc.
+- blog posts should be able to be categorized into one or more categories.
+- llm should be able to generate blog posts in different languages.
+- blog post creators should be aware of the languages the LLM can write in.
+- readers should be able to choose their preferred language for reading blog posts.
+- language choices should determine the language of the blog post content on each users's view of posted blogs.
+
+### Blog App - Cozy Corner
+
+- Cozy Corner is a blog app that is dedicated to providing a platform for users to conveniently create blogs with the help of an LLM.
+- This app is a separate app from The Synth Blog.
+- It will be a paid service with a subscription model.
+- The app will be integrated into the main app as a page.
+
+#### AI-Powered Content Generation
+
+##### Agent Provider
+
+- Web content research using Google Custom Search API
+- Multiple source content generation
+- Content embedding and similarity search
+- Vectorization for relevance ranking
+- Reference material processing
+- Content indexing
+
+##### Agent Creator
+
+- Blog content generation
+- Context-aware content creation
+- Semantic search integration
+- Reference material prioritization
+- Fact-checking with Gemini
+
+#### Content Generation Workflows
+
+##### User-Led Process
+
+1. User initiates with title
+2. Real-time research and suggestions
+3. Auto-completion as user types
+4. Dynamic content updates
+5. User control over suggestions
+6. Final verification
+
+##### AI-Led Process
+
+1. Title suggestion generation
+2. Content research and generation
+3. User-guided revisions
+4. Dynamic content updates
+5. Final verification
+
+#### System Instructions
+
+- Local storage with backend sync
+- Categorization:
+  - Content style
+  - Tone
+  - Research depth
+  - Writing style
+- Template system
+- Real-time switching
+- Version control
+- Dual agent application
+
+#### Scratchpad Integration
+
+- Toggle-able interface
+- AI assistance integration
+- Real-time content sync
+- Automatic mode switching
+- Main editor synchronization
+
+#### Detailed AI Implementation
+
+We will have two llm agents for the app: one for content fetching and one for blog creation.
+the llm agents: provider and creator.
+
+##### Agent Provider Story
+
+- agent can fetch content from the internet using Google Custom Search API
+- agent can generate multiple related content from various sources
+- app will create and manage content embeddings for similarity search
+- app will use vectorization for content relevance ranking
+- agent can process user-uploaded reference materials (PDFs, docs, text files)
+- agent can extract content from user materials
+- agent can perform fact-checking on agent creator's blog output.
+
+##### Agent Creator Story
+
+- agent can create blog content using all available content (web content provided by agent provider, and user materials (if provided))
+- agent can use embeddings to find relevant context
+- agent can manage semantic search across all sources
+- agent can prioritize user-provided reference materials when provided
+
+#### Content Generation Flows
+
+##### User-Led Process - User Story
+
+- user starts writing… a title
+- agent provider does a perplexity type search using Google Custom Search API
+- generates multiple related content from various sources
+- makes content available to agent creator
+- agent creator starts autocompleting content as the user types using the content from the agent provider
+- user accepts suggestions by pressing tab button or rejects by continuing to type
+- as writing progresses, agent provider updates related content array
+- agent creator uses updated content for more autocompletes
+- continues until user concludes writing
+
+##### AI-Led Process - User Story
+
+- user can chat with ai to ask for title ideas
+- agent creator offers suggestions
+- user communicates their choice
+- agent provider generates related content
+- agent creator generates blog using related content
+- user can request amendments
+- if amendments require additional content
+  - agent provider generates new related content
+  - provides to agent creator
+- agent creator generates revisions
+
+#### System Instructions for Agent Creator
+
+- User can set custom instructions
+- instructions can include content style, tone, and writing style.
+- Preset templates for custom instructions should be available
+- user can save and access instruction history
+- user can select instructions from history for any blog post creation
+
+#### Reference Materials
+
+Users can upload their own reference materials:
+
+- Supported formats: PDF, DOC, DOCX, TXT
+- Materials are processed and embedded for LLM use
+- user can specify priority level for user materials
+- user can toggle between using only user materials or including agent provider content
 
 ### Payment Page
 
+- app can have separate premium service offerings for different services.
 - Payment Page for paid services with payment options
+- payment page should be integrated with a central payment processor and payment gateway.
+- include a subscription management system for individuals and small businesses to manage their subscription.
+- users can choose a selection of services to subscribe to and pay a single monthly subscription fee.
 
 ### Online Tools Page
 
@@ -128,14 +284,6 @@ Web app that allows users to create forms with a drag and drop interface.
 - developed in a separate project
 
 This app will be integrated into the main app.
-
-### The Synth Blog
-
-Blog app powered by two LLMs, an agent provider and agent creator.
-
-- developed in a separate project: [synth-blog](https://synth-blog.vercel.app/)
-
-This app will be integrated into the main app as a page.
 
 ### Interview Questions Generator
 
