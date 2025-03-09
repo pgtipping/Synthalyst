@@ -42,15 +42,17 @@ export default function ContentGuide() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <Alert className="mx-6 my-4 bg-blue-50">
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Welcome to The Synth Blog writing guide! This friendly guide
-                will help you create engaging, valuable content that readers
-                will love. Feel free to use it as inspiration rather than strict
-                rules.
-              </AlertDescription>
-            </Alert>
+            <div className="justify-self-center">
+              <Alert className="mx-6 my-4 bg-blue-50">
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  Welcome to The Synth Blog writing guide! This friendly guide
+                  will help you create engaging, valuable content that readers
+                  will love. Feel free to use it as inspiration rather than
+                  strict rules.
+                </AlertDescription>
+              </Alert>
+            </div>
 
             <div className="overflow-hidden">
               <Tabs defaultValue="voice">
