@@ -254,13 +254,6 @@ const MDXContent: React.FC<MDXContentProps> = ({ content }) => {
 
   return (
     <>
-      <div className="my-8">
-        <img
-          src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"
-          alt="Training Plan Creator Overview"
-          className="rounded-lg shadow-md mx-auto max-w-full"
-        />
-      </div>
       <div
         className="prose prose-lg mb-8 
                   prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
