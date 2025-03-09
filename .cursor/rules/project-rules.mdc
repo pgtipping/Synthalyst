@@ -9,6 +9,7 @@ alwaysApply: true
 - This project is configured to only run its development server on localhost:3001  
 - ALWAYS terminate running server before invoking the build command.
 - ALWAYS check server status BEFORE starting the server.
+- do not use emojis. this is a professional mobile-first web app. you must use ONLY high quality and professional looking icons.
 
 ## development folder
 

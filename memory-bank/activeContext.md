@@ -1,6 +1,16 @@
-# Active Context - [2025-03-09 17:30:00]
+# Active Context - [2025-03-09 21:30:00]
 
 ## Current Focus
+
+- **Environment Configuration Update**: Added NEXT_PUBLIC_API_URL to the environment configuration to fix undefined API URL errors. This variable is required for blog post functionality and should be set to http://localhost:3001 in development.
+
+- **Blog Post Creation Strategy**: Identified that the preferred method for blog post creation is through the API endpoints (`/api/posts` and `/api/blog/generate`) rather than MDX files. This approach provides better consistency across environments and eliminates filesystem synchronization issues.
+
+- **Blog Starter Content Implementation**: Identified the need to properly implement starter/example blog posts that are available in both development and production environments. This requires creating a proper seeding mechanism that runs during deployment to ensure example content is consistently available across all environments.
+
+- **Cross-Environment Database Operations**: Identified that database operations need to be performed in both development and production environments. Currently working on implementing proper patterns for handling operations across environments, particularly for content management tasks like blog post deletion.
+
+- **Blog System Cleanup**: Removed unnecessary blog post and associated components from local development environment. Need to extend this cleanup to the production database to ensure consistency across environments.
 
 - **Blog Systems Implementation - Phase 1.5**: Enhanced the content creation guide for The Synth Blog with a more user-friendly design, predefined content categories, and improved guidance. This prepares the way for Phase 2 implementation with rich text editor, admin dashboard, and social media sharing.
 
@@ -18,7 +28,25 @@
 
 - **Blog Systems Implementation**: Implemented Phase 1 of The Synth Blog enhancements, focusing on global accessibility, content creation guide integration, and LLM-assisted blog creation. This addresses the core functionality issues identified in the blog implementation plan.
 
+- **Blog Post Page Implementation**: Created a proper server component for individual blog posts that correctly awaits params.slug before using it. This fixes the "Route '/blog/[slug]' used `params.slug`" error and ensures proper handling of blog post data.
+
+- **Blog Content Categories Update**: Updated the content categories in the ContentGuide component to match the categories defined in content_creation-guide.md. The categories now include Innovation & Tech, Professional Growth, Learning Lab, Productivity & Tools, Industry Insights, and Community Corner, with appropriate descriptions and example topics for each.
+
 ## Recent Changes
+
+- **Blog Post Dynamic Route Fix** (2025-03-09 19:34:00)
+
+  - Fixed `params.slug` usage in blog post page by properly awaiting the parameter
+  - Added proper environment variable validation for API URL
+  - Improved error handling for blog post data fetching
+  - Verified fix by successfully loading blog posts
+
+- Cleaned up blog system (2025-03-09 19:45:00)
+
+  - Deleted unnecessary blog post "mastering-the-training-plan-creator"
+  - Removed associated MDX file and components
+  - Cleaned up database records
+  - Restarted development server to apply changes
 
 - Updated Memory Bank files (2025-03-09 17:30:00)
 

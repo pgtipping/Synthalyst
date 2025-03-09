@@ -1,4 +1,84 @@
-# Project Intelligence - 2025-03-09 17:00:00
+# Project Intelligence - [2025-03-09 20:05:00]
+
+## Blog Post Creation Pattern - [2025-03-09 20:05:00]
+
+- Blog posts can be created through two methods:
+  1. Direct API method (Preferred):
+     - Use `/api/posts` endpoint for database-driven posts
+     - Use `/api/blog/generate` for LLM-assisted content creation
+     - No filesystem operations required
+     - Works consistently across all environments
+  2. MDX file method (Legacy/Optional):
+     - Store MDX files in filesystem
+     - Requires manual file syncing across environments
+     - More complex to maintain
+     - Can cause deployment issues
+- Key principles to follow:
+  1. Prefer direct API method for new blog posts
+  2. Use LLM assistance for professional content generation
+  3. Store all content in database for consistency
+  4. Avoid filesystem-based content when possible
+- Common patterns for blog creation:
+  - Use `/api/blog/generate` for initial content
+  - Store in database via `/api/posts`
+  - Use proper categories and tags
+  - Include metadata (excerpt, cover image)
+  - Set published and featured flags appropriately
+
+## Starter Content Pattern - [2025-03-09 20:00:00]
+
+- When creating starter/example content for the blog or other features:
+  1. Create the content in a way that can be version controlled (e.g., MDX files in the repository)
+  2. Include database seed files for the content in the prisma/seed.ts file
+  3. Ensure the seed script runs during production deployment
+  4. Version control both the content files and seed data
+- Key principles to follow:
+  1. All example content should be production-ready and professional
+  2. Seed data should be part of the deployment process
+  3. Content should demonstrate best practices and features
+  4. Maintain consistency between filesystem content and database records
+- Common patterns for starter content:
+  - Store MDX files in a /content/starters directory
+  - Include seed data in prisma/seed.ts
+  - Add seed script to package.json: "seed": "prisma db seed"
+  - Run seed script during deployment
+  - Document the starter content creation process
+
+## Database Operations Pattern - [2025-03-09 19:55:00]
+
+- When performing database operations that need to affect production:
+  1. First perform the operation locally to verify it works
+  2. Then use the production database connection string to perform the same operation
+  3. Verify the operation was successful in both environments
+- Key principles to follow:
+  1. Always maintain separate connection strings for dev and prod
+  2. Test operations locally first before affecting production
+  3. Use environment variables to switch between databases
+  4. Verify operations in both environments
+- Common patterns for cross-environment operations:
+  - Use DATABASE_URL environment variable to switch connections
+  - Create separate scripts for dev and prod operations
+  - Implement proper error handling for both environments
+  - Log operations in both environments for verification
+
+## Blog Post Deletion Pattern - [2025-03-09 19:45:00]
+
+- When deleting blog posts, follow a comprehensive approach:
+  1. Remove the MDX file from the filesystem
+  2. Delete the post record from the database
+  3. Clean up any associated components or routes
+  4. Restart the development server to apply changes
+- Key principles to follow:
+  1. Always delete both content and database records
+  2. Ensure proper error handling during deletion
+  3. Verify deletion success through API responses
+  4. Clean up any associated files or components
+- Common patterns for blog post deletion:
+  - Use Prisma client for database operations
+  - Implement proper error handling and logging
+  - Clean up associated files and components
+  - Verify deletion through API responses
+  - Restart services to apply changes
 
 ## Blog Content Creation Pattern - 2025-03-09 17:00:00
 
@@ -2062,7 +2142,7 @@ When implementing changes to the Training Plan Creator, follow the approach outl
 - For MDX content, special handling is needed for team images:
   ```jsx
   if (
-    src.includes("synthalyst-team.jpg") ||
+    src.includes("synthalyst-team.png") ||
     src.includes("team/synthalyst-team")
   ) {
     return `<div class="my-8">

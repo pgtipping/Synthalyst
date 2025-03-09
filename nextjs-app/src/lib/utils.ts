@@ -31,6 +31,11 @@ export function getValidImageUrl(
     return fallback || defaultFallback;
   }
 
+  // Handle team image consistently
+  if (url.includes("synthalyst-team")) {
+    return "/images/synthalyst-team.png";
+  }
+
   // Check if URL is relative (starts with /)
   if (url.startsWith("/")) {
     return url; // Relative URLs are handled by Next.js

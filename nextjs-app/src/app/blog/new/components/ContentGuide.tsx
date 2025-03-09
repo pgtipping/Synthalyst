@@ -74,11 +74,11 @@ export default function ContentGuide() {
                 <ul className="ml-4 list-disc space-y-2">
                   <li>
                     <span className="font-medium">Forward-thinking:</span> Share
-                    insights about what&apos;s coming next in your field
+                    insights about what&apos;s coming next
                   </li>
                   <li>
                     <span className="font-medium">Approachable:</span> Write
-                    like you&apos;re having a conversation with a smart friend
+                    like you&apos;re having a conversation with a friend
                   </li>
                   <li>
                     <span className="font-medium">Practical:</span> Include
@@ -115,7 +115,7 @@ export default function ContentGuide() {
                   <li>Keep it between 40-60 characters</li>
                   <li>
                     <span className="italic">Example:</span> &quot;5 AI Tools
-                    That Will Transform Your HR Department in 2025&quot;
+                    That Will Transform How You Work in 2025&quot;
                   </li>
                 </ul>
 
@@ -160,44 +160,44 @@ export default function ContentGuide() {
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-medium text-primary">
-                      AI & Technology
+                      Innovation & Tech
                     </h4>
                     <p className="text-sm text-gray-600">
-                      Trends, tools, and practical applications of AI and
-                      emerging technologies.
+                      Latest developments in technology and innovative
+                      approaches.
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
                       <span className="font-medium">Example topics:</span> AI
-                      productivity tools, machine learning applications,
-                      technology trends
+                      Developments, Tool reviews, Digital transformation, Future
+                      trends
                     </p>
                   </div>
 
                   <div>
                     <h4 className="font-medium text-primary">
-                      Business Strategy
+                      Professional Growth
                     </h4>
                     <p className="text-sm text-gray-600">
-                      Insights on business growth, strategy, and management
-                      practices.
+                      Insights and strategies for career advancement and
+                      professional development.
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
                       <span className="font-medium">Example topics:</span>{" "}
-                      Strategic planning, business transformation, leadership
-                      approaches
+                      Career development, Skill-building strategies, Industry
+                      insights, Leadership perspectives
                     </p>
                   </div>
 
                   <div>
-                    <h4 className="font-medium text-primary">HR & Talent</h4>
+                    <h4 className="font-medium text-primary">Learning Lab</h4>
                     <p className="text-sm text-gray-600">
-                      Human resources, recruitment, employee development, and
-                      workplace culture.
+                      Educational approaches, methodologies, and learning
+                      technologies.
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
                       <span className="font-medium">Example topics:</span>{" "}
-                      Recruitment strategies, employee engagement, talent
-                      development
+                      Training methodologies, Educational technology, Learning
+                      strategies, Curriculum design
                     </p>
                   </div>
 
@@ -210,46 +210,38 @@ export default function ContentGuide() {
                       productivity.
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
-                      <span className="font-medium">Example topics:</span> Task
-                      management, workflow optimization, productivity apps
+                      <span className="font-medium">Example topics:</span> Tool
+                      guides, Workflow optimization, Best practices,
+                      Implementation tips
                     </p>
                   </div>
 
                   <div>
                     <h4 className="font-medium text-primary">
-                      Learning & Development
+                      Industry Insights
                     </h4>
                     <p className="text-sm text-gray-600">
-                      Educational approaches, learning technologies, and skill
-                      development.
+                      Analysis and perspectives on industry trends and
+                      developments.
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
                       <span className="font-medium">Example topics:</span>{" "}
-                      Training methods, learning platforms, skill acquisition
+                      Market analysis, Case studies, Expert interviews, Trend
+                      forecasts
                     </p>
                   </div>
 
                   <div>
-                    <h4 className="font-medium text-primary">Future of Work</h4>
+                    <h4 className="font-medium text-primary">
+                      Community Corner
+                    </h4>
                     <p className="text-sm text-gray-600">
-                      Emerging trends and predictions about how work is
-                      evolving.
+                      Stories, contributions, and highlights from the community.
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
-                      <span className="font-medium">Example topics:</span>{" "}
-                      Remote work, workplace evolution, future skills
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-primary">Case Studies</h4>
-                    <p className="text-sm text-gray-600">
-                      Real-world examples and success stories.
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      <span className="font-medium">Example topics:</span>{" "}
-                      Implementation stories, transformation journeys, success
-                      metrics
+                      <span className="font-medium">Example topics:</span> User
+                      success stories, Guest contributions, Community
+                      highlights, Expert Q&As
                     </p>
                   </div>
                 </div>

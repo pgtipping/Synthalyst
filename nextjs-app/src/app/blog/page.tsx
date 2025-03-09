@@ -204,8 +204,8 @@ export default function BlogPage() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="bg-gray-50 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
         <Breadcrumb
           items={[
             { label: "Home", href: "/" },
@@ -213,7 +213,27 @@ export default function BlogPage() {
           ]}
         />
 
-        <h1 className="text-4xl font-bold">The Synth</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">The Synth Blog</h1>
+          {session ? (
+            <Link
+              href="/blog/new"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              ✍️ Create New Post
+            </Link>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <p className="text-gray-600">Sign in to create a post</p>
+              <Link
+                href="/api/auth/signin"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Sign In
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Featured Posts */}
         <section className="mb-12">
@@ -261,16 +281,38 @@ export default function BlogPage() {
                         )}
                         <div className="flex items-center justify-between text-sm text-gray-500">
                           <div className="flex items-center space-x-2">
-                            {post.author.image && (
+                            {post.author.image ? (
                               <Image
-                                src={post.author.image}
+                                src={getValidImageUrl(post.author.image)}
                                 alt={post.author.name || ""}
                                 width={24}
                                 height={24}
                                 className="rounded-full"
+                                onError={(e) => {
+                                  // If the author image fails to load, use the default team image
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = "/images/synthalyst-team.png";
+                                  target.onerror = null; // Prevent infinite error loop
+                                }}
+                              />
+                            ) : (
+                              <Image
+                                src="/images/synthalyst-team.png"
+                                alt="Synthalyst Team"
+                                width={24}
+                                height={24}
+                                className="rounded-full"
+                                priority
+                                onError={(e) => {
+                                  // If the default team image fails to load, use a text placeholder
+                                  const target = e.target as HTMLImageElement;
+                                  target.src =
+                                    "https://placehold.co/24x24?text=S";
+                                  target.onerror = null; // Prevent infinite error loop
+                                }}
                               />
                             )}
-                            <span>{post.author.name}</span>
+                            <span>{post.author.name || "Synthalyst Team"}</span>
                           </div>
                           <span>
                             {new Date(post.createdAt).toLocaleDateString()}
@@ -337,16 +379,43 @@ export default function BlogPage() {
                           <div className="flex items-center justify-between text-sm text-gray-500">
                             <div className="flex items-center space-x-4">
                               <div className="flex items-center space-x-2">
-                                {post.author.image && (
+                                {post.author.image ? (
                                   <Image
-                                    src={post.author.image}
+                                    src={getValidImageUrl(post.author.image)}
                                     alt={post.author.name || ""}
                                     width={24}
                                     height={24}
                                     className="rounded-full"
+                                    onError={(e) => {
+                                      // If the author image fails to load, use the default team image
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      target.src =
+                                        "/images/synthalyst-team.png";
+                                      target.onerror = null; // Prevent infinite error loop
+                                    }}
+                                  />
+                                ) : (
+                                  <Image
+                                    src="/images/synthalyst-team.png"
+                                    alt="Synthalyst Team"
+                                    width={24}
+                                    height={24}
+                                    className="rounded-full"
+                                    priority
+                                    onError={(e) => {
+                                      // If the default team image fails to load, use a text placeholder
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      target.src =
+                                        "https://placehold.co/24x24?text=S";
+                                      target.onerror = null; // Prevent infinite error loop
+                                    }}
                                   />
                                 )}
-                                <span>{post.author.name}</span>
+                                <span>
+                                  {post.author.name || "Synthalyst Team"}
+                                </span>
                               </div>
                               <div className="flex items-center space-x-4">
                                 <span>👁️ {post.views}</span>
@@ -432,28 +501,6 @@ export default function BlogPage() {
               </div>
             )}
           </aside>
-        </div>
-
-        {/* Authentication and Create Post Section */}
-        <div className="mt-8 flex items-center justify-between border-t pt-8">
-          {session ? (
-            <Link
-              href="/blog/new"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              ✍️ Create New Post
-            </Link>
-          ) : (
-            <div className="flex items-center space-x-4">
-              <p className="text-gray-600">Sign in to create a post</p>
-              <Link
-                href="/api/auth/signin"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Sign In
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </div>
