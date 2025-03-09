@@ -3,8 +3,16 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronDown,
+  Lightbulb,
+  BookOpen,
+  Sparkles,
+  Info,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ContentGuide() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,147 +30,346 @@ export default function ContentGuide() {
         ) : (
           <ChevronRight className="mr-2 h-4 w-4" />
         )}
-        {isOpen ? "Hide Content Guide" : "Show Content Guide"}
+        {isOpen ? "Hide Writing Guide" : "Show Writing Guide"}
       </Button>
 
       {isOpen && (
         <Card className="mb-6 border border-gray-200">
           <CardHeader className="bg-gray-50">
-            <CardTitle className="text-lg">Content Creation Guide</CardTitle>
+            <CardTitle className="flex items-center text-lg">
+              <BookOpen className="mr-2 h-5 w-5 text-primary" />
+              Writing Guide for The Synth Blog
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
+            <Alert className="m-4 bg-blue-50">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Welcome to The Synth Blog writing guide! This friendly guide
+                will help you create engaging, valuable content that readers
+                will love. Feel free to use it as inspiration rather than strict
+                rules.
+              </AlertDescription>
+            </Alert>
+
             <Tabs defaultValue="voice">
               <TabsList className="w-full justify-start border-b px-4">
-                <TabsTrigger value="voice">Voice & Tone</TabsTrigger>
+                <TabsTrigger value="voice">Style & Tone</TabsTrigger>
                 <TabsTrigger value="structure">Structure</TabsTrigger>
-                <TabsTrigger value="quality">Quality</TabsTrigger>
-                <TabsTrigger value="seo">SEO</TabsTrigger>
-                <TabsTrigger value="template">Template</TabsTrigger>
+                <TabsTrigger value="categories">Categories</TabsTrigger>
+                <TabsTrigger value="tips">Quick Tips</TabsTrigger>
+                <TabsTrigger value="examples">Examples</TabsTrigger>
               </TabsList>
 
               <TabsContent value="voice" className="p-4">
-                <h3 className="mb-2 font-semibold">Brand Voice & Tone</h3>
-                <ul className="ml-4 list-disc space-y-1">
-                  <li>Forward-thinking and solution-oriented</li>
-                  <li>Authoritative yet approachable</li>
-                  <li>Evidence-based and practical</li>
-                  <li>Progressive and innovative</li>
-                  <li>Focuses on actionable insights</li>
+                <h3 className="mb-2 flex items-center font-semibold">
+                  <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                  Our Writing Style
+                </h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  Your unique voice matters! While keeping these style elements
+                  in mind, don&apos;t be afraid to let your personality shine
+                  through.
+                </p>
+                <ul className="ml-4 list-disc space-y-2">
+                  <li>
+                    <span className="font-medium">Forward-thinking:</span> Share
+                    insights about what&apos;s coming next in your field
+                  </li>
+                  <li>
+                    <span className="font-medium">Approachable:</span> Write
+                    like you&apos;re having a conversation with a smart friend
+                  </li>
+                  <li>
+                    <span className="font-medium">Practical:</span> Include
+                    actionable advice readers can apply today
+                  </li>
+                  <li>
+                    <span className="font-medium">Evidence-based:</span> Back up
+                    claims with data or examples when possible
+                  </li>
+                  <li>
+                    <span className="font-medium">Positive:</span> Focus on
+                    solutions and opportunities, not just problems
+                  </li>
                 </ul>
               </TabsContent>
 
               <TabsContent value="structure" className="p-4">
-                <h3 className="mb-2 font-semibold">Content Structure</h3>
-
-                <h4 className="mt-3 font-medium">Title Format</h4>
-                <ul className="ml-4 list-disc space-y-1">
-                  <li>Must be clear and specific</li>
-                  <li>Should include actionable or valuable insight</li>
-                  <li>Length: 40-60 characters</li>
-                  <li>
-                    Example: &ldquo;How AI-Powered Task Management Is
-                    Revolutionizing Team Productivity&rdquo;
-                  </li>
-                </ul>
-
-                <h4 className="mt-3 font-medium">Introduction</h4>
-                <ul className="ml-4 list-disc space-y-1">
-                  <li>Start with a compelling hook</li>
-                  <li>Establish relevance to reader&apos;s progress</li>
-                  <li>Clear problem statement or opportunity identification</li>
-                  <li>Preview of key insights</li>
-                </ul>
-
-                <h4 className="mt-3 font-medium">Main Body</h4>
-                <ul className="ml-4 list-disc space-y-1">
-                  <li>Minimum 3 key insights or takeaways</li>
-                  <li>
-                    Each insight must be actionable, evidence-based,
-                    forward-looking, and progress-oriented
-                  </li>
-                  <li>Include real-world examples or case studies</li>
-                  <li>Link to relevant Synthalyst tools when applicable</li>
-                </ul>
-
-                <h4 className="mt-3 font-medium">Conclusion</h4>
-                <ul className="ml-4 list-disc space-y-1">
-                  <li>Actionable summary</li>
-                  <li>Future implications</li>
-                  <li>Call to action or next steps</li>
-                  <li>Connection to relevant Synthalyst features or tools</li>
-                </ul>
-              </TabsContent>
-
-              <TabsContent value="quality" className="p-4">
-                <h3 className="mb-2 font-semibold">Quality Checklist</h3>
-                <p className="mb-2">Before publication, ensure the content:</p>
-                <ul className="ml-4 list-disc space-y-1">
-                  <li>Delivers clear, actionable value</li>
-                  <li>
-                    Aligns with &ldquo;Insights That Power Progress&rdquo;
-                    tagline
-                  </li>
-                  <li>Includes forward-looking perspectives</li>
-                  <li>Connects to broader industry trends</li>
-                  <li>References reliable sources</li>
-                  <li>Links to relevant Synthalyst tools/features</li>
-                  <li>Maintains professional yet accessible tone</li>
-                  <li>Includes practical implementation steps</li>
-                  <li>Encourages reader growth/progress</li>
-                </ul>
-              </TabsContent>
-
-              <TabsContent value="seo" className="p-4">
-                <h3 className="mb-2 font-semibold">
-                  SEO & Metadata Requirements
+                <h3 className="mb-2 flex items-center font-semibold">
+                  <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                  Simple Structure for Great Posts
                 </h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  A well-structured post helps readers follow your ideas.
+                  Here&apos;s a simple framework that works well:
+                </p>
+
+                <h4 className="mt-3 font-medium">Catchy Title</h4>
+                <p className="mb-2 text-sm text-gray-600">
+                  Your title is your first impression! Make it specific and
+                  interesting.
+                </p>
                 <ul className="ml-4 list-disc space-y-1">
-                  <li>Primary keyword in title</li>
-                  <li>2-3 secondary keywords in subheadings</li>
-                  <li>Meta description: 150-160 characters</li>
-                  <li>Include relevant tags from category list</li>
-                  <li>Add internal links to related Synthalyst content</li>
+                  <li>Include what readers will gain</li>
+                  <li>Keep it between 40-60 characters</li>
+                  <li>
+                    <span className="italic">Example:</span> &quot;5 AI Tools
+                    That Will Transform Your HR Department in 2025&quot;
+                  </li>
                 </ul>
 
-                <h3 className="mb-2 mt-4 font-semibold">Content Enhancement</h3>
+                <h4 className="mt-3 font-medium">Engaging Introduction</h4>
+                <p className="mb-2 text-sm text-gray-600">
+                  Hook readers in the first few sentences.
+                </p>
                 <ul className="ml-4 list-disc space-y-1">
-                  <li>Include relevant statistics or data points</li>
-                  <li>Add visual elements (charts, infographics, diagrams)</li>
-                  <li>Use subheadings for easy scanning</li>
-                  <li>Include expert quotes when applicable</li>
-                  <li>Provide additional resources section</li>
+                  <li>Start with a surprising fact, question, or story</li>
+                  <li>Explain why the topic matters to your readers</li>
+                  <li>
+                    Preview what they&apos;ll learn (without giving it all away)
+                  </li>
+                </ul>
+
+                <h4 className="mt-3 font-medium">Valuable Main Content</h4>
+                <ul className="ml-4 list-disc space-y-1">
+                  <li>Break content into 3-5 main points or sections</li>
+                  <li>Use subheadings to make scanning easy</li>
+                  <li>Include real examples or case studies</li>
+                  <li>Add visuals when they help explain concepts</li>
+                </ul>
+
+                <h4 className="mt-3 font-medium">Memorable Conclusion</h4>
+                <ul className="ml-4 list-disc space-y-1">
+                  <li>Summarize key takeaways</li>
+                  <li>Suggest a next step readers can take</li>
+                  <li>End with a thought-provoking question or statement</li>
                 </ul>
               </TabsContent>
 
-              <TabsContent value="template" className="p-4">
-                <h3 className="mb-2 font-semibold">Sample Query Template</h3>
-                <p className="mb-2">
-                  When creating content, use this template:
+              <TabsContent value="categories" className="p-4">
+                <h3 className="mb-2 flex items-center font-semibold">
+                  <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                  Content Categories
+                </h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  Choose one or more categories that best fit your content. This
+                  helps readers find topics they&apos;re interested in.
                 </p>
-                <div className="rounded bg-gray-100 p-3 font-mono text-sm">
-                  <p>Create a blog post for The Synth that:</p>
-                  <p>1. Category: [Specify primary category]</p>
-                  <p>2. Topic: [Define specific topic]</p>
-                  <p>
-                    3. Key Angle: How this [topic] powers progress in
-                    [industry/area]
-                  </p>
-                  <p>4. Required Elements:</p>
-                  <p className="ml-3">- Minimum 3 actionable insights</p>
-                  <p className="ml-3">
-                    - Connection to Synthalyst tools/features
-                  </p>
-                  <p className="ml-3">- Forward-looking implications</p>
-                  <p className="ml-3">- Practical implementation steps</p>
-                  <p>5. Target Reader: [Specify audience]</p>
-                  <p>
-                    6. Desired Outcome: [What should readers be able to do after
-                    reading]
-                  </p>
-                  <p>
-                    Additional Context: [Any specific focus areas or
-                    requirements]
-                  </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-primary">
+                      AI & Technology
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Trends, tools, and practical applications of AI and
+                      emerging technologies.
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Example topics:</span> AI
+                      productivity tools, machine learning applications,
+                      technology trends
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-primary">
+                      Business Strategy
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Insights on business growth, strategy, and management
+                      practices.
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Example topics:</span>{" "}
+                      Strategic planning, business transformation, leadership
+                      approaches
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-primary">HR & Talent</h4>
+                    <p className="text-sm text-gray-600">
+                      Human resources, recruitment, employee development, and
+                      workplace culture.
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Example topics:</span>{" "}
+                      Recruitment strategies, employee engagement, talent
+                      development
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-primary">
+                      Productivity & Tools
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Methods, systems, and tools to enhance personal and team
+                      productivity.
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Example topics:</span> Task
+                      management, workflow optimization, productivity apps
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-primary">
+                      Learning & Development
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Educational approaches, learning technologies, and skill
+                      development.
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Example topics:</span>{" "}
+                      Training methods, learning platforms, skill acquisition
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-primary">Future of Work</h4>
+                    <p className="text-sm text-gray-600">
+                      Emerging trends and predictions about how work is
+                      evolving.
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Example topics:</span>{" "}
+                      Remote work, workplace evolution, future skills
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-primary">Case Studies</h4>
+                    <p className="text-sm text-gray-600">
+                      Real-world examples and success stories.
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Example topics:</span>{" "}
+                      Implementation stories, transformation journeys, success
+                      metrics
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="tips" className="p-4">
+                <h3 className="mb-2 flex items-center font-semibold">
+                  <Lightbulb className="mr-2 h-4 w-4 text-amber-500" />
+                  Quick Writing Tips
+                </h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  These simple tips can instantly make your writing more
+                  engaging:
+                </p>
+
+                <ul className="ml-4 list-disc space-y-2">
+                  <li>
+                    <span className="font-medium">Use the active voice</span>{" "}
+                    (&quot;AI tools transform businesses&quot; instead of
+                    &quot;Businesses are transformed by AI tools&quot;)
+                  </li>
+                  <li>
+                    <span className="font-medium">Keep paragraphs short</span>{" "}
+                    (3-4 sentences max) for better readability
+                  </li>
+                  <li>
+                    <span className="font-medium">Include subheadings</span>{" "}
+                    every 200-300 words to break up text
+                  </li>
+                  <li>
+                    <span className="font-medium">Add bullet points</span> for
+                    lists (like this one!) to make information scannable
+                  </li>
+                  <li>
+                    <span className="font-medium">Use specific examples</span>{" "}
+                    to illustrate abstract concepts
+                  </li>
+                  <li>
+                    <span className="font-medium">
+                      Include a call-to-action
+                    </span>{" "}
+                    at the end of your post
+                  </li>
+                  <li>
+                    <span className="font-medium">Write conversationally</span>{" "}
+                    - it&apos;s okay to use &quot;you&quot; and &quot;I&quot;
+                  </li>
+                  <li>
+                    <span className="font-medium">Proofread everything</span>{" "}
+                    before publishing (or use our AI assistant to help!)
+                  </li>
+                </ul>
+              </TabsContent>
+
+              <TabsContent value="examples" className="p-4">
+                <h3 className="mb-2 flex items-center font-semibold">
+                  <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                  Examples to Inspire You
+                </h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  Sometimes seeing examples helps! Here are snippets from
+                  successful posts:
+                </p>
+
+                <div className="space-y-4">
+                  <div className="rounded-md border border-gray-200 p-3">
+                    <h4 className="font-medium text-primary">
+                      Great Title Example
+                    </h4>
+                    <p className="text-sm italic">
+                      &quot;7 AI-Powered Tools That Will Transform Your HR
+                      Department in 2025&quot;
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Why it works:</span>{" "}
+                      Specific number, clear benefit, timely reference
+                    </p>
+                  </div>
+
+                  <div className="rounded-md border border-gray-200 p-3">
+                    <h4 className="font-medium text-primary">
+                      Engaging Introduction Example
+                    </h4>
+                    <p className="text-sm italic">
+                      &quot;Remember when creating a job description took days
+                      of research and endless revisions? Those days are
+                      officially over. With the rise of AI-powered writing
+                      assistants, what once took days now takes minutes—and the
+                      results are often better than what human HR professionals
+                      could create alone. In this post, I&apos;ll show you how
+                      these tools are revolutionizing recruitment and how you
+                      can start using them today.&quot;
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Why it works:</span>{" "}
+                      Relatable opening, clear problem/solution, preview of
+                      value
+                    </p>
+                  </div>
+
+                  <div className="rounded-md border border-gray-200 p-3">
+                    <h4 className="font-medium text-primary">
+                      Strong Conclusion Example
+                    </h4>
+                    <p className="text-sm italic">
+                      &quot;As AI continues to evolve, the line between human
+                      and machine-generated content will blur even further. The
+                      winners won&apos;t be those who resist this change, but
+                      those who learn to collaborate effectively with AI tools.
+                      Start with the techniques we&apos;ve covered today, and
+                      you&apos;ll be well-positioned to ride this wave of
+                      innovation rather than being swept away by it. What AI
+                      tool will you try first?&quot;
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      <span className="font-medium">Why it works:</span>{" "}
+                      Forward-looking perspective, actionable takeaway, ending
+                      question
+                    </p>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>

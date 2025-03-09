@@ -11,11 +11,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, X, Sparkles, AlertCircle } from "lucide-react";
+import { ImagePlus, X, Sparkles, AlertCircle, Check } from "lucide-react";
 import ContentGuide from "./components/ContentGuide";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Define the blog categories
+const BLOG_CATEGORIES = [
+  { name: "AI & Technology", value: "ai-technology" },
+  { name: "Business Strategy", value: "business-strategy" },
+  { name: "HR & Talent", value: "hr-talent" },
+  { name: "Productivity & Tools", value: "productivity-tools" },
+  { name: "Learning & Development", value: "learning-development" },
+  { name: "Future of Work", value: "future-of-work" },
+  { name: "Case Studies", value: "case-studies" },
+];
 
 interface CreatePostForm {
   title: string;
@@ -318,20 +329,41 @@ function NewPostContent() {
 
               <div className="space-y-2">
                 <Label htmlFor="categories">Categories</Label>
-                <Input
-                  id="categories"
-                  value={formData.categories.join(", ")}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      categories: e.target.value
-                        .split(",")
-                        .map((cat) => cat.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  placeholder="Enter categories (comma-separated)"
-                />
+                <div className="flex flex-wrap gap-2">
+                  {BLOG_CATEGORIES.map((category) => (
+                    <Badge
+                      key={category.value}
+                      variant={
+                        formData.categories.includes(category.name)
+                          ? "default"
+                          : "outline"
+                      }
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const isSelected = formData.categories.includes(
+                          category.name
+                        );
+                        setFormData({
+                          ...formData,
+                          categories: isSelected
+                            ? formData.categories.filter(
+                                (c) => c !== category.name
+                              )
+                            : [...formData.categories, category.name],
+                        });
+                      }}
+                    >
+                      {formData.categories.includes(category.name) && (
+                        <Check className="mr-1 h-3 w-3" />
+                      )}
+                      {category.name}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Click on categories to select them. You can select multiple
+                  categories.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -428,8 +460,9 @@ function NewPostContent() {
 
                 <div className="space-y-2">
                   <Label htmlFor="ai-category">Category</Label>
-                  <Input
+                  <select
                     id="ai-category"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={generateForm.category}
                     onChange={(e) =>
                       setGenerateForm({
@@ -437,8 +470,15 @@ function NewPostContent() {
                         category: e.target.value,
                       })
                     }
-                    placeholder="E.g., Innovation & Tech, Professional Growth, etc."
-                  />
+                    aria-label="Select blog category"
+                  >
+                    <option value="">Select a category</option>
+                    {BLOG_CATEGORIES.map((category) => (
+                      <option key={category.value} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">

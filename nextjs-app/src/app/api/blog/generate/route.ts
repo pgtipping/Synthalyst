@@ -7,6 +7,25 @@ import {
 import { getGeminiModel } from "@/lib/gemini";
 import { z } from "zod";
 
+// Define the valid categories
+const VALID_CATEGORIES = [
+  "AI & Technology",
+  "Business Strategy",
+  "HR & Talent",
+  "Productivity & Tools",
+  "Learning & Development",
+  "Future of Work",
+  "Case Studies",
+] as const;
+
+// Create a type for the valid categories
+type BlogCategory = (typeof VALID_CATEGORIES)[number];
+
+// Check if a string is a valid category
+const isValidCategory = (category: string): category is BlogCategory => {
+  return VALID_CATEGORIES.includes(category as BlogCategory);
+};
+
 const generateBlogSchema = z.object({
   title: z.string().optional(),
   topic: z.string().optional(),
@@ -17,6 +36,59 @@ const generateBlogSchema = z.object({
 
 type GenerateBlogInput = z.infer<typeof generateBlogSchema>;
 
+// Category-specific guidance for the LLM
+const CATEGORY_GUIDANCE: Record<BlogCategory, string> = {
+  "AI & Technology": `
+- Focus on practical applications of AI and emerging technologies
+- Include specific examples of tools or technologies in action
+- Discuss both benefits and potential challenges
+- Consider ethical implications where relevant
+- Include forward-looking predictions about technology evolution
+`,
+  "Business Strategy": `
+- Provide actionable strategic insights for business leaders
+- Include real-world examples of successful strategies
+- Consider different business sizes and contexts
+- Balance theoretical frameworks with practical implementation steps
+- Address current business challenges and opportunities
+`,
+  "HR & Talent": `
+- Focus on practical solutions for HR professionals
+- Include insights on recruitment, retention, and development
+- Consider diverse workplace contexts and challenges
+- Reference current workplace trends and research
+- Provide actionable steps for improving HR processes
+`,
+  "Productivity & Tools": `
+- Highlight specific tools and methodologies that enhance productivity
+- Include step-by-step implementation guidance
+- Consider different work contexts (remote, hybrid, office)
+- Focus on measurable productivity improvements
+- Address common productivity challenges and solutions
+`,
+  "Learning & Development": `
+- Focus on effective learning methodologies and approaches
+- Include insights on skill development and knowledge acquisition
+- Consider different learning contexts and preferences
+- Reference current research in learning science
+- Provide practical implementation steps for L&D professionals
+`,
+  "Future of Work": `
+- Explore emerging workplace trends and their implications
+- Balance speculation with evidence-based predictions
+- Consider diverse perspectives and industries
+- Address both challenges and opportunities in future work models
+- Include actionable steps for preparing for workplace evolution
+`,
+  "Case Studies": `
+- Focus on detailed, real-world examples
+- Include specific challenges, solutions, and outcomes
+- Provide context about the organization or situation
+- Extract generalizable lessons and insights
+- Include metrics and measurable results where possible
+`,
+};
+
 export const POST = createHandler<GenerateBlogInput>(
   async (req: NextRequest, _params, body) => {
     if (!body) {
@@ -25,6 +97,12 @@ export const POST = createHandler<GenerateBlogInput>(
 
     try {
       const { title, topic, category, targetAudience, keyPoints } = body;
+
+      // Get category-specific guidance
+      let categoryGuidance = "";
+      if (category && isValidCategory(category)) {
+        categoryGuidance = `CATEGORY-SPECIFIC GUIDANCE (${category}):\n${CATEGORY_GUIDANCE[category]}\n`;
+      }
 
       // Build the prompt based on the content creation guide
       const prompt = `
@@ -39,6 +117,8 @@ ${
     ? `Key Points to Include: ${keyPoints.join(", ")}`
     : ""
 }
+
+${categoryGuidance}
 
 CONTENT CREATION GUIDELINES:
 
