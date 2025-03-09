@@ -42,7 +42,7 @@ export default function ContentGuide() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="justify-self-center">
+            <div className="flex justify-center">
               <Alert className="mx-6 my-4 bg-blue-50">
                 <Info className="h-4 w-4" />
                 <AlertDescription>
@@ -57,7 +57,10 @@ export default function ContentGuide() {
             <div className="overflow-hidden">
               <Tabs defaultValue="voice">
                 <div className="overflow-x-auto">
-                  <TabsList className="w-full justify-start border-b px-6 flex-wrap">
+                  <TabsList
+                    className="w-full justify-start border-b px-6 flex-wrap overflow-x-auto"
+                    role="tablist"
+                  >
                     <TabsTrigger value="voice">Style & Tone</TabsTrigger>
                     <TabsTrigger value="structure">Structure</TabsTrigger>
                     <TabsTrigger value="categories">Categories</TabsTrigger>
