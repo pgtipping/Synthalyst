@@ -246,7 +246,7 @@ export default function BlogPage() {
                               // If the image fails to load, replace with a placeholder
                               const target = e.target as HTMLImageElement;
                               target.src =
-                                "https://via.placeholder.com/800x400?text=Synthalyst";
+                                "https://placehold.co/800x400?text=Synthalyst";
                               target.onerror = null; // Prevent infinite error loop
                             }}
                           />
@@ -321,7 +321,7 @@ export default function BlogPage() {
                                 // If the image fails to load, replace with a placeholder
                                 const target = e.target as HTMLImageElement;
                                 target.src =
-                                  "https://via.placeholder.com/800x400?text=Synthalyst";
+                                  "https://placehold.co/800x400?text=Synthalyst";
                                 target.onerror = null; // Prevent infinite error loop
                               }}
                             />
@@ -402,7 +402,7 @@ export default function BlogPage() {
                                   // If the image fails to load, replace with a placeholder
                                   const target = e.target as HTMLImageElement;
                                   target.src =
-                                    "https://via.placeholder.com/400x200?text=Synthalyst";
+                                    "https://placehold.co/400x200?text=Synthalyst";
                                   target.onerror = null; // Prevent infinite error loop
                                 }}
                               />

@@ -24,7 +24,7 @@ export function getValidImageUrl(
   fallback?: string
 ): string {
   // Default fallback if none provided
-  const defaultFallback = "https://via.placeholder.com/800x400?text=Synthalyst";
+  const defaultFallback = "https://placehold.co/800x400?text=Synthalyst";
 
   // If no URL provided, return fallback
   if (!url) {

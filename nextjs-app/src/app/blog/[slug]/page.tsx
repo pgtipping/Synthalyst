@@ -200,8 +200,7 @@ export default function BlogPostPage() {
                 onError={(e) => {
                   // If the image fails to load, replace with a placeholder
                   const target = e.target as HTMLImageElement;
-                  target.src =
-                    "https://via.placeholder.com/1200x600?text=Synthalyst";
+                  target.src = "https://placehold.co/1200x600?text=Synthalyst";
                   target.onerror = null; // Prevent infinite error loop
                 }}
               />
@@ -348,7 +347,7 @@ export default function BlogPostPage() {
                             // If the image fails to load, replace with a placeholder
                             const target = e.target as HTMLImageElement;
                             target.src =
-                              "https://via.placeholder.com/800x400?text=Synthalyst";
+                              "https://placehold.co/800x400?text=Synthalyst";
                             target.onerror = null; // Prevent infinite error loop
                           }}
                         />

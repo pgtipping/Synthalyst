@@ -6,6 +6,10 @@ alwaysApply: true
 
 # project specific rules
 
+- This project is configured to only run its development server on localhost:3001  
+- ALWAYS terminate running server before invoking the build command.
+- ALWAYS check server status BEFORE starting the server.
+
 ## development folder
 
 - /nextjs-app

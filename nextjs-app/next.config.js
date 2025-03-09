@@ -99,10 +99,11 @@ const nextConfig = {
       "images.unsplash.com",
       "source.unsplash.com",
       "picsum.photos",
-      "via.placeholder.com",
       "placehold.co",
       "res.cloudinary.com",
     ],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: "https",

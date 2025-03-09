@@ -7,22 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// NextAuth Models
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -44,34 +42,34 @@ model VerificationToken {
 }
 
 model User {
-  id              String                @id @default(cuid())
-  name            String?
-  email           String                @unique
-  emailVerified   DateTime?
-  image           String?
-  role            String                @default("user")
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-  password        String?
-  accounts        Account[]
-  sessions        Session[]
-  chatMessages    ChatMessage[]
-  comments        Comment[]
-  competencies    CompetencyFramework[]
-  documents       Document[]
-  jobDescriptions JobDescription[]
-  learningContent LearningContent[]
-  payments        Payment[]
-  posts           Post[]
-  profile         Profile?
-  subscriptions   Subscription[]
-  supportTickets  SupportTicket[]
-  tasks           Task[]
-  templates       Template[]
-  trainingPlans   TrainingPlan[]
-  preferences     UserPreferences?
+  id                 String                        @id @default(cuid())
+  name               String?
+  email              String                        @unique
+  emailVerified      DateTime?
+  image              String?
+  role               String                        @default("user")
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+  password           String?
+  accounts           Account[]
+  chatMessages       ChatMessage[]
+  comments           Comment[]
+  competencies       CompetencyFramework[]
+  frameworkFeedback  CompetencyFrameworkFeedback[]
   competencyMatrices CompetencyMatrix[]
-  frameworkFeedback CompetencyFrameworkFeedback[]
+  documents          Document[]
+  jobDescriptions    JobDescription[]
+  learningContent    LearningContent[]
+  payments           Payment[]
+  posts              Post[]
+  profile            Profile?
+  sessions           Session[]
+  subscriptions      Subscription[]
+  supportTickets     SupportTicket[]
+  tasks              Task[]
+  templates          Template[]
+  trainingPlans      TrainingPlan[]
+  preferences        UserPreferences?
 }
 
 model Profile {
@@ -191,28 +189,27 @@ model Template {
 }
 
 model JobDescription {
-  id          String             @id @default(cuid())
-  title       String
-  content     String
-  industry    String?
-  level       String?
-  skills      String[]
-  userId      String
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  contentHash String
-  isLatest    Boolean            @default(true)
-  parentId    String?
-  version     Int                @default(1)
-  canonicalId String?
-  canonical   JobDescription?    @relation("DuplicateGroup", fields: [canonicalId], references: [id])
-  duplicates  JobDescription[]   @relation("DuplicateGroup")
-  parent      JobDescription?    @relation("VersionHistory", fields: [parentId], references: [id])
-  versions    JobDescription[]   @relation("VersionHistory")
-  user        User               @relation(fields: [userId], references: [id])
-  categories  TemplateCategory[] @relation("JobDescriptionToTemplateCategory")
-  // Add relation to Competency for integration (optional)
-  competencies Competency[] @relation("JobDescriptionToCompetency")
+  id           String             @id @default(cuid())
+  title        String
+  content      String
+  industry     String?
+  level        String?
+  skills       String[]
+  userId       String
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  contentHash  String
+  isLatest     Boolean            @default(true)
+  parentId     String?
+  version      Int                @default(1)
+  canonicalId  String?
+  canonical    JobDescription?    @relation("DuplicateGroup", fields: [canonicalId], references: [id])
+  duplicates   JobDescription[]   @relation("DuplicateGroup")
+  parent       JobDescription?    @relation("VersionHistory", fields: [parentId], references: [id])
+  versions     JobDescription[]   @relation("VersionHistory")
+  user         User               @relation(fields: [userId], references: [id])
+  competencies Competency[]       @relation("JobDescriptionToCompetency")
+  categories   TemplateCategory[] @relation("JobDescriptionToTemplateCategory")
 
   @@index([userId])
   @@index([contentHash])
@@ -289,51 +286,47 @@ model LearningContent {
 }
 
 model CompetencyFramework {
-  id          String       @id @default(cuid())
-  name        String
-  description String?      @db.Text
-  industry    String       // Keep for backward compatibility
-  jobFunction String
-  roleLevel   String
-  isPublic    Boolean      @default(false)
-  userId      String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  averageRating Float?     // New field for average rating
-  feedbackCount Int        @default(0) // New field for feedback count
-  user        User         @relation(fields: [userId], references: [id])
-  competencies Competency[]
-  feedback    CompetencyFrameworkFeedback[] // New relation to feedback
-  // New field for industry reference
-  industryId  String?
-  industryRef Industry?    @relation(fields: [industryId], references: [id])
+  id            String                        @id @default(cuid())
+  description   String?
+  industry      String
+  userId        String
+  createdAt     DateTime                      @default(now())
+  updatedAt     DateTime                      @updatedAt
+  industryId    String?
+  isPublic      Boolean                       @default(false)
+  jobFunction   String
+  name          String
+  roleLevel     String
+  averageRating Float?
+  feedbackCount Int                           @default(0)
+  competencies  Competency[]
+  industryRef   Industry?                     @relation(fields: [industryId], references: [id])
+  user          User                          @relation(fields: [userId], references: [id])
+  feedback      CompetencyFrameworkFeedback[]
 
   @@index([userId])
   @@index([industryId])
 }
 
 model Competency {
-  id            String            @id @default(cuid())
-  name          String
-  description   String            @db.Text
-  businessImpact String           @db.Text
-  type          String
-  frameworkId   String
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  framework     CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
-  levels        CompetencyLevel[]
-  // New fields for organizational reference data
-  categoryId    String?
-  category      CompetencyCategory? @relation(fields: [categoryId], references: [id])
-  industryId    String?
-  industry      Industry? @relation(fields: [industryId], references: [id])
-  // Relations for integration with other tools
+  id                   String                @id @default(cuid())
+  name                 String
+  description          String
+  businessImpact       String
+  type                 String
+  frameworkId          String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  categoryId           String?
+  industryId           String?
+  source               String?
+  sourceJdId           String?
+  category             CompetencyCategory?   @relation(fields: [categoryId], references: [id])
+  framework            CompetencyFramework   @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  industry             Industry?             @relation(fields: [industryId], references: [id])
+  levels               CompetencyLevel[]
   roleCompetencyLevels RoleCompetencyLevel[]
-  source        String?  // e.g., "JD_EXTRACTED", "USER_CREATED", "SYSTEM"
-  sourceJdId    String?  // If extracted from a JD, the ID of that JD
-  // Add relation to JobDescription
-  jobDescriptions JobDescription[] @relation("JobDescriptionToCompetency")
+  jobDescriptions      JobDescription[]      @relation("JobDescriptionToCompetency")
 
   @@index([frameworkId])
   @@index([categoryId])
@@ -341,115 +334,113 @@ model Competency {
 }
 
 model CompetencyLevel {
-  id                    String     @id @default(cuid())
-  name                  String
-  description           String     @db.Text
-  levelOrder            Int
-  behavioralIndicators  String[]
+  id                     String     @id @default(cuid())
+  name                   String
+  description            String
+  levelOrder             Int
+  behavioralIndicators   String[]
   developmentSuggestions String[]
-  competencyId          String
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
-  competency            Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  competencyId           String
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+  competency             Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
 
   @@index([competencyId])
 }
 
-// Organizational Reference Data Models
 model CompetencyCategory {
-  id            String       @id @default(cuid())
-  name          String       @unique
-  description   String       @db.Text
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  competencies  Competency[] // Relation to competencies in this category
+  id           String       @id @default(cuid())
+  name         String       @unique
+  description  String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  competencies Competency[]
 }
 
 model JobLevel {
-  id            String       @id @default(cuid())
-  name          String       // e.g., "Entry", "Associate", "Senior", "Lead", "Principal"
-  code          String?      // e.g., "L1", "L2", "L3", etc.
-  description   String       @db.Text
-  order         Int          // For sorting levels in the correct order
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  jobTitles     JobTitle[]
-  matrixRoles   MatrixRole[]
+  id          String       @id @default(cuid())
+  name        String
+  code        String?
+  description String
+  order       Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  jobTitles   JobTitle[]
+  matrixRoles MatrixRole[]
 }
 
 model JobFamily {
-  id            String       @id @default(cuid())
-  name          String       // e.g., "Engineering", "Marketing", "Sales"
-  description   String       @db.Text
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  jobTitles     JobTitle[]
+  id          String     @id @default(cuid())
+  name        String
+  description String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  jobTitles   JobTitle[]
 }
 
 model JobTitle {
-  id                String            @id @default(cuid())
-  title             String
-  description       String            @db.Text
-  jobFamilyId       String
-  jobFamily         JobFamily         @relation(fields: [jobFamilyId], references: [id])
-  jobLevelId        String
-  jobLevel          JobLevel          @relation(fields: [jobLevelId], references: [id])
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  matrixRoles       MatrixRole[]
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  jobFamilyId String
+  jobLevelId  String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  jobFamily   JobFamily    @relation(fields: [jobFamilyId], references: [id])
+  jobLevel    JobLevel     @relation(fields: [jobLevelId], references: [id])
+  matrixRoles MatrixRole[]
 
   @@index([jobFamilyId])
   @@index([jobLevelId])
 }
 
 model Department {
-  id            String       @id @default(cuid())
-  name          String
-  description   String?      @db.Text
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Industry {
-  id                  String                @id @default(cuid())
-  name                String                @unique
-  description         String?               @db.Text
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  competencies        Competency[]          // Relation to competencies in this industry
-  competencyFrameworks CompetencyFramework[] // Relation to frameworks in this industry
-  competencyMatrices  CompetencyMatrix[]
+  id                   String                @id @default(cuid())
+  name                 String                @unique
+  description          String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  competencies         Competency[]
+  competencyFrameworks CompetencyFramework[]
+  competencyMatrices   CompetencyMatrix[]
 }
 
-// Competency Matrix Models
 model CompetencyMatrix {
-  id            String       @id @default(cuid())
-  name          String
-  description   String       @db.Text
-  industryId    String?
-  industry      Industry?    @relation(fields: [industryId], references: [id])
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  userId        String
-  user          User         @relation(fields: [userId], references: [id])
-  roles         MatrixRole[]
-  isPublic      Boolean      @default(false)
+  id          String       @id @default(cuid())
+  name        String
+  description String
+  industryId  String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userId      String
+  isPublic    Boolean      @default(false)
+  industry    Industry?    @relation(fields: [industryId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+  roles       MatrixRole[]
 
   @@index([userId])
   @@index([industryId])
 }
 
 model MatrixRole {
-  id                String                @id @default(cuid())
-  title             String
-  description       String                @db.Text
-  matrixId          String
-  matrix            CompetencyMatrix      @relation(fields: [matrixId], references: [id], onDelete: Cascade)
-  competencyLevels  RoleCompetencyLevel[]
-  jobTitleId        String?
-  jobTitle          JobTitle?             @relation(fields: [jobTitleId], references: [id])
-  jobLevelId        String?
-  jobLevel          JobLevel?             @relation(fields: [jobLevelId], references: [id])
+  id               String                @id @default(cuid())
+  title            String
+  description      String
+  matrixId         String
+  jobTitleId       String?
+  jobLevelId       String?
+  jobLevel         JobLevel?             @relation(fields: [jobLevelId], references: [id])
+  jobTitle         JobTitle?             @relation(fields: [jobTitleId], references: [id])
+  matrix           CompetencyMatrix      @relation(fields: [matrixId], references: [id], onDelete: Cascade)
+  competencyLevels RoleCompetencyLevel[]
 
   @@index([matrixId])
   @@index([jobTitleId])
@@ -457,13 +448,13 @@ model MatrixRole {
 }
 
 model RoleCompetencyLevel {
-  id            String       @id @default(cuid())
+  id            String     @id @default(cuid())
   roleId        String
-  role          MatrixRole   @relation(fields: [roleId], references: [id], onDelete: Cascade)
   competencyId  String
-  competency    Competency   @relation(fields: [competencyId], references: [id])
-  levelRequired String       // References the level name in CompetencyLevel
-  
+  levelRequired String
+  competency    Competency @relation(fields: [competencyId], references: [id])
+  role          MatrixRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
   @@index([roleId])
   @@index([competencyId])
 }
@@ -529,19 +520,19 @@ model Payment {
 }
 
 model ContactSubmission {
-  id            String                  @id @default(cuid())
+  id            String                   @id @default(cuid())
   name          String
   email         String
   subject       String
   company       String?
   phone         String?
   inquiryType   String
-  message       String                  @db.Text
-  status        String                  @default("new") // new, in-progress, resolved
-  notes         String?                 @db.Text
+  message       String
+  status        String                   @default("new")
+  notes         String?
   assignedTo    String?
-  createdAt     DateTime                @default(now())
-  updatedAt     DateTime                @updatedAt
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
   lastRepliedAt DateTime?
   replies       ContactSubmissionReply[]
 
@@ -551,32 +542,31 @@ model ContactSubmission {
 }
 
 model ContactSubmissionReply {
-  id           String           @id @default(cuid())
+  id           String            @id @default(cuid())
   submissionId String
   subject      String
-  message      String           @db.Text
+  message      String
   sentBy       String
-  sentAt       DateTime         @default(now())
+  sentAt       DateTime          @default(now())
   submission   ContactSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@index([submissionId])
   @@index([sentAt])
 }
 
-// New model for competency framework feedback
 model CompetencyFrameworkFeedback {
-  id                      String       @id @default(cuid())
-  rating                  Int          // 1-5 star rating
-  feedback                String       @db.Text // Optional feedback text
-  isPublic                Boolean      @default(true) // Whether the feedback is public
-  llmQualityFeedback      String?      // "good" or "needs_improvement"
-  llmImprovementSuggestion String      @db.Text // Suggestions for improving the LLM
-  frameworkId             String
-  userId                  String?      // Optional user ID (can be anonymous)
-  createdAt               DateTime     @default(now())
-  updatedAt               DateTime     @updatedAt
-  framework               CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
-  user                    User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id                       String              @id @default(cuid())
+  rating                   Int
+  feedback                 String
+  frameworkId              String
+  userId                   String?
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  isPublic                 Boolean             @default(true)
+  llmImprovementSuggestion String
+  llmQualityFeedback       String?
+  framework                CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  user                     User?               @relation(fields: [userId], references: [id])
 
   @@index([frameworkId])
   @@index([userId])

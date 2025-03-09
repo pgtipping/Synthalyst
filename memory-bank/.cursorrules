@@ -3289,3 +3289,13 @@ This approach ensures that access control is maintainable, scalable, and secure.
 - The animation is implemented using setTimeout and requestAnimationFrame
 - The component includes proper cleanup in useEffect to prevent memory leaks
 - The original SynthalystLogo component has been removed to avoid conflicts
+
+## Development Server Port Management - [2025-03-09 17:30:00]
+
+- The development server is configured to run on port 3001 as specified in the project rules
+- If the server fails to start with "Error: listen EADDRINUSE: address already in use :::3001", it means the port is already in use
+- To resolve this issue:
+  1. Check which process is using port 3001 with `netstat -ano | findstr :3001`
+  2. Kill the process with `taskkill //F //PID <PID>` (note the double slashes for Windows Git Bash)
+  3. Restart the development server with `cd nextjs-app && npm run dev`
+- Always ensure the development server is running on port 3001 to maintain compatibility with authentication and API configurations
