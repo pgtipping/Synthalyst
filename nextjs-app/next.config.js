@@ -93,7 +93,26 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ["lh3.googleusercontent.com", "avatars.githubusercontent.com"],
+    domains: [
+      "lh3.googleusercontent.com",
+      "avatars.githubusercontent.com",
+      "images.unsplash.com",
+      "source.unsplash.com",
+      "picsum.photos",
+      "via.placeholder.com",
+      "placehold.co",
+      "res.cloudinary.com",
+    ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
   },
   serverExternalPackages: ["@prisma/client", "bcrypt"],
   // Skip database-dependent pages during static generation

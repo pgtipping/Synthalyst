@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { getValidImageUrl } from "@/lib/utils";
 
 interface Post {
   id: string;
@@ -237,10 +238,17 @@ export default function BlogPage() {
                       {post.coverImage && (
                         <div className="relative h-48">
                           <Image
-                            src={post.coverImage}
+                            src={getValidImageUrl(post.coverImage)}
                             alt={post.title}
                             fill
                             className="object-cover"
+                            onError={(e) => {
+                              // If the image fails to load, replace with a placeholder
+                              const target = e.target as HTMLImageElement;
+                              target.src =
+                                "https://via.placeholder.com/800x400?text=Synthalyst";
+                              target.onerror = null; // Prevent infinite error loop
+                            }}
                           />
                         </div>
                       )}
@@ -302,6 +310,23 @@ export default function BlogPage() {
                       className="block group"
                     >
                       <article className="bg-white rounded-lg shadow-md overflow-hidden">
+                        {post.coverImage && (
+                          <div className="relative h-48">
+                            <Image
+                              src={getValidImageUrl(post.coverImage)}
+                              alt={post.title}
+                              fill
+                              className="object-cover"
+                              onError={(e) => {
+                                // If the image fails to load, replace with a placeholder
+                                const target = e.target as HTMLImageElement;
+                                target.src =
+                                  "https://via.placeholder.com/800x400?text=Synthalyst";
+                                target.onerror = null; // Prevent infinite error loop
+                              }}
+                            />
+                          </div>
+                        )}
                         <div className="p-6">
                           <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-600">
                             {post.title}
@@ -366,6 +391,23 @@ export default function BlogPage() {
                         className="block group"
                       >
                         <article>
+                          {post.coverImage && (
+                            <div className="relative h-32 mb-2 rounded overflow-hidden">
+                              <Image
+                                src={getValidImageUrl(post.coverImage)}
+                                alt={post.title}
+                                fill
+                                className="object-cover"
+                                onError={(e) => {
+                                  // If the image fails to load, replace with a placeholder
+                                  const target = e.target as HTMLImageElement;
+                                  target.src =
+                                    "https://via.placeholder.com/400x200?text=Synthalyst";
+                                  target.onerror = null; // Prevent infinite error loop
+                                }}
+                              />
+                            </div>
+                          )}
                           <h3 className="font-semibold mb-2 group-hover:text-blue-600">
                             {post.title}
                           </h3>

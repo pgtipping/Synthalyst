@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import MDXContent from "@/components/MDXContent";
 import { EyeOpenIcon, HeartFilledIcon } from "@radix-ui/react-icons";
+import { getValidImageUrl } from "@/lib/utils";
 
 interface Post {
   id: string;
@@ -187,6 +188,26 @@ export default function BlogPostPage() {
         <article className="prose prose-lg max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
 
+          {/* Add cover image */}
+          {post.coverImage && (
+            <div className="relative w-full h-96 mb-8 rounded-lg overflow-hidden">
+              <Image
+                src={getValidImageUrl(post.coverImage)}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+                onError={(e) => {
+                  // If the image fails to load, replace with a placeholder
+                  const target = e.target as HTMLImageElement;
+                  target.src =
+                    "https://via.placeholder.com/1200x600?text=Synthalyst";
+                  target.onerror = null; // Prevent infinite error loop
+                }}
+              />
+            </div>
+          )}
+
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center">
               {/* Author image */}
@@ -319,10 +340,17 @@ export default function BlogPostPage() {
                     {relatedPost.coverImage && (
                       <div className="relative h-48">
                         <Image
-                          src={relatedPost.coverImage}
+                          src={getValidImageUrl(relatedPost.coverImage)}
                           alt={relatedPost.title}
                           fill
                           className="object-cover"
+                          onError={(e) => {
+                            // If the image fails to load, replace with a placeholder
+                            const target = e.target as HTMLImageElement;
+                            target.src =
+                              "https://via.placeholder.com/800x400?text=Synthalyst";
+                            target.onerror = null; // Prevent infinite error loop
+                          }}
                         />
                       </div>
                     )}
