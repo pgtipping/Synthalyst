@@ -535,6 +535,17 @@
 - Seed data for reference data models
 - Completion of standalone functionality for each HR tool
 
+## Next Implementation Items
+
+- **Newsletter Subscription Management Admin Interface** (2025-03-09 23:45:00)
+  - Create a dedicated admin interface at `/admin/newsletter`
+  - Implement subscriber list view with filtering options (confirmed, active, unsubscribed)
+  - Add functionality to manually add, edit, or remove subscribers
+  - Create interface for sending newsletters to specific segments
+  - Implement subscription analytics dashboard
+  - Add integration with SendGrid for bulk operations
+  - Ensure proper role-based access control
+
 ## Recent Updates
 
 - Restored loading animation with countdown for framework generation (2025-03-08 18:00:00)

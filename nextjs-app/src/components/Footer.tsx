@@ -45,9 +45,8 @@ export default function Footer() {
               <h2 className="text-2xl font-bold text-white">Synthalyst</h2>
             </Link>
             <p className="mt-4 text-gray-400 max-w-md">
-              Empowering businesses with AI-driven tools for HR, training, and
-              productivity. Transform your operations with intelligent
-              solutions.
+              Empowering you with AI-driven tools for personal and business
+              productivity. Work smarter, live better.
             </p>
             <div className="mt-6 flex space-x-4">
               <a

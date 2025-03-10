@@ -2,7 +2,7 @@
 
 ## Current Focus
 
-- **Environment Configuration Update**: Added NEXT_PUBLIC_API_URL to the environment configuration to fix undefined API URL errors. This variable is required for blog post functionality and should be set to http://localhost:3001 in development.
+- **Environment Configuration Update**: Added NEXT_PUBLIC_API_URL to the environment configuration to fix undefined API URL errors. This variable is required for blog post functionality and should be set to <http://localhost:3001> in development.
 
 - **Blog Post Creation Strategy**: Identified that the preferred method for blog post creation is through the API endpoints (`/api/posts` and `/api/blog/generate`) rather than MDX files. This approach provides better consistency across environments and eliminates filesystem synchronization issues.
 
@@ -35,6 +35,8 @@
 - **ContentGuide UI Improvement**: Enhanced the ContentGuide component layout with consistent padding and proper container sizing. Replaced the overflow-based approach with proper spacing and padding to ensure equal whitespace on both sides of the content. This improves the visual balance and overall user experience of the blog creation interface.
 
 - **Newsletter Functionality Implementation**: Completed the newsletter system with a finalized database schema. Created the Newsletter model in Prisma, implemented API routes for subscription, confirmation, and unsubscription, and developed UI components for the newsletter system. The system now supports email confirmation, welcome emails, and unsubscription with proper database integration.
+
+- **Newsletter Admin Interface Planning**: Planning the implementation of a dedicated admin interface for newsletter subscription management. This will include a subscriber list view with filtering options, functionality to manually manage subscribers, an interface for sending newsletters to specific segments, subscription analytics, and SendGrid integration for bulk operations. The interface will be implemented at `/admin/newsletter` with proper role-based access control.
 
 ## Recent Changes
 
@@ -430,7 +432,7 @@ The Competency Manager feature is now complete with the following components imp
 
 - Added script to assign admin role to specific email (2025-03-07 21:30:00)
 
-  - Created a script to assign the ADMIN role to pgtipping1@gmail.com
+  - Created a script to assign the ADMIN role to <pgtipping1@gmail.com>
   - Implemented the script using Prisma to update the user record
   - Added an npm script to run the admin role assignment
   - Ensured the Header component correctly checks for the admin role
