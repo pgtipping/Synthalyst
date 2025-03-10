@@ -10,12 +10,20 @@ interface NewsletterSignupProps {
   source?: string;
   buttonText?: string;
   placeholder?: string;
+  variant?: string;
+  className?: string;
+  title?: string;
+  description?: string;
 }
 
 export default function NewsletterSignup({
   source = "website",
   buttonText = "Subscribe",
   placeholder = "Enter your email",
+  variant = "default",
+  className = "",
+  title,
+  description,
 }: NewsletterSignupProps) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<
@@ -57,19 +65,35 @@ export default function NewsletterSignup({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className={`w-full max-w-md mx-auto ${className}`}>
+      {(title || description) && (
+        <div className="mb-4">
+          {title && <h3 className="text-lg font-semibold mb-1">{title}</h3>}
+          {description && (
+            <p className="text-sm text-gray-600">{description}</p>
+          )}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-        <div className="flex space-x-2">
+        <div
+          className={`flex ${
+            variant === "minimal" ? "flex-row" : "flex-col sm:flex-row"
+          } space-x-0 sm:space-x-2 space-y-2 sm:space-y-0`}
+        >
           <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={placeholder}
             required
-            className="flex-grow"
+            className={`flex-grow ${variant === "minimal" ? "h-9" : ""}`}
             disabled={status === "loading"}
           />
-          <Button type="submit" disabled={status === "loading"}>
+          <Button
+            type="submit"
+            disabled={status === "loading"}
+            size={variant === "minimal" ? "sm" : "default"}
+          >
             {status === "loading" ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -82,13 +106,21 @@ export default function NewsletterSignup({
         </div>
 
         {status === "success" && (
-          <Alert className="bg-green-50 border-green-200">
+          <Alert
+            className={`bg-green-50 border-green-200 ${
+              variant === "minimal" ? "py-2 text-sm" : ""
+            }`}
+          >
             <AlertDescription>{message}</AlertDescription>
           </Alert>
         )}
 
         {status === "error" && (
-          <Alert className="bg-red-50 border-red-200">
+          <Alert
+            className={`bg-red-50 border-red-200 ${
+              variant === "minimal" ? "py-2 text-sm" : ""
+            }`}
+          >
             <AlertDescription>{message}</AlertDescription>
           </Alert>
         )}
