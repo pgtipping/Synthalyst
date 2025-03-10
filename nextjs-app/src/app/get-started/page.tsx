@@ -244,7 +244,7 @@ export default function GetStarted() {
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-8 md:p-12 text-white text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Join thousands of organizations already using Synthalyst to
+            Join the growing number of organizations already using Synthalyst to
             streamline their HR processes.
           </p>
           <Link href="/login">

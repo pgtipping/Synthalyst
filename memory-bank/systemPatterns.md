@@ -749,3 +749,88 @@ The application implements role-based access control (RBAC) to manage access to 
   - Add aria-label to animated elements
   - Ensure animations don't interfere with screen readers
   - Keep animations subtle to avoid distracting users with cognitive disabilities
+
+# System Architecture and Patterns - 2024-03-10 16:46
+
+## Authentication and Authorization
+
+### Role-Based Access Control
+
+- Three-tier role system:
+  - Superadmin (pgtipping1@gmail.com)
+  - Admin
+  - User
+- Role hierarchy enforced through multiple layers:
+  - API route authorization
+  - Client-side component protection
+  - Server-side session validation
+
+### Access Control Implementation
+
+- Session-based authentication using NextAuth.js
+- Role checks in API routes with proper error handling
+- Protected routes with client-side redirects
+- Real-time role updates with optimistic UI
+
+### Role Management
+
+- Exclusive superadmin privileges for role modification
+- Protected superadmin account from role changes
+- Role update API with proper validation
+- Real-time UI feedback for role changes
+
+## API Architecture
+
+### RESTful Endpoints
+
+- User management: `/api/admin/users/*`
+- Role management: `/api/admin/users/[id]/update-role`
+- Superadmin setup: `/api/admin/users/set-superadmin`
+
+### Error Handling
+
+- Consistent error response format
+- Proper HTTP status codes
+- Detailed error messages for debugging
+- Client-side error handling with toast notifications
+
+## Database Schema
+
+### User Model
+
+- Core fields: id, name, email, role
+- Role field with enum values: "user", "ADMIN"
+- Proper indexing on email and role fields
+- Timestamps for auditing
+
+## UI Components
+
+### Admin Dashboard
+
+- Role-aware navigation
+- Protected routes based on user role
+- Real-time role indicators
+- Loading states for async operations
+
+### User Management Interface
+
+- Role selection dropdown
+- Real-time role updates
+- Visual indicators for user roles
+- Protected actions based on user role
+
+## Security Patterns
+
+### Authorization Checks
+
+- Multiple layers of role verification
+- Protected superadmin operations
+- Session validation on all protected routes
+- API route protection with proper middleware
+
+### Data Protection
+
+- Input validation with Zod schemas
+- Protected role modification endpoints
+- Secure session handling
+- Error message sanitization

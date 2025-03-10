@@ -677,7 +677,7 @@ export default function Home() {
             Ready to Transform Your Business Operations?
           </h2>
           <p className="text-xl mb-8 text-blue-50">
-            Join thousands of organizations already using Synthalyst to
+            Join the growing number of organizations already using Synthalyst to
             streamline their business processes.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
