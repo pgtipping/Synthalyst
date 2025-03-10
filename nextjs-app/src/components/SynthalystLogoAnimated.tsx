@@ -26,16 +26,16 @@ export default function SynthalystLogoAnimated() {
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
 
-  // Define the color rotation patterns
-  const colorPatterns = [
-    { start: primaryBlue, mid: secondaryBlue, end: black }, // Pattern 1
-    { start: black, mid: primaryBlue, end: secondaryBlue }, // Pattern 2
-    { start: secondaryBlue, mid: black, end: primaryBlue }, // Pattern 3
-  ];
-
   // Update colors based on the current pattern
   const updateColors = useCallback(() => {
     if (!isMountedRef.current) return;
+
+    // Define the color rotation patterns inside the callback
+    const colorPatterns = [
+      { start: primaryBlue, mid: secondaryBlue, end: black }, // Pattern 1
+      { start: black, mid: primaryBlue, end: secondaryBlue }, // Pattern 2
+      { start: secondaryBlue, mid: black, end: primaryBlue }, // Pattern 3
+    ];
 
     try {
       // Get the next pattern
@@ -59,7 +59,7 @@ export default function SynthalystLogoAnimated() {
         updateColors();
       }, 12000) as unknown as number;
     }
-  }, [colorPatterns]);
+  }, [primaryBlue, secondaryBlue, black]);
 
   // Set up and clean up animation
   useEffect(() => {
