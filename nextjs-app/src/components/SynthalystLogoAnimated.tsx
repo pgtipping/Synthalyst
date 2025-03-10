@@ -57,7 +57,7 @@ export default function SynthalystLogoAnimated() {
     if (isMountedRef.current) {
       animationRef.current = setTimeout(() => {
         updateColors();
-      }, 8000) as unknown as number;
+      }, 12000) as unknown as number;
     }
   }, [colorPatterns]);
 

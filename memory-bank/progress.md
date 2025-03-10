@@ -2,6 +2,13 @@
 
 ## Fixed Issues
 
+- **Animated Logo Transition Timing** (2025-03-10)
+
+  - ✅ Fixed: Restored original gradient transition timing from 3 seconds back to 8 seconds
+  - ✅ Fixed: Further slowed down transition timing to 12 seconds for optimal visual effect
+  - ✅ Fixed: Reverted unnecessary speed change that made transitions unreasonably fast
+  - Status: Resolved
+
 - **NewsletterSignup Component Props Issue** (2025-03-10)
 
   - ✅ Fixed: Updated NewsletterSignup component to accept variant, className, title, and description props
