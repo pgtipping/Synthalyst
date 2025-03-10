@@ -36,12 +36,18 @@ export default async function ContactSubmissionsPage() {
       cs.subject, 
       cs."inquiryType", 
       cs.status, 
-      cs."createdAt", 
-      cs."lastRepliedAt",
-      COUNT(csr.id) as "replyCount"
+      cs."createdAt",
+      (
+        SELECT MAX(r."createdAt")
+        FROM "ContactSubmissionReply" r
+        WHERE r."contactSubmissionId" = cs.id
+      ) as "lastRepliedAt",
+      (
+        SELECT COUNT(*)
+        FROM "ContactSubmissionReply" r
+        WHERE r."contactSubmissionId" = cs.id
+      ) as "replyCount"
     FROM "ContactSubmission" cs
-    LEFT JOIN "ContactSubmissionReply" csr ON cs.id = csr."submissionId"
-    GROUP BY cs.id
     ORDER BY cs."createdAt" DESC
   `;
 

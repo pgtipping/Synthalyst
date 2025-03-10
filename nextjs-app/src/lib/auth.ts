@@ -129,7 +129,17 @@ export const authOptions: AuthOptions = {
                 email: user.email,
                 name: user.name,
                 image: user.image,
+                role: user.email === "pgtipping1@gmail.com" ? "ADMIN" : "user",
               },
+            });
+          } else if (
+            user.email === "pgtipping1@gmail.com" &&
+            existingUser.role !== "ADMIN"
+          ) {
+            // Ensure pgtipping1@gmail.com always has ADMIN role
+            await prisma.user.update({
+              where: { email: user.email },
+              data: { role: "ADMIN" },
             });
           }
         } catch (error) {

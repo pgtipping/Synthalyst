@@ -10,6 +10,7 @@ alwaysApply: true
 - ALWAYS terminate running server before invoking the build command.
 - ALWAYS check server status BEFORE starting the server.
 - do not use emojis. this is a professional mobile-first web app. you must use ONLY high quality and professional looking icons.
+- don't use code to explain when i ask questions. respond in plain english. except i ask to see the code.
 
 ## development folder
 

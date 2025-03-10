@@ -1,32 +1,33 @@
-# Active Development Context - 2024-03-10 16:46
+# Active Context [2025-03-10 22:15]
 
 ## Current Focus
 
-- Enhanced user role management system
-- Superadmin privileges for pgtipping1@gmail.com
-- Role-based access control improvements
+- Implemented reference-based threading system for contact form replies
+- Simplified email handling using single noreply@synthalyst.com address
+- Enhanced user experience with clear reply instructions
 
 ## Recent Changes
 
-- Implemented role management UI in the admin dashboard
-- Created API route for role updates with proper authorization checks
-- Added protection for superadmin account
-- Enhanced user management interface with real-time role updates
+### Contact Submission Reply System [2025-03-10 22:15]
 
-## Active Decisions
-
-- Superadmin (pgtipping1@gmail.com) has exclusive rights to modify user roles
-- Role changes are protected by multiple layers of authorization
-- Clear UI indicators for role status and permissions
+- Added reference number generation (format: REF-{submissionId}-{timestamp})
+- Modified email replies to include reference in subject and instructions
+- Updated contact form to handle reference numbers
+- Implemented submission linking for threaded conversations
+- Removed multiple sender email options in favor of single noreply address
 
 ## Next Steps
 
-- Test role management in production environment
-- Monitor role update functionality
-- Verify superadmin privileges
+- Test the new reference-based reply system
+- Monitor user engagement with the reference system
+- Consider adding visual threading in admin interface
 
-## Technical Considerations
+## Active Decisions
 
-- Session-based authentication required for role management
-- Role updates handled through secure API endpoints
-- Real-time UI updates on role changes
+### Email Reply System [2025-03-10 22:15]
+
+- Using reference numbers instead of multiple reply-to addresses
+- Format: REF-{first 8 chars of submissionId}-{timestamp}
+- All replies sent from noreply@synthalyst.com
+- Users must quote reference in subject for replies
+- Submissions linked in database for conversation threading

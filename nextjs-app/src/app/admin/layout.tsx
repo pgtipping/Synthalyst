@@ -35,5 +35,11 @@ export default async function AdminLayout({
     redirect("/");
   }
 
-  return <div className="admin-layout">{children}</div>;
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-8">{children}</div>
+      </div>
+    </div>
+  );
 }

@@ -5,6 +5,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeleteSubmissionButton } from "@/components/contact-submissions/DeleteSubmissionButton";
 import {
   ArrowLeft,
   Mail,
@@ -38,11 +39,9 @@ interface ContactSubmission {
 // Define the ContactSubmissionReply interface
 interface ContactSubmissionReply {
   id: string;
-  submissionId: string;
-  subject: string;
-  message: string;
-  sentBy: string;
-  sentAt: Date | string;
+  contactSubmissionId: string;
+  content: string;
+  createdAt: Date | string;
 }
 
 export const metadata = {
@@ -74,8 +73,8 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
   // Fetch replies for this submission
   const replies = await prisma.$queryRaw<ContactSubmissionReply[]>`
     SELECT * FROM "ContactSubmissionReply" 
-    WHERE "submissionId" = ${id}
-    ORDER BY "sentAt" DESC
+    WHERE "contactSubmissionId" = ${id}
+    ORDER BY "createdAt" DESC
   `;
 
   // Status badge colors
@@ -273,13 +272,10 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
                   className="border-b pb-4 last:border-b-0 last:pb-0"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-medium">{reply.subject}</h3>
+                    <h3 className="font-medium">{reply.content}</h3>
                     <span className="text-sm text-muted-foreground">
-                      {format(new Date(reply.sentAt), "MMM d, yyyy h:mm a")}
+                      {format(new Date(reply.createdAt), "MMM d, yyyy h:mm a")}
                     </span>
-                  </div>
-                  <div className="bg-muted/30 p-4 rounded-md whitespace-pre-wrap">
-                    {reply.message}
                   </div>
                 </div>
               ))}
@@ -331,40 +327,7 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
           </Button>
         </Link>
 
-        <form
-          action="#"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (
-              confirm(
-                "Are you sure you want to delete this submission? This action cannot be undone."
-              )
-            ) {
-              fetch(`/api/admin/contact-submissions/${id}/delete`, {
-                method: "DELETE",
-              })
-                .then((response) => {
-                  if (response.ok) {
-                    window.location.href = "/admin/contact-submissions";
-                  } else {
-                    alert("Failed to delete submission");
-                  }
-                })
-                .catch((error) => {
-                  console.error("Error deleting submission:", error);
-                  alert("Failed to delete submission");
-                });
-            }
-          }}
-        >
-          <Button
-            type="submit"
-            variant="outline"
-            className="bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
-          >
-            Delete
-          </Button>
-        </form>
+        <DeleteSubmissionButton submissionId={id} />
       </div>
     </div>
   );

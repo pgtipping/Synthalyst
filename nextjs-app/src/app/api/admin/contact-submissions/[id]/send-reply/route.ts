@@ -13,8 +13,18 @@ const replySchema = z.object({
   subject: z.string().min(1, "Subject is required"),
   message: z.string().min(1, "Message is required"),
   replyToEmail: z.string().email("Invalid reply-to email").optional(),
-  fromEmail: z.string().email("Invalid sender email").optional(),
+  fromEmail: z
+    .union([z.literal("default"), z.string().email("Invalid sender email")])
+    .optional(),
 });
+
+// Generate a reference number for the reply
+function generateReference(submissionId: string) {
+  // Format: REF-{first 8 chars of submissionId}-{timestamp}
+  const timestamp = Date.now().toString(36);
+  const shortId = submissionId.substring(0, 8);
+  return `REF-${shortId}-${timestamp}`.toUpperCase();
+}
 
 export async function POST(
   request: Request,
@@ -39,11 +49,20 @@ export async function POST(
     // Get the submission ID from the URL params
     const { id } = await params;
 
+    // Generate reference number
+    const reference = generateReference(id);
+
     // Parse the request body
     const body = await request.json();
 
     // Validate the reply data
     const validatedData = replySchema.parse(body);
+
+    // Modify subject to include reference
+    const subjectWithRef = `${validatedData.subject} [${reference}]`;
+
+    // Add reply instructions to the message
+    const messageWithInstructions = `${validatedData.message}\n\n---\nTo reply to this message, please use our contact form and include "${reference}" in the subject line.`;
 
     // Check if the submission exists
     const submission = await prisma.contactSubmission.findUnique({
@@ -61,22 +80,23 @@ export async function POST(
     try {
       logger.info("Sending reply email", {
         to: validatedData.recipientEmail,
-        subject: validatedData.subject,
+        subject: subjectWithRef,
         messagePreview: validatedData.message.substring(0, 50) + "...",
+        reference,
         submissionId: id,
       });
 
       // Format the message as HTML
-      const htmlMessage = validatedData.message.replace(/\n/g, "<br>");
+      const htmlMessage = messageWithInstructions.replace(/\n/g, "<br>");
 
       // Send the email using SendGrid
       const emailSent = await sendContactReply(
         validatedData.recipientEmail,
-        validatedData.subject,
+        subjectWithRef,
         htmlMessage,
         "Synthalyst Support",
-        validatedData.replyToEmail || userEmail,
-        validatedData.fromEmail
+        "noreply@synthalyst.com",
+        "noreply@synthalyst.com"
       );
 
       if (!emailSent) {
@@ -90,18 +110,16 @@ export async function POST(
           Prisma.sql`
             INSERT INTO "ContactSubmissionReply" (
               "id", 
-              "submissionId", 
-              "subject", 
-              "message", 
-              "sentBy", 
-              "sentAt"
+              "contactSubmissionId", 
+              "content",
+              "reference",
+              "createdAt"
             ) 
             VALUES (
               ${crypto.randomUUID()}, 
               ${id}, 
-              ${validatedData.subject}, 
-              ${validatedData.message}, 
-              ${session.user.id || "unknown"}, 
+              ${messageWithInstructions},
+              ${reference},
               NOW()
             )
           `

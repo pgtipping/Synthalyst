@@ -26,7 +26,7 @@ interface ReplyFormProps {
 
 // Available sender email addresses
 const SENDER_EMAILS = [
-  { value: "", label: "Default Sender (from .env)" },
+  { value: "default", label: "Default Sender (from .env)" },
   { value: "info@synthalyst.com", label: "info@synthalyst.com" },
   { value: "support@synthalyst.com", label: "support@synthalyst.com" },
   { value: "contact@synthalyst.com", label: "contact@synthalyst.com" },
