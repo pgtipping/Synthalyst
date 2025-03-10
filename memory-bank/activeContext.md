@@ -2,6 +2,13 @@
 
 ## Current Focus
 
+- **UI Improvements**: Enhanced several UI components for better user experience and visual consistency:
+
+  - Fixed button hover states to ensure consistent text color on hover
+  - Improved newsletter section by removing redundancy and centering content
+  - Updated "Schedule a Demo" button to "Contact Us" with black text for better visibility
+  - Converted custom-styled buttons to use the design system's Button component for consistency
+
 - **Environment Configuration Update**: Added NEXT_PUBLIC_API_URL to the environment configuration to fix undefined API URL errors. This variable is required for blog post functionality and should be set to <http://localhost:3001> in development.
 
 - **Blog Post Creation Strategy**: Identified that the preferred method for blog post creation is through the API endpoints (`/api/posts` and `/api/blog/generate`) rather than MDX files. This approach provides better consistency across environments and eliminates filesystem synchronization issues.

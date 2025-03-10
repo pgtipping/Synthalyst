@@ -653,19 +653,19 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-2">
               Stay Ahead with Synthalyst
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-gray-600 max-w-2xl mx-auto mb-6">
               Subscribe to our newsletter for the latest AI insights, tool
               updates, and exclusive content to help you maximize productivity.
             </p>
-          </div>
 
-          <div className="max-w-xl mx-auto">
-            <NewsletterSignup
-              variant="card"
-              title="Join Our Newsletter"
-              description="Get weekly updates on AI advancements, new features, and productivity tips."
-              className="shadow-lg"
-            />
+            <div className="max-w-xl mx-auto">
+              <NewsletterSignup
+                variant="default"
+                buttonText="Subscribe"
+                placeholder="Enter your email"
+                className=""
+              />
+            </div>
           </div>
         </div>
       </section>

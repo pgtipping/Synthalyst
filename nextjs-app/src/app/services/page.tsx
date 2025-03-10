@@ -226,11 +226,11 @@ export default function Services() {
         {/* CTA Section */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-8 md:p-12 text-white text-center">
           <h2 className="text-3xl font-bold mb-4">
-            Ready to Transform Your HR Operations?
+            Ready to Transform Your Productivity?
           </h2>
           <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Join thousands of organizations already using Synthalyst to
-            streamline their HR processes.
+            Join the growing number of organizations already using Synthalyst to
+            streamline their operations.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link href="/login">
@@ -242,9 +242,9 @@ export default function Services() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white text-white hover:bg-white/10 min-w-[200px]"
+                className="border-white text-black hover:bg-white/10 min-w-[200px]"
               >
-                Schedule a Demo
+                Contact Us
               </Button>
             </Link>
           </div>

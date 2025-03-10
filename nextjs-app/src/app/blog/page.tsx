@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { getValidImageUrl } from "@/lib/utils";
 import NewsletterSignup from "@/components/NewsletterSignup";
 
@@ -234,20 +235,16 @@ export default function BlogPage() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">The Synth Blog</h1>
           {session ? (
-            <Link
-              href="/blog/new"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              ✍️ Create New Post
+            <Link href="/blog/new">
+              <Button>Create New Post</Button>
             </Link>
           ) : (
             <div className="flex items-center space-x-4">
               <p className="text-gray-600">Sign in to create a post</p>
-              <Link
-                href="/api/auth/signin"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Sign In
+              <Link href="/api/auth/signin">
+                <Button variant="outline" size="sm">
+                  Sign In
+                </Button>
               </Link>
             </div>
           )}

@@ -18,9 +18,19 @@
   - Status: Resolved
 
 - **Blog Post Dynamic Route Error** (2025-03-09 19:34:00)
+
   - ✅ Fixed: `params.slug` usage in blog post page by properly awaiting the parameter
   - ✅ Fixed: API URL undefined error by adding proper environment variable validation
   - ✅ Fixed: Blog post data fetching with proper error handling
+  - Status: Resolved
+
+- **UI Component Improvements** (2023-03-11)
+
+  - ✅ Fixed: Button hover states to ensure consistent text color on hover
+  - ✅ Fixed: Converted custom-styled "Create New Post" button in blog page to use the Button component
+  - ✅ Fixed: Updated "Schedule a Demo" button to "Contact Us" with black text for better visibility
+  - ✅ Fixed: Removed redundant newsletter section on homepage for cleaner UI
+  - ✅ Fixed: Centered newsletter content for better visual balance
   - Status: Resolved
 
 ## What Works

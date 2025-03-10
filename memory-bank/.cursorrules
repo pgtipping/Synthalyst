@@ -3379,3 +3379,20 @@ This approach ensures that access control is maintainable, scalable, and secure.
   2. Kill the process with `taskkill //F //PID <PID>` (note the double slashes for Windows Git Bash)
   3. Restart the development server with `cd nextjs-app && npm run dev`
 - Always ensure the development server is running on port 3001 to maintain compatibility with authentication and API configurations
+
+## UI Component Best Practices - [2023-03-11 12:00:00]
+
+### Button Component Usage
+
+- Always use the Button component from the UI library (`@/components/ui/button`) instead of custom-styled links or buttons
+- Remove emoji icons from buttons for a more professional look
+- Maintain consistent hover states across the application
+- When custom styling is needed, extend the Button component rather than creating new button styles
+- Default button variant has blue background with white text, and slightly lighter blue background with white text on hover
+
+### Newsletter Component
+
+- Keep newsletter sections clean and minimal without redundant text
+- Center newsletter content for better visual balance
+- Avoid card effects (borders, shadows) for a cleaner look
+- Use descriptive placeholder text in the email input field
