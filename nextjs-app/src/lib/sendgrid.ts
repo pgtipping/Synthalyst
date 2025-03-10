@@ -29,6 +29,17 @@ export const sendWelcomeEmail = async (email: string): Promise<boolean> => {
   try {
     if (!sendgridInitialized) {
       console.warn("SendGrid not initialized. Cannot send welcome email.");
+
+      // For development, we'll simulate success to allow testing without SendGrid
+      if (
+        process.env.NODE_ENV === "development" &&
+        process.env.MOCK_NEWSLETTER === "true"
+      ) {
+        console.log("DEV MODE: Simulating successful welcome email sending");
+        console.log(`Welcome email would be sent to: ${email}`);
+        return true;
+      }
+
       return false;
     }
 
@@ -213,6 +224,20 @@ export const syncSubscriberToSendGrid = async (
   try {
     if (!sendgridInitialized) {
       console.warn("SendGrid not initialized. Cannot sync subscriber.");
+
+      // For development, we'll simulate success to allow testing without SendGrid
+      if (
+        process.env.NODE_ENV === "development" &&
+        process.env.MOCK_NEWSLETTER === "true"
+      ) {
+        console.log("DEV MODE: Simulating successful subscriber sync");
+        console.log(
+          `Would sync subscriber ${email} to SendGrid with tags:`,
+          tags
+        );
+        return true;
+      }
+
       return false;
     }
 

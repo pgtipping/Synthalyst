@@ -575,6 +575,9 @@
   - Added robust error handling for token expiry date parsing issues (2025-03-10 05:30:00)
   - Implemented a fallback mechanism to prevent users from being blocked due to date format issues
   - Added comprehensive debugging to help diagnose token expiry issues
+  - Fixed development mode handling to ensure newsletter works without database setup (2025-03-10 06:00:00)
+  - Added MOCK_NEWSLETTER environment variable to enable newsletter functionality in development mode
+  - Enhanced email sending functions to work properly in development mode
 
 ## Known Issues
 

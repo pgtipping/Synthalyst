@@ -64,6 +64,15 @@
   - Implemented a fallback mechanism to prevent users from being blocked due to date format issues
   - Added comprehensive debugging to help diagnose token expiry issues
 
+- **Newsletter Development Mode Fix** (2025-03-10 06:00:00): Fixed the newsletter subscription system to work properly in development mode without requiring a fully configured database.
+
+  - Added MOCK_NEWSLETTER environment variable to enable newsletter functionality in development mode
+  - Updated the confirmation route to handle development mode with special case handling
+  - Enhanced the sendWelcomeEmail and syncSubscriberToSendGrid functions to work in development mode
+  - Added proper console logging for development mode to aid in debugging
+  - Ensured the NEXT_PUBLIC_API_URL environment variable is set correctly
+  - Fixed the issue where users would see "No subscription found for this email address" error
+
 ## Recent Changes
 
 - **NewsletterSignup Component Fix** (2025-03-10)

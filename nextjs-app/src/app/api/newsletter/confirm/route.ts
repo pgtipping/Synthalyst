@@ -28,6 +28,27 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Special handling for development mode with MOCK_NEWSLETTER
+    if (
+      process.env.NODE_ENV === "development" &&
+      process.env.MOCK_NEWSLETTER === "true"
+    ) {
+      console.log(
+        "DEV MODE with MOCK_NEWSLETTER: Simulating successful confirmation"
+      );
+
+      // Send welcome email
+      const welcomeEmailSent = await sendWelcomeEmail(email);
+      console.log(`Welcome email sent: ${welcomeEmailSent}`);
+
+      console.log("========== END NEWSLETTER CONFIRMATION DEBUG ==========");
+
+      // Redirect to a confirmation page
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_API_URL}/newsletter/confirmed`
+      );
+    }
+
     // Use type assertion to work around the type error
     const prismaAny = prisma as any;
 

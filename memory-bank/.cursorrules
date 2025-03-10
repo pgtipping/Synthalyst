@@ -3476,6 +3476,7 @@ The newsletter system follows these implementation patterns:
    - Use consistent styling with the rest of the application
 
 10. **Token Management**:
+
     - Generate secure and unique tokens for email confirmation
     - Set standard 24-hour expiry time for confirmation tokens
     - Include expiry information in confirmation emails
@@ -3485,3 +3486,12 @@ The newsletter system follows these implementation patterns:
     - Implement fallback mechanism to prevent users from being blocked due to date format issues
     - Use comprehensive debugging to help diagnose token expiry issues
     - Truncate tokens in logs for security while maintaining traceability
+
+11. **Development Mode Support** (2025-03-10 06:00:00):
+    - Use MOCK_NEWSLETTER environment variable to enable newsletter functionality in development mode
+    - Implement special case handling in API routes for development mode
+    - Simulate email sending and database operations in development mode
+    - Provide detailed console logging for development mode operations
+    - Ensure consistent behavior between development and production environments
+    - Always set NEXT_PUBLIC_API_URL environment variable to the correct value
+    - Use fallback mechanisms to handle missing database models or tables
