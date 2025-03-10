@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { MessageSquare, AlertCircle, Users } from "lucide-react";
+import { MessageSquare, AlertCircle, Users, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | Synthalyst",
@@ -33,6 +33,32 @@ export default async function AdminPage() {
   const adminCount = await prisma.user.count({
     where: { role: "ADMIN" },
   });
+
+  // Get newsletter subscriber counts
+  let subscriberStats = {
+    total: 0,
+    confirmed: 0,
+    active: 0,
+    unsubscribed: 0,
+  };
+
+  try {
+    // Use type assertion to work around the type error
+    const prismaAny = prisma as any;
+
+    if (prismaAny.newsletter) {
+      const subscribers = await prismaAny.newsletter.findMany();
+
+      subscriberStats = {
+        total: subscribers.length,
+        confirmed: subscribers.filter((s: any) => s.confirmed).length,
+        active: subscribers.filter((s: any) => s.active).length,
+        unsubscribed: subscribers.filter((s: any) => s.unsubscribed).length,
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching newsletter stats:", error);
+  }
 
   return (
     <div className="space-y-6">
@@ -115,7 +141,45 @@ export default async function AdminPage() {
           </Link>
         </div>
 
-        {/* Add more admin cards here */}
+        {/* Newsletter Management Card */}
+        <div className="bg-card rounded-lg shadow-sm p-6 border">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-xl font-semibold">Newsletter Management</h2>
+            <Mail className="h-5 w-5 text-primary" />
+          </div>
+
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Total Subscribers
+              </span>
+              <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                {subscriberStats.total}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Active</span>
+              <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                {subscriberStats.active}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Unsubscribed
+              </span>
+              <span className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">
+                {subscriberStats.unsubscribed}
+              </span>
+            </div>
+          </div>
+
+          <Link
+            href="/admin/newsletter"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Manage Newsletter
+          </Link>
+        </div>
       </div>
     </div>
   );

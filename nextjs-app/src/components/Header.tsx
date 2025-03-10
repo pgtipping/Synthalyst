@@ -17,6 +17,7 @@ import {
   Code,
   Sparkles,
   Users,
+  Mail,
 } from "lucide-react";
 import { useToast } from "@/lib/toast-migration";
 import {
@@ -191,15 +192,26 @@ export default function Header() {
             {session.user.email}
           </div>
           {isAdmin && (
-            <Link href="/admin" onClick={() => setMenuOpen(false)}>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 w-full mb-2"
-              >
-                <Users className="w-4 h-4" />
-                Admin Dashboard
-              </Button>
-            </Link>
+            <>
+              <Link href="/admin" onClick={() => setMenuOpen(false)}>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 w-full mb-2"
+                >
+                  <Users className="w-4 h-4" />
+                  Admin Dashboard
+                </Button>
+              </Link>
+              <Link href="/admin/newsletter" onClick={() => setMenuOpen(false)}>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 w-full mb-2"
+                >
+                  <Mail className="w-4 h-4" />
+                  Newsletter Management
+                </Button>
+              </Link>
+            </>
           )}
           <Button
             variant="ghost"

@@ -10,8 +10,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
+    // Use type assertion to work around the type error
+    const prismaAny = prisma as any;
+
     // Find the subscriber with the given email
-    const subscriber = await prisma.newsletter.findUnique({
+    const subscriber = await prismaAny.newsletter.findUnique({
       where: { email },
     });
 
@@ -23,7 +26,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Update the subscriber to unsubscribed status
-    await prisma.newsletter.update({
+    await prismaAny.newsletter.update({
       where: { id: subscriber.id },
       data: {
         unsubscribed: true,

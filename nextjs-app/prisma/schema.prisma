@@ -543,33 +543,33 @@ model ContactSubmission {
 
 model ContactSubmissionReply {
   id                  String            @id @default(cuid())
+  contactSubmissionId String
   content             String
   createdAt           DateTime          @default(now())
-  contactSubmissionId String
   contactSubmission   ContactSubmission @relation(fields: [contactSubmissionId], references: [id], onDelete: Cascade)
 }
 
 model CompetencyFrameworkFeedback {
-  id                    String              @id @default(cuid())
-  frameworkId           String
-  framework             CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
-  rating                Int
-  feedback              String?
-  createdAt             DateTime            @default(now())
-  userId                String?
-  user                  User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id          String              @id @default(cuid())
+  rating      Int
+  feedback    String?
+  frameworkId String
+  userId      String?
+  createdAt   DateTime            @default(now())
+  framework   CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  user        User?               @relation(fields: [userId], references: [id])
 }
 
 model NewsletterSubscriber {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  subscribedAt DateTime  @default(now())
-  confirmed    Boolean   @default(false)
-  confirmedAt  DateTime?
-  unsubscribed Boolean   @default(false)
+  id             String    @id @default(cuid())
+  email          String    @unique
+  subscribedAt   DateTime  @default(now())
+  confirmed      Boolean   @default(false)
+  confirmedAt    DateTime?
+  unsubscribed   Boolean   @default(false)
   unsubscribedAt DateTime?
-  source       String?   // Where the user subscribed from (e.g., "blog", "homepage")
-  tags         String[]  // For segmentation
+  source         String?
+  tags           String[]
 }
 
 model Newsletter {
@@ -588,4 +588,15 @@ model Newsletter {
 
   @@index([email])
   @@index([confirmed, active, unsubscribed])
+}
+
+model NewsletterSend {
+  id             String   @id @default(cuid())
+  subject        String
+  recipientCount Int
+  sentBy         String
+  filter         String
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
 }

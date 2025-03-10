@@ -30,6 +30,7 @@ export default function NewsletterSignup({
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [message, setMessage] = useState("");
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +38,7 @@ export default function NewsletterSignup({
     if (!email) return;
 
     setStatus("loading");
+    setErrorDetails(null);
 
     try {
       const response = await fetch("/api/newsletter/subscribe", {
@@ -56,6 +58,10 @@ export default function NewsletterSignup({
       } else {
         setStatus("error");
         setMessage(data.error || "Failed to subscribe. Please try again.");
+        if (data.details) {
+          setErrorDetails(data.details);
+          console.error("Subscription error details:", data.details);
+        }
       }
     } catch (error) {
       setStatus("error");
@@ -121,7 +127,17 @@ export default function NewsletterSignup({
               variant === "minimal" ? "py-2 text-sm" : ""
             }`}
           >
-            <AlertDescription>{message}</AlertDescription>
+            <AlertDescription>
+              {message}
+              {errorDetails && process.env.NODE_ENV === "development" && (
+                <details className="mt-2 text-xs">
+                  <summary className="cursor-pointer">Error Details</summary>
+                  <pre className="mt-1 p-2 bg-red-100 rounded overflow-x-auto">
+                    {errorDetails}
+                  </pre>
+                </details>
+              )}
+            </AlertDescription>
           </Alert>
         )}
       </form>
