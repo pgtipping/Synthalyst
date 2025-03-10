@@ -41,6 +41,7 @@ interface ContactSubmissionReply {
   id: string;
   contactSubmissionId: string;
   content: string;
+  reference: string | null;
   createdAt: Date | string;
 }
 
@@ -260,28 +261,28 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
 
       {/* Reply History */}
       {replies.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Reply History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {replies.map((reply) => (
-                <div
-                  key={reply.id}
-                  className="border-b pb-4 last:border-b-0 last:pb-0"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-medium">{reply.content}</h3>
-                    <span className="text-sm text-muted-foreground">
-                      {format(new Date(reply.createdAt), "MMM d, yyyy h:mm a")}
-                    </span>
+        <div className="border-t pt-4">
+          <h4 className="text-sm font-medium text-muted-foreground mb-2">
+            Reply History
+          </h4>
+          <div className="space-y-4">
+            {replies.map((reply) => (
+              <div key={reply.id} className="bg-muted/30 p-4 rounded-md">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm text-muted-foreground">
+                    {format(new Date(reply.createdAt), "MMMM d, yyyy h:mm a")}
                   </div>
+                  {reply.reference && (
+                    <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                      {reply.reference}
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="whitespace-pre-wrap">{reply.content}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Action Buttons */}

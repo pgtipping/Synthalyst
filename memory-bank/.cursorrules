@@ -3495,3 +3495,27 @@ The newsletter system follows these implementation patterns:
     - Ensure consistent behavior between development and production environments
     - Always set NEXT_PUBLIC_API_URL environment variable to the correct value
     - Use fallback mechanisms to handle missing database models or tables
+
+# Database Schema Patterns [2025-03-10 22:48]
+
+## Column Naming Conventions
+
+- Use contactSubmissionId instead of submissionId for ContactSubmissionReply table
+- Prefer createdAt over sentAt for timestamp fields
+- Always include proper foreign key relationships in schema
+- Use reference field for threading-related functionality
+- Maintain consistent naming across related tables
+
+## Query Patterns
+
+- Use $queryRaw with proper column names
+- Include ORDER BY clauses with correct column references
+- Verify foreign key relationships in JOINs
+- Test queries with sample data before deployment
+
+## Schema Evolution
+
+- Add new fields with proper null constraints
+- Update related queries when modifying schema
+- Document schema changes in memory bank
+- Test migrations in development before production

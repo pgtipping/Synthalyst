@@ -542,11 +542,14 @@ model ContactSubmission {
 }
 
 model ContactSubmissionReply {
-  id                  String            @id @default(cuid())
+  id                  String            @id @default(uuid())
   contactSubmissionId String
   content             String
+  reference           String?
   createdAt           DateTime          @default(now())
   contactSubmission   ContactSubmission @relation(fields: [contactSubmissionId], references: [id], onDelete: Cascade)
+
+  @@index([contactSubmissionId])
 }
 
 model CompetencyFrameworkFeedback {
