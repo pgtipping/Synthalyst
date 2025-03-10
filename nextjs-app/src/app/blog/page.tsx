@@ -58,36 +58,63 @@ export default function BlogPage() {
     retryCount: 0,
   });
 
-  // Helper function to delay execution
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
-
   // Fetch helper with retry logic
   const fetchWithRetry = useCallback(
     async <T,>(url: string, retryCount = 0): Promise<T[]> => {
+      // Helper function to delay execution (moved inside useCallback)
+      const delay = (ms: number) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+
+      // Add timeout to fetch
+      const fetchWithTimeout = async (url: string, timeout = 5000) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+
+        try {
+          const response = await fetch(url, {
+            signal: controller.signal,
+            cache: "no-store",
+          });
+          clearTimeout(id);
+          return response;
+        } catch (error) {
+          clearTimeout(id);
+          throw error;
+        }
+      };
+
       try {
-        const response = await fetch(url);
+        console.log(`Fetching ${url} (attempt ${retryCount + 1}/2)...`);
+        const response = await fetchWithTimeout(url);
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+
         const data = await response.json();
 
         // Validate data structure
         if (!data?.data?.posts || !Array.isArray(data.data.posts)) {
-          throw new Error("Invalid response data structure");
+          console.warn("Invalid response structure:", data);
+          return []; // Return empty array instead of throwing
         }
 
         return data.data.posts as T[];
       } catch (error) {
-        if (retryCount < 3) {
-          console.log(`Retrying fetch (${retryCount + 1}/3)...`);
-          await delay(1000 * (retryCount + 1)); // Exponential backoff
+        console.error(`Error fetching ${url}:`, error);
+
+        // Only retry once to reduce resource usage
+        if (retryCount < 1) {
+          console.log(`Retrying fetch after delay...`);
+          await delay(2000); // Fixed delay to avoid exponential growth
           return fetchWithRetry(url, retryCount + 1);
         }
-        throw error;
+
+        console.warn(`Max retries reached for ${url}, returning empty array`);
+        return []; // Return empty array instead of throwing
       }
     },
-    [delay]
+    []
   );
 
   // Individual section fetch functions
@@ -100,10 +127,7 @@ export default function BlogPage() {
       console.error("Error fetching featured posts:", error);
       setFeaturedState((prev) => ({
         ...prev,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to load featured posts",
+        error: "Unable to load featured posts. Please try again later.",
       }));
       setFeaturedPosts([]);
     } finally {
@@ -120,10 +144,7 @@ export default function BlogPage() {
       console.error("Error fetching recent posts:", error);
       setRecentState((prev) => ({
         ...prev,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to load recent posts",
+        error: "Unable to load recent posts. Please try again later.",
       }));
       setRecentPosts([]);
     } finally {
@@ -140,10 +161,7 @@ export default function BlogPage() {
       console.error("Error fetching popular posts:", error);
       setPopularState((prev) => ({
         ...prev,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to load popular posts",
+        error: "Unable to load popular posts. Please try again later.",
       }));
       setPopularPosts([]);
     } finally {
