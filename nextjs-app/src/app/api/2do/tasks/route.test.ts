@@ -2,6 +2,8 @@ import { GET, POST } from "./route";
 import { NextRequest } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
+import { APIError, handleAPIError, validateRequest } from "@/lib/middleware";
+import { z } from "zod";
 
 // Mock the NextRequest class
 class MockNextRequest {
@@ -69,6 +71,17 @@ jest.mock("@/lib/logger", () => ({
 const mockPrismaClient = (global as any).__mockPrismaClient as PrismaClient;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const resetMockStorage = (global as any).__resetMockStorage as () => void;
+
+// Define a mock task schema for validation
+// This is just for reference and not actually used in the tests
+const _schema = z.object({
+  title: z.string().min(1),
+  description: z.string().optional(),
+  dueDate: z.string().optional(),
+  priority: z.enum(["low", "medium", "high"]).optional(),
+  status: z.enum(["todo", "in-progress", "done"]).optional(),
+  tags: z.array(z.string()).optional(),
+});
 
 describe("2Do Tasks API", () => {
   beforeEach(() => {
@@ -150,11 +163,7 @@ describe("2Do Tasks API", () => {
         "http://localhost:3000/api/2do/tasks"
       );
 
-      // Import the middleware module to access the mocked APIError
-      const { APIError } = require("@/lib/middleware");
-
       // Mock handleAPIError to simulate the error response
-      const { handleAPIError } = require("@/lib/middleware");
       handleAPIError.mockImplementation((error) => {
         return {
           status: error.status || 500,
@@ -194,7 +203,6 @@ describe("2Do Tasks API", () => {
       );
 
       // Mock the validateRequest function to return the task data
-      const { validateRequest } = require("@/lib/middleware");
       validateRequest.mockResolvedValue(taskData);
 
       const response = await POST(request as unknown as NextRequest);
@@ -238,11 +246,7 @@ describe("2Do Tasks API", () => {
         }
       );
 
-      // Import the middleware module to access the mocked APIError
-      const { APIError } = require("@/lib/middleware");
-
       // Mock handleAPIError to simulate the error response
-      const { handleAPIError } = require("@/lib/middleware");
       handleAPIError.mockImplementation((error) => {
         return {
           status: error.status || 500,

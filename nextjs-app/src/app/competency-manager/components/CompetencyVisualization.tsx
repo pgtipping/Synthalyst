@@ -37,10 +37,26 @@ interface CompetencyVisualizationProps {
   competencies: Competency[];
 }
 
+interface ChartData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string;
+    borderColor: string;
+    borderWidth: number;
+    fill?: boolean;
+    pointBackgroundColor?: string;
+    pointBorderColor?: string;
+    pointHoverBackgroundColor?: string;
+    pointHoverBorderColor?: string;
+  }[];
+}
+
 export default function CompetencyVisualization({
   competencies,
 }: CompetencyVisualizationProps) {
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
   const [activeVisualization, setActiveVisualization] = useState<
     "radar" | "matrix" | "heatmap"
   >("radar");
@@ -186,7 +202,9 @@ export default function CompetencyVisualization({
           <Tabs
             defaultValue="radar"
             className="w-full"
-            onValueChange={(value) => setActiveVisualization(value as any)}
+            onValueChange={(value) =>
+              setActiveVisualization(value as "radar" | "matrix" | "heatmap")
+            }
           >
             <TabsList className="mb-4">
               <TabsTrigger value="radar">Radar Chart</TabsTrigger>

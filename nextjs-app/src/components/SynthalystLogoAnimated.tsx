@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useId, useState, useEffect, useRef } from "react";
+import React, { useId, useState, useEffect, useRef, useCallback } from "react";
 
 export default function SynthalystLogoAnimated() {
   // Generate a stable ID for the gradient using React's useId hook
@@ -34,7 +34,7 @@ export default function SynthalystLogoAnimated() {
   ];
 
   // Update colors based on the current pattern
-  const updateColors = () => {
+  const updateColors = useCallback(() => {
     if (!isMountedRef.current) return;
 
     try {
@@ -59,7 +59,7 @@ export default function SynthalystLogoAnimated() {
         updateColors();
       }, 3000) as unknown as number;
     }
-  };
+  }, [colorPatterns]);
 
   // Set up and clean up animation
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function SynthalystLogoAnimated() {
         clearTimeout(animationRef.current as unknown as NodeJS.Timeout);
       }
     };
-  }, []);
+  }, [updateColors]);
 
   return (
     <svg

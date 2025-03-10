@@ -1,4 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
+import { PrismaClient } from "@prisma/client";
 
 // This script checks if the user with email pgtipping1@gmail.com has the ADMIN role
 async function main() {

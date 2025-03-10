@@ -26,7 +26,7 @@ export default function GradientCardExamplePage() {
           <CardContent>
             <p className="text-white/90">
               This card uses the primary gradient variant, which transitions
-              from blue to indigo. It's perfect for highlighting important
+              from blue to indigo. It&apos;s perfect for highlighting important
               information or primary actions.
             </p>
           </CardContent>
@@ -48,7 +48,7 @@ export default function GradientCardExamplePage() {
           <CardContent>
             <p className="text-white/90">
               This card uses the secondary gradient variant, which transitions
-              from purple to pink. It's great for secondary information or
+              from purple to pink. It&apos;s great for secondary information or
               alternative options.
             </p>
           </CardContent>
@@ -70,8 +70,8 @@ export default function GradientCardExamplePage() {
           <CardContent>
             <p className="text-white/90">
               This card uses the accent gradient variant, which transitions
-              through amber shades. It's perfect for highlighting premium or
-              special features.
+              through amber shades. It&apos;s perfect for highlighting premium
+              or special features.
             </p>
           </CardContent>
           <CardFooter>
@@ -92,8 +92,8 @@ export default function GradientCardExamplePage() {
           <CardContent>
             <p className="text-foreground/90">
               This card uses the info gradient variant, which provides a subtle
-              blue background. It's ideal for informational content that doesn't
-              need strong emphasis.
+              blue background. It&apos;s ideal for informational content that
+              doesn&apos;t need strong emphasis.
             </p>
           </CardContent>
           <CardFooter>

@@ -34,7 +34,6 @@ type SectionStateDispatch = React.Dispatch<React.SetStateAction<SectionState>>;
 type SectionStateEntry = [SectionState, SectionStateDispatch];
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
 
 export default function BlogPage() {
   const { data: session } = useSession();
@@ -64,32 +63,32 @@ export default function BlogPage() {
     new Promise((resolve) => setTimeout(resolve, ms));
 
   // Fetch helper with retry logic
-  const fetchWithRetry = async <T,>(
-    url: string,
-    retryCount = 0
-  ): Promise<T[]> => {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+  const fetchWithRetry = useCallback(
+    async <T,>(url: string, retryCount = 0): Promise<T[]> => {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
 
-      // Validate data structure
-      if (!data?.data?.posts || !Array.isArray(data.data.posts)) {
-        throw new Error("Invalid response data structure");
-      }
+        // Validate data structure
+        if (!data?.data?.posts || !Array.isArray(data.data.posts)) {
+          throw new Error("Invalid response data structure");
+        }
 
-      return data.data.posts as T[];
-    } catch (error) {
-      if (retryCount < MAX_RETRIES) {
-        console.log(`Retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`);
-        await delay(RETRY_DELAY * Math.pow(2, retryCount)); // Exponential backoff
-        return fetchWithRetry<T>(url, retryCount + 1);
+        return data.data.posts as T[];
+      } catch (error) {
+        if (retryCount < 3) {
+          console.log(`Retrying fetch (${retryCount + 1}/3)...`);
+          await delay(1000 * (retryCount + 1)); // Exponential backoff
+          return fetchWithRetry(url, retryCount + 1);
+        }
+        throw error;
       }
-      throw error;
-    }
-  };
+    },
+    [delay]
+  );
 
   // Individual section fetch functions
   const fetchFeaturedPosts = useCallback(async () => {
@@ -110,7 +109,7 @@ export default function BlogPage() {
     } finally {
       setFeaturedState((prev) => ({ ...prev, isLoading: false }));
     }
-  }, []);
+  }, [fetchWithRetry]);
 
   const fetchRecentPosts = useCallback(async () => {
     setRecentState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -130,7 +129,7 @@ export default function BlogPage() {
     } finally {
       setRecentState((prev) => ({ ...prev, isLoading: false }));
     }
-  }, []);
+  }, [fetchWithRetry]);
 
   const fetchPopularPosts = useCallback(async () => {
     setPopularState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -150,7 +149,7 @@ export default function BlogPage() {
     } finally {
       setPopularState((prev) => ({ ...prev, isLoading: false }));
     }
-  }, []);
+  }, [fetchWithRetry]);
 
   // Retry handlers
   const handleRetry = async (

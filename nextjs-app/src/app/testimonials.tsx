@@ -15,7 +15,7 @@ export default function Testimonials() {
       <ul className="list-disc list-inside">
         {testimonials.map((testimonial, index) => (
           <li key={index} className="mb-4">
-            <p className="text-lg italic">"{testimonial.quote}"</p>
+            <p className="text-lg italic">&quot;{testimonial.quote}&quot;</p>
             <p className="text-gray-600">- {testimonial.author}</p>
           </li>
         ))}

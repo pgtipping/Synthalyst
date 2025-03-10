@@ -18,8 +18,8 @@ export default function NewsletterUnsubscribed() {
         </p>
 
         <p className="text-md text-gray-600 mb-8">
-          We're sorry to see you go. If you changed your mind or unsubscribed by
-          mistake, you can always subscribe again.
+          We&apos;re sorry to see you go. If you changed your mind or
+          unsubscribed by mistake, you can always subscribe again.
         </p>
 
         <div className="flex justify-center space-x-4">

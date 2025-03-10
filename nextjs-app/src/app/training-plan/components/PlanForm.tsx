@@ -46,7 +46,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Sparkles, Download, Copy, Loader2, AlertCircle } from "lucide-react";
 import { ResourceList } from "./ResourceList";
 import { Resource } from "./ResourceCard";
-import { pdf } from "@react-pdf/renderer";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import TrainingPlanPDF from "@/components/TrainingPlanPDF";
 import {
   Card,
@@ -85,7 +86,7 @@ interface GeneratedPlan {
 }
 
 interface PlanFormProps {
-  session: any; // Using any to avoid type compatibility issues
+  session: Session | null;
   usageCount: number;
   setUsageCount: (count: number) => void;
 }
@@ -488,6 +489,22 @@ export default function PlanForm({
         </div>
       </div>
     );
+  };
+
+  // These functions are defined but not currently used in the UI
+  // They are kept for future implementation
+  const _handleDownloadPDF = async () => {
+    // Implementation...
+    const _filename = `Training_Plan_${
+      new Date().toISOString().split("T")[0]
+    }.pdf`;
+    // Rest of implementation...
+  };
+
+  // This component is defined but not currently used in the UI
+  // It is kept for future implementation
+  const _GeneratedPlanDisplay = ({ plan }: { plan: GeneratedPlan }) => {
+    // Component implementation...
   };
 
   return (

@@ -16,8 +16,8 @@ export default function NewsletterSubscribe() {
 
           <p className="text-lg text-gray-700 max-w-2xl mx-auto">
             Stay updated with the latest features, tips, and insights from
-            Synthalyst. We'll send you valuable content to help you maximize
-            your productivity.
+            Synthalyst. We&apos;ll send you valuable content to help you
+            maximize your productivity.
           </p>
         </div>
 
@@ -32,7 +32,7 @@ export default function NewsletterSubscribe() {
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>We respect your privacy. You can unsubscribe at any time.</p>
           <p className="mt-2">
-            We'll never share your email with third parties.
+            We&apos;ll never share your email with third parties.
           </p>
         </div>
       </div>

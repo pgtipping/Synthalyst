@@ -1,4 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
+import { PrismaClient } from "@prisma/client";
 
 // This script assigns the ADMIN role to a specific user by email
 async function main() {

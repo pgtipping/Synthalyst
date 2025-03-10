@@ -6,6 +6,43 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star } from "lucide-react";
 
+interface CompetencyLevel {
+  id: string;
+  name: string;
+  description: string;
+  levelOrder: number;
+  behavioralIndicators?: string[] | string;
+  developmentSuggestions?: string[] | string;
+}
+
+interface Competency {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  businessImpact: string;
+  levels: CompetencyLevel[];
+}
+
+interface Framework {
+  id: string;
+  title: string;
+  description: string;
+  industry: string;
+  jobFunction: string;
+  roleLevel: string;
+  competencies: Competency[];
+  createdAt: string;
+  updatedAt: string;
+  isPublic: boolean;
+  userId: string;
+  averageRating?: number;
+  feedbackCount?: number;
+  user?: {
+    name?: string;
+  };
+}
+
 interface SharedFrameworkClientProps {
   id: string;
 }
@@ -13,7 +50,7 @@ interface SharedFrameworkClientProps {
 export default function SharedFrameworkClient({
   id,
 }: SharedFrameworkClientProps) {
-  const [framework, setFramework] = useState<any>(null);
+  const [framework, setFramework] = useState<Framework | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,7 +134,7 @@ export default function SharedFrameworkClient({
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">{framework.name}</h1>
+          <h1 className="text-2xl font-bold mb-2">{framework.title}</h1>
           <p className="text-blue-100 mb-4">{framework.description}</p>
 
           <div className="flex flex-wrap gap-4 text-sm">
@@ -116,7 +153,7 @@ export default function SharedFrameworkClient({
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="text-sm text-gray-500">
-              <p>Shared by: {framework.user?.name || "Anonymous"}</p>
+              <p>Shared by: {framework.userId || "Anonymous"}</p>
               <p>Created: {createdAt}</p>
             </div>
 
@@ -139,7 +176,7 @@ export default function SharedFrameworkClient({
               Competencies
             </h2>
 
-            {framework.competencies.map((competency: any) => (
+            {framework.competencies.map((competency: Competency) => (
               <div
                 key={competency.id}
                 className="border rounded-lg overflow-hidden"
@@ -164,8 +201,11 @@ export default function SharedFrameworkClient({
                   </h4>
                   <div className="space-y-4">
                     {competency.levels
-                      .sort((a: any, b: any) => a.levelOrder - b.levelOrder)
-                      .map((level: any) => (
+                      .sort(
+                        (a: CompetencyLevel, b: CompetencyLevel) =>
+                          a.levelOrder - b.levelOrder
+                      )
+                      .map((level: CompetencyLevel) => (
                         <div key={level.id} className="bg-gray-50 p-3 rounded">
                           <h5 className="font-medium mb-1">{level.name}</h5>
                           <p className="text-sm mb-2">{level.description}</p>
@@ -175,10 +215,14 @@ export default function SharedFrameworkClient({
                               Behavioral Indicators
                             </h6>
                             <ul className="list-disc pl-5 text-sm text-gray-600">
-                              {level.behavioralIndicators.map(
-                                (indicator: string, i: number) => (
-                                  <li key={i}>{indicator}</li>
+                              {Array.isArray(level.behavioralIndicators) ? (
+                                level.behavioralIndicators.map(
+                                  (indicator: string, i: number) => (
+                                    <li key={i}>{indicator}</li>
+                                  )
                                 )
+                              ) : (
+                                <li>{level.behavioralIndicators}</li>
                               )}
                             </ul>
                           </div>
@@ -188,10 +232,14 @@ export default function SharedFrameworkClient({
                               Development Suggestions
                             </h6>
                             <ul className="list-disc pl-5 text-sm text-gray-600">
-                              {level.developmentSuggestions.map(
-                                (suggestion: string, i: number) => (
-                                  <li key={i}>{suggestion}</li>
+                              {Array.isArray(level.developmentSuggestions) ? (
+                                level.developmentSuggestions.map(
+                                  (suggestion: string, i: number) => (
+                                    <li key={i}>{suggestion}</li>
+                                  )
                                 )
+                              ) : (
+                                <li>{level.developmentSuggestions}</li>
                               )}
                             </ul>
                           </div>
