@@ -347,3 +347,27 @@ Web app that calculates the affordability of an apartment based on user's input 
 - developed in a separate project: [Apartment Affordability Calculator](https://apartment-affordability-checker.vercel.app/)
 
 This app will be integrated into the main app as a page.
+
+### Resume Builder
+
+Web app that allows users to build a professional resume in a few simple steps.
+
+- The app will use an LLM to generate the resume following best practices for resume writing
+- users can build their resume from scratch or use an existing template
+- users can upload their existing resume, enter details of the job they will like to use the resume to apply for and the LLM will adapt the resume to best-suit the job requirements highlighting the user's relevant skills and experience that are most likely to get the user the interview.
+- llm creates a cover letter for the user based on the job description and the user's resume
+- users can download the resume as a PDF
+- users can post the resume to their LinkedIn profile
+- users can get feedback on their resume
+- users can use the resume and cover letter to apply for jobs (this will be a paid service)
+
+### Interview Prep App
+
+Web app that allows users to prepare for interviews with the help of an LLM.
+
+- users can add details of the job they will like to use the resume to apply for and the LLM will adapt the interview prep plan to best-suit the job requirements
+- app can do a mock interview with the user and provide feedback on the user's performance (paid service)
+- users can download the interview prep plan as a PDF
+- users can post the interview prep plan to their LinkedIn profile
+- users can get feedback on their interview prep plan
+- users can use the interview prep plan to prepare for interviews (this will be a paid service)
