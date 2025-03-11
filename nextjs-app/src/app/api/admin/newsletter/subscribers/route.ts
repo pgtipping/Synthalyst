@@ -8,7 +8,7 @@ import { z } from "zod";
 const subscriberSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string().optional().nullable(),
-  source: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 // GET /api/admin/newsletter/subscribers - Get all subscribers
@@ -20,11 +20,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Use type assertion to work around the type error
-    const prismaAny = prisma as any;
-
     // Get all subscribers
-    const subscribers = await prismaAny.newsletter.findMany({
+    const subscribers = await prisma.newsletterSubscriber.findMany({
       orderBy: {
         createdAt: "desc",
       },
@@ -33,9 +30,10 @@ export async function GET(req: NextRequest) {
     // Get subscriber stats
     const stats = {
       total: subscribers.length,
-      confirmed: subscribers.filter((s: any) => s.confirmed).length,
-      active: subscribers.filter((s: any) => s.active).length,
-      unsubscribed: subscribers.filter((s: any) => s.unsubscribed).length,
+      confirmed: subscribers.filter((s) => s.status === "confirmed").length,
+      pending: subscribers.filter((s) => s.status === "pending").length,
+      unsubscribed: subscribers.filter((s) => s.status === "unsubscribed")
+        .length,
     };
 
     return NextResponse.json({ subscribers, stats });
@@ -68,13 +66,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, name, source } = result.data;
-
-    // Use type assertion to work around the type error
-    const prismaAny = prisma as any;
+    const { email, name, tags } = result.data;
 
     // Check if the email is already subscribed
-    const existingSubscriber = await prismaAny.newsletter.findUnique({
+    const existingSubscriber = await prisma.newsletterSubscriber.findUnique({
       where: { email },
     });
 
@@ -86,14 +81,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Create a new subscriber
-    const subscriber = await prismaAny.newsletter.create({
+    const subscriber = await prisma.newsletterSubscriber.create({
       data: {
         email,
         name,
-        source: source || "admin",
-        confirmed: true, // Auto-confirm when added by admin
-        active: true,
-        tags: source ? [source] : ["admin"],
+        tags: tags || ["admin"],
+        status: "confirmed", // Auto-confirm when added by admin
       },
     });
 

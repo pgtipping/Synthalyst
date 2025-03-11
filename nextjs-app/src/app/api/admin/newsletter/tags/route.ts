@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PrismaClient } from "@prisma/client";
 
-// GET /api/admin/newsletter/tags - Get all tags with counts
-export async function GET() {
+// GET /api/admin/newsletter/tags - Get all unique tags and their counts
+export async function GET(req: NextRequest) {
   try {
     // Check if user is authenticated and has admin role
     const session = await getServerSession(authOptions);
@@ -13,24 +12,29 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get all unique tags and their counts
-    const subscribers = await (prisma as PrismaClient).subscriber.findMany({
+    // Get all subscribers with their tags
+    const subscribers = await prisma.newsletterSubscriber.findMany({
       select: {
         tags: true,
       },
     });
 
-    const tagCounts: Record<string, number> = {};
+    // Count occurrences of each tag
+    const tagCounts = new Map<string, number>();
     subscribers.forEach((subscriber) => {
       subscriber.tags.forEach((tag) => {
-        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
       });
     });
 
-    const tags = Object.entries(tagCounts).map(([name, count]) => ({
+    // Convert to array of objects
+    const tags = Array.from(tagCounts.entries()).map(([name, count]) => ({
       name,
       count,
     }));
+
+    // Sort by count descending
+    tags.sort((a, b) => b.count - a.count);
 
     return NextResponse.json({ tags });
   } catch (error) {
@@ -64,18 +68,16 @@ export async function POST(req: NextRequest) {
     // Update subscribers with new tags
     await Promise.all(
       subscriberIds.map(async (id: string) => {
-        const subscriber = await (prisma as PrismaClient).subscriber.findUnique(
-          {
-            where: { id },
-            select: { tags: true },
-          }
-        );
+        const subscriber = await prisma.newsletterSubscriber.findUnique({
+          where: { id },
+          select: { tags: true },
+        });
 
         if (subscriber) {
           const updatedTags = Array.from(
             new Set([...subscriber.tags, ...tags])
           );
-          await (prisma as PrismaClient).subscriber.update({
+          await prisma.newsletterSubscriber.update({
             where: { id },
             data: { tags: updatedTags },
           });
@@ -112,18 +114,16 @@ export async function DELETE(req: NextRequest) {
     // Remove specified tags from subscribers
     await Promise.all(
       subscriberIds.map(async (id: string) => {
-        const subscriber = await (prisma as PrismaClient).subscriber.findUnique(
-          {
-            where: { id },
-            select: { tags: true },
-          }
-        );
+        const subscriber = await prisma.newsletterSubscriber.findUnique({
+          where: { id },
+          select: { tags: true },
+        });
 
         if (subscriber) {
           const updatedTags = subscriber.tags.filter(
             (tag) => !tags.includes(tag)
           );
-          await (prisma as PrismaClient).subscriber.update({
+          await prisma.newsletterSubscriber.update({
             where: { id },
             data: { tags: updatedTags },
           });

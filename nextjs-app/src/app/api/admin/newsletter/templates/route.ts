@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PrismaClient } from "@prisma/client";
 
 // GET /api/admin/newsletter/templates - Get all templates
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     // Check if user is authenticated and has admin role
     const session = await getServerSession(authOptions);
@@ -13,17 +12,18 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const templates = await (
-      prisma as PrismaClient
-    ).newsletterTemplate.findMany({
+    // Get all templates
+    const templates = await prisma.newsletterTemplate.findMany({
       orderBy: {
         createdAt: "desc",
       },
-      select: {
-        id: true,
-        name: true,
-        content: true,
-        createdAt: true,
+      include: {
+        createdBy: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -47,24 +47,30 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, content } = body;
+    const { name, subject, content } = body;
 
-    if (!name || !content) {
-      return NextResponse.json(
-        { error: "Name and content are required" },
-        { status: 400 }
-      );
-    }
-
-    const template = await (prisma as PrismaClient).newsletterTemplate.create({
+    // Create a new template
+    const template = await prisma.newsletterTemplate.create({
       data: {
         name,
+        subject,
         content,
-        createdBy: session.user.email!,
+        createdById: session.user.id,
+      },
+      include: {
+        createdBy: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json(template);
+    return NextResponse.json(
+      { message: "Template created successfully", template },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating template:", error);
     return NextResponse.json(
@@ -88,7 +94,7 @@ export async function DELETE(
 
     const { id } = params;
 
-    await (prisma as PrismaClient).newsletterTemplate.delete({
+    await prisma.newsletterTemplate.delete({
       where: { id },
     });
 
