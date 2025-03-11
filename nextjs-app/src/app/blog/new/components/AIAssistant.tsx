@@ -36,12 +36,7 @@ export default function AIAssistant({
   }, [isStreaming, finalContent, onContentGenerated]);
 
   const handleAIRequest = async (
-    type:
-      | "generate"
-      | "improve"
-      | "suggest_tags"
-      | "open_question"
-      | "seo_optimize"
+    type: "generate" | "improve" | "suggest_tags" | "open_question"
   ) => {
     setIsLoading(true);
     setError(null);
@@ -148,10 +143,9 @@ export default function AIAssistant({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="generate" className="w-full">
-          <TabsList className="grid grid-cols-5">
+          <TabsList className="grid grid-cols-4">
             <TabsTrigger value="generate">Generate</TabsTrigger>
             <TabsTrigger value="improve">Improve</TabsTrigger>
-            <TabsTrigger value="seo_optimize">SEO</TabsTrigger>
             <TabsTrigger value="suggest_tags">Tags</TabsTrigger>
             <TabsTrigger value="open_question">Ask</TabsTrigger>
           </TabsList>
@@ -161,7 +155,8 @@ export default function AIAssistant({
               <Alert>
                 <AlertDescription>
                   Describe what you want to write about, and I&apos;ll help you
-                  create a blog post following our style guidelines.
+                  create a blog post following our style guidelines with
+                  automatic SEO optimization.
                 </AlertDescription>
               </Alert>
               <Textarea
@@ -193,7 +188,7 @@ export default function AIAssistant({
               <AlertDescription>
                 I&apos;ll analyze your current content and suggest improvements
                 based on our style guidelines, including sentence structure,
-                clarity, and persuasiveness.
+                clarity, persuasiveness, and SEO optimization.
               </AlertDescription>
             </Alert>
             <Button
@@ -209,30 +204,6 @@ export default function AIAssistant({
                 </>
               ) : (
                 "Get Suggestions"
-              )}
-            </Button>
-          </TabsContent>
-
-          <TabsContent value="seo_optimize" className="space-y-4">
-            <Alert>
-              <AlertDescription>
-                I&apos;ll analyze your content and provide SEO optimization
-                suggestions to improve visibility and search ranking.
-              </AlertDescription>
-            </Alert>
-            <Button
-              onClick={() => handleAIRequest("seo_optimize")}
-              disabled={isLoading || !currentContent}
-              className="w-full"
-            >
-              <Wand2 className="mr-2 h-4 w-4" />
-              {isLoading ? (
-                <>
-                  {isStreaming ? "Analyzing" : "Processing"}
-                  <LoadingDots className="ml-2" />
-                </>
-              ) : (
-                "Optimize for SEO"
               )}
             </Button>
           </TabsContent>

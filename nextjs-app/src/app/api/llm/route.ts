@@ -47,19 +47,28 @@ export async function POST(request: Request) {
         - Remove extra words and prune sentences for clarity
         - Use active voice whenever possible
         
-        SEO Optimization:
+        SEO Optimization (Required for ALL content):
         - Include relevant keywords naturally throughout the content
         - Create descriptive, keyword-rich headings
         - Ensure proper heading hierarchy (H1 > H2 > H3)
         - Write meta-friendly content (compelling title and introduction)
         - Include internal linking opportunities where relevant
         - Aim for content length of 1000-1500 words for optimal SEO
+        - Include a meta description suggestion at the end of the content
+        - Structure content with proper HTML semantic elements for better indexing
         
         Important formatting rules:
         1. Output clean HTML without any markdown or code fences
         2. Use semantic HTML elements: <h1> for title, <h2> for sections, <p> for paragraphs
         3. Do not mention or reference our company name in the content
         4. Keep the content brand-neutral and focused on value
+        5. At the end of the content, include a section with SEO metadata:
+           <div class="seo-metadata" style="display:none">
+             <h3>SEO Metadata</h3>
+             <p><strong>Primary Keyword:</strong> [primary keyword]</p>
+             <p><strong>Secondary Keywords:</strong> [comma-separated list of secondary keywords]</p>
+             <p><strong>Meta Description:</strong> [compelling meta description under 160 characters]</p>
+           </div>
         
         Based on this prompt, generate a blog post: ${prompt}`;
         break;
@@ -76,60 +85,39 @@ export async function POST(request: Request) {
         - Find and remove extra words and overly complex sentences
         - Convert passive voice to active voice where appropriate
         
+        SEO Improvement (Required for ALL content):
+        - Analyze keyword usage and suggest improvements
+        - Evaluate heading structure and hierarchy
+        - Assess content length and depth
+        - Identify internal linking opportunities
+        - Suggest meta description improvements
+        - Check for mobile-friendly content structure
+        
         Format your response in these sections:
         <h2>Overall Assessment</h2>
         <p>[Your assessment here]</p>
         
-        <h2>Specific Suggestions</h2>
+        <h2>Style and Structure Suggestions</h2>
         <ul>
           <li>[Each suggestion with example]</li>
+        </ul>
+        
+        <h2>SEO Improvement Suggestions</h2>
+        <ul>
+          <li>[Each SEO suggestion with example]</li>
         </ul>
         
         <h2>Proposed Improvements</h2>
         <p>[Detailed improvements]</p>
         
+        <div class="seo-metadata" style="display:none">
+          <h3>SEO Metadata</h3>
+          <p><strong>Primary Keyword:</strong> [primary keyword]</p>
+          <p><strong>Secondary Keywords:</strong> [comma-separated list of secondary keywords]</p>
+          <p><strong>Meta Description:</strong> [compelling meta description under 160 characters]</p>
+        </div>
+        
         Content to review: ${prompt}`;
-        break;
-      case "seo_optimize":
-        systemPrompt = `You are an SEO expert specializing in blog content optimization.
-        Analyze the following content and provide specific SEO improvements:
-        
-        SEO Analysis Focus Areas:
-        - Keyword usage and placement
-        - Title optimization
-        - Meta description suggestions
-        - Heading structure and hierarchy
-        - Content length and depth
-        - Internal linking opportunities
-        - Readability improvements
-        - Mobile optimization considerations
-        
-        Format your response in these sections:
-        <h2>SEO Assessment</h2>
-        <p>[Your overall SEO assessment]</p>
-        
-        <h2>Keyword Analysis</h2>
-        <ul>
-          <li>Primary keyword suggestion: [keyword]</li>
-          <li>Secondary keywords: [keyword list]</li>
-          <li>Long-tail keyword opportunities: [keyword list]</li>
-        </ul>
-        
-        <h2>Title & Meta Optimization</h2>
-        <p>Optimized title suggestion: [title]</p>
-        <p>Meta description suggestion: [meta description under 160 characters]</p>
-        
-        <h2>Content Structure Improvements</h2>
-        <ul>
-          <li>[Each suggestion with example]</li>
-        </ul>
-        
-        <h2>Additional SEO Recommendations</h2>
-        <ul>
-          <li>[Each recommendation]</li>
-        </ul>
-        
-        Content to analyze: ${prompt}`;
         break;
       case "suggest_tags":
         systemPrompt = `You are a content categorization expert.
@@ -165,7 +153,7 @@ export async function POST(request: Request) {
         - Create engaging, scannable content
         - Maintain a conversational yet professional tone
         
-        SEO Best Practices to Include When Relevant:
+        SEO Best Practices (Required for ALL content):
         - Strategic keyword placement
         - Proper heading hierarchy
         - Optimal content length
@@ -181,6 +169,7 @@ export async function POST(request: Request) {
         5. Provide actionable next steps
         6. Do not mention or reference our company name in the content
         7. Keep the content brand-neutral and focused on value
+        8. Always include SEO recommendations in your advice, as SEO optimization is a standard requirement for all blog content
         
         User question: ${prompt}
         
