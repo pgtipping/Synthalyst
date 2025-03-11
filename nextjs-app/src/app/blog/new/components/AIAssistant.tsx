@@ -36,7 +36,12 @@ export default function AIAssistant({
   }, [isStreaming, finalContent, onContentGenerated]);
 
   const handleAIRequest = async (
-    type: "generate" | "improve" | "suggest_tags" | "open_question"
+    type:
+      | "generate"
+      | "improve"
+      | "suggest_tags"
+      | "open_question"
+      | "seo_optimize"
   ) => {
     setIsLoading(true);
     setError(null);
@@ -143,11 +148,12 @@ export default function AIAssistant({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="generate" className="w-full">
-          <TabsList>
+          <TabsList className="grid grid-cols-5">
             <TabsTrigger value="generate">Generate</TabsTrigger>
             <TabsTrigger value="improve">Improve</TabsTrigger>
-            <TabsTrigger value="suggest_tags">Suggest Tags</TabsTrigger>
-            <TabsTrigger value="open_question">Ask Question</TabsTrigger>
+            <TabsTrigger value="seo_optimize">SEO</TabsTrigger>
+            <TabsTrigger value="suggest_tags">Tags</TabsTrigger>
+            <TabsTrigger value="open_question">Ask</TabsTrigger>
           </TabsList>
 
           <TabsContent value="generate" className="space-y-4">
@@ -159,7 +165,7 @@ export default function AIAssistant({
                 </AlertDescription>
               </Alert>
               <Textarea
-                placeholder="E.g., Write a blog post about the latest trends in AI and their impact on productivity"
+                placeholder="E.g., Write a blog post about the latest trends in AI and their impact on productivity. Use a persuasive tone, place people before actions in sentences, and keep sentences concise by removing extra words."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="min-h-[100px]"
@@ -186,7 +192,8 @@ export default function AIAssistant({
             <Alert>
               <AlertDescription>
                 I&apos;ll analyze your current content and suggest improvements
-                based on our style guidelines.
+                based on our style guidelines, including sentence structure,
+                clarity, and persuasiveness.
               </AlertDescription>
             </Alert>
             <Button
@@ -202,6 +209,30 @@ export default function AIAssistant({
                 </>
               ) : (
                 "Get Suggestions"
+              )}
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="seo_optimize" className="space-y-4">
+            <Alert>
+              <AlertDescription>
+                I&apos;ll analyze your content and provide SEO optimization
+                suggestions to improve visibility and search ranking.
+              </AlertDescription>
+            </Alert>
+            <Button
+              onClick={() => handleAIRequest("seo_optimize")}
+              disabled={isLoading || !currentContent}
+              className="w-full"
+            >
+              <Wand2 className="mr-2 h-4 w-4" />
+              {isLoading ? (
+                <>
+                  {isStreaming ? "Analyzing" : "Processing"}
+                  <LoadingDots className="ml-2" />
+                </>
+              ) : (
+                "Optimize for SEO"
               )}
             </Button>
           </TabsContent>
@@ -233,14 +264,15 @@ export default function AIAssistant({
           <TabsContent value="open_question" className="space-y-4">
             <Alert>
               <AlertDescription>
-                Ask me any question about blog writing, and I&apos;ll provide
-                helpful advice. Try questions like &quot;How do I create an
-                excerpt for my blog post?&quot; or &quot;What&apos;s the ideal
-                blog post length?&quot;
+                Ask me any question about blog writing, SEO, or content
+                strategy. Try questions like &quot;How do I create an engaging
+                excerpt?&quot;, &quot;What&apos;s the ideal blog post
+                length?&quot;, or &quot;How can I make my writing more
+                persuasive?&quot;
               </AlertDescription>
             </Alert>
             <Textarea
-              placeholder="E.g., Help me create an excerpt for my blog post"
+              placeholder="E.g., Help me create an excerpt that drives clicks, or How can I improve my sentence structure to place people before actions?"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="min-h-[100px]"

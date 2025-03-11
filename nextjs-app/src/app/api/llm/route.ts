@@ -42,6 +42,18 @@ export async function POST(request: Request) {
         - Include actionable advice and real examples
         - Back up claims with data when possible
         - Focus on solutions and opportunities
+        - Place the person before the action in sentences
+        - Keep writing simple and persuasive
+        - Remove extra words and prune sentences for clarity
+        - Use active voice whenever possible
+        
+        SEO Optimization:
+        - Include relevant keywords naturally throughout the content
+        - Create descriptive, keyword-rich headings
+        - Ensure proper heading hierarchy (H1 > H2 > H3)
+        - Write meta-friendly content (compelling title and introduction)
+        - Include internal linking opportunities where relevant
+        - Aim for content length of 1000-1500 words for optimal SEO
         
         Important formatting rules:
         1. Output clean HTML without any markdown or code fences
@@ -59,6 +71,10 @@ export async function POST(request: Request) {
         - Look for opportunities to add actionable advice and examples
         - Suggest ways to back up claims with data
         - Ensure focus on solutions and opportunities
+        - Check if sentences place the person before the action
+        - Identify opportunities to simplify and make writing more persuasive
+        - Find and remove extra words and overly complex sentences
+        - Convert passive voice to active voice where appropriate
         
         Format your response in these sections:
         <h2>Overall Assessment</h2>
@@ -73,6 +89,47 @@ export async function POST(request: Request) {
         <p>[Detailed improvements]</p>
         
         Content to review: ${prompt}`;
+        break;
+      case "seo_optimize":
+        systemPrompt = `You are an SEO expert specializing in blog content optimization.
+        Analyze the following content and provide specific SEO improvements:
+        
+        SEO Analysis Focus Areas:
+        - Keyword usage and placement
+        - Title optimization
+        - Meta description suggestions
+        - Heading structure and hierarchy
+        - Content length and depth
+        - Internal linking opportunities
+        - Readability improvements
+        - Mobile optimization considerations
+        
+        Format your response in these sections:
+        <h2>SEO Assessment</h2>
+        <p>[Your overall SEO assessment]</p>
+        
+        <h2>Keyword Analysis</h2>
+        <ul>
+          <li>Primary keyword suggestion: [keyword]</li>
+          <li>Secondary keywords: [keyword list]</li>
+          <li>Long-tail keyword opportunities: [keyword list]</li>
+        </ul>
+        
+        <h2>Title & Meta Optimization</h2>
+        <p>Optimized title suggestion: [title]</p>
+        <p>Meta description suggestion: [meta description under 160 characters]</p>
+        
+        <h2>Content Structure Improvements</h2>
+        <ul>
+          <li>[Each suggestion with example]</li>
+        </ul>
+        
+        <h2>Additional SEO Recommendations</h2>
+        <ul>
+          <li>[Each recommendation]</li>
+        </ul>
+        
+        Content to analyze: ${prompt}`;
         break;
       case "suggest_tags":
         systemPrompt = `You are a content categorization expert.
@@ -99,6 +156,22 @@ export async function POST(request: Request) {
         systemPrompt = `You are a professional blog writing assistant with expertise in content creation, SEO, and digital marketing.
         
         Answer the following question about blog writing, providing practical, actionable advice tailored to the user's specific needs.
+        
+        Writing Style Guidelines to Incorporate in Your Advice:
+        - Place the person before the action in sentences
+        - Keep writing simple and persuasive
+        - Remove extra words and prune sentences for clarity
+        - Use active voice whenever possible
+        - Create engaging, scannable content
+        - Maintain a conversational yet professional tone
+        
+        SEO Best Practices to Include When Relevant:
+        - Strategic keyword placement
+        - Proper heading hierarchy
+        - Optimal content length
+        - Internal and external linking strategies
+        - Meta description optimization
+        - Mobile-friendly content structure
         
         Important formatting rules:
         1. Output clean HTML without any markdown or code fences

@@ -367,7 +367,6 @@ Web app that allows users to prepare for interviews with the help of an LLM.
 
 - users can add details of the job they will like to use the resume to apply for and the LLM will adapt the interview prep plan to best-suit the job requirements
 - app can do a mock interview with the user and provide feedback on the user's performance (paid service)
+- mock interview will be done using llm text and user voice, and llm voice and user voice as options.
+- app should have a library of interview questions and answers by job and industry(paid service)
 - users can download the interview prep plan as a PDF
-- users can post the interview prep plan to their LinkedIn profile
-- users can get feedback on their interview prep plan
-- users can use the interview prep plan to prepare for interviews (this will be a paid service)
