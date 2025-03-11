@@ -3556,3 +3556,34 @@ The newsletter system follows these implementation patterns:
     </div>
   </div>
   ```
+
+# Newsletter System Patterns [2025-03-11 00:34]
+
+## API Routes
+
+- All newsletter routes must be under `/api/admin/newsletter/`
+- All routes require admin role authentication
+- Use Prisma's type-safe query builder
+- Implement comprehensive error handling
+- Return consistent response formats
+
+## Database Models
+
+- NewsletterSubscriber: Manages subscriber data and status
+- NewsletterTemplate: Stores reusable email templates
+- NewsletterSend: Tracks newsletter sending history
+- NewsletterReply: Handles subscriber responses
+
+## Field Naming Conventions
+
+- Use `createdAt` for creation timestamps
+- Use `updatedAt` for modification timestamps
+- Use descriptive names for status fields
+- Maintain consistent field names across models
+
+## Error Handling
+
+- Log all errors with detailed context
+- Return appropriate HTTP status codes
+- Provide clear error messages
+- Handle validation errors gracefully

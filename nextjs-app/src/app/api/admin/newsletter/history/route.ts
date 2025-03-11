@@ -29,7 +29,6 @@ export async function GET(req: NextRequest) {
         select: {
           id: true,
           subject: true,
-          content: true,
           recipientCount: true,
           sentBy: true,
           filter: true,

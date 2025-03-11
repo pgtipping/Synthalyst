@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     // Get all subscribers
     const subscribers = await prisma.newsletterSubscriber.findMany({
       orderBy: {
-        createdAt: "desc",
+        subscribedAt: "desc",
       },
     });
 
