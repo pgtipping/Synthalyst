@@ -36,7 +36,7 @@ export default function AIAssistant({
   }, [isStreaming, finalContent, onContentGenerated]);
 
   const handleAIRequest = async (
-    type: "generate" | "improve" | "suggest_tags"
+    type: "generate" | "improve" | "suggest_tags" | "open_question"
   ) => {
     setIsLoading(true);
     setError(null);
@@ -147,6 +147,7 @@ export default function AIAssistant({
             <TabsTrigger value="generate">Generate</TabsTrigger>
             <TabsTrigger value="improve">Improve</TabsTrigger>
             <TabsTrigger value="suggest_tags">Suggest Tags</TabsTrigger>
+            <TabsTrigger value="open_question">Ask Question</TabsTrigger>
           </TabsList>
 
           <TabsContent value="generate" className="space-y-4">
@@ -225,6 +226,38 @@ export default function AIAssistant({
                 </>
               ) : (
                 "Suggest Tags"
+              )}
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="open_question" className="space-y-4">
+            <Alert>
+              <AlertDescription>
+                Ask me any question about blog writing, and I&apos;ll provide
+                helpful advice. Try questions like &quot;How do I create an
+                excerpt for my blog post?&quot; or &quot;What&apos;s the ideal
+                blog post length?&quot;
+              </AlertDescription>
+            </Alert>
+            <Textarea
+              placeholder="E.g., Help me create an excerpt for my blog post"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="min-h-[100px]"
+            />
+            <Button
+              onClick={() => handleAIRequest("open_question")}
+              disabled={isLoading || !prompt}
+              className="w-full"
+            >
+              <Wand2 className="mr-2 h-4 w-4" />
+              {isLoading ? (
+                <>
+                  {isStreaming ? "Thinking" : "Processing"}
+                  <LoadingDots className="ml-2" />
+                </>
+              ) : (
+                "Get Answer"
               )}
             </Button>
           </TabsContent>

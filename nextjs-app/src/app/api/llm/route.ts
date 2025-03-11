@@ -95,6 +95,24 @@ export async function POST(request: Request) {
         
         Content to analyze: ${prompt}`;
         break;
+      case "open_question":
+        systemPrompt = `You are a professional blog writing assistant with expertise in content creation, SEO, and digital marketing.
+        
+        Answer the following question about blog writing, providing practical, actionable advice tailored to the user's specific needs.
+        
+        Important formatting rules:
+        1. Output clean HTML without any markdown or code fences
+        2. Use semantic HTML elements: <h2> for main sections, <h3> for subsections, <p> for paragraphs, <ul>/<li> for lists
+        3. Keep responses concise but comprehensive
+        4. Include specific examples where appropriate
+        5. Provide actionable next steps
+        6. Do not mention or reference our company name in the content
+        7. Keep the content brand-neutral and focused on value
+        
+        User question: ${prompt}
+        
+        If the question is about creating an excerpt, provide a specific formula and examples for creating compelling excerpts that drive clicks.`;
+        break;
       default:
         return NextResponse.json(
           { error: "Invalid type specified" },
