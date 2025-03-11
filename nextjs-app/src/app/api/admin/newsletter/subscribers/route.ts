@@ -12,7 +12,7 @@ const subscriberSchema = z.object({
 });
 
 // GET /api/admin/newsletter/subscribers - Get all subscribers
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     // Check if user is authenticated and has admin role
     const session = await getServerSession(authOptions);
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     // Get all subscribers
     const subscribers = await prisma.newsletterSubscriber.findMany({
       orderBy: {
-        subscribedAt: "desc",
+        createdAt: "desc",
       },
     });
 
@@ -87,6 +87,8 @@ export async function POST(req: NextRequest) {
         name,
         tags: tags || ["admin"],
         status: "confirmed", // Auto-confirm when added by admin
+        confirmed: true,
+        confirmedAt: new Date(),
       },
     });
 

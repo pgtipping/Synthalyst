@@ -140,39 +140,78 @@ export const sendConfirmationEmail = async (
 };
 
 /**
- * Send a newsletter to all active subscribers
+ * Send a newsletter to subscribers
+ * @param newsletterId The ID of the newsletter
  * @param subject The newsletter subject
  * @param content The newsletter HTML content
+ * @param recipients Array of email addresses to send to
  * @returns Boolean indicating success or failure
  */
 export const sendNewsletterToSubscribers = async (
+  newsletterId: string,
   subject: string,
-  content: string
+  content: string,
+  recipients: string[]
 ): Promise<boolean> => {
   try {
     if (!sendgridInitialized) {
       console.warn("SendGrid not initialized. Cannot send newsletter.");
+
+      // For development, we'll simulate success to allow testing without SendGrid
+      if (process.env.NODE_ENV === "development") {
+        console.log("DEV MODE: Simulating successful newsletter sending");
+        console.log(`Would send newsletter to ${recipients.length} recipients`);
+        return true;
+      }
+
       return false;
     }
 
-    // Get subscribers from database
-    const subscribers = await getActiveSubscribers();
-
-    if (subscribers.length === 0) {
-      console.warn("No active subscribers found for this segment");
+    if (recipients.length === 0) {
+      console.warn("No recipients provided for newsletter");
       return false;
     }
 
-    console.log(`Sending newsletter to ${subscribers.length} subscribers`);
+    console.log(`Sending newsletter to ${recipients.length} recipients`);
+
+    // Add tracking pixels and click tracking
+    const trackingPixel = `<img src="${process.env.NEXT_PUBLIC_API_URL}/api/newsletter/track/open/${newsletterId}?r={{recipient}}" width="1" height="1" alt="" style="display:none;" />`;
+    let processedContent = content;
+
+    // Add tracking pixel at the end of the content
+    processedContent += trackingPixel;
+
+    // Add click tracking to all links
+    processedContent = processedContent.replace(
+      /<a\s+(?:[^>]*?\s+)?href=["']([^"']*)["']([^>]*)>/gi,
+      (match, url, rest) => {
+        const trackingUrl = `${
+          process.env.NEXT_PUBLIC_API_URL
+        }/api/newsletter/track/click/${newsletterId}?url=${encodeURIComponent(
+          url
+        )}&r={{recipient}}`;
+        return `<a href="${trackingUrl}"${rest}>`;
+      }
+    );
 
     // For small lists, send individual emails
-    if (subscribers.length < 50) {
-      const promises = subscribers.map((subscriber) => {
+    if (recipients.length < 50) {
+      const promises = recipients.map((email) => {
+        // Replace recipient placeholder with actual email (for tracking)
+        const personalizedContent = processedContent.replace(
+          /{{recipient}}/g,
+          encodeURIComponent(email)
+        );
+
         const msg = {
-          to: subscriber.email,
+          to: email,
           from: process.env.SENDGRID_FROM_EMAIL || "noreply@synthalyst.com",
           subject,
-          html: content,
+          html: personalizedContent,
+          trackingSettings: {
+            clickTracking: { enable: false }, // Disable SendGrid's click tracking since we're using our own
+            openTracking: { enable: false }, // Disable SendGrid's open tracking since we're using our own
+          },
         };
         return sgMail.send(msg);
       });
@@ -180,25 +219,34 @@ export const sendNewsletterToSubscribers = async (
       await Promise.all(promises);
     } else {
       // For larger lists, use SendGrid's batch sending
-      const personalizations = subscribers.map(
-        (subscriber: { email: string }) => ({
-          to: subscriber.email,
-        })
-      );
+      const personalizations = recipients.map((email) => ({
+        to: email,
+        substitutions: {
+          "{{recipient}}": encodeURIComponent(email),
+        },
+      }));
 
       const msg = {
         personalizations,
         from: process.env.SENDGRID_FROM_EMAIL || "newsletter@synthalyst.com",
         subject,
-        html: content,
+        html: processedContent,
+        trackingSettings: {
+          clickTracking: { enable: false }, // Disable SendGrid's click tracking since we're using our own
+          openTracking: { enable: false }, // Disable SendGrid's open tracking since we're using our own
+        },
       };
 
       // Use a more specific type for batch sending
       interface BatchMessage {
-        personalizations: { to: string }[];
+        personalizations: { to: string; substitutions: Record<string, string> }[];
         from: string;
         subject: string;
         html: string;
+        trackingSettings: {
+          clickTracking: { enable: boolean };
+          openTracking: { enable: boolean };
+        };
       }
 
       await sgMail.send(msg as BatchMessage);

@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/admin/newsletter/templates - Get all templates
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     // Check if user is authenticated and has admin role
     const session = await getServerSession(authOptions);
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
 // DELETE /api/admin/newsletter/templates/[id] - Delete a template
 export async function DELETE(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

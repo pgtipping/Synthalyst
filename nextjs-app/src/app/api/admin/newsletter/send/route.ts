@@ -3,18 +3,33 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendNewsletterToSubscribers } from "@/lib/sendgrid";
+import { rateLimit } from "@/middleware/rateLimit";
 import { z } from "zod";
+import { emailValidationSchema } from "@/lib/emailValidator";
 
 // Newsletter schema
 const newsletterSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
   content: z.string().min(1, "Content is required"),
-  filter: z.enum(["all", "confirmed", "recent"]).default("all"),
+  filter: z.enum(["all", "confirmed", "recent", "tags"]).default("all"),
+  tags: z.array(z.string()).optional(),
+  testMode: z.boolean().optional().default(false),
+  testEmails: z.array(emailValidationSchema).optional(),
 });
 
 // POST /api/admin/newsletter/send - Send a newsletter
 export async function POST(req: NextRequest) {
   try {
+    // Apply rate limiting - now using prefixed keys
+    const rateLimitResult = await rateLimit(req, {
+      max: 5, // 5 requests per minute
+      windowInSeconds: 60,
+    });
+
+    if (rateLimitResult) {
+      return rateLimitResult;
+    }
+
     // Check if user is authenticated and has admin role
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
@@ -32,51 +47,74 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { subject, content, filter } = result.data;
-
-    // Use type assertion to work around the type error
-    const prismaAny = prisma as any;
+    const { subject, content, filter, tags, testMode, testEmails } =
+      result.data;
 
     // Get subscribers based on filter
     let subscribers;
-    if (filter === "all") {
-      subscribers = await prismaAny.newsletter.findMany({
-        where: {
-          confirmed: true,
-          active: true,
-          unsubscribed: false,
-        },
-        select: {
-          email: true,
-        },
-      });
-    } else if (filter === "confirmed") {
-      subscribers = await prismaAny.newsletter.findMany({
-        where: {
-          confirmed: true,
-          unsubscribed: false,
-        },
-        select: {
-          email: true,
-        },
-      });
-    } else if (filter === "recent") {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    let filterDescription = filter;
 
-      subscribers = await prismaAny.newsletter.findMany({
-        where: {
-          confirmed: true,
-          active: true,
-          unsubscribed: false,
-          createdAt: {
-            gte: thirtyDaysAgo,
+    if (testMode && testEmails && testEmails.length > 0) {
+      // In test mode, use the provided test emails
+      subscribers = testEmails.map((email) => ({ email }));
+      filterDescription = `test (${testEmails.length} recipients)`;
+    } else {
+      // Normal mode, get subscribers from database
+      if (filter === "all") {
+        subscribers = await prisma.newsletterSubscriber.findMany({
+          where: {
+            status: "confirmed",
+            unsubscribed: false,
           },
-        },
-        select: {
-          email: true,
-        },
-      });
+          select: {
+            id: true,
+            email: true,
+          },
+        });
+      } else if (filter === "confirmed") {
+        subscribers = await prisma.newsletterSubscriber.findMany({
+          where: {
+            status: "confirmed",
+            unsubscribed: false,
+          },
+          select: {
+            id: true,
+            email: true,
+          },
+        });
+      } else if (filter === "recent") {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        subscribers = await prisma.newsletterSubscriber.findMany({
+          where: {
+            status: "confirmed",
+            unsubscribed: false,
+            createdAt: {
+              gte: thirtyDaysAgo,
+            },
+          },
+          select: {
+            id: true,
+            email: true,
+          },
+        });
+      } else if (filter === "tags" && tags && tags.length > 0) {
+        subscribers = await prisma.newsletterSubscriber.findMany({
+          where: {
+            status: "confirmed",
+            unsubscribed: false,
+            tags: {
+              hasSome: tags,
+            },
+          },
+          select: {
+            id: true,
+            email: true,
+          },
+        });
+        filterDescription = `tags: ${tags.join(", ")}`;
+      }
     }
 
     if (!subscribers || subscribers.length === 0) {
@@ -86,28 +124,54 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Create the newsletter record first
+    const newsletter = await prisma.newsletterSend.create({
+      data: {
+        subject,
+        content,
+        recipientCount: subscribers.length,
+        sentBy: session.user.email || "admin",
+        filter: filterDescription,
+        status: testMode ? "test" : "sending",
+      },
+    });
+
     // Send the newsletter
-    const success = await sendNewsletterToSubscribers(subject, content);
+    const success = await sendNewsletterToSubscribers(
+      newsletter.id,
+      subject,
+      content,
+      subscribers.map((s) => s.email)
+    );
 
     if (!success) {
+      // Update status to failed
+      await prisma.newsletterSend.update({
+        where: { id: newsletter.id },
+        data: {
+          status: "failed",
+        },
+      });
+
       return NextResponse.json(
         { error: "Failed to send newsletter" },
         { status: 500 }
       );
     }
 
-    // Log the newsletter send
-    await prismaAny.newsletterSend.create({
+    // Update status to sent
+    await prisma.newsletterSend.update({
+      where: { id: newsletter.id },
       data: {
-        subject,
-        recipientCount: subscribers.length,
-        sentBy: session.user.email,
-        filter,
+        status: testMode ? "test-sent" : "sent",
       },
     });
 
     return NextResponse.json({
-      message: `Newsletter sent successfully to ${subscribers.length} subscribers`,
+      message: `Newsletter ${testMode ? "test " : ""}sent successfully to ${
+        subscribers.length
+      } subscribers`,
+      newsletterId: newsletter.id,
     });
   } catch (error) {
     console.error("Error sending newsletter:", error);

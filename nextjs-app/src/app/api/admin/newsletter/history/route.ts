@@ -32,8 +32,13 @@ export async function GET(req: NextRequest) {
           recipientCount: true,
           sentBy: true,
           filter: true,
-          createdAt: true,
           status: true,
+          opens: true,
+          clicks: true,
+          bounces: true,
+          unsubscribes: true,
+          createdAt: true,
+          updatedAt: true,
           _count: {
             select: {
               replies: true,
@@ -44,8 +49,15 @@ export async function GET(req: NextRequest) {
       prisma.newsletterSend.count(),
     ]);
 
+    // Transform the data to include reply counts in a cleaner format
+    const formattedHistory = history.map((item) => ({
+      ...item,
+      replyCount: item._count.replies,
+      _count: undefined, // Remove the _count object from the response
+    }));
+
     return NextResponse.json({
-      history,
+      history: formattedHistory,
       total,
       page,
       limit,

@@ -42,35 +42,35 @@ model VerificationToken {
 }
 
 model User {
-  id                 String                @id @default(cuid())
-  name               String?
-  email              String                @unique
-  emailVerified      DateTime?
-  image              String?
-  role               String                @default("user")
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @updatedAt
-  password           String?
-  accounts           Account[]
-  chatMessages       ChatMessage[]
-  comments           Comment[]
-  competencies       CompetencyFramework[]
-  frameworkFeedback  CompetencyFrameworkFeedback[]
-  competencyMatrices CompetencyMatrix[]
-  documents          Document[]
-  jobDescriptions    JobDescription[]
-  learningContent    LearningContent[]
-  payments           Payment[]
-  posts              Post[]
-  profile            Profile?
-  sessions           Session[]
-  subscriptions      Subscription[]
-  supportTickets     SupportTicket[]
-  tasks              Task[]
-  templates          Template[]
-  trainingPlans      TrainingPlan[]
-  preferences        UserPreferences?
+  id                  String                        @id @default(cuid())
+  name                String?
+  email               String                        @unique
+  emailVerified       DateTime?
+  image               String?
+  role                String                        @default("user")
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @updatedAt
+  password            String?
+  accounts            Account[]
+  chatMessages        ChatMessage[]
+  comments            Comment[]
+  competencies        CompetencyFramework[]
+  frameworkFeedback   CompetencyFrameworkFeedback[]
+  competencyMatrices  CompetencyMatrix[]
+  documents           Document[]
+  jobDescriptions     JobDescription[]
+  learningContent     LearningContent[]
   newsletterTemplates NewsletterTemplate[]
+  payments            Payment[]
+  posts               Post[]
+  profile             Profile?
+  sessions            Session[]
+  subscriptions       Subscription[]
+  supportTickets      SupportTicket[]
+  tasks               Task[]
+  templates           Template[]
+  trainingPlans       TrainingPlan[]
+  preferences         UserPreferences?
 }
 
 model Profile {
@@ -546,8 +546,8 @@ model ContactSubmissionReply {
   id                  String            @id @default(uuid())
   contactSubmissionId String
   content             String
-  reference           String?
   createdAt           DateTime          @default(now())
+  reference           String?
   contactSubmission   ContactSubmission @relation(fields: [contactSubmissionId], references: [id], onDelete: Cascade)
 
   @@index([contactSubmissionId])
@@ -565,16 +565,24 @@ model CompetencyFrameworkFeedback {
 }
 
 model NewsletterSubscriber {
-  id            String   @id @default(cuid())
-  email         String   @unique
+  id            String    @id @default(cuid())
+  email         String    @unique
   name          String?
-  tags          String[]
-  status        String   @default("pending") // pending, confirmed, unsubscribed
-  confirmToken  String?  @unique
-  confirmExpiry DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  replies       NewsletterReply[]
+  tags          String[]  @default([])
+  status        String    @default("pending") // pending, confirmed, unsubscribed, bounced
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  confirmed     Boolean   @default(false)
+  confirmedAt   DateTime?
+  unsubscribed  Boolean   @default(false)
+  unsubscribedAt DateTime?
+  source        String?
+  token         String?
+  tokenExpiry   DateTime?
+  openEvents    NewsletterOpenEvent[]
+  clickEvents   NewsletterClickEvent[]
+  bounceEvents  NewsletterBounceEvent[]
+  unsubscribeEvents NewsletterUnsubscribeEvent[]
 }
 
 model NewsletterTemplate {
@@ -582,35 +590,100 @@ model NewsletterTemplate {
   name        String
   subject     String
   content     String
+  createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  createdById String
   createdBy   User     @relation(fields: [createdById], references: [id])
 
   @@index([createdById])
 }
 
 model NewsletterSend {
-  id             String   @id @default(cuid())
+  id             String           @id @default(cuid())
   subject        String
-  content        String
+  content        String?
   recipientCount Int
   sentBy         String
-  filter         Json?
-  createdAt      DateTime @default(now())
-  status         String   @default("draft") // draft, sending, sent, failed
+  filter         String
+  status         String           @default("pending")
+  opens          Int              @default(0)
+  clicks         Int              @default(0)
+  bounces        Int              @default(0)
+  unsubscribes   Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   replies        NewsletterReply[]
+  openEvents     NewsletterOpenEvent[]
+  clickEvents    NewsletterClickEvent[]
+  bounceEvents   NewsletterBounceEvent[]
+  unsubscribeEvents NewsletterUnsubscribeEvent[]
 }
 
 model NewsletterReply {
-  id           String               @id @default(cuid())
-  content      String
-  subscriberId String
-  sendId       String
-  createdAt    DateTime            @default(now())
-  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
-  send         NewsletterSend      @relation(fields: [sendId], references: [id])
+  id        String         @id @default(cuid())
+  content   String
+  sendId    String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  send      NewsletterSend @relation(fields: [sendId], references: [id])
 
-  @@index([subscriberId])
   @@index([sendId])
+}
+
+// New models for analytics
+
+model NewsletterOpenEvent {
+  id           String               @id @default(cuid())
+  newsletterId String
+  subscriberId String
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime             @default(now())
+  newsletter   NewsletterSend       @relation(fields: [newsletterId], references: [id])
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+
+  @@index([newsletterId])
+  @@index([subscriberId])
+}
+
+model NewsletterClickEvent {
+  id           String               @id @default(cuid())
+  newsletterId String
+  subscriberId String
+  url          String
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime             @default(now())
+  newsletter   NewsletterSend       @relation(fields: [newsletterId], references: [id])
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+
+  @@index([newsletterId])
+  @@index([subscriberId])
+  @@index([url])
+}
+
+model NewsletterBounceEvent {
+  id           String               @id @default(cuid())
+  newsletterId String
+  subscriberId String
+  reason       String?
+  createdAt    DateTime             @default(now())
+  newsletter   NewsletterSend       @relation(fields: [newsletterId], references: [id])
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+
+  @@index([newsletterId])
+  @@index([subscriberId])
+}
+
+model NewsletterUnsubscribeEvent {
+  id           String               @id @default(cuid())
+  newsletterId String
+  subscriberId String
+  reason       String?
+  createdAt    DateTime             @default(now())
+  newsletter   NewsletterSend       @relation(fields: [newsletterId], references: [id])
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+
+  @@index([newsletterId])
+  @@index([subscriberId])
 }

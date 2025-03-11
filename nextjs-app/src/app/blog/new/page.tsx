@@ -11,11 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, X, Sparkles, AlertCircle, Check } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 import ContentGuide from "./components/ContentGuide";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import RichTextEditor from "@/components/RichTextEditor";
 
 // Define the blog categories
 const BLOG_CATEGORIES = [
@@ -32,39 +31,18 @@ interface CreatePostForm {
   content: string;
   excerpt: string;
   coverImage: string;
-  categories: string[]; // This will be transformed to categoryIds
-  tags: string[]; // This will be transformed to tagIds
+  categories: string[];
+  tags: string[];
   published: boolean;
   featured: boolean;
 }
 
-interface GenerateContentForm {
-  title: string;
-  topic: string;
-  category: string;
-  targetAudience: string;
-  keyPoints: string;
-}
-
-function NewPostContent() {
+const NewBlogPost = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  // LLM generation states
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [contentScore, setContentScore] = useState<number | null>(null);
-  const [contentFeedback, setContentFeedback] = useState<string[] | null>(null);
-  const [generateForm, setGenerateForm] = useState<GenerateContentForm>({
-    title: "",
-    topic: "",
-    category: "",
-    targetAudience: "",
-    keyPoints: "",
-  });
-
   const [formData, setFormData] = useState<CreatePostForm>({
     title: "",
     content: "",
@@ -72,7 +50,7 @@ function NewPostContent() {
     coverImage: "",
     categories: [],
     tags: [],
-    published: false,
+    published: true,
     featured: false,
   });
 
@@ -89,60 +67,6 @@ function NewPostContent() {
     }
   };
 
-  const handleGenerateContent = async () => {
-    setIsGenerating(true);
-    setError(null);
-
-    try {
-      // Convert keyPoints string to array
-      const keyPointsArray = generateForm.keyPoints
-        .split(",")
-        .map((point) => point.trim())
-        .filter(Boolean);
-
-      const response = await fetch("/api/blog/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: generateForm.title,
-          topic: generateForm.topic,
-          category: generateForm.category,
-          targetAudience: generateForm.targetAudience,
-          keyPoints: keyPointsArray,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to generate content");
-      }
-
-      const data = await response.json();
-
-      // Update form with generated content
-      setContentScore(data.data.score);
-      setContentFeedback(data.data.feedback);
-
-      // Update the main form with the generated content
-      setFormData({
-        ...formData,
-        content: data.data.content,
-        title: generateForm.title || formData.title,
-        categories: generateForm.category
-          ? [...formData.categories, generateForm.category]
-          : formData.categories,
-      });
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to generate content"
-      );
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -156,11 +80,10 @@ function NewPostContent() {
 
     try {
       // Transform categories and tags arrays to IDs
-      // In a real app, you'd probably want to validate these against existing categories/tags
-      const categoryIds = formData.categories.map((cat) =>
+      const categoryIds = formData.categories.map((cat: string) =>
         cat.toLowerCase().replace(/\s+/g, "-")
       );
-      const tagIds = formData.tags.map((tag) =>
+      const tagIds = formData.tags.map((tag: string) =>
         tag.toLowerCase().replace(/\s+/g, "-")
       );
 
@@ -209,7 +132,7 @@ function NewPostContent() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl py-8">
+    <div className="container mx-auto py-6 space-y-6">
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
@@ -228,14 +151,12 @@ function NewPostContent() {
         </div>
       )}
 
-      <Tabs defaultValue="manual" className="mb-6">
-        <TabsList className="mb-4">
-          <TabsTrigger value="manual">Write Manually</TabsTrigger>
-          <TabsTrigger value="ai">AI-Assisted</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="manual">
-          <form onSubmit={handleSubmit} className="space-y-8">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Create New Blog Post</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
@@ -247,34 +168,6 @@ function NewPostContent() {
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="Enter post title"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">Content</Label>
-                <Textarea
-                  id="content"
-                  required
-                  rows={10}
-                  value={formData.content}
-                  onChange={(e) =>
-                    setFormData({ ...formData, content: e.target.value })
-                  }
-                  placeholder="Write your post content here..."
-                  className="min-h-[200px]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="excerpt">Excerpt</Label>
-                <Textarea
-                  id="excerpt"
-                  rows={3}
-                  value={formData.excerpt}
-                  onChange={(e) =>
-                    setFormData({ ...formData, excerpt: e.target.value })
-                  }
-                  placeholder="Brief summary of your post"
                 />
               </div>
 
@@ -326,49 +219,95 @@ function NewPostContent() {
                 </Card>
               </div>
 
+              <Tabs defaultValue="editor" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+                  <TabsTrigger value="editor">Editor</TabsTrigger>
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                </TabsList>
+                <TabsContent value="editor" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="content">Content</Label>
+                    <RichTextEditor
+                      id="content"
+                      content={formData.content}
+                      onChange={(value) =>
+                        setFormData({ ...formData, content: value })
+                      }
+                      placeholder="Write your post content here..."
+                      className="min-h-[400px] w-full"
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="preview" className="space-y-4">
+                  <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none border rounded-lg p-6 min-h-[400px]">
+                    <h1 className="!mt-0">
+                      {formData.title || "Your Post Title"}
+                    </h1>
+                    {formData.content ? (
+                      <div
+                        dangerouslySetInnerHTML={{ __html: formData.content }}
+                        className="[&>*:first-child]:!mt-0"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground">
+                        Your preview will appear here...
+                      </p>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+
               <div className="space-y-2">
-                <Label htmlFor="categories">Categories</Label>
+                <Label htmlFor="excerpt">Excerpt</Label>
+                <Textarea
+                  id="excerpt"
+                  value={formData.excerpt}
+                  onChange={(e) =>
+                    setFormData({ ...formData, excerpt: e.target.value })
+                  }
+                  placeholder="Write a brief excerpt for your post..."
+                  className="h-24"
+                />
+              </div>
+
+              <div className="space-y-4">
+                <Label>Categories</Label>
                 <div className="flex flex-wrap gap-2">
                   {BLOG_CATEGORIES.map((category) => (
-                    <Badge
+                    <label
                       key={category.value}
-                      variant={
-                        formData.categories.includes(category.name)
-                          ? "default"
-                          : "outline"
-                      }
-                      className="cursor-pointer"
-                      onClick={() => {
-                        const isSelected = formData.categories.includes(
-                          category.name
-                        );
-                        setFormData({
-                          ...formData,
-                          categories: isSelected
-                            ? formData.categories.filter(
-                                (c) => c !== category.name
-                              )
-                            : [...formData.categories, category.name],
-                        });
-                      }}
+                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border cursor-pointer transition-colors ${
+                        formData.categories.includes(category.value)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background hover:bg-accent"
+                      }`}
                     >
-                      {formData.categories.includes(category.name) && (
-                        <Check className="mr-1 h-3 w-3" />
-                      )}
+                      <input
+                        type="checkbox"
+                        value={category.value}
+                        checked={formData.categories.includes(category.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({
+                            ...formData,
+                            categories: e.target.checked
+                              ? [...formData.categories, value]
+                              : formData.categories.filter((c) => c !== value),
+                          });
+                        }}
+                        className="sr-only"
+                      />
                       {category.name}
-                    </Badge>
+                    </label>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Click on categories to select them. You can select multiple
-                  categories.
-                </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags</Label>
                 <Input
                   id="tags"
+                  placeholder="Enter tags separated by commas"
                   value={formData.tags.join(", ")}
                   onChange={(e) =>
                     setFormData({
@@ -379,11 +318,10 @@ function NewPostContent() {
                         .filter(Boolean),
                     })
                   }
-                  placeholder="Enter tags (comma-separated)"
                 />
               </div>
 
-              <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="published"
@@ -403,215 +341,34 @@ function NewPostContent() {
                       setFormData({ ...formData, featured: checked })
                     }
                   />
-                  <Label htmlFor="featured">Featured post</Label>
+                  <Label htmlFor="featured">Feature this post</Label>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/blog")}
+              >
+                Cancel
+              </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Creating..." : "Create Post"}
               </Button>
             </div>
           </form>
-        </TabsContent>
-
-        <TabsContent value="ai">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Sparkles className="mr-2 h-5 w-5 text-primary" />
-                AI-Assisted Content Generation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="ai-title">Title (optional)</Label>
-                  <Input
-                    id="ai-title"
-                    value={generateForm.title}
-                    onChange={(e) =>
-                      setGenerateForm({
-                        ...generateForm,
-                        title: e.target.value,
-                      })
-                    }
-                    placeholder="Enter a title or leave blank for AI to suggest"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ai-topic">Topic (required)</Label>
-                  <Input
-                    id="ai-topic"
-                    required
-                    value={generateForm.topic}
-                    onChange={(e) =>
-                      setGenerateForm({
-                        ...generateForm,
-                        topic: e.target.value,
-                      })
-                    }
-                    placeholder="What is the main topic of your blog post?"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ai-category">Category</Label>
-                  <select
-                    id="ai-category"
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={generateForm.category}
-                    onChange={(e) =>
-                      setGenerateForm({
-                        ...generateForm,
-                        category: e.target.value,
-                      })
-                    }
-                    aria-label="Select blog category"
-                  >
-                    <option value="">Select a category</option>
-                    {BLOG_CATEGORIES.map((category) => (
-                      <option key={category.value} value={category.name}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ai-audience">Target Audience</Label>
-                  <Input
-                    id="ai-audience"
-                    value={generateForm.targetAudience}
-                    onChange={(e) =>
-                      setGenerateForm({
-                        ...generateForm,
-                        targetAudience: e.target.value,
-                      })
-                    }
-                    placeholder="Who is this content for?"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ai-keypoints">
-                    Key Points (comma-separated)
-                  </Label>
-                  <Textarea
-                    id="ai-keypoints"
-                    value={generateForm.keyPoints}
-                    onChange={(e) =>
-                      setGenerateForm({
-                        ...generateForm,
-                        keyPoints: e.target.value,
-                      })
-                    }
-                    placeholder="List key points to include, separated by commas"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    onClick={handleGenerateContent}
-                    disabled={isGenerating || !generateForm.topic}
-                    className="flex items-center"
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {isGenerating ? "Generating..." : "Generate Content"}
-                  </Button>
-                </div>
-
-                {isGenerating && (
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      Generating content, please wait...
-                    </p>
-                    <Progress value={45} className="h-2 w-full" />
-                  </div>
-                )}
-
-                {contentScore !== null && (
-                  <div className="mt-4 rounded-md border p-4">
-                    <div className="mb-2 flex items-center justify-between">
-                      <h3 className="font-semibold">Content Quality Score</h3>
-                      <Badge
-                        variant={
-                          contentScore > 70
-                            ? "default"
-                            : contentScore > 50
-                            ? "outline"
-                            : "destructive"
-                        }
-                      >
-                        {contentScore}/100
-                      </Badge>
-                    </div>
-
-                    <Progress
-                      value={contentScore}
-                      className="h-2 w-full"
-                      color={
-                        contentScore > 70
-                          ? "bg-green-500"
-                          : contentScore > 50
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                      }
-                    />
-
-                    {contentFeedback && contentFeedback.length > 0 && (
-                      <div className="mt-4">
-                        <h4 className="mb-2 font-medium">Feedback:</h4>
-                        <ul className="space-y-1">
-                          {contentFeedback.map((feedback, index) => (
-                            <li
-                              key={index}
-                              className="flex items-start text-sm"
-                            >
-                              <AlertCircle className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                              <span>{feedback}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    <div className="mt-4 flex justify-end">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          // Continue to manual editing with the generated content
-                          const manualTab = document.querySelector(
-                            '[data-value="manual"]'
-                          );
-                          if (manualTab && manualTab instanceof HTMLElement) {
-                            manualTab.click();
-                          }
-                        }}
-                      >
-                        Continue to Manual Editing
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
 
 export default function NewPostPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <NewPostContent />
+      <NewBlogPost />
     </Suspense>
   );
 }
