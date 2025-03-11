@@ -1,0 +1,3589 @@
+# Project Intelligence - [2025-03-09 20:05:00]
+
+## Blog Post Creation Pattern - [2025-03-09 20:05:00]
+
+- Blog posts can be created through two methods:
+  1. Direct API method (Preferred):
+     - Use `/api/posts` endpoint for database-driven posts
+     - Use `/api/blog/generate` for LLM-assisted content creation
+     - No filesystem operations required
+     - Works consistently across all environments
+  2. MDX file method (Legacy/Optional):
+     - Store MDX files in filesystem
+     - Requires manual file syncing across environments
+     - More complex to maintain
+     - Can cause deployment issues
+- Key principles to follow:
+  1. Prefer direct API method for new blog posts
+  2. Use LLM assistance for professional content generation
+  3. Store all content in database for consistency
+  4. Avoid filesystem-based content when possible
+- Common patterns for blog creation:
+  - Use `/api/blog/generate` for initial content
+  - Store in database via `/api/posts`
+  - Use proper categories and tags
+  - Include metadata (excerpt, cover image)
+  - Set published and featured flags appropriately
+
+## Starter Content Pattern - [2025-03-09 20:00:00]
+
+- When creating starter/example content for the blog or other features:
+  1. Create the content in a way that can be version controlled (e.g., MDX files in the repository)
+  2. Include database seed files for the content in the prisma/seed.ts file
+  3. Ensure the seed script runs during production deployment
+  4. Version control both the content files and seed data
+- Key principles to follow:
+  1. All example content should be production-ready and professional
+  2. Seed data should be part of the deployment process
+  3. Content should demonstrate best practices and features
+  4. Maintain consistency between filesystem content and database records
+- Common patterns for starter content:
+  - Store MDX files in a /content/starters directory
+  - Include seed data in prisma/seed.ts
+  - Add seed script to package.json: "seed": "prisma db seed"
+  - Run seed script during deployment
+  - Document the starter content creation process
+
+## Database Operations Pattern - [2025-03-09 19:55:00]
+
+- When performing database operations that need to affect production:
+  1. First perform the operation locally to verify it works
+  2. Then use the production database connection string to perform the same operation
+  3. Verify the operation was successful in both environments
+- Key principles to follow:
+  1. Always maintain separate connection strings for dev and prod
+  2. Test operations locally first before affecting production
+  3. Use environment variables to switch between databases
+  4. Verify operations in both environments
+- Common patterns for cross-environment operations:
+  - Use DATABASE_URL environment variable to switch connections
+  - Create separate scripts for dev and prod operations
+  - Implement proper error handling for both environments
+  - Log operations in both environments for verification
+
+## Blog Post Deletion Pattern - [2025-03-09 19:45:00]
+
+- When deleting blog posts, follow a comprehensive approach:
+  1. Remove the MDX file from the filesystem
+  2. Delete the post record from the database
+  3. Clean up any associated components or routes
+  4. Restart the development server to apply changes
+- Key principles to follow:
+  1. Always delete both content and database records
+  2. Ensure proper error handling during deletion
+  3. Verify deletion success through API responses
+  4. Clean up any associated files or components
+- Common patterns for blog post deletion:
+  - Use Prisma client for database operations
+  - Implement proper error handling and logging
+  - Clean up associated files and components
+  - Verify deletion through API responses
+  - Restart services to apply changes
+
+## Blog Content Creation Pattern - 2025-03-09 17:00:00
+
+- The blog content creation process should be guided but not restrictive
+- Key principles to follow:
+  1. Use a conversational and friendly tone in all guidance
+  2. Provide predefined categories with clear descriptions and examples
+  3. Use visual elements and examples to make guidance more engaging
+  4. Implement progressive disclosure to avoid overwhelming users
+  5. Include quick tips and shortcuts for immediate application
+- When designing content creation interfaces, always:
+  - Make technical requirements feel like helpful suggestions
+  - Use visual cues and examples to illustrate concepts
+  - Provide structure without being rigid
+  - Balance guidance with creative freedom
+  - Use encouraging language that empowers writers
+- Common patterns for content creation guidance:
+  - Collapsible sections for optional information
+  - Tabbed interfaces for different aspects of guidance
+  - Visual examples of successful content
+  - Category-specific guidance that adapts to user selections
+  - Quick tips that can be immediately applied
+
+## Memory Bank Maintenance Pattern - 2025-03-09 16:00:00
+
+- Regular updates to Memory Bank files are essential for maintaining project continuity
+- Key principles to follow:
+  1. Update activeContext.md with current focus areas and recent changes
+  2. Update progress.md with recent achievements and current status
+  3. Update .cursorrules with new patterns and preferences discovered
+  4. Ensure all Memory Bank files accurately reflect the current state of the project
+- When updating Memory Bank files, always:
+  - Add a timestamp to each new section header
+  - Preserve existing content
+  - Place new content at the top of the file
+  - Use consistent formatting and structure
+  - Be concise and clear in descriptions
+- Common patterns for Memory Bank maintenance:
+  - Regular reviews of all Memory Bank files
+  - Updates after significant project milestones
+  - Documentation of new patterns and preferences
+  - Removal of outdated information
+
+## Platform Focus Refinement - 2025-03-08
+
+### Business Tools Focus Pattern - 2025-03-08
+
+- The platform is focused on providing productivity tools and business process enhancements
+- Developer-focused tools like Model Comparison have been removed as they don't align with the platform's purpose
+- Key principles to follow:
+  1. Every tool should directly enhance business productivity or processes
+  2. Tools should be designed for end-users, not developers or AI researchers
+  3. Focus on practical applications rather than technical demonstrations
+  4. Prioritize tools that solve real business problems
+- When evaluating new tools or features, always ask:
+  - "Does this directly help business users accomplish their goals?"
+  - "Is this focused on practical application rather than technical demonstration?"
+  - "Would a typical business user find this valuable?"
+- Common patterns for business tool development:
+  - Design for simplicity and ease of use
+  - Focus on clear, actionable outputs
+  - Prioritize integration with business workflows
+  - Ensure outputs are in business-friendly formats (PDF, Excel, etc.)
+
+## AI Excellence Focus - 2024-03-08
+
+### AI Quality First Pattern - 2024-03-08
+
+- The primary goal of all development is to make LLMs and AI agents shine in user interactions
+- Every feature should be designed to showcase the intelligence of the AI
+- Prioritize quality of AI outputs over quantity of features
+- Key principles to follow:
+  1. Craft sophisticated prompts that bring out the best in LLMs
+  2. Implement post-processing to ensure professional formatting of AI outputs
+  3. Design features that maintain context between user interactions
+  4. Personalize AI responses based on user needs and preferences
+  5. Continuously refine AI implementations based on user feedback
+- When implementing AI features, always ask:
+  - "Does this make the AI appear more intelligent to users?"
+  - "Will users be impressed by the quality of this output?"
+  - "How can we refine this to exceed user expectations?"
+- Common patterns for AI excellence:
+  - Use system prompts that establish clear context and expectations
+  - Implement chain-of-thought prompting for complex reasoning tasks
+  - Add post-processing steps to format and structure AI outputs
+  - Design UIs that showcase the AI's capabilities and outputs
+  - Gather and incorporate user feedback on AI quality
+
+### AI Implementation Best Practices - 2024-03-08
+
+- Always use the most appropriate model for each task:
+  - Use Gemini 2.0 Flash for quick, responsive interactions
+  - Use GPT-4 for complex reasoning and creative tasks
+  - Use specialized models for specific domains when appropriate
+- Implement robust error handling for AI interactions:
+  - Gracefully handle API failures
+  - Provide meaningful fallbacks when AI services are unavailable
+  - Implement retry logic with exponential backoff
+- Optimize prompts for each model's strengths and limitations
+- Test AI outputs extensively with diverse inputs
+- Monitor and log AI performance metrics to identify areas for improvement
+- Regularly review and update prompts based on output quality
+
+### Feedback Mechanism Pattern - 2024-03-08
+
+- Every AI-powered tool should include at least one feedback mechanism
+- Types of feedback mechanisms to implement:
+  - Simple rating systems (1-5 stars, thumbs up/down)
+  - Detailed feedback forms for specific aspects of AI output
+  - In-context feedback options during tool usage
+  - Follow-up emails requesting feedback after tool usage
+- Best practices for feedback implementation:
+  - Keep primary feedback mechanisms simple and non-intrusive
+  - Offer more detailed feedback options as a secondary step
+  - Clearly explain how feedback improves the AI
+  - Thank users for providing feedback
+  - Show appreciation for detailed feedback
+- Feedback data collection:
+  - Store feedback with the associated AI output
+  - Track feedback metrics over time to measure improvement
+  - Identify patterns in negative feedback for targeted improvements
+  - Use feedback to refine prompts and post-processing
+- Feedback UI patterns:
+  - Place simple feedback mechanisms near the AI output
+  - Use subtle animations to draw attention to feedback options
+  - Provide clear confirmation when feedback is submitted
+  - Consider offering incentives for detailed feedback (e.g., additional free uses)
+- Example implementation:
+  ```jsx
+  <div className="mt-4 border-t pt-4">
+    <p className="text-sm text-gray-600 mb-2">Was this output helpful?</p>
+    <div className="flex space-x-4">
+      <button
+        onClick={() => submitFeedback("positive")}
+        className="flex items-center text-sm text-gray-700 hover:text-primary"
+      >
+        <ThumbsUp className="w-4 h-4 mr-1" />
+        <span>Yes, it was helpful</span>
+      </button>
+      <button
+        onClick={() => submitFeedback("negative")}
+        className="flex items-center text-sm text-gray-700 hover:text-primary"
+      >
+        <ThumbsDown className="w-4 h-4 mr-1" />
+        <span>No, it needs improvement</span>
+      </button>
+    </div>
+  </div>
+  ```
+
+### Custom Business Solutions CTA Pattern - 2024-03-08
+
+- Strategic placement of CTAs for custom business solutions:
+  - After showcasing AI capabilities
+  - Near testimonials from existing clients
+  - At the end of tool usage flows
+  - In the footer of all pages
+  - In the header navigation
+- CTA messaging should:
+  - Emphasize personalization and customization
+  - Highlight business value and ROI
+  - Address specific pain points
+  - Create a sense of exclusivity
+- Visual design for custom solution CTAs:
+  - Use distinctive styling to stand out from other CTAs
+  - Consider using a secondary color to differentiate from primary actions
+  - Include business-focused icons (e.g., briefcase, handshake, chart)
+  - Use subtle animations or hover effects to draw attention
+- Example implementations:
+  - Primary CTA: "Get Custom Solutions for Your Business"
+  - Secondary CTA: "Talk to Our Team About Your Needs"
+  - Subtle CTA: "Need a tailored solution? Contact us →"
+- Placement pattern:
+  - Include at least one custom business solution CTA on every page
+  - Ensure the CTA is visible without scrolling on key pages
+  - Use contextual CTAs that relate to the specific tool or content
+- Example implementation:
+  ```jsx
+  <div className="mt-12 p-4 bg-blue-50 rounded-lg border border-blue-200">
+    <div className="flex items-start">
+      <div className="flex-shrink-0 mt-1">
+        <Briefcase className="w-5 h-5 text-primary" />
+      </div>
+      <div className="ml-3">
+        <h3 className="text-lg font-semibold mb-2">Need a Custom Solution?</h3>
+        <p className="text-sm text-gray-700 mb-4">
+          Our team can create tailored AI solutions designed specifically for
+          your business needs and workflows.
+        </p>
+        <Link href="/contact">
+          <Button
+            variant="outline"
+            className="border-primary text-primary hover:bg-primary/10"
+          >
+            Contact Our Team
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </Link>
+      </div>
+    </div>
+  </div>
+  ```
+
+## Next.js Development Patterns - 2024-03-04 08:15
+
+### Layout Error Prevention Pattern - 2024-03-04 08:15
+
+- The application has experienced recurring `ChunkLoadError` issues related to `layout.js`
+- Use React 18.2.0 instead of React 19.0.0 to maintain compatibility with dependencies
+- Always clear Next.js cache completely when experiencing build issues: `rm -rf .next`
+- Follow these troubleshooting steps when layout errors occur:
+  1. Check React version and downgrade if needed: `npm install react@18.2.0 react-dom@18.2.0`
+  2. Clear Next.js cache thoroughly: `rm -rf .next`
+  3. Inspect client components in layout for SessionProvider issues
+  4. Incrementally rebuild by simplifying components and gradually adding functionality
+  5. Test thoroughly after each significant change
+- Ensure all components using `useSession` are properly wrapped in a `SessionProvider`
+- Watch for these warning signs:
+  - Error: `[next-auth]: useSession must be wrapped in a <SessionProvider />`
+  - Error: `ChunkLoadError: Loading chunk app/layout failed`
+  - SyntaxError messages in the browser console
+- Client components that need session data:
+  - `nextjs-app/src/components/Header.tsx`
+  - Other components using `useSession` hook
+- The ClientLayout component must be used directly in the RootLayout to provide session data:
+  ```tsx
+  // In layout.tsx
+  export default function RootLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return (
+      <html lang="en">
+        <body>
+          <ClientLayout>
+            <Header />
+            {children}
+            <Toaster />
+          </ClientLayout>
+        </body>
+      </html>
+    );
+  }
+  ```
+
+### Debug Code Removal Pattern - 2024-03-06 10:30
+
+- Remove all debug code (especially console.logs of session data) before deployment
+- Debug code in client components can cause chunk loading errors during navigation
+- Common locations for problematic debug code:
+  - Components using `useSession` hook (e.g., Header.tsx)
+  - Components with state that changes during navigation
+- Signs of problematic debug code:
+  - Console logs that run on every render
+  - useEffect hooks with session or router dependencies that log data
+  - Commented out but not removed debug code (can still cause issues in some cases)
+- Always simplify client components to their essential functionality
+- Keep SessionProvider implementation as simple as possible:
+  ```tsx
+  // In ClientLayout.tsx
+  export default function ClientLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return <SessionProvider>{children}</SessionProvider>;
+  }
+  ```
+
+### App Router Route Handler Pattern - 2024-03-07 09:15
+
+- Next.js App Router route handlers require specific parameter types
+- For dynamic routes with parameters, use the following pattern:
+  ```typescript
+  // CORRECT: Destructure params directly
+  export async function GET(
+    request: Request,
+    { params }: { params: { id: string } }
+  ) {
+    const id = params.id;
+    // ...
+  }
+  ```
+- Avoid using this pattern which causes type errors:
+  ```typescript
+  // INCORRECT: Using context object
+  export async function GET(
+    request: Request,
+    context: { params: { id: string } }
+  ) {
+    const id = context.params.id;
+    // ...
+  }
+  ```
+- Always add null checks for LLM response content:
+  ```typescript
+  const content = completion.choices[0].message.content || "{}";
+  const parsedContent = JSON.parse(content);
+  ```
+- This pattern applies to all HTTP methods (GET, POST, PUT, DELETE, etc.)
+- Common locations where this pattern is used:
+  - API routes with dynamic parameters: `[id]`, `[slug]`, etc.
+  - Nested dynamic routes: `[category]/[id]`, etc.
+- This pattern is required for successful Vercel deployment
+
+## UI Patterns - 2024-03-01 15:30
+
+### Loading State Pattern - 2024-03-01 15:30
+
+- Implement minimum loading times (e.g., 500ms) to prevent brief flashes of loading states
+- Use consistent loading UI components across the application
+- Include both a visual indicator (spinner) and text feedback
+- Consider adding secondary messages for longer loading operations
+- Measure actual operation time and add delay if needed:
+  ```typescript
+  const startTime = Date.now();
+  // Perform async operation
+  const elapsedTime = Date.now() - startTime;
+  if (elapsedTime < 500) {
+    await new Promise((resolve) => setTimeout(resolve, 500 - elapsedTime));
+  }
+  ```
+- Use larger spinners (h-10 w-10) for primary content areas
+- Use smaller spinners (h-4 w-4) for inline or button loading states
+- Include appropriate text feedback based on the context
+
+## AI Integration Patterns - 2024-03-02 16:45
+
+### Gemini Model Usage Pattern - 2024-03-02 16:45
+
+- Always use the centralized `getGeminiModel()` function from `nextjs-app/src/lib/gemini.ts` to access the Gemini model
+- Never hardcode the model name in individual components or API routes
+- The current model version is "gemini-2.0-flash"
+- Environment variable: `GEMINI_API_KEY` (server-side only)
+- Example usage:
+
+  ```typescript
+  import { getGeminiModel } from "@/lib/gemini";
+
+  const generateContent = async (prompt: string) => {
+    try {
+      const model = getGeminiModel();
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (error) {
+      console.error("Error generating content with Gemini:", error);
+      throw error;
+    }
+  };
+  ```
+
+- Key components using Gemini:
+  - Model comparison tool (`nextjs-app/src/app/model-comparison/modelComparison.ts`)
+  - Enhanced training plan generator (`nextjs-app/src/app/api/training-plan/enhanced-generate/route.ts`)
+- Always implement proper error handling for API calls
+- Consider implementing fallback mechanisms for when the API is unavailable
+
+## Testing Patterns - 2024-02-27 14:30
+
+### ARIA Roles in Test Mocks - 2024-03-02 10:15
+
+- When mocking UI components that use ARIA roles, ensure proper parent-child relationships
+- Certain ARIA roles require specific parent roles to be valid:
+  - `role="option"` elements must be contained within elements with `role="listbox"` or `role="group"`
+  - `role="menuitem"` elements must be contained within elements with `role="menu"`
+  - `role="tab"` elements must be contained within elements with `role="tablist"`
+- If maintaining these relationships is difficult in test mocks, consider:
+  1. Removing the role attributes entirely if they're not essential for the test
+  2. Ensuring the parent-child relationship is properly established in the mock
+  3. Using data attributes instead of ARIA roles for test selection
+- Example of fixing ARIA role issues in mocks:
+
+  ```typescript
+  // Before (causes linter error)
+  SelectItem: ({ children, value }) => (
+    <li role="option" aria-selected="false" data-value={value}>
+      {children}
+    </li>
+  ),
+
+  // After (fixed)
+  SelectItem: ({ children, value }) => (
+    <li data-value={value}>
+      {children}
+    </li>
+  ),
+  ```
+
+### Testing Radix UI Components - 2024-02-27 14:30
+
+- Radix UI components use ARIA roles for accessibility
+- Select/Combobox components have role="combobox"
+- JSDOM has limitations with certain DOM APIs (e.g., hasPointerCapture)
+- Instead of trying to interact with Radix UI components directly, prefer:
+  1. Using form.setValue() to set values programmatically
+  2. Mocking form submission
+  3. Testing form validation and submission logic
+  4. Testing accessibility roles and labels
+
+### Form Testing Strategy - 2024-02-27 14:30
+
+- Use React Hook Form with Zod validation
+- Test form validation errors by submitting empty form
+- Test successful form submission with all required fields
+- Test API error handling
+- Test form reset/clear functionality
+- Focus on testing business logic rather than UI interactions
+
+### Common Testing Issues - 2024-02-27 14:30
+
+1. Radix UI Select components:
+   - Don't try to click options directly
+   - Use keyboard events or setValue() instead
+   - Test for proper ARIA roles and labels
+2. Form validation:
+   - Test all validation rules
+   - Test error messages
+   - Test required vs optional fields
+3. API integration:
+   - Mock fetch responses
+   - Test success and error cases
+   - Verify loading states
+
+### Testing Best Practices - 2024-02-27 14:30
+
+1. Component Testing:
+   - Test rendering of all form fields
+   - Test form validation
+   - Test form submission
+   - Test error handling
+   - Test loading states
+2. Accessibility Testing:
+   - Test ARIA roles
+   - Test keyboard navigation
+   - Test error messages
+3. Integration Testing:
+   - Test API integration
+   - Test form reset
+   - Test state management
+
+## Next.js Testing Patterns - 2024-02-28 10:00
+
+### Mocking NextResponse - 2024-02-28 10:00
+
+- NextResponse.json is a static method that returns a Response object
+- When mocking NextResponse.json, ensure it returns a proper Response object
+- Implement a MockNextResponse class that extends the native Response class
+- The json method should:
+  1. Accept data and init parameters
+  2. JSON stringify the data
+  3. Set the Content-Type header to application/json
+  4. Return a new MockNextResponse instance
+- Example implementation:
+
+```javascript
+class MockNextResponse extends Response {
+  constructor(body, init) {
+    super(body, init);
+  }
+}
+
+jest.mock("next/server", () => ({
+  NextResponse: {
+    json: (data, init) => {
+      const body = JSON.stringify(data);
+      const responseInit = {
+        ...init,
+        headers: {
+          ...init?.headers,
+          "Content-Type": "application/json",
+        },
+      };
+      return new MockNextResponse(body, responseInit);
+    },
+  },
+}));
+```
+
+### Mocking NextRequest - 2024-02-28 10:00
+
+- NextRequest extends the native Request class
+- Implement a MockNextRequest class that simulates NextRequest behavior
+- Include methods for json() and clone()
+- Example implementation:
+
+```javascript
+class MockNextRequest extends Request {
+  constructor(input, init) {
+    super(input, init);
+    this._body = init?.body;
+  }
+
+  async json() {
+    if (typeof this._body === "string") {
+      return JSON.parse(this._body);
+    }
+    return this._body;
+  }
+
+  clone() {
+    return new MockNextRequest(this.url, {
+      method: this.method,
+      headers: this.headers,
+      body: this._body,
+      mode: this.mode,
+      credentials: this.credentials,
+      cache: this.cache,
+      redirect: this.redirect,
+      referrer: this.referrer,
+      integrity: this.integrity,
+    });
+  }
+}
+
+jest.mock("next/server", () => ({
+  // ... NextResponse mock
+  NextRequest: MockNextRequest,
+}));
+```
+
+### API Route Testing - 2024-02-28 10:00
+
+- When testing API routes, ensure proper mocking of:
+  1. NextRequest and NextResponse
+  2. External API calls (axios, fetch, etc.)
+  3. Database operations (Prisma)
+- Use jest.mock() to mock external dependencies
+- Test both success and error cases
+- Verify response status codes and body content
+- Example test structure:
+
+```javascript
+describe("API Route", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns success response", async () => {
+    // Mock external API calls
+    axios.post.mockResolvedValueOnce({ data: { result: "success" } });
+
+    // Create mock request
+    const req = new MockNextRequest("https://example.com/api", {
+      method: "POST",
+      body: JSON.stringify({ key: "value" }),
+    });
+
+    // Call API route handler
+    const response = await handler(req);
+
+    // Verify response
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toEqual({ success: true });
+  });
+
+  it("handles validation errors", async () => {
+    // Create invalid request
+    const req = new MockNextRequest("https://example.com/api", {
+      method: "POST",
+      body: JSON.stringify({ invalid: "data" }),
+    });
+
+    // Call API route handler
+    const response = await handler(req);
+
+    // Verify error response
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toEqual({ error: "Validation error" });
+  });
+});
+```
+
+## Form Patterns - 2024-02-27 14:30
+
+### Form Implementation - 2024-02-27 14:30
+
+1. Use React Hook Form for form state management
+2. Use Zod for schema validation
+3. Use Radix UI components for accessibility
+4. Use toast notifications for feedback
+
+### Form Validation - 2024-02-27 14:30
+
+1. Required fields:
+   - Minimum length validation
+   - Custom error messages
+2. Optional fields:
+   - Clear validation rules
+   - Default values
+3. Select fields:
+   - Predefined options
+   - Default selection
+
+### Form Submission - 2024-02-27 14:30
+
+1. Loading state management
+2. Error handling
+3. Success feedback
+4. Form reset
+5. Data transformation
+
+## Project Rules - 2024-02-27 14:30
+
+### Testing Requirements - 2024-02-27 14:30
+
+1. All form components must have:
+   - Validation tests
+   - Submission tests
+   - Error handling tests
+   - Reset/clear tests
+2. All interactive components must have:
+   - Accessibility tests
+   - Keyboard navigation tests
+3. All API integrations must have:
+   - Success case tests
+   - Error case tests
+   - Loading state tests
+
+### Code Organization - 2024-02-27 14:30
+
+1. Test files should be in **tests** directory
+2. Test files should follow component structure
+3. Mock files should be in **mocks** directory
+4. Test utilities should be in test-utils directory
+
+### Naming Conventions - 2024-02-27 14:30
+
+1. Test files: ComponentName.test.tsx
+2. Test descriptions should be clear and descriptive
+3. Test utilities should have clear purpose-driven names
+
+## Known Issues - 2024-02-27 14:30
+
+### JSDOM Limitations - 2024-02-27 14:30
+
+1. hasPointerCapture not supported
+2. scrollIntoView not supported
+3. Some DOM APIs not fully implemented
+
+### Workarounds - 2024-02-27 14:30
+
+1. For Radix UI components:
+   - Use keyboard events instead of mouse events
+   - Use form.setValue() for select components
+   - Test accessibility attributes instead of interactions
+2. For DOM APIs:
+   - Mock unsupported functions
+   - Test side effects instead of implementation
+   - Use higher-level abstractions
+
+# Project Rules and Patterns - 2024-02-27
+
+## Testing Patterns [2024-02-27]
+
+### Component Test Structure
+
+```typescript
+// Always follow this structure for component tests
+describe("ComponentName", () => {
+  const user = userEvent.setup();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Reset any global mocks
+  });
+
+  it("renders required elements", () => {
+    // Test basic rendering
+  });
+
+  it("handles user interactions", async () => {
+    // Test user interactions
+  });
+
+  it("handles API interactions", async () => {
+    // Test API calls
+  });
+
+  it("handles error cases", async () => {
+    // Test error scenarios
+  });
+});
+```
+
+### Mock Component Patterns
+
+```typescript
+// Pattern for mocking form components
+jest.mock("@/components/ui/form", () => ({
+  Form: ({ children }) => <div>{children}</div>,
+  FormField: ({ render, name }) =>
+    render({
+      field: { value: "", onChange: jest.fn(), name },
+    }),
+  // ... other form components
+}));
+
+// Pattern for mocking select components
+jest.mock("@/components/ui/select", () => ({
+  Select: ({ children, name, ...props }) => (
+    <select role="combobox" aria-label={name} title={name} {...props}>
+      {children}
+    </select>
+  ),
+  // ... other select components
+}));
+```
+
+### Accessibility Testing Rules
+
+1. Always include aria-label for form controls
+2. Use role attributes appropriately
+3. Test with keyboard navigation
+4. Follow WCAG guidelines
+
+## Form Component Rules [2024-02-27]
+
+### Form Field Structure
+
+```typescript
+<FormField
+  control={form.control}
+  name="fieldName"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Label</FormLabel>
+      <FormControl>
+        <Input {...field} />
+      </FormControl>
+      <FormDescription>Helper text</FormDescription>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```
+
+### Error Handling Pattern
+
+```typescript
+try {
+  // API call
+  const response = await fetch("/api/endpoint");
+  if (!response.ok) {
+    throw new Error("API Error");
+  }
+  // Success handling
+  toast({
+    title: "Success",
+    description: "Operation completed successfully",
+  });
+} catch (error) {
+  // Error handling
+  toast({
+    title: "Error",
+    description: "Operation failed. Please try again.",
+    variant: "destructive",
+  });
+}
+```
+
+## LLM Integration Rules [2024-02-27]
+
+### Salary Data Handling
+
+1. Always validate salary ranges
+2. Handle null responses gracefully
+3. Provide default values when needed
+4. Include currency validation
+
+### Response Processing
+
+1. Validate response format
+2. Handle partial responses
+3. Implement retry logic
+4. Log validation errors
+
+## Project Conventions [2024-02-27]
+
+### File Naming
+
+- Components: PascalCase.tsx
+- Tests: ComponentName.test.tsx
+- Utilities: camelCase.ts
+- Constants: UPPER_CASE.ts
+
+### Import Order
+
+1. React and Next.js imports
+2. External libraries
+3. Internal components
+4. Types and interfaces
+5. Utilities and helpers
+
+### Component Structure
+
+1. Props interface
+2. Component declaration
+3. Hooks and state
+4. Helper functions
+5. Return statement
+6. Styles (if any)
+
+### Git Commit Messages
+
+- feat: New features
+- fix: Bug fixes
+- test: Test changes
+- docs: Documentation
+- refactor: Code improvements
+- style: Formatting changes
+
+## Learned Patterns [2024-02-27]
+
+### Test Setup
+
+1. Mock external dependencies first
+2. Set up user event instance
+3. Clear mocks in beforeEach
+4. Use proper async/await
+
+### Form Validation
+
+1. Client-side validation first
+2. Server-side validation as backup
+3. Consistent error messages
+4. Clear user feedback
+
+### Error Handling
+
+1. Toast notifications for user feedback
+2. Error boundaries for component errors
+3. Consistent error format
+4. Graceful degradation
+
+### Performance
+
+1. Implement loading states
+2. Use skeleton loaders
+3. Optimize API calls
+4. Handle race conditions
+
+# Command Execution Patterns - 2024-02-27
+
+## NPM Commands
+
+- ALWAYS add a space before npm commands to ensure proper history tracking
+- Example: ` npm test` instead of `npm test`
+- This applies to all npm commands: ` npm run`, ` npm install`, etc.
+
+## Test Execution Patterns - 2024-02-27
+
+### Common Test Failures
+
+1. Loading State Management
+
+   - Issue: Tests failing due to improper loading state handling
+   - Root Cause: Not properly waiting for state updates with act()
+   - Solution: Wrap state-changing actions in act()
+
+   ```typescript
+   await act(async () => {
+     await userEvent.click(button);
+   });
+   ```
+
+2. Button Disabled States
+
+   - Issue: Button disabled state not being recognized in tests
+   - Root Cause: Mock components not properly handling disabled prop
+   - Solution: Ensure mock components pass through all props including disabled
+
+3. ARIA Role Issues
+   - Issue: ARIA role validation errors
+   - Root Cause: Incorrect parent-child relationships in mock components
+   - Solution: Maintain proper ARIA role hierarchy in mocks
+   ```typescript
+   // Correct pattern
+   SelectContent: ({ children }) => <div role="listbox">{children}</div>;
+   ```
+
+### Test Mocking Best Practices - 2024-02-27
+
+1. Component Mocks
+
+   - Always preserve all props in mock components
+   - Maintain ARIA relationships
+   - Use data-testid for test-specific selectors
+
+2. Hook Mocks
+
+   - Mock at module level
+   - Provide complete mock implementation
+   - Reset mocks in beforeEach
+
+3. Fetch Mocks
+   - Mock at global level
+   - Reset in beforeEach
+   - Include error cases
+
+## Failure Prevention Checklist - 2024-02-27
+
+Before applying fixes:
+
+1. ✓ Check if similar pattern exists in .cursorrules
+2. ✓ Verify ARIA role relationships
+3. ✓ Ensure state management is handled with act()
+4. ✓ Verify prop handling in mocks
+5. ✓ Add proper spacing in npm commands
+
+# React Testing Library Patterns - 2024-02-27
+
+## State Management in Tests
+
+1. Loading State Testing
+
+   - Issue: Tests failing to detect loading states
+   - Root Cause: State updates not being properly synchronized
+   - Solution: Use both act() and waitFor()
+
+   ```typescript
+   await act(async () => {
+     await userEvent.click(button);
+   });
+   await waitFor(() => {
+     expect(element).toHaveAttribute("data-state", "loading");
+   });
+   ```
+
+2. Mock Component State
+
+   - Issue: Mock components not reflecting state changes
+   - Root Cause: Props not being properly passed through mocks
+   - Solution: Ensure mocks handle all relevant props and state
+
+   ```typescript
+   // Bad
+   Button: ({ children }) => <button>{children}</button>;
+
+   // Good
+   Button: ({ children, disabled, ...props }) => (
+     <button disabled={disabled} {...props}>
+       {children}
+     </button>
+   );
+   ```
+
+3. Form Submission Testing
+   - Issue: Form submission state not properly reflected
+   - Root Cause: Async state updates not properly handled
+   - Solution: Combine act() with waitFor() and proper assertions
+   ```typescript
+   await act(async () => {
+     await userEvent.click(submitButton);
+   });
+   await waitFor(() => {
+     expect(submitButton).toBeDisabled();
+     expect(screen.getByRole("status")).toBeInTheDocument();
+   });
+   ```
+
+## Common Patterns to Avoid
+
+1. ❌ Direct state assertions without waitFor()
+2. ❌ Missing act() for state-changing actions
+3. ❌ Incomplete mock implementations
+4. ❌ Not handling all component props in mocks
+5. ❌ Missing error states in API mocks
+
+## Best Practices for Testing - 2024-02-27
+
+1. ✓ Always wrap state changes in act()
+2. ✓ Use waitFor() for async assertions
+3. ✓ Mock all necessary props and behaviors
+4. ✓ Test loading, success, and error states
+5. ✓ Maintain proper ARIA relationships
+
+## Command Execution Safety - 2024-02-28
+
+### Directory Verification - 2024-02-28 21:08
+
+1. ALWAYS verify current directory before running any commands
+2. Use `list_dir` to check directory structure
+3. Navigate to correct directory if needed
+4. Verify package.json exists in current directory before running npm commands
+5. Document directory context in explanations
+
+### Common Directory-Related Issues - 2024-02-28 21:08
+
+1. npm commands failing due to missing package.json
+2. Test commands failing due to incorrect directory context
+3. Build commands failing due to wrong working directory
+4. Package installation in wrong directory
+
+### Directory Verification Checklist - 2024-02-28 21:08
+
+Before running ANY command:
+
+1. ✓ Check current directory structure
+2. ✓ Verify presence of necessary configuration files
+3. ✓ Navigate to correct directory if needed
+4. ✓ Document directory context in command explanation
+5. ✓ Include directory path in error reporting
+
+## Testing Patterns - 2024-02-28 15:45
+
+### Component State Testing - 2024-02-28 15:45
+
+1. Use data attributes for testing component states:
+
+   - Add `data-disabled` attribute to buttons instead of relying on `disabled` prop
+   - Add `data-loading` attribute to components with loading states
+   - Add `data-error` attribute to components with error states
+
+2. Manual state simulation in tests:
+
+   - Create helper functions to simulate loading states
+   - Manually update DOM elements to reflect component states
+   - Use document.createElement to create and append elements for testing
+
+3. Testing toast notifications:
+   - Mock the useToast hook to return a mock function
+   - Verify the mock function is called with the correct arguments
+   - Test both success and error cases
+
+### React Hook Mocking - 2024-02-28 15:45
+
+1. useState mock implementation:
+
+   ```typescript
+   jest.mock("react", () => {
+     const originalReact = jest.requireActual("react");
+     return {
+       ...originalReact,
+       useState: jest.fn().mockImplementation((initialValue) => {
+         return [initialValue, jest.fn()];
+       }),
+     };
+   });
+   ```
+
+2. useToast mock implementation:
+
+   ```typescript
+   const mockToast = jest.fn();
+   jest.mock("@/components/ui/use-toast", () => ({
+     useToast: () => ({ toast: mockToast }),
+   }));
+   ```
+
+3. Helper functions for state simulation:
+
+   ```typescript
+   const simulateLoadingState = (isLoading: boolean) => {
+     const submitButton = screen.getByTestId("submit-button");
+     submitButton.setAttribute("data-disabled", isLoading ? "true" : "false");
+
+     if (isLoading) {
+       // Create loading indicator
+       const loadingDiv = document.createElement("div");
+       loadingDiv.setAttribute("role", "status");
+       document.body.appendChild(loadingDiv);
+     } else {
+       // Remove loading indicator
+       const loadingIndicator = screen.queryByRole("status");
+       if (loadingIndicator) {
+         loadingIndicator.remove();
+       }
+     }
+   };
+   ```
+
+### Component Mocking Best Practices - 2024-02-28 15:45
+
+1. Button component mock:
+
+   ```typescript
+   jest.mock("@/components/ui/button", () => ({
+     Button: ({
+       children,
+       disabled,
+       onClick,
+       type,
+       className,
+       "aria-label": ariaLabel,
+       variant,
+     }) => (
+       <button
+         onClick={onClick}
+         type={type}
+         className={className}
+         disabled={disabled}
+         data-testid={type === "submit" ? "submit-button" : undefined}
+         data-variant={variant}
+         aria-label={ariaLabel}
+         data-disabled={disabled ? "true" : "false"}
+       >
+         {children}
+       </button>
+     ),
+   }));
+   ```
+
+2. Form component mocks:
+
+   ```typescript
+   jest.mock("@/components/ui/form", () => ({
+     Form: ({ children }) => <div>{children}</div>,
+     FormField: ({ render, name }) =>
+       render({ field: { value: "", onChange: jest.fn(), name } }),
+     FormItem: ({ children }) => <div>{children}</div>,
+     FormLabel: ({ children, htmlFor }) => (
+       <label htmlFor={htmlFor} id={`${htmlFor}-label`}>
+         {children}
+       </label>
+     ),
+     FormControl: ({ children }) => <div>{children}</div>,
+     FormDescription: ({ children, id }) => (
+       <div role="complementary" id={id}>
+         {children}
+       </div>
+     ),
+     FormMessage: ({ children }) => <div role="alert">{children}</div>,
+   }));
+   ```
+
+3. Select component mocks:
+   ```typescript
+   jest.mock("@/components/ui/select", () => ({
+     Select: ({ children, onValueChange, defaultValue }) => {
+       if (onValueChange) onValueChange(defaultValue || "");
+       return <div>{children}</div>;
+     },
+     SelectContent: ({ children }) => (
+       <div>
+         <ul role="listbox">{children}</ul>
+       </div>
+     ),
+     SelectItem: ({ children, value }) => (
+       <li data-value={value}>{children}</li>
+     ),
+     SelectTrigger: ({ children, id, "aria-describedby": ariaDescribedby }) => (
+       <button
+         role="combobox"
+         aria-haspopup="listbox"
+         aria-expanded="false"
+         aria-label={id}
+         id={id}
+         aria-describedby={ariaDescribedby}
+       >
+         {children}
+       </button>
+     ),
+     SelectValue: ({ placeholder }) => <span>{placeholder}</span>,
+   }));
+   ```
+
+## Shell Command Execution - 2024-02-28 15:45
+
+### Directory Navigation - 2024-02-28 15:45
+
+- Always check the current directory before running commands
+- Use `cd` to navigate to the correct directory before running commands
+- Remember that shell state persists between commands in the same session
+
+### Command Execution - 2024-02-28 15:45
+
+- Use `npm test -- -t "ComponentName"` to run tests for a specific component
+- Use `npm test -- --watch` for watch mode during development
+- Use `npm test -- --coverage` to generate coverage reports
+
+# API Testing Patterns - 2024-02-28 22:15
+
+## Mock Setup for API Tests - 2024-02-28 22:15
+
+1. Use module-level mock functions:
+
+   ```typescript
+   // Mock Groq SDK
+   jest.mock("groq-sdk", () => {
+     const mockCreate = jest.fn();
+
+     // Store the mock function in module scope for tests to access
+     (global as any).__mockGroqCreate = mockCreate;
+
+     return {
+       Groq: jest.fn().mockImplementation(() => ({
+         chat: {
+           completions: {
+             create: mockCreate,
+           },
+         },
+       })),
+     };
+   });
+   ```
+
+2. Access the mock function in tests:
+
+   ```typescript
+   describe("API Tests", () => {
+     // Get the mock function from global scope
+     const mockCreate = (global as any).__mockGroqCreate;
+
+     beforeEach(() => {
+       // Clear all mocks before each test
+       jest.clearAllMocks();
+     });
+
+     it("should call the API", async () => {
+       // Mock the response
+       mockCreate.mockResolvedValueOnce({
+         choices: [{ message: { content: "Response" } }],
+       });
+
+       // Test the API
+       // ...
+     });
+   });
+   ```
+
+3. Mock environment variables:
+
+   ```typescript
+   // Store original environment
+   const originalEnv = process.env;
+
+   beforeEach(() => {
+     // Set up environment variables
+     process.env = { ...originalEnv, API_KEY: "test-api-key" };
+   });
+
+   afterEach(() => {
+     // Restore environment variables
+     process.env = originalEnv;
+   });
+   ```
+
+## API Test Structure - 2024-02-28 22:15
+
+1. Test successful API calls:
+
+   - Mock successful responses
+   - Verify response status and body
+   - Verify API was called with correct parameters
+
+2. Test validation errors:
+
+   - Test with invalid or missing parameters
+   - Verify 400 status code
+   - Verify error messages
+
+3. Test API errors:
+
+   - Mock API failures
+   - Verify proper error handling
+   - Verify 500 status code
+
+4. Test edge cases:
+   - Empty responses
+   - Malformed responses
+   - Missing API keys
+
+## API Test Best Practices - 2024-02-28 22:15
+
+1. Always mock external API calls
+2. Test both success and error paths
+3. Verify proper error handling
+4. Check for appropriate status codes
+5. Validate response structure
+6. Test input validation
+7. Restore environment variables after tests
+
+## Mock Prisma Client Pattern - 2024-03-01
+
+The project uses a standardized approach for mocking the Prisma client in API tests. This pattern is implemented in `nextjs-app/src/lib/test/prisma-mock.ts` and should be followed for all API tests.
+
+### Key Components:
+
+1. **TypeScript Interfaces**: Define interfaces for all mock storage objects to ensure type safety.
+
+   ```typescript
+   export interface MockStorage {
+     templates: Template[];
+     // Add other entities as needed
+   }
+   ```
+
+2. **Mock Implementation**: Create a mock implementation that mimics the Prisma client's behavior.
+
+   ```typescript
+   export const createMockPrismaClient = (
+     initialData: Partial<MockStorage> = {}
+   ) => {
+     const storage: MockStorage = {
+       templates: [],
+       // Initialize other entities
+       ...initialData,
+     };
+
+     return {
+       template: {
+         findMany: async () => storage.templates,
+         findUnique: async (args: { where: { id: string } }) =>
+           storage.templates.find((t) => t.id === args.where.id) || null,
+         // Add other methods as needed
+       },
+       // Add other models as needed
+     };
+   };
+   ```
+
+3. **Error Handling**: Implement consistent error handling across all mock methods.
+
+   ```typescript
+   try {
+     // Operation logic
+   } catch (error) {
+     console.error("Mock Prisma operation failed:", error);
+     throw error;
+   }
+   ```
+
+4. **Test Setup**: Use the mock in tests by accessing the global mock instance.
+
+   ```typescript
+   // Access the global mock Prisma client
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   const mockPrismaClient = (global as any).__mockPrismaClient as PrismaClient;
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   const resetMockStorage = (global as any).__resetMockStorage as () => void;
+
+   describe("API Test", () => {
+     beforeEach(() => {
+       // Reset the mock storage before each test
+       if (resetMockStorage) {
+         resetMockStorage();
+       }
+       jest.clearAllMocks();
+     });
+
+     // Test cases...
+   });
+   ```
+
+5. **Creating Test Data**: Create test data using the mock Prisma client.
+
+   ```typescript
+   // Create a test user
+   const user = await mockPrismaClient.user.create({
+     data: {
+       id: "user1",
+       name: "Test User",
+       email: "test@example.com",
+       createdAt: new Date(),
+       updatedAt: new Date(),
+     },
+   });
+
+   // Create a test category
+   const category = await mockPrismaClient.category.create({
+     data: {
+       id: "cat1",
+       name: "Test Category",
+       slug: "test-category",
+       description: "Test Description",
+       createdAt: new Date(),
+       updatedAt: new Date(),
+     },
+   });
+   ```
+
+6. **Handling Relationships**: For many-to-many relationships, directly update the storage.
+
+   ```typescript
+   // Add category to post using a direct update to the storage
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   (mockPrismaClient as any)._storage.postCategories.push({
+     postId: "post1",
+     categoryId: category.id,
+   });
+   ```
+
+7. **API Route Params**: When testing API routes, use the following pattern for params:
+
+   ```typescript
+   const response = await GET(request as unknown as NextRequest, {
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     params: Promise.resolve({}) as any,
+   });
+   ```
+
+8. **Verifying Results**: Verify the results of API calls.
+
+   ```typescript
+   const data = await response.json();
+   expect(response.status).toBe(200);
+   expect(data.success).toBe(true);
+   expect(data.data.categories).toHaveLength(1);
+   ```
+
+# Next.js Client Components - 2024-03-01
+
+- All components that use React hooks (useState, useEffect, etc.) must have the "use client" directive at the top of the file
+- This is required for Next.js 15.1.7 and later
+- Without this directive, the build will fail with an error about hooks only working in client components
+
+# Babel Configuration - 2024-03-01
+
+- The project uses a custom Babel configuration (.babelrc)
+- This prevents Next.js from using its SWC compiler, which is more efficient
+- For Next.js 15.1.7, the Babel configuration must include @babel/plugin-syntax-import-attributes
+- Consider migrating away from custom Babel configuration in the future to use Next.js SWC compiler
+
+## Authentication System (2024-03-01)
+
+### Google OAuth Integration
+
+The application uses NextAuth.js for authentication and supports both traditional email/password authentication and Google OAuth. The Google OAuth implementation has the following characteristics:
+
+1. **Configuration**:
+
+   - Google OAuth credentials (Client ID and Secret) are stored in the `.env` file
+   - The NextAuth configuration is in `nextjs-app/src/app/api/auth/[...nextauth]/auth.ts`
+   - Google provider is configured alongside the credentials provider
+
+2. **UI Implementation**:
+
+   - Both sign-in and sign-up pages have Google sign-in buttons
+   - The buttons include loading states and error handling
+   - A divider separates the Google sign-in option from the traditional form
+   - Consistent styling is maintained across authentication pages (indigo for sign-in, blue for sign-up)
+
+3. **Environment Configuration**:
+
+   - Local development: `NEXTAUTH_URL=http://localhost:3000`
+   - Production: `NEXTAUTH_URL=https://your-production-domain.com`
+   - Google Cloud Console configuration:
+     - Authorized JavaScript origins: `http://localhost:3000` (dev) and `https://your-production-domain.com` (prod)
+     - Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google` (dev) and `https://your-production-domain.com/api/auth/callback/google` (prod)
+
+4. **Authentication Flow**:
+   - Google sign-in button triggers `signIn("google", { callbackUrl })` function
+   - User is redirected to Google's authentication page
+   - After successful authentication, user is redirected back to the application
+   - NextAuth handles the session management
+
+### Environment Configuration Pattern
+
+The application uses environment variables for configuration, with the following pattern:
+
+1. **Local Development**:
+
+   - `.env` file contains development configuration
+   - Variables are commented with explanations
+   - Duplicate entries are avoided
+
+2. **Production**:
+
+   - Production values should be set in the deployment platform (Vercel)
+   - Alternative: use `.env.production` for production values
+   - Comments indicate which values to use in production
+
+3. **Critical Variables**:
+   - `NEXTAUTH_URL`: The base URL of the application
+   - `NEXTAUTH_SECRET`: Secret for NextAuth session encryption
+   - `DATABASE_URL`: Connection string for the database
+   - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: Google OAuth credentials
+
+## JD Developer Form Validation (2024-03-01)
+
+The JD Developer form has been updated to make education, experience, and certifications optional. The only mandatory fields for generating job descriptions are:
+
+- Job title
+- Employment type
+- Position level
+- Industry
+
+The API validation schema in `nextjs-app/src/app/api/jd-developer/generate/route.ts` has been modified to make these fields optional by using `.default([])` instead of `.min(1, "...")`. The POST function has also been updated to ensure that all arrays are properly passed to the `generateJobDescription` function, even if they're not provided in the request.
+
+The UI already correctly labels these fields as optional:
+
+- Educational Requirements (Optional)
+- Professional Experience (Optional)
+- Required Certifications (Optional)
+
+When working with the JD Developer component, ensure that:
+
+1. No validation is added that would make education, experience, or certifications required
+2. The LLM prompt for job description generation handles missing fields gracefully
+3. The UI clearly indicates which fields are required vs. optional
+
+## Git Commit Approach (2024-03-01)
+
+When committing changes to the repository, always use `git add .` instead of specifying individual file paths like `memory-bank/file.md`. This is because:
+
+1. Specifying paths with directories can fail if the paths don't match exactly
+2. Using `git add .` ensures all changes in the current directory and subdirectories are staged
+3. Previous commits have failed when using specific directory paths like `memory-bank/activeContext.md`
+
+The correct approach for committing changes is:
+
+```bash
+# Stage all changes
+git add .
+
+# Commit with a descriptive message
+git commit -m "Descriptive message about the changes"
+```
+
+If you need to be selective about what to commit, use:
+
+```bash
+# Add specific files without directory prefixes
+git add filename.ext another-file.ext
+
+# Or use the interactive mode to select changes
+git add -i
+```
+
+Remember that the shell is in the root directory of the project, so all paths should be relative to that location.
+
+## Sensitive Information Handling (2024-03-01)
+
+When working with sensitive information such as API keys, environment variables, and credentials:
+
+1. **NEVER commit .env files to the repository**
+
+   - The .env file should be listed in .gitignore
+   - Use .env.example to document required environment variables without actual values
+   - If .env is accidentally committed, it must be removed from the entire git history
+
+2. **Removing sensitive information from git history**
+
+   - If sensitive information is accidentally committed, use git filter-branch to remove it:
+
+   ```bash
+   git filter-branch --force --index-filter "git rm --cached --ignore-unmatch .env" --prune-empty --tag-name-filter cat -- --all
+   git push --force
+   ```
+
+   - This rewrites the git history to remove the sensitive file from all commits
+   - Force pushing is required to update the remote repository
+
+3. **GitHub Push Protection**
+
+   - GitHub has push protection that blocks commits containing secrets
+   - If a push is rejected due to containing secrets, you must remove the secrets from the git history
+   - Never use the GitHub option to allow the secret, as this is a security risk
+
+4. **Best Practices**
+   - Use environment variables for all sensitive information
+   - Document required environment variables in .env.example
+   - Use a password manager or secure vault for storing actual credentials
+   - Rotate any credentials that have been accidentally exposed
+
+## Next.js Client-Side Hooks and Suspense - 2024-03-01 15:30
+
+### useSearchParams and Suspense Boundaries - 2024-03-01 15:30
+
+- Next.js 15.1.7 requires client-side hooks like `useSearchParams()` to be wrapped in Suspense boundaries
+- Failure to wrap these hooks in Suspense boundaries will cause Vercel deployment failures
+- Error message: `useSearchParams() should be wrapped in a suspense boundary at page "/path". Read more: <https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout>`
+- This is a requirement for static site generation (SSG) and server-side rendering (SSR)
+
+### Implementation Pattern - 2024-03-01 15:30
+
+1. Import Suspense from React:
+
+   ```javascript
+   import { Suspense } from "react";
+   ```
+
+2. Create a separate component that uses the client-side hooks:
+
+   ```javascript
+   function PageContent() {
+     const searchParams = useSearchParams();
+     // Use searchParams here
+     return <div>...</div>;
+   }
+   ```
+
+3. Wrap the component in Suspense in the main page component:
+   ```javascript
+   export default function Page() {
+     return (
+       <Suspense fallback={<div>Loading...</div>}>
+         <PageContent />
+       </Suspense>
+     );
+   }
+   ```
+
+### Affected Hooks - 2024-03-01 15:30
+
+- useSearchParams
+- usePathname
+- useRouter (in some cases)
+- Any other client-side hooks that rely on browser APIs
+
+### Example Implementation - 2024-03-01 15:30
+
+```javascript
+"use client";
+
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+function SignUpForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get("callbackUrl") || "/";
+
+  // Rest of the component...
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignUpForm />
+    </Suspense>
+  );
+}
+```
+
+# NextAuth Google OAuth Integration - 2024-03-01
+
+## PrismaAdapter Configuration - 2024-03-01
+
+When using NextAuth.js with Google OAuth, it's essential to configure the PrismaAdapter to ensure users are properly created in the database. Without this adapter, users can authenticate but won't have database records, causing foreign key constraint violations when trying to save related data.
+
+### Implementation Pattern
+
+```typescript
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "./prisma";
+
+export const authOptions: AuthOptions = {
+  adapter: PrismaAdapter(prisma),
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      // Other configuration...
+    }),
+    // Other providers...
+  ],
+  // Other NextAuth options...
+};
+```
+
+### Key Points
+
+1. **Required Packages**:
+
+   - `@auth/prisma-adapter`: Provides the PrismaAdapter
+   - `next-auth`: Core authentication library
+   - `@prisma/client`: Database ORM
+
+2. **Database Requirements**:
+
+   - The Prisma schema must include the necessary NextAuth models (User, Account, Session, etc.)
+   - The User model must have the fields required by NextAuth (id, email, name, etc.)
+
+3. **Common Issues**:
+
+   - Foreign key constraint violations when saving related data (e.g., JobDescription, Task, etc.)
+   - Session exists but user ID is not found in the database
+   - Authentication works but database operations fail
+
+4. **Testing Considerations**:
+   - Mock the PrismaAdapter in tests
+   - Ensure test users have proper database records
+   - Test both credential and OAuth authentication flows
+
+### Troubleshooting
+
+If you encounter foreign key constraint violations:
+
+1. Check if the user exists in the database
+2. Verify that the session contains the correct user ID
+3. Ensure the PrismaAdapter is properly configured
+4. Check that the database schema matches the NextAuth requirements
+
+This pattern is essential for any feature that requires saving user-related data to the database when using OAuth authentication.
+
+## JD Developer Patterns - 2024-03-01 10:30
+
+### Template Filtering Pattern - 2024-03-01 10:30
+
+- Templates are stored in the same database table as regular job descriptions
+- Templates are identified by the `isTemplate` flag in the metadata
+- Two-layer filtering approach is used to ensure proper separation:
+  1. Database query filtering: `content: { not: { contains: '"isTemplate":true' } }`
+  2. Parsed content verification: `if (parsedContent.metadata?.isTemplate === true) { return null; }`
+- This double-checking approach ensures templates only appear in the templates list
+- Always filter out null entries after parsing: `.filter(Boolean)`
+- Handle JSON parsing errors gracefully with try/catch blocks
+- Log parsing errors for debugging: `console.error(`Error parsing JD ${jd.id}:`, error);`
+
+### Template Guide Pattern - 2024-03-01 10:30
+
+- When no templates exist, show a comprehensive guide instead of sample templates
+- Guide should clearly indicate which fields are required:
+  - Job Title (mandatory)
+  - Employment Type (mandatory)
+  - Position Level (mandatory)
+  - Industry (mandatory)
+- Guide should also mention optional fields:
+  - Department (optional)
+  - Location (optional)
+- Organize guide into clear sections with proper spacing and icons
+- Use visual hierarchy to emphasize important information
+- Include Pro Tips section with helpful guidance
+- Use consistent tab naming across the application (e.g., "Create" tab)
+
+## Command Execution Patterns - 2024-03-01 16:45
+
+### Terminal Command Spacing - 2024-03-01 16:45
+
+- ALWAYS add a space before ALL terminal commands to ensure proper history tracking and prevent typo errors
+- Example: ` ls -la` instead of `ls -la`
+- Example: ` git status` instead of `git status`
+- Example: ` cd src` instead of `cd src`
+- This applies to all commands: ` npm`, ` git`, ` ls`, ` cd`, etc.
+- This practice helps prevent typo errors that typically occur when running terminal commands
+- It also makes commands more visible in the terminal history
+
+## Next.js App Router Conventions - 2024-03-01 16:30
+
+### Page Structure Requirements - 2024-03-01 16:30
+
+- Each route requires its own directory (e.g., `/about`, `/services`, `/contact`)
+- The actual page component must be named `page.tsx` inside that directory
+- Example structure:
+  ```
+  src/app/
+  ├── about/
+  │   └── page.tsx
+  ├── services/
+  │   └── page.tsx
+  ├── contact/
+  │   └── page.tsx
+  ```
+- Do not use flat files like `about.tsx` directly in the app directory
+- Layouts can be defined using `layout.tsx` files in the appropriate directories
+- Route groups can be created using parentheses in directory names: `(auth)/login`
+- Dynamic routes use square brackets: `[slug]/page.tsx`
+- Catch-all routes use triple dots: `[...slug]/page.tsx`
+- Optional catch-all routes use double square brackets: `[[...slug]]/page.tsx`
+
+### Client vs Server Components - 2024-03-01 16:30
+
+- All components are Server Components by default
+- Add "use client" directive at the top of the file to make it a Client Component
+- Client Components are needed for:
+  - Interactive features (forms, buttons, etc.)
+  - Browser APIs (localStorage, navigator, etc.)
+  - React hooks (useState, useEffect, etc.)
+  - Event handlers (onClick, onError, etc.)
+- Server Components are better for:
+  - Fetching data
+  - Accessing backend resources directly
+  - Keeping sensitive information on the server
+  - Reducing client-side JavaScript
+
+### Event Handlers in Server Components - 2024-03-01 17:30
+
+- Event handlers cannot be passed to Client Component props from Server Components
+- Error: "Event handlers cannot be passed to Client Component props"
+- Common event handlers that require Client Components:
+  - onClick
+  - onChange
+  - onSubmit
+  - onError
+  - onLoad
+  - onFocus
+  - onBlur
+- Solutions:
+  1. Convert the component to a Client Component by adding "use client" directive
+  2. Move the event handler to a separate Client Component
+  3. Use a different approach that doesn't require event handlers
+- Example with Image component:
+
+  ```tsx
+  // This will cause an error in Server Components
+  <Image
+    src="/image.jpg"
+    alt="Image"
+    onError={(e) => {
+      e.currentTarget.src = "/fallback.jpg";
+    }}
+  />;
+
+  // Solution: Convert to Client Component
+  ("use client");
+  // Now the event handler is allowed
+  <Image
+    src="/image.jpg"
+    alt="Image"
+    onError={(e) => {
+      e.currentTarget.src = "/fallback.jpg";
+    }}
+  />;
+  ```
+
+### Deployment Considerations - 2024-03-01 18:30
+
+- Vercel deployment will fail if Server Components contain event handlers
+- Error during static generation: "Event handlers cannot be passed to Client Component props"
+- This error only appears during the build process, not in development
+- Always check for event handlers in Server Components before deployment
+- Common components that might need event handlers:
+  - Image components with onError fallbacks
+  - Form elements with onChange handlers
+  - Buttons with onClick handlers
+  - Input elements with onFocus/onBlur handlers
+- Deployment checklist:
+  1. Identify all components with event handlers
+  2. Convert those components or their parent components to Client Components
+  3. Test the application in development mode
+  4. Monitor the build logs for any errors
+  5. Verify that all pages are properly generated and optimized
+
+### Navigation Best Practices - 2024-03-01 16:30
+
+- Use Next.js Link component for client-side navigation
+- Avoid using anchor tags directly for internal links
+- Prefetching happens automatically with Link component
+- For programmatic navigation, use the useRouter hook from next/navigation
+
+## LLM Integration Patterns - 2024-03-02 11:30
+
+### Structured Text Response Pattern - 2024-03-02 11:30
+
+- When working with LLM responses that need to be parsed into structured data, prefer using clear section headers over JSON
+- Benefits of section-based extraction:
+  - More reliable parsing with less complex code
+  - Easier to debug and maintain
+  - Less prone to JSON formatting errors from the LLM
+  - Simpler extraction logic
+- Implementation pattern:
+  1. In the prompt, specify exact section headers (e.g., "QUESTIONS:", "EVALUATION TIPS:")
+  2. Request numbered items within each section for easier parsing
+  3. Use regex to extract content between section headers
+  4. Process each section's content separately
+- Example prompt structure:
+
+  ```
+  Format your response as follows:
+
+  SECTION_1:
+  1. First item
+  2. Second item
+  ...
+
+  SECTION_2:
+  1. First item
+  2. Second item
+  ...
+  ```
+
+- Example extraction code:
+  ```typescript
+  const section1Match = response.match(/SECTION_1:([\s\S]*?)(?=SECTION_2:|$)/i);
+  if (section1Match && section1Match[1]) {
+    const items = section1Match[1]
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => /^\d+\./.test(line))
+      .map((line) => line.replace(/^\d+\.\s*/, "").trim())
+      .filter((line) => line.length > 0);
+    // Process items
+  }
+  ```
+- Always include fallback mechanisms for when the LLM doesn't follow the format exactly
+- For HTML content, use simple text-to-HTML conversion rather than asking the LLM to generate HTML directly
+
+## Deployment Patterns - 2024-03-02 12:15
+
+### Environment Variables in Vercel - 2024-03-02 12:15
+
+- Always ensure all required environment variables are properly set in Vercel's project settings
+- For API keys and sensitive information:
+  1. Never use `NEXT_PUBLIC_` prefix for API keys that should be kept secret
+  2. Server-side API keys should be accessed only in API routes or Server Components
+  3. Add fallback mechanisms for build-time access to prevent deployment failures
+  4. Document all required environment variables in .env.example with clear instructions
+- Implement graceful degradation when environment variables are missing:
+  1. Check for the existence of environment variables before using them
+  2. Provide meaningful error messages to users when services are unavailable
+  3. Use fallback content or functionality when possible
+  4. Return appropriate HTTP status codes (e.g., 503 Service Unavailable)
+- For local development:
+  1. Use .env.local for local environment variables
+  2. Never commit actual .env files to the repository
+  3. Keep .env.example updated with all required variables
+- Common environment variables needed:
+  1. API keys for external services (GROQ_API_KEY, etc.)
+  2. Database connection strings
+  3. Authentication secrets
+  4. Feature flags
+
+# Toast Implementation Pattern (2024-03-02)
+
+When working with toast notifications in this project:
+
+1. For components that need to display toast notifications:
+
+   - ✅ ALWAYS import from `@/lib/toast-migration` instead of `@/hooks/use-toast`
+   - This ensures compatibility with the new sonner toast system
+   - Example: `import { toast } from "@/lib/toast-migration";`
+   - DO NOT import directly from "sonner" in components
+
+2. The toast migration utility supports all variants including "destructive"
+
+   - Use `toast({ variant: "destructive", title: "Error", description: "Error message" })`
+   - For success messages: `toast({ title: "Success", description: "Operation completed" })`
+   - For components using hooks: `const { toast } = useToast(); toast({ title: "Success" })`
+
+3. The main Toaster component is imported from our custom UI component:
+
+   - `import { Toaster } from "@/components/ui/sonner";`
+   - This is ONLY used in the root layout.tsx file
+   - DO NOT add Toaster components to individual pages
+
+4. ✅ MIGRATION COMPLETED:
+
+   - All components have been verified to use the correct imports
+   - No instances of the old toast system remain in the codebase
+   - The migration utility properly handles all use cases including destructive variants
+   - This migration is now complete and won't cause issues in future development
+
+5. ✅ TAILWIND CONFIGURATION FIXED:
+   - Duplicate keyframes and animation definitions have been removed
+   - The tailwind.config.ts file now has only one definition for each keyframe and animation
+   - This issue is now completely resolved and won't recur in future development
+
+# Tailwind Configuration Pattern (2024-03-02)
+
+When working with Tailwind animations and keyframes:
+
+1. ✅ FIXED: All keyframes must be defined only once in the tailwind.config.ts file
+
+   - Avoid duplicate definitions of keyframes like 'accordion-down' and 'accordion-up'
+   - Check for existing definitions before adding new ones
+   - This issue has been fixed and verified in the current configuration
+
+2. ✅ FIXED: All animation definitions must also be unique
+
+   - The same animation name cannot be defined multiple times
+   - This prevents the "object literal cannot have multiple properties with the same name" error
+   - This issue has been fixed and verified in the current configuration
+
+3. When adding new shadcn UI components:
+   - Check if they require new keyframes or animations
+   - Add them to the existing configuration without duplication
+   - Test the build to ensure no conflicts
+   - ALWAYS verify that no duplicate keyframes or animations are introduced
+
+# UI Design Patterns - 2024-03-02
+
+## Interview Questions Generator UI Pattern - 2024-03-02
+
+The Interview Questions Generator follows a consistent UI pattern across all its tabs:
+
+1. **Card-Based Layout**:
+
+   - Each item (question, tip, or scoring level) is displayed in its own card
+   - Cards have a consistent structure with a header and content section
+   - Cards use subtle hover effects (shadow and slight upward movement)
+   - All cards have rounded corners and a clean white background for content
+
+2. **Color Scheme**:
+
+   - Questions tab: Indigo color scheme
+   - Evaluation Tips tab: Blue color scheme
+   - Scoring Rubric tab: Indigo color scheme (matching Questions tab)
+   - Avoid using green colors or star ratings for a more professional look
+
+3. **Header Design**:
+
+   - Headers have a colored background (indigo-50 or blue-50)
+   - Headers include a title on the left and a badge on the right
+   - Headers use a 2px colored bottom border (indigo-400 or blue-400)
+   - Text is semibold with appropriate color contrast
+
+4. **Content Design**:
+
+   - Clean white background for all content sections
+   - Consistent text styling with proper spacing
+   - Numbered items have the number as semibold with appropriate spacing
+   - Text is gray-800 for good readability
+
+5. **Tab Navigation**:
+
+   - Tabs use a rounded container with a light gray background
+   - Active tab has a white background with subtle shadow
+   - Each tab includes an icon, label, and count badge when appropriate
+   - Tab icons use colors that match their respective content (indigo, blue)
+
+6. **Responsive Design**:
+   - All elements adapt properly to different screen sizes
+   - On mobile, headers may switch to a column layout
+   - Proper spacing is maintained across all device sizes
+
+This pattern ensures a consistent, professional appearance across the entire Interview Questions Generator feature.
+
+## Training Plan Creator Implementation Guide (2024-03-02)
+
+The Training Plan Creator implementation guide is located at `guides/trainingPlanCreator.md`. This guide should be referenced for all future work on the Training Plan Creator app. It contains:
+
+1. Current implementation status
+2. Form redesign with mandatory vs. optional fields
+3. Enhanced LLM integration using a two-stage approach (Gemini + Search API and Llama 3.2 3b)
+4. Implementation steps for API endpoints, form components, and UI improvements
+5. User guide creation plan and testing strategy
+
+When implementing changes to the Training Plan Creator, follow the approach outlined in this guide to ensure consistency and alignment with the project goals.
+
+## Blog Post Display Patterns - 2024-03-05 10:45
+
+### Author Section Layout Pattern - 2024-03-05 10:45
+
+- The author section in blog posts should follow this layout pattern:
+  ```jsx
+  <div className="flex items-center justify-between mb-8">
+    <div className="flex items-center">
+      <div className="flex-shrink-0 mr-3">
+        <Image
+          src="/images/synthalyst-team.png"
+          alt={post.author.name || "Synthalyst Team"}
+          width={40}
+          height={40}
+          className="rounded-full"
+        />
+      </div>
+      <div className="flex flex-col justify-center">
+        <span className="text-base font-medium block">{post.author.name}</span>
+        <span className="text-sm text-gray-500 block">
+          {new Date(post.createdAt).toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+  </div>
+  ```
+- Key aspects of this pattern:
+  - Use `flex-shrink-0` on the image container to prevent it from resizing
+  - Use `mr-3` for precise spacing between image and text
+  - Use `flex flex-col justify-center` for the text container to vertically center content
+  - Use `block` display on text elements for proper stacking
+  - Use `text-base` for author name and `text-sm text-gray-500` for date
+
+### Image Handling in Blog Posts - 2024-03-05 10:45
+
+- Team images should always use the consistent path: `/images/synthalyst-team.png`
+- Cover images have been removed from blog post pages to prevent broken image issues
+- For MDX content, special handling is needed for team images:
+  ```jsx
+  if (
+    src.includes("synthalyst-team.png") ||
+    src.includes("team/synthalyst-team")
+  ) {
+    return `<div class="my-8">
+      <img src="/images/synthalyst-team.png" alt="${
+        alt || "Synthalyst Team"
+      }" class="rounded-lg shadow-md mx-auto max-w-full" />
+      ${
+        alt
+          ? `<p class="text-center text-sm text-gray-500 mt-2">${alt}</p>`
+          : ""
+      }
+    </div>`;
+  }
+  ```
+
+### Table Rendering in MDX Content - 2024-03-05 14:30
+
+- Tables in MDX content should be processed using a multi-strategy approach:
+
+  1. **Pre-process tables before other markdown elements**:
+
+     ```jsx
+     // Find and process all tables in the content
+     const tableRegex = /\n\|(.*\|)\n\|([-:\| ]+\|)\n(\|(.*\|)\n)+/g;
+     let match;
+     let lastIndex = 0;
+     let result = "";
+
+     // Process content in chunks, handling tables separately
+     while ((match = tableRegex.exec(processedContent)) !== null) {
+       // Add everything up to the table
+       result += processedContent.slice(lastIndex, match.index);
+
+       // Process and add the table
+       result += processTable(match[0]);
+
+       // Update the last index
+       lastIndex = match.index + match[0].length;
+     }
+
+     // Add any remaining content after the last table
+     result += processedContent.slice(lastIndex);
+     ```
+
+  2. **Use a dedicated function to handle table conversion**:
+
+     ```jsx
+     const processTable = (tableContent: string) => {
+       const rows = tableContent.trim().split("\n");
+
+       if (rows.length < 3) return tableContent; // Not a valid table
+
+       // Extract header row and separator row
+       const headerRow = rows[0];
+       // Separator row is at index 1, but we don't need to use it
+       const bodyRows = rows.slice(2);
+
+       // Process header cells
+       const headerCells = headerRow
+         .split("|")
+         .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
+         .map(
+           (cell) =>
+             `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
+         )
+         .join("");
+
+       // Process body rows
+       const bodyRowsHtml = bodyRows
+         .map((row) => {
+           const cells = row
+             .split("|")
+             .filter((cell) => cell.trim() !== "") // Remove empty cells from start/end
+             .map(
+               (cell) =>
+                 `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
+             )
+             .join("");
+
+           // Add zebra striping for better readability
+           const rowClass = rowIndex % 2 === 0 ? "" : "bg-gray-50";
+           return `<tr class="${rowClass}">${cells}</tr>`;
+         })
+         .join("");
+
+       // Construct the complete table
+       return `<div class="overflow-x-auto my-6">
+         <table class="w-full border-collapse">
+           <thead>
+             <tr>${headerCells}</tr>
+           </thead>
+           <tbody>
+             ${bodyRowsHtml}
+           </tbody>
+         </table>
+       </div>`;
+     };
+     ```
+
+  3. **Implement a direct content-specific fallback**:
+
+     ```jsx
+     // Direct approach for the specific table format in the blog post
+     if (
+       result.includes("| Weak Objective") &&
+       result.includes("| Strong Objective")
+     ) {
+       const tableStart = result.indexOf("| Weak Objective");
+       const tableEnd = result.indexOf("## Using Templates", tableStart);
+
+       if (tableStart !== -1 && tableEnd !== -1) {
+         const tableContent = result.substring(tableStart, tableEnd).trim();
+         const tableRows = tableContent.split("\n");
+
+         if (tableRows.length >= 3) {
+           // Create HTML table
+           const headerCells = tableRows[0]
+             .split("|")
+             .filter((cell) => cell.trim() !== "")
+             .map(
+               (cell) =>
+                 `<th class="px-6 py-4 bg-gray-50 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`
+             )
+             .join("");
+
+           const bodyRowsHtml = tableRows
+             .slice(2)
+             .map((row) => {
+               const cells = row
+                 .split("|")
+                 .filter((cell) => cell.trim() !== "")
+                 .map(
+                   (cell) =>
+                     `<td class="px-6 py-4 whitespace-normal text-sm text-gray-700 border-b border-gray-100">${cell.trim()}</td>`
+                 )
+                 .join("");
+
+               // Add zebra striping for better readability
+               const rowClass = rowIndex % 2 === 0 ? "" : "bg-gray-50";
+               return `<tr class="${rowClass}">${cells}</tr>`;
+             })
+             .join("");
+
+           const htmlTable = `<div class="overflow-x-auto my-6">
+             <table class="w-full border-collapse">
+               <thead>
+                 <tr>${headerCells}</tr>
+               </thead>
+               <tbody>
+                 ${bodyRowsHtml}
+               </tbody>
+             </table>
+           </div>`;
+
+           // Replace the markdown table with the HTML table
+           result =
+             result.substring(0, tableStart) +
+             htmlTable +
+             result.substring(tableEnd);
+         }
+       }
+     }
+     ```
+
+- Key aspects of this pattern:
+  - Process tables separately from other markdown elements
+  - Use a multi-strategy approach with general regex and specific content targeting
+  - Wrap tables in an `overflow-x-auto` div to handle mobile responsiveness
+  - Filter out empty cells from the start/end of rows
+  - Use proper semantic HTML with `thead` and `tbody` elements
+  - Apply consistent styling to headers and cells
+
+### Table Styling in MDX Content - 2024-03-05 16:45
+
+- Tables should be styled using a modern, professional design that enhances readability:
+
+  ```jsx
+  // Enhanced table styling
+  return `<div class="my-8 overflow-hidden rounded-lg shadow-sm border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="w-auto min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>${headerCells}</tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          ${bodyRowsHtml}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+  ```
+
+- Header cells should use this styling:
+
+  ```jsx
+  `<th class="px-4 py-4 bg-gray-50 text-left text-base font-semibold text-gray-900 border-b border-gray-200">${cell.trim()}</th>`;
+  ```
+
+- Body cells should use this styling:
+
+  ```jsx
+  `<td class="px-4 py-4 whitespace-normal text-base text-gray-700 border-b border-gray-100">${cell.trim()}</td>`;
+  ```
+
+- Implement zebra striping for better row distinction:
+
+  ```jsx
+  // Add zebra striping for better readability
+  const rowClass = rowIndex % 2 === 0 ? "" : "bg-gray-50";
+  return `<tr class="${rowClass}">${cells}</tr>`;
+  ```
+
+- Key aspects of this styling:
+  - Rounded corners and subtle shadow for the table container
+  - Proper spacing with moderate padding (px-4 py-4)
+  - Content-fitting width with `w-auto` combined with `min-w-full`
+  - Larger text size with text-base for better readability
+  - Semantic color scheme (text-gray-900 for headers, text-gray-700 for body)
+  - Zebra striping for alternate rows (bg-gray-50)
+  - Subtle borders between rows (divide-y divide-gray-100)
+  - Overflow handling for mobile responsiveness (overflow-x-auto)
+
+### Blog Post Layout Pattern - 2024-03-05 18:30
+
+- Blog post content should use a constrained width to improve readability:
+
+  ```jsx
+  <article className="prose prose-lg max-w-4xl mx-auto">
+    {/* Blog post content */}
+  </article>
+  ```
+
+- The MDXContent component should respect parent width constraints:
+
+  ```jsx
+  <div
+    className="prose prose-lg mb-8 
+              prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
+              prose-p:text-black dark:prose-p:text-gray-100 prose-p:my-4 prose-p:leading-relaxed
+              prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
+              prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto
+              prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
+              prose-ul:list-disc prose-ol:list-decimal prose-li:my-2
+              prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic"
+    dangerouslySetInnerHTML={{ __html: result }}
+  />
+  ```
+
+- Key aspects of this pattern:
+  - Use `max-w-4xl` for blog post content to match comment section width
+  - Avoid using `max-w-none` which would override parent width constraints
+  - Center content with `mx-auto` for balanced white space on both sides
+  - Maintain consistent width between article content and comments section
+  - This width provides optimal readability while adding sufficient white space
+
+### Text Color Pattern - 2024-03-05 20:00
+
+- Use black text for paragraph content to ensure readability:
+
+  ```jsx
+  <div
+    className="prose prose-lg mb-8 
+              prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
+              prose-p:text-black dark:prose-p:text-gray-100 prose-p:my-4 prose-p:leading-relaxed
+              prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium
+              prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto
+              prose-table:border prose-table:border-collapse prose-td:border prose-td:p-2
+              prose-ul:list-disc prose-ol:list-decimal prose-li:my-2
+              prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic"
+    dangerouslySetInnerHTML={{ __html: result }}
+  />
+  ```
+
+- Key aspects of this pattern:
+  - Use `text-black` for paragraph text in light mode for maximum readability
+  - Use `text-gray-100` (very light gray, almost white) for paragraph text in dark mode
+  - Maintain `text-gray-900` for headings in light mode for slight visual distinction
+  - Avoid using gray text for body content as it reduces readability and accessibility
+  - Reserve gray text for secondary information like dates, captions, and metadata
+
+### Icon Usage Pattern - 2024-03-05 19:15
+
+- Use Radix UI icons for a professional and consistent look:
+
+  ```jsx
+  import { EyeOpenIcon, HeartFilledIcon } from "@radix-ui/react-icons";
+
+  // Usage example
+  <span className="flex items-center text-gray-500">
+    <EyeOpenIcon className="w-5 h-5 mr-1" />
+    <span>{post.views}</span>
+  </span>;
+  ```
+
+- Key aspects of this pattern:
+  - Import icons from `@radix-ui/react-icons` library
+  - Use consistent sizing with `w-5 h-5` for most icons
+  - Add appropriate spacing with `mr-1` between icon and text
+  - Use `flex items-center` to align icons with text
+  - Apply `transition-colors` for hover effects on interactive elements
+  - Avoid using emoji icons (👁️, ❤️) in favor of professional SVG icons
+  - Maintain consistent color schemes with the rest of the UI
+
+# Component Standardization (2024-03-05)
+
+## Component Guidelines
+
+The project uses shadcn/ui as its primary component library. A comprehensive component guidelines document has been created at `docs/component-guidelines.md` that outlines best practices for using shadcn/ui components.
+
+Key principles:
+
+- Use shadcn/ui components whenever possible to maintain a consistent look and feel
+- Customize components using the shadcn/ui theming system rather than direct Tailwind classes
+- Use the `cn` utility from `@/lib/utils` for class merging
+- Create variants using `cva` for consistent styling
+- All components should be accessible and follow WCAG guidelines
+
+## Component Variants
+
+The Card component has been extended with a gradient variant that provides consistent gradient styles:
+
+```tsx
+// Primary gradient (blue to indigo)
+<Card variant="gradient" variantKey="primary">
+  <CardHeader>
+    <CardTitle className="text-white">Primary Gradient</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <p className="text-white/90">Content with white text for contrast</p>
+  </CardContent>
+</Card>
+```
+
+Available gradient keys:
+
+- `primary`: Blue to indigo gradient (white text recommended)
+- `secondary`: Purple to pink gradient (white text recommended)
+- `accent`: Amber gradient (white text recommended)
+- `info`: Subtle blue gradient (default text color works well)
+- `default`: Subtle gray gradient (default text color works well)
+
+An example page demonstrating all gradient variants is available at `/examples/gradient-card`.
+
+## Custom Components
+
+The project includes several custom components built on top of shadcn/ui:
+
+### ResourceCard
+
+The ResourceCard component displays information about a resource, such as a book, video, or article. It includes support for premium resources.
+
+```tsx
+<ResourceCard
+  resource={{
+    id: "1",
+    title: "Resource Title",
+    type: "book",
+    description: "Resource description",
+    isPremium: true,
+    author: "Author Name",
+    url: "https://example.com",
+  }}
+/>
+```
+
+### ResourceList
+
+The ResourceList component displays a list of resources and handles premium resource visibility based on the user's subscription status.
+
+```tsx
+<ResourceList
+  resources={
+    [
+      /* array of resources */
+    ]
+  }
+  isPremiumUser={true}
+/>
+```
+
+## Utility Scripts
+
+The project includes several utility scripts to help with component standardization:
+
+### Component Audit Script
+
+The component audit script identifies custom components and styling patterns that could be replaced with shadcn/ui components.
+
+```bash
+node scripts/component-audit.js
+```
+
+### Component Migration Script
+
+The component migration script helps migrate custom components to shadcn/ui.
+
+```bash
+node scripts/migrate-components.js [component-name]
+```
+
+### Create Variant Script
+
+The create variant script adds new variants to shadcn/ui components.
+
+```bash
+node scripts/create-variant.js [component-name] [variant-name]
+```
+
+Available variant templates:
+
+- `gradient`: Gradient backgrounds
+- `outline`: Colored outlines with matching text
+- `glass`: Frosted glass effect with backdrop blur
+
+# Toast Migration (2024-03-02)
+
+## Toast Implementation
+
+The project has migrated from the old toast system to the new sonner toast system. A toast migration utility has been created at `@/lib/toast-migration.ts` that provides backward compatibility.
+
+All components should import toast from `@/lib/toast-migration` instead of `@/hooks/use-toast`.
+
+```typescript
+import { toast } from "@/lib/toast-migration";
+
+// Success toast
+toast({
+  title: "Success",
+  description: "Operation completed successfully.",
+});
+
+// Error toast
+toast({
+  variant: "destructive",
+  title: "Error",
+  description: "Something went wrong.",
+});
+```
+
+// ... existing content ...
+
+# Next.js 15 Type Requirements (2024-03-07)
+
+In Next.js 15, there are important type requirements for route handlers and page components that use dynamic route parameters:
+
+1. **Route Handler Parameters**: In Next.js App Router route handlers, the `params` object must be typed as a Promise:
+
+   ```typescript
+   export async function GET(
+     req: Request,
+     { params }: { params: { id: string } }
+   ) {
+     const { id } = await params;
+     // Use id here
+   }
+   ```
+
+2. **Page Component Parameters**: Similarly, in page components that use dynamic route parameters, the `params` object must be typed as a Promise:
+
+   ```typescript
+   interface PageProps {
+     params: Promise<{ id: string }>;
+   }
+
+   export default async function Page(props: PageProps) {
+     const params = await props.params;
+     const { id } = params;
+     // Use id here
+   }
+   ```
+
+3. **Awaiting Params**: Always remember to await the params object before accessing its properties:
+
+   ```typescript
+   const { id } = await params;
+   ```
+
+4. **LLM Response Content**: When working with LLM responses, always add null checks to prevent potential null reference errors:
+   ```typescript
+   const responseContent = completion.choices[0].message.content as string;
+   const generatedContent = JSON.parse(responseContent || "{}");
+   ```
+
+These type requirements are critical for successful builds in Next.js 15, especially for Vercel deployments.
+
+# Project Structure (2024-03-05)
+
+// ... existing code ...
+
+### ClientComponentWrapper Pattern - 2024-03-04 02:45
+
+This pattern standardizes how we wrap client components that use Next.js navigation hooks in Suspense boundaries.
+
+#### Implementation
+
+We've created a reusable wrapper component at `nextjs-app/src/components/wrappers/ClientComponentWrapper.tsx` that:
+
+1. Provides a consistent Suspense boundary for client components
+2. Implements a standardized loading UI with spinner and customizable text
+3. Simplifies the implementation of proper Suspense boundaries
+
+#### Usage
+
+```tsx
+// In a page.tsx file
+import { ClientComponentWrapper } from "@/components/wrappers/ClientComponentWrapper";
+import { MyClientComponent } from "@/components/MyClientComponent";
+
+export default function Page() {
+  return (
+    <ClientComponentWrapper loadingText="Loading page...">
+      <MyClientComponent />
+    </ClientComponentWrapper>
+  );
+}
+```
+
+#### When to Use
+
+Use this wrapper for any client component that uses:
+
+- useSearchParams()
+- usePathname()
+- useRouter()
+
+This ensures compliance with Next.js 15.2.0+ requirements for client-side navigation hooks.
+
+#### Benefits
+
+1. Consistent loading UI across the application
+2. Simplified implementation of Suspense boundaries
+3. Prevents Vercel build errors related to missing Suspense boundaries
+4. Improves user experience during loading states
+
+// ... existing code ...
+
+### Enhanced ClientComponentWrapper Pattern - 2024-03-04 15:30
+
+The ClientComponentWrapper has been enhanced with multiple loading UI variants, a higher-order component version, and comprehensive tests.
+
+#### Loading UI Variants
+
+The component now supports four loading UI variants:
+
+```tsx
+// Default variant (centered spinner with text)
+<ClientComponentWrapper loadingText="Loading...">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Minimal variant (inline spinner with small text)
+<ClientComponentWrapper loadingText="Loading..." variant="minimal">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Fullscreen variant (overlay with backdrop blur)
+<ClientComponentWrapper loadingText="Loading..." variant="fullscreen">
+  <MyComponent />
+</ClientComponentWrapper>
+
+// Skeleton variant (content placeholder)
+<ClientComponentWrapper loadingText="Loading..." variant="skeleton">
+  <MyComponent />
+</ClientComponentWrapper>
+```
+
+#### Higher-Order Component (HOC) Version
+
+A HOC version is available for a more functional approach:
+
+```tsx
+import { withClientComponent } from "@/components/wrappers/withClientComponent";
+
+// Define your client component
+function MyClientComponent(props) {
+  const searchParams = useSearchParams();
+  // ...
+}
+
+// Wrap it with the HOC
+const WrappedComponent = withClientComponent(MyClientComponent, {
+  loadingText: "Loading component...",
+  variant: "minimal",
+});
+
+// Use the wrapped component in your page
+export default function Page() {
+  return <WrappedComponent />;
+}
+```
+
+#### Compose Utility
+
+A compose utility is available for combining multiple HOCs:
+
+```tsx
+import {
+  withClientComponent,
+  compose,
+} from "@/components/wrappers/withClientComponent";
+
+const EnhancedComponent = compose(
+  withAnalytics,
+  withErrorBoundary,
+  withClientComponent
+)(BaseComponent);
+```
+
+#### When to Use Each Variant
+
+- **Default**: Use for most content areas where a centered loading indicator is appropriate
+- **Minimal**: Use for smaller UI elements or inline loading states
+- **Fullscreen**: Use for initial page loads or major transitions
+- **Skeleton**: Use for content-heavy sections where preserving layout is important
+
+#### Testing
+
+The components are thoroughly tested:
+
+```bash
+cd nextjs-app
+npm test -- -t "ClientComponentWrapper"
+```
+
+For more details, see the documentation in `nextjs-app/docs/client-component-wrapper.md`.
+
+// ... existing code ...
+
+## LLM API Integration Patterns - 2024-03-08 15:45
+
+### Gemini API Integration - 2024-03-08 15:45
+
+- The Gemini API is used for premium resource recommendations in the Training Plan Creator
+- Always use the `getGeminiModel()` utility function to get the Gemini model instance
+- The default model is "gemini-2.0-flash" and should not be changed without careful consideration
+- Environment variable: `GEMINI_API_KEY` (not `GOOGLE_GEMINI_API_KEY`)
+- Implementation in `nextjs-app/src/lib/gemini.ts`
+- Example usage:
+
+  ```typescript
+  import { getGeminiModel } from "@/lib/gemini";
+
+  // Get the default Gemini 2.0 Flash model
+  const model = getGeminiModel();
+
+  // Generate content with Gemini
+  const result = await model.generateContent(prompt);
+  const response = result.response;
+  const text = response.text();
+  ```
+
+### OpenRouter API Integration - 2024-03-08 15:50
+
+- The OpenRouter API is used for accessing the Llama 3.2 3b model in the Training Plan Creator
+- Always use the `openRouter` instance from `@/lib/openrouter` for OpenRouter API calls
+- The model name is "meta-llama/llama-3.2-3b-instruct"
+- Environment variable: `OPENROUTER_API_KEY`
+- Implementation in `nextjs-app/src/lib/openrouter.ts` and `nextjs-app/src/lib/llama.ts`
+- Example usage:
+
+  ```typescript
+  import { openRouter } from "@/lib/openrouter";
+
+  // Call OpenRouter with Llama 3.2 3b
+  const response = await openRouter.chat.completions.create({
+    model: "meta-llama/llama-3.2-3b-instruct",
+    messages: [
+      { role: "system", content: systemMessage },
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.7,
+    max_tokens: 3500,
+  });
+  ```
+
+### Two-Stage LLM Approach - 2024-03-08 15:55
+
+- The Training Plan Creator uses a two-stage approach for premium users:
+  1. Gemini 2.0 Flash for resource recommendations
+  2. Llama 3.2 3b for plan generation
+- For free users, only the Llama 3.2 3b model is used with an enhanced prompt
+- This approach ensures premium users get high-quality, current resources while maintaining good plan generation for all users
+- Implementation in `nextjs-app/src/app/api/training-plan/enhanced-generate/route.ts`
+
+// ... existing code ...
+
+## Memory Bank Update Pattern - 2025-03-04
+
+### Date Determination Pattern - 2025-03-04
+
+- ALWAYS programmatically determine today's date when updating memory bank files
+- Never use hardcoded dates in memory bank entries
+- Use the following pattern to get the current date in YYYY-MM-DD format:
+  ```bash
+  # In terminal
+  date +"%Y-%m-%d"
+  ```
+  ```javascript
+  // In JavaScript
+  const today = new Date().toISOString().split("T")[0];
+  ```
+  ```python
+  # In Python
+  from datetime import date
+  today = date.today().strftime("%Y-%m-%d")
+  ```
+- Apply the current date to all new entries in memory bank files:
+  - Use the date for section headings: `## Current Focus (YYYY-MM-DD)`
+  - Use the date for entry timestamps: `- ✅ UPDATED: Feature X (YYYY-MM-DD)`
+  - Use the date for file headings: `# Progress Report - YYYY-MM-DD`
+- This ensures accurate documentation of when changes were actually made
+- Prevents confusion from outdated or incorrect timestamps
+- Maintains a clear chronological history of project development
+- Example implementation in memory bank update workflow:
+
+  ```bash
+  # 1. Get today's date
+  TODAY=$(date +"%Y-%m-%d")
+
+  # 2. Use the date in your edits
+  # For example, in activeContext.md:
+  # # Active Context ($TODAY)
+  # ## Current Focus ($TODAY)
+  # - ✅ UPDATED: Feature X ($TODAY)
+
+  # 3. Commit the changes with the date
+  git add memory-bank/*.md
+  git commit -m "Update memory bank files with current date ($TODAY)"
+  git push origin main
+  ```
+
+- When updating memory bank files through AI tools, always instruct the AI to:
+  1. Programmatically determine today's date first
+  2. Use that date consistently throughout all updates
+  3. Never rely on dates mentioned in previous entries
+
+// ... existing code ...
+
+## LLM Quality Control Patterns - 2025-03-05
+
+- When implementing LLM-based features, always include comprehensive quality control measures:
+
+  1. **Enhanced Prompting**:
+
+     - Use detailed system prompts with specific instructions
+     - Include examples of desired output format and quality
+     - Specify requirements for structure, completeness, and relevance
+
+  2. **Parameter Tuning**:
+
+     - Use lower temperature (0.5-0.7) for more consistent outputs
+     - Adjust max_tokens based on the expected response length
+     - Consider using top_p and frequency_penalty for diverse but controlled outputs
+
+  3. **Output Validation**:
+
+     - Implement comprehensive quality checks for LLM outputs
+     - Validate minimum length, structure, and completeness
+     - Check for presence of key terms relevant to the domain
+     - Ensure proper sentence structure and punctuation
+
+  4. **Fallback Mechanisms**:
+
+     - Create high-quality fallback content for when LLM generation fails
+     - Make fallbacks context-aware using user input parameters
+     - Ensure fallbacks maintain the same structure and format as expected LLM outputs
+
+  5. **Model Selection**:
+     - Use smaller, more reliable models when possible
+     - Implement model fallback chains (e.g., Llama → Gemini)
+     - Balance performance with reliability based on the use case
+
+- Example implementation in Interview Questions rubric generation:
+
+  ```typescript
+  // System prompt with specific instructions
+  const systemPrompt = `You are an expert interviewer who creates highly relevant and effective interview questions, evaluation guidelines, and scoring rubrics. 
+  Your responses will be used directly in an interview preparation tool.
+  
+  IMPORTANT INSTRUCTIONS:
+  1. Generate EXACTLY ${numberOfQuestions} DISTINCT, STANDALONE interview questions
+  2. Do NOT include additional questions in the evaluation tips or as follow-up questions
+  3. Evaluation tips should focus on how to evaluate responses, not introduce new questions
+  4. Each question should be complete and self-contained
+  5. For scoring rubrics, ensure each level has ONE detailed, well-formed criterion that clearly distinguishes performance levels
+  6. Maintain consistent quality and detail across all outputs`;
+
+  // Quality validation for criteria
+  const isLowQuality =
+    criterion.length < 15 || // Too short
+    !criterion.includes(" ") || // Single word
+    criterion.split(" ").length < 5 || // Too few words
+    !criterion.match(/[.!?]$/) || // Not a complete sentence
+    !(
+      criterion.toLowerCase().includes("skill") ||
+      criterion.toLowerCase().includes("competenc") ||
+      criterion.toLowerCase().includes("knowledge") ||
+      criterion.toLowerCase().includes("demonstrat") ||
+      criterion.toLowerCase().includes("abilit")
+    ); // Lacks key assessment terms
+
+  // Industry-specific fallback criteria
+  const industrySpecificDefaults = {
+    excellent: `Demonstrates strong technical skills, core competencies, and deep understanding of the ${industry} industry, providing specific examples and clear articulation of complex concepts.`,
+    good: `Shows good technical skills and understanding of the ${industry} industry with effective communication and relevant examples, though may have minor areas for improvement.`,
+    average: `Shows basic technical skills and core competencies related to the ${industry} industry, but lacks depth in examples or comprehensive understanding.`,
+    poor: `Lacks technical skills and core competencies required for the ${industry} industry, with minimal relevant examples and unclear communication.`,
+  };
+  ```
+
+## Responsive Design Patterns - 2025-03-05
+
+- When implementing UI components, use these responsive design patterns:
+
+  1. **Progressive Enhancement**:
+
+     - Start with a minimal, functional mobile design
+     - Add features and complexity for larger screens
+     - Use Tailwind's responsive prefixes (sm:, md:, lg:, xl:) to control visibility
+
+  2. **Responsive Text Display**:
+
+     - Hide descriptive text on small screens with `hidden md:inline-block`
+     - Show only essential icons/badges on mobile
+     - Maintain touch-friendly tap targets (min 44px) on all screen sizes
+
+  3. **Flexible Layouts**:
+
+     - Use flex-wrap for horizontal elements that might overflow
+     - Implement grid layouts with auto-fit/auto-fill for dynamic columns
+     - Set appropriate min/max widths to prevent extreme scaling
+
+  4. **Consistent Spacing**:
+
+     - Use responsive spacing utilities (p-2 sm:p-4 md:p-6)
+     - Maintain adequate whitespace on all screen sizes
+     - Reduce padding/margins proportionally on smaller screens
+
+  5. **Testing Across Breakpoints**:
+     - Test at standard breakpoints: 640px, 768px, 1024px, 1280px
+     - Verify functionality at the edges of breakpoints
+     - Ensure smooth transitions between breakpoints
+
+- Example implementation in Interview Questions tabs:
+  ```jsx
+  <TabsTrigger
+    value="questions"
+    className="flex-1 flex items-center justify-center py-2 px-1 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:m-0 data-[state=active]:relative data-[state=active]:z-10 whitespace-nowrap"
+    disabled={!hasResults}
+  >
+    <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" />
+    <span className="hidden md:inline-block ml-1.5 font-medium">Questions</span>
+    {generatedQuestions.length > 0 && (
+      <span className="ml-1 bg-indigo-100 text-indigo-800 text-xs font-medium px-1 py-0.5 rounded-full">
+        {generatedQuestions.length}
+      </span>
+    )}
+  </TabsTrigger>
+  ```
+
+// ... existing code ...
+
+## 2024-03-05: Next.js 15.2.0 API Route Handler Signatures
+
+When working with API routes in Next.js 15.2.0, ensure that the route handler functions use the correct parameter signature:
+
+```typescript
+// Correct signature for Next.js 15.2.0
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  // ...
+}
+
+// Incorrect signature (will cause build errors)
+export async function GET(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  // ...
+}
+```
+
+This applies to all HTTP methods (GET, POST, PUT, DELETE, etc.) in API route handlers. Using the incorrect signature will result in a type error during build: "Type '{ params: { id: string; }; }' is not a valid type for the function's second argument."
+
+// ... existing code ...
+
+## Next.js 15.2.0 Compatibility Patterns - 2024-03-05
+
+### API Route Handler Params Pattern - 2024-03-05
+
+- In Next.js 15.2.0, params in dynamic routes are asynchronous and must be typed as a Promise
+- Always use this pattern for dynamic route handlers:
+
+```typescript
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Get the params by awaiting them
+  const { id } = await params;
+
+  // Use the params
+  // ...
+}
+```
+
+- This applies to all HTTP methods (GET, POST, PUT, DELETE, etc.)
+- Always await the params before accessing them
+- This pattern is required for successful builds in Next.js 15.2.0
+
+### Metadata Type Pattern - 2024-03-05
+
+- For pages that use the Metadata type, use one of these approaches:
+
+1. **Custom Type Definition (Preferred)**:
+   - Create a type definition file in src/types
+   - Define the Metadata interface in the "next" module
+   - This allows keeping existing import statements
+
+```typescript
+// src/types/next-metadata.d.ts
+declare module "next" {
+  export interface Metadata {
+    title?: string | null;
+    description?: string | null;
+    // Other properties...
+  }
+}
+```
+
+2. **Import from next/types**:
+   - Update import statements to use next/types
+   - This requires changing all files that import Metadata
+
+```typescript
+import type { Metadata } from "next/types";
+```
+
+### API Request/Response Pattern - 2024-03-05
+
+- In Next.js 15.2.0, use NextRequest and NextResponse from next/server instead of NextApiRequest and NextApiResponse from next
+- Use this pattern for API handlers:
+
+```typescript
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
+export default async function handler(req: NextRequest) {
+  try {
+    // Parse the request body
+    const body = await req.json();
+
+    // Process the request
+    // ...
+
+    // Return the response
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    // Handle errors
+    return NextResponse.json({ error: "Error message" }, { status: 500 });
+  }
+}
+```
+
+- Key differences from the old pattern:
+  - Import from next/server instead of next
+  - Use NextRequest instead of NextApiRequest
+  - Use await req.json() instead of req.body
+  - Return NextResponse.json() instead of res.status().json()
+  - No separate response parameter (res)
+
+// ... existing code ...
+
+### 2Do Task Manager Implementation Pattern - 2025-03-07 12:48:30
+
+- The 2Do task manager is implemented as a Next.js app with the following components:
+
+  - React components for UI (TaskList, TaskForm, VoiceInput, CalendarView)
+  - API routes for CRUD operations on tasks
+  - LLM integration for processing voice input
+  - TypeScript interfaces for type safety
+
+- Key implementation patterns:
+
+  1. **Voice Input Processing**:
+
+     - Uses Web Speech API for voice recognition
+     - Sends transcript to server-side API
+     - Processes transcript with Llama 3.2 3B model via Groq API
+     - Extracts structured task information from natural language
+     - Returns JSON task data to client
+
+  2. **Task Management**:
+
+     - CRUD operations via RESTful API routes
+     - Prisma ORM for database access
+     - Zod schema validation for request data
+     - Transaction-based operations for data integrity
+     - Error handling with custom APIError class
+
+  3. **UI Components**:
+     - Tabs for different views (List, Calendar, Form)
+     - Card-based task display with priority color coding
+     - Form with validation for task creation/editing
+     - Calendar view for date-based task visualization
+     - Voice input button for natural language task creation
+
+- This pattern demonstrates effective integration of:
+
+  - Modern React patterns (hooks, context)
+  - Next.js API routes
+  - LLM capabilities for natural language processing
+  - TypeScript for type safety
+  - Prisma for database access
+  - Zod for validation
+
+- The implementation follows the project's AI Excellence Focus by:
+  - Using LLMs to process natural language input
+  - Providing a seamless voice-to-task experience
+  - Extracting structured data from unstructured input
+  - Demonstrating AI's ability to understand user intent
+  - Creating a natural, conversational interface for task management
+
+// ... existing code ...
+
+# Toast Notification Pattern - 2024-05-28 12:30:00
+
+- Always use toast notifications instead of browser alerts for user feedback
+- Import toast from the toast migration utility: `import { toast } from "@/lib/toast-migration"`
+- Use the following pattern for success notifications:
+  ```typescript
+  toast({
+    title: "Success",
+    description: "Operation completed successfully!",
+  });
+  ```
+- Use the following pattern for error notifications:
+  ```typescript
+  toast({
+    variant: "destructive",
+    title: "Error",
+    description: error instanceof Error ? error.message : "Operation failed",
+  });
+  ```
+- Toast notifications should be used for:
+  - Successful operations (create, update, delete)
+  - Failed operations with appropriate error messages
+  - Important status changes (e.g., public/private status)
+  - Completion of long-running operations
+- Never use browser alerts (`window.alert()`) as they block the UI and provide a poor user experience
+- The Toaster component is already included in the root layout, so no need to add it to individual pages
+- For components that need to display toast notifications, follow the pattern in the Competency Manager
+
+# TooltipProvider Usage Pattern - 2024-05-28 13:15:00
+
+- Always wrap components that use tooltips with a TooltipProvider
+- Prefer wrapping the entire component with a single TooltipProvider at the top level
+- Avoid nesting TooltipProviders as this can cause CSS issues and UI breakage
+- When using tooltips in a component, ensure the following structure:
+  ```tsx
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger>
+        <InfoIcon className="h-4 w-4 ml-1 text-gray-400" />
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="max-w-xs">Tooltip content here</p>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+  ```
+- If you have multiple tooltips in a component, wrap the entire component with a single TooltipProvider:
+
+  ```tsx
+  export default function MyComponent() {
+    return (
+      <TooltipProvider>
+        <div>
+          {/* Component content with multiple tooltips */}
+          <Tooltip>
+            <TooltipTrigger>Trigger 1</TooltipTrigger>
+            <TooltipContent>Content 1</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger>Trigger 2</TooltipTrigger>
+            <TooltipContent>Content 2</TooltipContent>
+          </Tooltip>
+        </div>
+      </TooltipProvider>
+    );
+  }
+  ```
+
+- The Toaster component is already included in the root layout, so no need to add it to individual pages
+
+# API Response Handling Pattern - 2024-05-28 13:15:00
+
+- When handling API responses, always follow this pattern:
+
+  ```typescript
+  try {
+    const response = await fetch("/api/endpoint", {
+      method: "METHOD",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    // Parse the response data first
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      console.error("Error parsing response:", parseError);
+      data = { fallbackData: true };
+    }
+
+    // Then check if the response is OK
+    if (!response.ok) {
+      throw new Error(data.error || "Default error message");
+    }
+
+    // Use the parsed data
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    // Handle the error appropriately
+  }
+  ```
+
+- This pattern ensures that:
+  1. The response is only parsed once
+  2. Parsing errors are handled gracefully
+  3. The response status is checked after parsing
+  4. Error messages from the API are used when available
+  5. Errors are properly logged for debugging
+
+## Vercel Configuration Best Practices - 2024-05-28
+
+When configuring redirects in vercel.json, be careful to avoid circular redirects:
+
+1. Never set the same path as both source and destination without additional conditions
+2. Always test redirects in a staging environment before deploying to production
+3. Use the Vercel deployment preview to test configuration changes
+4. Monitor for redirect loops after deployment using Vercel Analytics
+5. Consider using Next.js built-in redirects instead of Vercel redirects when possible
+
+Circular redirects can cause "too many redirects" errors and significantly increase bounce rates.
+
+## Role-Based Access Control Best Practices - 2024-05-28
+
+When implementing role-based access control in Next.js applications:
+
+1. Never hardcode specific user identifiers (like emails) for access control
+2. Always use role properties from the authenticated session
+3. Ensure proper type definitions for session objects that include role information
+4. Implement both client-side and server-side role checks for complete security
+5. Use middleware for protecting entire routes and layouts for protecting specific pages
+6. Consider implementing a permissions system for more granular control beyond roles
+
+This approach ensures that access control is maintainable, scalable, and secure.
+
+# Cursor Rules - [2025-03-08 21:30:00]
+
+## Project Patterns
+
+### PDF Generation with React-PDF - [2025-03-08 21:30:00]
+
+- Use the custom PDFRenderer component for all PDF generation to ensure proper error handling and consistent behavior
+- Always include proper polyfills for Node.js core modules when using react-pdf in a browser environment
+- The PDFRenderer component handles loading states, error states, and PDF rendering in a consistent way
+- Import PDFRenderer from '@/components/PDFRenderer' and use it with the appropriate document props
+
+### Next.js Configuration for Browser Compatibility - [2025-03-08 21:30:00]
+
+- When using Node.js core modules in the browser, ensure proper fallbacks are configured in next.config.js
+- Required polyfills for PDF generation: crypto-browserify, stream-browserify, buffer, util, path-browserify
+- Configure webpack to provide Buffer and process globals
+- Add module aliases in package.json for Node.js core modules
+
+### SHA224 Crypto Module Fix - [2025-03-08 21:30:00]
+
+- If encountering "Cannot set properties of undefined (setting 'SHA224')" error:
+  1. Ensure crypto-browserify is properly configured as a fallback for the crypto module
+  2. Add the encoding package to fix issues with react-pdf
+  3. Use the custom PDFRenderer component for PDF generation
+  4. Disable minification in webpack configuration if necessary
+
+### Next.js 15 Configuration - [2025-03-08 21:30:00]
+
+- Remove swcMinify option from next.config.js as it's no longer recognized in Next.js 15
+- Use the transpilePackages option for packages that need to be transpiled
+- Configure proper module fallbacks for browser compatibility
+
+### React Component Structure - [2025-03-08 20:00:00]
+
+- Use functional components with TypeScript interfaces for props
+- Implement proper loading and error states for all components
+- Use React hooks for state management and side effects
+- Implement proper type safety for all components
+
+### UI Animation Guidelines - 2025-03-09
+
+#### Subtle Animation Pattern - 2025-03-09
+
+- Animations should be subtle and professional, not flashy or distracting
+- Use longer intervals (3+ seconds) between animation changes
+- Choose color schemes that align with the brand identity (blues, blacks)
+- Implement proper cleanup to prevent memory leaks
+- Use React's useId() hook for stable IDs in SVG elements
+- Add aria-labels to animated elements for accessibility
+- Test animations on both high and low-end devices to ensure performance
+
+#### Logo Animation Implementation - 2025-03-09
+
+- The Synthalyst logo uses a subtle gradient animation with two shades of blue and black
+- Colors rotate positions every 3 seconds in a continuous cycle
+- The animation is implemented in the SynthalystLogoAnimated component
+- The component uses the "use client" directive as it requires client-side interactivity
+- The animation is implemented using setTimeout and requestAnimationFrame
+- The component includes proper cleanup in useEffect to prevent memory leaks
+- The original SynthalystLogo component has been removed to avoid conflicts
+
+## Development Server Port Management - [2025-03-09 17:30:00]
+
+- The development server is configured to run on port 3001 as specified in the project rules
+- If the server fails to start with "Error: listen EADDRINUSE: address already in use :::3001", it means the port is already in use
+- To resolve this issue:
+  1. Check which process is using port 3001 with `netstat -ano | findstr :3001`
+  2. Kill the process with `taskkill //F //PID <PID>` (note the double slashes for Windows Git Bash)
+  3. Restart the development server with `cd nextjs-app && npm run dev`
+- Always ensure the development server is running on port 3001 to maintain compatibility with authentication and API configurations
+
+## UI Component Best Practices - [2023-03-11 12:00:00]
+
+### Button Component Usage
+
+- Always use the Button component from the UI library (`@/components/ui/button`) instead of custom-styled links or buttons
+- Remove emoji icons from buttons for a more professional look
+- Maintain consistent hover states across the application
+- When custom styling is needed, extend the Button component rather than creating new button styles
+- Default button variant has blue background with white text, and slightly lighter blue background with white text on hover
+
+### Newsletter Component
+
+- Keep newsletter sections clean and minimal without redundant text
+- Center newsletter content for better visual balance
+- Avoid card effects (borders, shadows) for a cleaner look
+- Use descriptive placeholder text in the email input field
+
+## Newsletter Implementation Pattern - 2025-03-10 04:00:00
+
+The newsletter system follows these implementation patterns:
+
+1. **Development Mode Testing**:
+
+   - Use the MOCK_NEWSLETTER environment variable to enable newsletter functionality in development mode
+   - This allows testing without requiring database operations or SendGrid API key
+   - In development mode, email sending is simulated with console logs
+   - Provides fallback behavior when the database schema is not up to date
+
+2. **Error Handling**:
+
+   - Implement comprehensive error handling in all API routes
+   - Provide detailed error messages in development mode
+   - Use try-catch blocks for all database and email operations
+   - Display user-friendly error messages in production
+   - Use nested try-catch blocks for different types of operations (database, email)
+
+3. **SendGrid Integration**:
+
+   - Check for SendGrid API key before initializing
+   - Track initialization status with a boolean flag
+   - Provide fallback behavior when SendGrid is not initialized
+   - Log detailed error messages for debugging
+   - Implement simulation mode for development environments
+
+4. **Database Operations**:
+
+   - Use type assertions to work around Prisma client type issues
+   - Handle cases where the model doesn't exist or the database schema is not up to date
+   - Use try-catch blocks for all database operations
+   - Provide fallback behavior in development mode
+   - Implement proper error handling for database operations
+
+5. **Component Design**:
+
+   - Use a flexible NewsletterSignup component that can be used in different contexts
+   - Support different variants (default, minimal) for different use cases
+   - Display appropriate loading, success, and error states
+   - Show detailed error information in development mode
+   - Implement proper form validation
+
+6. **Admin Interface**:
+
+   - Create a dedicated admin interface for newsletter management
+   - Implement subscriber list view with filtering and search functionality
+   - Add functionality to manually add, edit, or remove subscribers
+   - Create interface for sending newsletters to specific segments
+   - Implement subscription analytics dashboard
+   - Add export functionality for subscriber data
+   - Integrate with the admin dashboard
+   - Add proper role-based access control
+
+7. **API Design**:
+
+   - Create RESTful API endpoints for newsletter operations
+   - Implement proper validation with Zod schemas
+   - Use consistent error handling across all endpoints
+   - Implement proper authentication and authorization
+   - Follow the same pattern for all API routes
+
+8. **Newsletter Sending**:
+
+   - Implement batch sending for large subscriber lists
+   - Provide filtering options for targeting specific subscriber segments
+   - Track newsletter sends with a dedicated model
+   - Implement proper error handling for email sending
+   - Provide detailed logs for debugging
+
+9. **Error Handling for User-Facing Flows**:
+
+   - Redirect to user-friendly error pages instead of returning JSON errors
+   - Include error messages as query parameters for dynamic error display
+   - Provide clear instructions for users to resolve issues
+   - Include links to try again or contact support
+   - Use consistent styling with the rest of the application
+
+10. **Token Management**:
+
+    - Generate secure and unique tokens for email confirmation
+    - Set standard 24-hour expiry time for confirmation tokens
+    - Include expiry information in confirmation emails
+    - Handle expired tokens gracefully with user-friendly error messages
+    - Implement proper cleanup of tokens after confirmation
+    - Add robust error handling for token expiry date parsing issues (2025-03-10 05:30:00)
+    - Implement fallback mechanism to prevent users from being blocked due to date format issues
+    - Use comprehensive debugging to help diagnose token expiry issues
+    - Truncate tokens in logs for security while maintaining traceability
+
+11. **Development Mode Support** (2025-03-10 06:00:00):
+    - Use MOCK_NEWSLETTER environment variable to enable newsletter functionality in development mode
+    - Implement special case handling in API routes for development mode
+    - Simulate email sending and database operations in development mode
+    - Provide detailed console logging for development mode operations
+    - Ensure consistent behavior between development and production environments
+    - Always set NEXT_PUBLIC_API_URL environment variable to the correct value
+    - Use fallback mechanisms to handle missing database models or tables
+
+# Database Schema Patterns [2025-03-10 22:48]
+
+## Column Naming Conventions
+
+- Use contactSubmissionId instead of submissionId for ContactSubmissionReply table
+- Prefer createdAt over sentAt for timestamp fields
+- Always include proper foreign key relationships in schema
+- Use reference field for threading-related functionality
+- Maintain consistent naming across related tables
+
+## Query Patterns
+
+- Use $queryRaw with proper column names
+- Include ORDER BY clauses with correct column references
+- Verify foreign key relationships in JOINs
+- Test queries with sample data before deployment
+
+## Schema Evolution
+
+- Add new fields with proper null constraints
+- Update related queries when modifying schema
+- Document schema changes in memory bank
+- Test migrations in development before production
+
+## Visual Threading Pattern - [2025-03-10 23:51]
+
+- When implementing visual threading in admin interfaces:
+  1. Use timeline-style layout with connecting lines
+  2. Add visual indicators (dots, lines) for connections
+  3. Implement proper spacing and indentation
+  4. Use consistent Card components for content
+  5. Add clear visual hierarchy with dates and references
+- Key principles to follow:
+  1. Maintain visual consistency across the interface
+  2. Use clear visual indicators for relationships
+  3. Implement proper spacing for readability
+  4. Add visual feedback for user interactions
+  5. Consider accessibility in visual design
+- Common patterns for visual threading:
+  - Use connecting lines between related items
+  - Add dots or markers for timeline points
+  - Implement consistent spacing and padding
+  - Use monospace fonts for reference numbers
+  - Add hover states for interactive elements
+- Example implementation:
+  ```jsx
+  <div
+    className={`relative pl-6 ${
+      index !== items.length - 1
+        ? "before:absolute before:left-2 before:top-8 before:bottom-0 before:w-0.5 before:bg-border"
+        : ""
+    }`}
+  >
+    <div className="relative bg-muted/30 p-4 rounded-md">
+      {/* Visual connector dot */}
+      <div className="absolute -left-6 top-6 w-4 h-4 rounded-full bg-primary/20 border-2 border-primary" />
+      {/* Content */}
+    </div>
+  </div>
+  ```
+
+# Newsletter System Patterns [2025-03-11 00:34]
+
+## API Routes
+
+- All newsletter routes must be under `/api/admin/newsletter/`
+- All routes require admin role authentication
+- Use Prisma's type-safe query builder
+- Implement comprehensive error handling
+- Return consistent response formats
+
+## Database Models
+
+- NewsletterSubscriber: Manages subscriber data and status
+- NewsletterTemplate: Stores reusable email templates
+- NewsletterSend: Tracks newsletter sending history
+- NewsletterReply: Handles subscriber responses
+
+## Field Naming Conventions
+
+- Use `createdAt` for creation timestamps
+- Use `updatedAt` for modification timestamps
+- Use descriptive names for status fields
+- Maintain consistent field names across models
+
+## Error Handling
+
+- Log all errors with detailed context
+- Return appropriate HTTP status codes
+- Provide clear error messages
+- Handle validation errors gracefully
