@@ -232,21 +232,12 @@ export default function BlogPage() {
           ]}
         />
 
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">The Synth Blog</h1>
-          {session ? (
+          {session && (
             <Link href="/blog/new">
               <Button>Create New Post</Button>
             </Link>
-          ) : (
-            <div className="flex items-center space-x-4">
-              <p className="text-gray-600">Sign in to create a post</p>
-              <Link href="/api/auth/signin">
-                <Button variant="outline" size="sm">
-                  Sign In
-                </Button>
-              </Link>
-            </div>
           )}
         </div>
 

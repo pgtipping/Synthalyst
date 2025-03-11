@@ -6,52 +6,55 @@ import { NotFoundError } from "@/lib/errors";
 import slugify from "slugify";
 
 // Get a single post by slug
-export const GET = createHandler(async (req: NextRequest, { params }) => {
-  const { slug } = await params;
-  const post = await prisma.post.findUnique({
-    where: { slug },
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          image: true,
+export const GET = createHandler(
+  async (req: NextRequest, { params }) => {
+    const { slug } = await params;
+    const post = await prisma.post.findUnique({
+      where: { slug },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        categories: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+          },
         },
       },
-      categories: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-      tags: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-      _count: {
-        select: {
-          comments: true,
-        },
-      },
-    },
-  });
+    });
 
-  if (!post) {
-    throw new NotFoundError("Post not found");
-  }
+    if (!post) {
+      throw new NotFoundError("Post not found");
+    }
 
-  // Increment view count
-  await prisma.post.update({
-    where: { id: post.id },
-    data: { views: { increment: 1 } },
-  });
+    // Increment view count
+    await prisma.post.update({
+      where: { id: post.id },
+      data: { views: { increment: 1 } },
+    });
 
-  return successResponse(post);
-});
+    return successResponse(post);
+  },
+  { requireAuth: false }
+);
 
 // Update a post
 export const PATCH = createHandler<UpdatePostInput>(

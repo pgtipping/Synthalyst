@@ -33,6 +33,10 @@ const ALWAYS_ACCESSIBLE_PATHS = [
   "/login",
   "/api",
   "/coming-soon",
+  "/blog",
+  "/blog/[slug]",
+  "/api/posts",
+  "/api/posts/[slug]",
 ];
 
 // Middleware function to handle Coming Soon redirects

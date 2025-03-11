@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { SocialShare } from "@/components/SocialShare";
+import type { Metadata } from "next";
 
 interface BlogPostPageProps {
   params: {
@@ -20,6 +22,47 @@ interface Comment {
   author: {
     name: string;
   };
+}
+
+// Generate metadata for social sharing
+export async function generateMetadata({
+  params,
+}: BlogPostPageProps): Promise<Metadata> {
+  // Ensure params.slug is available
+  const slug = params.slug;
+  if (!slug) {
+    return {};
+  }
+
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) {
+      throw new Error("API URL is not defined");
+    }
+
+    const response = await fetch(`${apiUrl}/api/posts/${slug}`);
+    const post = await response.json();
+
+    return {
+      title: post.title,
+      description: post.excerpt,
+      openGraph: {
+        title: post.title,
+        description: post.excerpt,
+        type: "article",
+        publishedTime: post.createdAt,
+        authors: [post.author.name || "Synthalyst Team"],
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/blog/${slug}`,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: post.title,
+        description: post.excerpt,
+      },
+    };
+  } catch {
+    return {};
+  }
 }
 
 async function BlogPostPage({ params }: BlogPostPageProps) {
@@ -61,8 +104,15 @@ async function BlogPostPage({ params }: BlogPostPageProps) {
           ]}
         />
 
-        <article className="prose lg:prose-xl mx-auto">
-          <h1>{post.title}</h1>
+        <article className="prose prose-lg dark:prose-invert mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="mb-0">{post.title}</h1>
+            <SocialShare
+              title={post.title}
+              url={`${process.env.NEXT_PUBLIC_APP_URL}/blog/${post.slug}`}
+              description={post.excerpt}
+            />
+          </div>
           <div className="flex items-center space-x-4 text-gray-500">
             <span>{new Date(post.createdAt).toLocaleDateString()}</span>
             <span>•</span>

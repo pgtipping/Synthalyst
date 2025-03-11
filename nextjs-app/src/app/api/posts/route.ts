@@ -14,110 +14,113 @@ import { ConflictError } from "@/lib/errors";
 import slugify from "slugify";
 import { Prisma } from "@prisma/client";
 
-export const GET = createHandler(async (req: NextRequest) => {
-  const url = new URL(req.url);
-  const query = Object.fromEntries(url.searchParams.entries());
+export const GET = createHandler(
+  async (req: NextRequest) => {
+    const url = new URL(req.url);
+    const query = Object.fromEntries(url.searchParams.entries());
 
-  // Parse and validate query parameters
-  const {
-    page,
-    limit,
-    published,
-    featured,
-    categoryId,
-    tagId,
-    authorId,
-    searchQuery,
-  } = postQuerySchema.parse({
-    ...query,
-    page: Number(query.page || 1),
-    limit: Number(query.limit || 10),
-  });
-
-  // Build where clause
-  const where: Prisma.PostWhereInput = {
-    ...(published !== undefined && { published }),
-    ...(featured !== undefined && { featured }),
-    ...(categoryId && {
-      categories: {
-        some: { id: categoryId },
-      },
-    }),
-    ...(tagId && {
-      tags: {
-        some: { id: tagId },
-      },
-    }),
-    ...(authorId && { authorId }),
-    ...(searchQuery && {
-      OR: [
-        {
-          title: {
-            contains: searchQuery,
-            mode: Prisma.QueryMode.insensitive,
-          },
-        },
-        {
-          content: {
-            contains: searchQuery,
-            mode: Prisma.QueryMode.insensitive,
-          },
-        },
-      ],
-    }),
-  };
-
-  // Get total count for pagination
-  const total = await prisma.post.count({ where });
-
-  // Get posts with relations
-  const posts = await prisma.post.findMany({
-    where,
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          image: true,
-        },
-      },
-      categories: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-      tags: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-      _count: {
-        select: {
-          comments: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    skip: (page - 1) * limit,
-    take: limit,
-  });
-
-  return successResponse({
-    posts,
-    pagination: {
+    // Parse and validate query parameters
+    const {
       page,
       limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  });
-});
+      published,
+      featured,
+      categoryId,
+      tagId,
+      authorId,
+      searchQuery,
+    } = postQuerySchema.parse({
+      ...query,
+      page: Number(query.page || 1),
+      limit: Number(query.limit || 10),
+    });
+
+    // Build where clause
+    const where: Prisma.PostWhereInput = {
+      ...(published !== undefined && { published }),
+      ...(featured !== undefined && { featured }),
+      ...(categoryId && {
+        categories: {
+          some: { id: categoryId },
+        },
+      }),
+      ...(tagId && {
+        tags: {
+          some: { id: tagId },
+        },
+      }),
+      ...(authorId && { authorId }),
+      ...(searchQuery && {
+        OR: [
+          {
+            title: {
+              contains: searchQuery,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
+          {
+            content: {
+              contains: searchQuery,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
+        ],
+      }),
+    };
+
+    // Get total count for pagination
+    const total = await prisma.post.count({ where });
+
+    // Get posts with relations
+    const posts = await prisma.post.findMany({
+      where,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        categories: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return successResponse({
+      posts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  },
+  { requireAuth: false }
+);
 
 export const POST = createHandler<CreatePostInput>(
   async (req: NextRequest, _params, body) => {

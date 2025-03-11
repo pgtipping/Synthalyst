@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePlus, X } from "lucide-react";
 import ContentGuide from "./components/ContentGuide";
+import AIAssistant from "./components/AIAssistant";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RichTextEditor from "@/components/RichTextEditor";
 
@@ -144,6 +145,16 @@ const NewBlogPost = () => {
       <h1 className="mb-6 mt-4 text-3xl font-bold">Create New Blog Post</h1>
 
       <ContentGuide />
+
+      <AIAssistant
+        onContentGenerated={(content) => {
+          setFormData({ ...formData, content });
+        }}
+        onTagsGenerated={(categories, tags) => {
+          setFormData({ ...formData, categories, tags });
+        }}
+        currentContent={formData.content}
+      />
 
       {error && (
         <div className="mb-6 rounded-md bg-destructive/10 p-4 text-destructive">
