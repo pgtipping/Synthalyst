@@ -32,7 +32,7 @@ interface RichTextEditorProps {
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
-  placeholder = "Start writing your blog post...",
+  placeholder = "Click here to start writing your blog post. Use the toolbar above for formatting...",
   className = "",
   id,
 }) => {
@@ -48,11 +48,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }),
       Placeholder.configure({
         placeholder,
+        emptyEditorClass:
+          "before:content-[attr(data-placeholder)] before:text-muted-foreground before:float-left before:pointer-events-none before:h-0",
       }),
     ],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class:
+          "w-full focus:outline-none prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none p-2",
+      },
     },
   });
 
@@ -75,7 +83,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   return (
-    <div className={`flex flex-col gap-4 w-full ${className}`} id={id}>
+    <div className={`flex flex-col gap-6 w-full ${className}`} id={id}>
       {/* Toolbar */}
       <div className="flex flex-wrap gap-2 p-2 bg-background border rounded-lg sticky top-0 z-10">
         <Button
@@ -257,7 +265,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none">
         <EditorContent
           editor={editor}
-          className="min-h-[200px] border rounded-lg p-4 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/50"
+          className="min-h-[300px] p-6 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/50 bg-background/50 rounded-lg"
         />
       </div>
     </div>
