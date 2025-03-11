@@ -34,3 +34,5 @@ alwaysApply: true
 - programmatically determine the current date and time and use the date and time on headers in memory bank files to enable tracking and avoid duplicate headers.
 - stage and commit files from the root directory
 - ALWAYS stage files with "git add ."
+- ALWAYS use code to determine current date to avoid date error from knowledge cut-off bias
+

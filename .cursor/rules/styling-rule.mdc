@@ -1,0 +1,12 @@
+---
+description: all UI and styling related tasks
+globs: 
+alwaysApply: true
+---
+
+# Non negotiable styling rules
+
+- EVERY page in the app MUST be 100% mobile responsive
+- You must review every page and component to confirm all necessary design and styling requirements to make each page fully responsive has been implemented.
+- Perform tests to confirm mobile responsiveness of pages and their elements
+- Maintain WCAG contrast ratio standards for ALL fonts against their backgrounds in the app.

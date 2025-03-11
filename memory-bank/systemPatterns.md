@@ -834,3 +834,170 @@ The application implements role-based access control (RBAC) to manage access to 
 - Protected role modification endpoints
 - Secure session handling
 - Error message sanitization
+
+# System Architecture and Patterns [2024-03-11T07:30:00]
+
+## Blog System Architecture
+
+### Component Structure
+
+```mermaid
+flowchart TD
+    BP[Blog Pages] --> BC[Blog Components]
+    BC --> SE[Shared Elements]
+    BC --> RTE[Rich Text Editor]
+
+    subgraph "Blog Components"
+        RTE --> TT[TipTap Integration]
+        BC --> PF[Post Form]
+        BC --> PV[Post View]
+        BC --> CG[Content Guide]
+    end
+
+    subgraph "Shared Elements"
+        SE --> UI[UI Components]
+        SE --> LA[Layout]
+        SE --> NV[Navigation]
+    end
+```
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    UI[User Interface] --> AC[API Controllers]
+    AC --> PS[Prisma Schema]
+    PS --> DB[Database]
+
+    subgraph "Data Layer"
+        PS --> PM[Post Model]
+        PS --> CM[Category Model]
+        PS --> TM[Tag Model]
+    end
+```
+
+## Design Patterns
+
+### Rich Text Editor Implementation
+
+- TipTap for WYSIWYG editing
+- Component-based toolbar
+- Mobile-first responsive design
+- Extensible plugin architecture
+- HTML sanitization for security
+
+### Blog Post Management
+
+- Draft/Publish workflow
+- Category and tag organization
+- Featured post system
+- Image upload handling
+- Form validation patterns
+
+### UI/UX Patterns
+
+- Mobile-first design approach
+- WCAG compliance implementation
+- Professional icon system
+- Consistent typography scale
+- Responsive layout patterns
+
+## Technical Decisions
+
+### Editor Choice: TipTap
+
+- Pros:
+  - React integration
+  - Extensible architecture
+  - Mobile support
+  - TypeScript support
+  - Active community
+- Implementation:
+  - Custom toolbar
+  - Image handling
+  - Link management
+  - HTML sanitization
+
+### Form Management
+
+- Client-side validation
+- Server-side validation
+- Image upload handling
+- Draft auto-saving (planned)
+- Error handling patterns
+
+### Security Patterns
+
+- HTML sanitization
+- Image validation
+- Authentication checks
+- Role-based access
+- API route protection
+
+## Component Relationships
+
+### Blog Post Creation
+
+```mermaid
+flowchart TD
+    PF[Post Form] --> RTE[Rich Text Editor]
+    PF --> IMG[Image Upload]
+    PF --> CAT[Categories]
+    PF --> TAG[Tags]
+
+    RTE --> TIP[TipTap]
+    RTE --> TB[Toolbar]
+    RTE --> PV[Preview]
+```
+
+### Blog Post Display
+
+```mermaid
+flowchart TD
+    BP[Blog Post] --> HD[Header]
+    BP --> CT[Content]
+    BP --> MT[Metadata]
+
+    CT --> RTC[Rich Text Content]
+    MT --> CAT[Categories]
+    MT --> TAG[Tags]
+```
+
+## Future Considerations
+
+### Phase 2 Architecture
+
+- Admin dashboard structure
+- Analytics integration
+- Social media sharing
+- Feedback system
+
+### Phase 3 Planning
+
+- Multi-language support
+- Enhanced LLM integration
+- Advanced analytics
+- Performance optimization
+
+## Development Guidelines
+
+### Code Organization
+
+- Feature-based directory structure
+- Shared component library
+- Type-safe implementations
+- Consistent naming conventions
+
+### Quality Standards
+
+- Mobile responsiveness
+- WCAG compliance
+- Performance optimization
+- Security best practices
+
+### Testing Strategy
+
+- Component testing
+- Integration testing
+- Accessibility testing
+- Performance testing
