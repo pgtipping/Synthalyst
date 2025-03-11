@@ -42,14 +42,14 @@ model VerificationToken {
 }
 
 model User {
-  id                 String                        @id @default(cuid())
+  id                 String                @id @default(cuid())
   name               String?
-  email              String                        @unique
+  email              String                @unique
   emailVerified      DateTime?
   image              String?
-  role               String                        @default("user")
-  createdAt          DateTime                      @default(now())
-  updatedAt          DateTime                      @updatedAt
+  role               String                @default("user")
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
   password           String?
   accounts           Account[]
   chatMessages       ChatMessage[]
@@ -70,6 +70,7 @@ model User {
   templates          Template[]
   trainingPlans      TrainingPlan[]
   preferences        UserPreferences?
+  newsletterTemplates NewsletterTemplate[]
 }
 
 model Profile {
@@ -564,42 +565,52 @@ model CompetencyFrameworkFeedback {
 }
 
 model NewsletterSubscriber {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  subscribedAt   DateTime  @default(now())
-  confirmed      Boolean   @default(false)
-  confirmedAt    DateTime?
-  unsubscribed   Boolean   @default(false)
-  unsubscribedAt DateTime?
-  source         String?
-  tags           String[]
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  tags          String[]
+  status        String   @default("pending") // pending, confirmed, unsubscribed
+  confirmToken  String?  @unique
+  confirmExpiry DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  replies       NewsletterReply[]
 }
 
-model Newsletter {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String?
-  confirmed    Boolean   @default(false)
-  active       Boolean   @default(true)
-  unsubscribed Boolean   @default(false)
-  token        String?
-  tokenExpiry  DateTime?
-  tags         String[]
-  source       String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+model NewsletterTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  subject     String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
 
-  @@index([email])
-  @@index([confirmed, active, unsubscribed])
+  @@index([createdById])
 }
 
 model NewsletterSend {
   id             String   @id @default(cuid())
   subject        String
+  content        String
   recipientCount Int
   sentBy         String
-  filter         String
+  filter         Json?
   createdAt      DateTime @default(now())
+  status         String   @default("draft") // draft, sending, sent, failed
+  replies        NewsletterReply[]
+}
 
-  @@index([createdAt])
+model NewsletterReply {
+  id           String               @id @default(cuid())
+  content      String
+  subscriberId String
+  sendId       String
+  createdAt    DateTime            @default(now())
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+  send         NewsletterSend      @relation(fields: [sendId], references: [id])
+
+  @@index([subscriberId])
+  @@index([sendId])
 }
