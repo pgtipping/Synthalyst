@@ -1,37 +1,53 @@
-# Active Context [2025-03-10 22:48]
+# Active Context [2025-03-10 23:51]
 
 ## Current Focus
 
-- Fixed SQL query issues in contact submissions system
-- Implemented reference-based threading system for contact form replies
-- Simplified email handling using single noreply@synthalyst.com address
-- Enhanced user experience with clear reply instructions
+- Enhanced visual threading in contact submissions admin interface
+- Fixed SQL queries to use correct column names
+- Improved UI/UX for reply history display
+- Added proper error handling in reply system
 
 ## Recent Changes
 
-### Contact Submission System Fixes [2025-03-10 22:48]
+### Contact Submission System Enhancements [2025-03-10 23:51]
 
-- Fixed column name in SQL queries (submissionId → contactSubmissionId)
-- Updated schema to include reference field for replies
-- Corrected query ordering using createdAt instead of sentAt
-- Enhanced reply display with reference numbers
+- Added visual timeline with connecting lines between replies
+- Improved reference number display with monospace font
+- Enhanced date/time formatting for better readability
+- Added visual dots to indicate reply points
+- Organized reply history in a Card component
+- Added proper subqueries for reply count and last replied timestamp
 
-### Contact Submission Reply System [2025-03-10 22:15]
+### SQL Query Improvements [2025-03-10 23:51]
 
-- Added reference number generation (format: REF-{submissionId}-{timestamp})
-- Modified email replies to include reference in subject and instructions
-- Updated contact form to handle reference numbers
-- Implemented submission linking for threaded conversations
-- Removed multiple sender email options in favor of single noreply address
+- Updated queries to use correct column name `contactSubmissionId`
+- Switched from raw SQL to Prisma's type-safe query builder
+- Added proper transaction handling for reply creation
+- Enhanced error handling in database operations
+- Fixed column reference in ContactSubmissionReply queries
 
 ## Next Steps
 
-- Test the new reference-based reply system
-- Monitor user engagement with the reference system
-- Consider adding visual threading in admin interface
-- Verify all SQL queries use correct column names
+- Monitor the enhanced visual threading system
+- Verify all database operations are working correctly
+- Consider adding more visual indicators for reply status
+- Add pagination for submissions with many replies
 
 ## Active Decisions
+
+### UI/UX Improvements [2025-03-10 23:51]
+
+- Using timeline-style visual threading for replies
+- Implementing consistent Card components
+- Adding visual indicators for reply connections
+- Using monospace font for reference numbers
+
+### Database Operations [2025-03-10 23:51]
+
+- Using Prisma's type-safe query builder instead of raw SQL
+- Implementing proper transaction handling
+- Maintaining consistent column naming
+- Adding proper error handling and logging
 
 ### Database Schema [2025-03-10 22:48]
 

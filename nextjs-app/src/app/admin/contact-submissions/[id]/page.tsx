@@ -61,7 +61,11 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
 
   // Fetch the contact submission from the database
   const submissions = await prisma.$queryRaw<ContactSubmission[]>`
-    SELECT * FROM "ContactSubmission" WHERE id = ${id}
+    SELECT cs.*, 
+      (SELECT COUNT(*) FROM "ContactSubmissionReply" csr WHERE csr."contactSubmissionId" = cs.id) as "replyCount",
+      (SELECT MAX(csr."createdAt") FROM "ContactSubmissionReply" csr WHERE csr."contactSubmissionId" = cs.id) as "lastRepliedAt"
+    FROM "ContactSubmission" cs 
+    WHERE cs.id = ${id}
   `;
 
   const submission = submissions[0];
@@ -73,9 +77,12 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
 
   // Fetch replies for this submission
   const replies = await prisma.$queryRaw<ContactSubmissionReply[]>`
-    SELECT * FROM "ContactSubmissionReply" 
-    WHERE "contactSubmissionId" = ${id}
-    ORDER BY "createdAt" DESC
+    SELECT csr.*, 
+      COALESCE(csr.reference, 'REF-' || SUBSTRING(csr."contactSubmissionId", 1, 8) || '-' || 
+        TO_CHAR(csr."createdAt", 'YYYYMMDDHH24MISS')) as "reference"
+    FROM "ContactSubmissionReply" csr
+    WHERE csr."contactSubmissionId" = ${id}
+    ORDER BY csr."createdAt" DESC
   `;
 
   // Status badge colors
@@ -261,28 +268,51 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
 
       {/* Reply History */}
       {replies.length > 0 && (
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-medium text-muted-foreground mb-2">
-            Reply History
-          </h4>
-          <div className="space-y-4">
-            {replies.map((reply) => (
-              <div key={reply.id} className="bg-muted/30 p-4 rounded-md">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm text-muted-foreground">
-                    {format(new Date(reply.createdAt), "MMMM d, yyyy h:mm a")}
-                  </div>
-                  {reply.reference && (
-                    <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                      {reply.reference}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Reply History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {replies.map((reply, index) => (
+                <div
+                  key={reply.id}
+                  className={`relative pl-6 ${
+                    index !== replies.length - 1
+                      ? "before:absolute before:left-2 before:top-8 before:bottom-0 before:w-0.5 before:bg-border"
+                      : ""
+                  }`}
+                >
+                  <div className="relative bg-muted/30 p-4 rounded-md">
+                    {/* Visual connector dot */}
+                    <div className="absolute -left-6 top-6 w-4 h-4 rounded-full bg-primary/20 border-2 border-primary" />
+
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="space-y-1">
+                        <div className="text-sm text-muted-foreground">
+                          {format(new Date(reply.createdAt), "MMMM d, yyyy")}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {format(new Date(reply.createdAt), "h:mm a")}
+                        </div>
+                      </div>
+                      {reply.reference && (
+                        <div className="flex items-center space-x-2">
+                          <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-mono">
+                            {reply.reference}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                    <div className="mt-3 prose prose-sm max-w-none">
+                      <div className="whitespace-pre-wrap">{reply.content}</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="whitespace-pre-wrap">{reply.content}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Action Buttons */}

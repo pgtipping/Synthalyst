@@ -3519,3 +3519,40 @@ The newsletter system follows these implementation patterns:
 - Update related queries when modifying schema
 - Document schema changes in memory bank
 - Test migrations in development before production
+
+## Visual Threading Pattern - [2025-03-10 23:51]
+
+- When implementing visual threading in admin interfaces:
+  1. Use timeline-style layout with connecting lines
+  2. Add visual indicators (dots, lines) for connections
+  3. Implement proper spacing and indentation
+  4. Use consistent Card components for content
+  5. Add clear visual hierarchy with dates and references
+- Key principles to follow:
+  1. Maintain visual consistency across the interface
+  2. Use clear visual indicators for relationships
+  3. Implement proper spacing for readability
+  4. Add visual feedback for user interactions
+  5. Consider accessibility in visual design
+- Common patterns for visual threading:
+  - Use connecting lines between related items
+  - Add dots or markers for timeline points
+  - Implement consistent spacing and padding
+  - Use monospace fonts for reference numbers
+  - Add hover states for interactive elements
+- Example implementation:
+  ```jsx
+  <div
+    className={`relative pl-6 ${
+      index !== items.length - 1
+        ? "before:absolute before:left-2 before:top-8 before:bottom-0 before:w-0.5 before:bg-border"
+        : ""
+    }`}
+  >
+    <div className="relative bg-muted/30 p-4 rounded-md">
+      {/* Visual connector dot */}
+      <div className="absolute -left-6 top-6 w-4 h-4 rounded-full bg-primary/20 border-2 border-primary" />
+      {/* Content */}
+    </div>
+  </div>
+  ```

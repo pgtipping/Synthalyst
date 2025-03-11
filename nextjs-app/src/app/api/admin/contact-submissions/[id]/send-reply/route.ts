@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 import { sendContactReply } from "@/lib/email";
-import { Prisma } from "@prisma/client";
+import { format } from "date-fns";
 
 // Schema for email reply
 const replySchema = z.object({
@@ -105,37 +105,23 @@ export async function POST(
 
       // Use a transaction to ensure both operations succeed or fail together
       await prisma.$transaction(async (tx) => {
-        // Create the reply record using Prisma's model API
-        await tx.$queryRaw(
-          Prisma.sql`
-            INSERT INTO "ContactSubmissionReply" (
-              "id", 
-              "contactSubmissionId", 
-              "content",
-              "reference",
-              "createdAt"
-            ) 
-            VALUES (
-              ${crypto.randomUUID()}, 
-              ${id}, 
-              ${messageWithInstructions},
-              ${reference},
-              NOW()
-            )
-          `
-        );
+        // Create the reply record in the database
+        await tx.contactSubmissionReply.create({
+          data: {
+            contactSubmissionId: id,
+            content: messageWithInstructions,
+            reference,
+          },
+        });
 
-        // Update the submission status using Prisma's model API
-        await tx.$queryRaw(
-          Prisma.sql`
-            UPDATE "ContactSubmission"
-            SET 
-              "status" = 'in-progress',
-              "updatedAt" = NOW(),
-              "lastRepliedAt" = NOW()
-            WHERE "id" = ${id}
-          `
-        );
+        // Update the submission's lastRepliedAt timestamp
+        await tx.contactSubmission.update({
+          where: { id },
+          data: {
+            lastRepliedAt: new Date(),
+            status: "in-progress",
+          },
+        });
       });
     } catch (emailError) {
       logger.error("Failed to send reply email", emailError);
