@@ -1002,7 +1002,7 @@ flowchart TD
 - Accessibility testing
 - Performance testing
 
-## Email System Architecture [2025-03-12T00:30:00]
+## Email System Architecture [2025-03-12T01:15:00]
 
 ### SendGrid Integration
 
@@ -1046,12 +1046,40 @@ The application implements a webhook endpoint at `/api/webhooks/email` that proc
 
    - `InboundEmail` model for storing general emails
    - `NewsletterReply` model for newsletter-specific replies
+   - `ContactSubmission` model for support emails
    - Proper email parsing and content extraction
 
 4. **Security Considerations**
    - Webhook authentication
    - Email validation
    - Content sanitization
+
+### Contact Submission Integration
+
+The email webhook system integrates with the contact management system:
+
+1. **Automatic Submission Creation**
+
+   - Support emails automatically create contact submissions
+   - Sender information extracted from email headers
+   - Email content preserved in submission message
+
+2. **Email Threading**
+
+   - Reference numbers included in email replies ([REF-XXXXXXXX-XXXX])
+   - Incoming emails with references associated with existing submissions
+   - Reply history maintained with proper threading
+
+3. **Notification System**
+
+   - Admin notifications sent for new submissions and replies
+   - Notifications include direct links to admin panel
+   - All notifications sent to designated admin email (pgtipping1@gmail.com)
+
+4. **Workflow Integration**
+   - Submission status updated based on email activity
+   - Complete communication history maintained
+   - Two-way communication channel established
 
 ### Email Templates
 
