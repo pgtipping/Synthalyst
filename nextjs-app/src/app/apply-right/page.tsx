@@ -17,8 +17,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { FileUpload } from "./components/FileUpload";
 import { JobDescription } from "./components/JobDescription";
-import { ResumePreview } from "./components/ResumePreview";
-import { CoverLetterPreview } from "./components/CoverLetterPreview";
+import ResumePreview from "./components/ResumePreview";
+import CoverLetterPreview from "./components/CoverLetterPreview";
 import { PricingSection } from "./components/PricingSection";
 import { FeaturesSection } from "./components/FeaturesSection";
 import { HowItWorks } from "./components/HowItWorks";
@@ -624,6 +624,51 @@ export default function ApplyRight() {
     window.location.href = "/api/auth/signin";
   };
 
+  // Calculate match score for a single keyword
+  const calculateKeywordMatch = (keyword: string): number => {
+    if (!transformedResume) return 0;
+
+    const regex = new RegExp(`\\b${keyword}\\b`, "i");
+    const matches = transformedResume.match(regex);
+
+    // If the keyword is found, return a score between 75-100 based on frequency
+    if (matches) {
+      // For single matches, return 100%
+      // For multiple matches, still return 100%
+      return 100;
+    }
+
+    // Check for partial matches (e.g., "management" vs "manager")
+    const keywordRoot =
+      keyword.length > 5 ? keyword.substring(0, keyword.length - 2) : keyword;
+    const partialRegex = new RegExp(`\\b${keywordRoot}\\w*\\b`, "i");
+    const partialMatches = transformedResume.match(partialRegex);
+
+    // If partial matches found, return a score of 75%
+    if (partialMatches) {
+      return 75;
+    }
+
+    return 0;
+  };
+
+  // Calculate overall match score across all keywords
+  const calculateOverallMatchScore = (): number => {
+    if (!keywordsExtracted.length || !transformedResume) return 0;
+
+    // Count how many keywords have a match score > 0
+    const matchedKeywords = keywordsExtracted.filter(
+      (keyword) => calculateKeywordMatch(keyword) > 0
+    ).length;
+
+    // Calculate percentage of matched keywords
+    const matchPercentage = Math.round(
+      (matchedKeywords / keywordsExtracted.length) * 100
+    );
+
+    return matchPercentage;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Toaster position="top-right" />
@@ -885,12 +930,52 @@ export default function ApplyRight() {
                       <h3 className="font-medium mb-2">
                         Keywords from Job Description:
                       </h3>
+                      <div className="mb-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">
+                            Keyword Match Score:
+                          </span>
+                          <div className="flex items-center">
+                            <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
+                              <div
+                                className="h-full bg-green-500 rounded-full"
+                                style={{
+                                  width: `${calculateOverallMatchScore()}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium">
+                              {calculateOverallMatchScore()}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                       <div className="flex flex-wrap gap-2">
-                        {keywordsExtracted.map((keyword, index) => (
-                          <Badge key={index} variant="secondary">
-                            {keyword}
-                          </Badge>
-                        ))}
+                        {keywordsExtracted.map((keyword, index) => {
+                          const matchScore = calculateKeywordMatch(keyword);
+                          return (
+                            <div key={index} className="relative group">
+                              <Badge
+                                variant="secondary"
+                                className={`${
+                                  matchScore > 0
+                                    ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                    : ""
+                                }`}
+                              >
+                                {keyword}
+                                {matchScore > 0 && (
+                                  <span className="ml-1 text-xs font-normal text-green-600">
+                                    ✓
+                                  </span>
+                                )}
+                              </Badge>
+                              <div className="absolute bottom-full mb-2 left-0 transform -translate-x-1/4 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                Match: {matchScore}%
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}

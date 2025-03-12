@@ -1297,3 +1297,25 @@ We've successfully implemented significant improvements to the ApplyRight featur
 - ✅ Implemented dynamic filename generation based on user information
 
 These enhancements provide a more professional and polished experience for users, making the ApplyRight feature more valuable and user-friendly.
+
+## March 12, 2025 - ApplyRight Feature Improvements
+
+### Completed
+
+- Upgraded the LLM model from Gemini 1.5 Flash to Gemini 2.0 Flash for better quality output
+- Fixed placeholder text issues in resume transformation output
+- Improved cover letter paragraph alignment and formatting
+- Fixed keyword matching score calculation to accurately reflect matched keywords
+- Enhanced fallback functions for when the LLM is unavailable
+- Added regex replacements to handle placeholder text in fallback mode
+
+### In Progress
+
+- Continue monitoring the quality of LLM outputs for further improvements
+- Consider adding more templates for resume and cover letter exports
+
+### Next Steps
+
+- Explore additional customization options for premium users
+- Consider adding more export format options
+- Investigate integration with the Interview Prep App for a complete job application solution

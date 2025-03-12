@@ -999,3 +999,33 @@ These improvements significantly enhance the user experience by providing more p
   - Proper paragraph spacing for readability
   - Page numbers in the footer
   - Dynamic filename based on sender name
+
+## ApplyRight Feature Improvements - March 12, 2025
+
+### LLM Model Selection
+
+- Gemini 2.0 Flash provides significantly better quality output than Gemini 1.5 Flash for resume and cover letter generation
+- The model is better at following specific formatting instructions and avoiding placeholder text
+- Response times are comparable between the two models
+
+### Prompt Engineering Insights
+
+- Explicit instructions to NEVER use placeholder text are critical for quality output
+- Including examples of desired output format (e.g., "leading to a 20% increase" instead of "Quantifiable Achievement (e.g., 20%)") significantly improves results
+- For cover letter generation, specific instructions about paragraph alignment and avoiding generic terms like "Platform" are necessary
+- The LLM responds well to numbered lists of specific instructions in the prompt
+
+### Fallback Function Design
+
+- Regex replacements are effective for handling common placeholder patterns
+- Maintaining separate fallback functions for resume and cover letter generation provides better control over the output quality
+- The fallback functions should mirror the LLM's expected output format as closely as possible
+
+### UI/UX Considerations
+
+- Keyword matching visualization should accurately reflect the actual matches in the content
+- Green checkmarks provide clear visual feedback for matched keywords
+- Hover tooltips with match percentages add valuable context for users
+- The overall match score should align with the visual indicators (all green = 100%)
+
+These insights will help maintain high-quality output in the ApplyRight feature and can be applied to other LLM-powered features in the application.

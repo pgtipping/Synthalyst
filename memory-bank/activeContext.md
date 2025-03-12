@@ -529,3 +529,27 @@ We've made significant improvements to the ApplyRight feature, focusing on the r
      - Professional footer with page numbers
 
 These improvements significantly enhance the user experience by providing more professional-looking previews and downloads, thereby increasing the value of the ApplyRight feature to users.
+
+## ApplyRight Feature Improvements - March 12, 2025
+
+### Resume Transformation Enhancements
+
+- Upgraded the LLM model from Gemini 1.5 Flash to Gemini 2.0 Flash for better quality output
+- Improved resume transformation prompts to eliminate placeholder text like "Quantifiable Achievement (e.g., 20%)" and replace with actual achievements
+- Enhanced fallback functions to properly handle placeholder text when the LLM is unavailable
+- Added regex replacements to convert any remaining placeholder text to proper achievement statements
+
+### Cover Letter Improvements
+
+- Enhanced cover letter generation prompt to ensure proper paragraph alignment
+- Added specific instructions to avoid generic placeholder terms like "Platform" in favor of specific job board names
+- Improved formatting consistency in the generated cover letter
+
+### Keyword Matching Improvements
+
+- Fixed the keyword matching score calculation to properly reflect the actual matches
+- Updated the scoring system to show 100% when all keywords are matched (green checkmarks)
+- Improved partial matching to provide more accurate scores
+- Enhanced the visual feedback for matched keywords
+
+These improvements significantly enhance the user experience by providing more professional-looking outputs and more accurate keyword matching information, making the ApplyRight feature more valuable to users.
