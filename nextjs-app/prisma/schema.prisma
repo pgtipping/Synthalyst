@@ -530,6 +530,7 @@ model ContactSubmission {
   inquiryType   String
   message       String
   status        String                   @default("new")
+  source        String?                  @default("WEBSITE")
   notes         String?
   assignedTo    String?
   createdAt     DateTime                 @default(now())
@@ -540,6 +541,7 @@ model ContactSubmission {
   @@index([status])
   @@index([inquiryType])
   @@index([createdAt])
+  @@index([source])
 }
 
 model ContactSubmissionReply {
