@@ -24,27 +24,20 @@ export function JobDescription({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Textarea
-        placeholder="Paste the job description here to optimize your resume for this specific role..."
+        placeholder="Paste the job description here to tailor your resume (optional)"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-h-[200px] resize-y"
+        className="min-h-[200px] resize-none"
       />
-
-      <div className="flex flex-col space-y-2">
-        <Button type="submit" disabled={!value.trim()}>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={value.length > 0 && value.length < 10}>
           Continue <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
-
-        <div className="text-sm text-muted-foreground">
-          <p className="mb-2">Adding a job description helps us:</p>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Identify key skills and requirements</li>
-            <li>Highlight relevant experience</li>
-            <li>Match industry terminology</li>
-            <li>Optimize for ATS systems</li>
-          </ul>
-        </div>
       </div>
+      <p className="text-sm text-muted-foreground">
+        Adding a job description helps us tailor your resume to highlight
+        relevant skills and experience.
+      </p>
     </form>
   );
 }

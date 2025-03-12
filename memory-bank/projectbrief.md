@@ -401,7 +401,7 @@ Implementation Approach:
 User Flow:
 
 - Free tier: Upload Resume → (Optional) Add Job application details → Transform → Generate Cover Letter → Download
-- Paid tier: Same initial flow + Iterative Refinement + Advanced Features + Interview Prep App
+- Paid tier: Same initial flow + Iterative Refinement + Advanced Features + Interview Prep App access (if subscribed to discounted bundle)
 
 Technical Architecture:
 

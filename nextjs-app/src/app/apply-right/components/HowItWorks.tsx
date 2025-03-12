@@ -1,66 +1,69 @@
 "use client";
 
 import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Upload, FileText, Sparkles, Download } from "lucide-react";
 
 export function HowItWorks() {
+  const steps = [
+    {
+      icon: <Upload className="h-8 w-8 text-primary" />,
+      title: "Upload Your Resume",
+      description:
+        "Upload your current resume in PDF, DOC, DOCX, or TXT format. Our system will extract the text for processing.",
+    },
+    {
+      icon: <FileText className="h-8 w-8 text-primary" />,
+      title: "Add Job Description",
+      description:
+        "Optionally paste the job description to tailor your resume for a specific position and improve your chances of getting an interview.",
+    },
+    {
+      icon: <Sparkles className="h-8 w-8 text-primary" />,
+      title: "Transform Your Resume",
+      description:
+        "Our AI analyzes your resume and enhances it with professional language, better formatting, and targeted improvements.",
+    },
+    {
+      icon: <Download className="h-8 w-8 text-primary" />,
+      title: "Download & Apply",
+      description:
+        "Download your transformed resume and cover letter, then apply with confidence knowing your application is optimized.",
+    },
+  ];
+
   return (
-    <div className="py-8">
-      <h2 className="text-2xl font-bold text-center mb-8">How It Works</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <Step
-          number={1}
-          icon={<Upload className="h-8 w-8 text-primary" />}
-          title="Upload Resume"
-          description="Upload your current resume in PDF or DOCX format."
-        />
-
-        <Step
-          number={2}
-          icon={<FileText className="h-8 w-8 text-primary" />}
-          title="Add Job Details"
-          description="Optionally paste the job description to target your resume."
-        />
-
-        <Step
-          number={3}
-          icon={<Sparkles className="h-8 w-8 text-primary" />}
-          title="Transform"
-          description="Our AI enhances your resume with professional improvements."
-        />
-
-        <Step
-          number={4}
-          icon={<Download className="h-8 w-8 text-primary" />}
-          title="Download"
-          description="Get your enhanced resume and cover letter ready to use."
-        />
+    <section className="space-y-6">
+      <div className="text-center space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">How It Works</h2>
+        <p className="text-muted-foreground max-w-3xl mx-auto">
+          Transform your resume in just a few simple steps
+        </p>
       </div>
-    </div>
-  );
-}
 
-interface StepProps {
-  number: number;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-function Step({ number, icon, title, description }: StepProps) {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <div className="relative mb-4">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-          {icon}
-        </div>
-        <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
-          {number}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {steps.map((step, index) => (
+          <Card key={index} className="border-none shadow-sm">
+            <CardHeader className="pb-2">
+              <div className="mb-2">{step.icon}</div>
+              <CardTitle className="text-xl">
+                {index + 1}. {step.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-sm text-muted-foreground">
+                {step.description}
+              </CardDescription>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
-    </div>
+    </section>
   );
 }

@@ -1,143 +1,179 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Upload, File, X } from "lucide-react";
+import { Upload, FileText, Loader2, AlertCircle } from "lucide-react";
+import { parseDocument } from "../utils/documentParser";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface FileUploadProps {
-  onFileUpload: (file: File) => void;
+  onFileUpload: (file: File, text: string) => void;
 }
 
 export function FileUpload({ onFileUpload }: FileUploadProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleDrag = (e: React.DragEvent) => {
+  const processFile = async (selectedFile: File) => {
+    // Check file type
+    const validTypes = [
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ];
+
+    // Temporarily disable PDF uploads
+    if (selectedFile.type === "application/pdf") {
+      toast.error(
+        "PDF parsing is temporarily disabled. Please upload a DOC, DOCX, or TXT file instead."
+      );
+      return;
+    }
+
+    if (!validTypes.includes(selectedFile.type)) {
+      toast.error("Please upload a DOC, DOCX, or TXT file");
+      return;
+    }
+
+    // Check file size (5MB max)
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      toast.error("File size exceeds 5MB limit");
+      return;
+    }
+
+    setFile(selectedFile);
+    setIsLoading(true);
+
+    try {
+      // Parse the document to extract text
+      const text = await parseDocument(selectedFile);
+
+      if (!text || text.trim() === "") {
+        throw new Error("Could not extract text from the document");
+      }
+
+      onFileUpload(selectedFile, text);
+      toast.success("Resume uploaded successfully!");
+    } catch (error) {
+      console.error("Error processing file:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to process file"
+      );
+      setFile(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (e.type === "dragenter" || e.type === "dragover") {
       setDragActive(true);
     } else if (e.type === "dragleave") {
       setDragActive(false);
     }
-  };
+  }, []);
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        const droppedFile = e.dataTransfer.files[0];
+        await processFile(droppedFile);
+      }
+    },
+    [processFile]
+  );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-  };
-
-  const handleFile = (file: File) => {
-    // Check file type
-    const validTypes = [
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (!validTypes.includes(file.type)) {
-      toast.error("Please upload a PDF or DOCX file");
-      return;
-    }
-
-    // Check file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size should be less than 5MB");
-      return;
-    }
-
-    setSelectedFile(file);
-    onFileUpload(file);
-  };
-
-  const removeFile = () => {
-    setSelectedFile(null);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
-  };
-
-  const openFileSelector = () => {
-    if (inputRef.current) {
-      inputRef.current.click();
-    }
-  };
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        const selectedFile = e.target.files[0];
+        await processFile(selectedFile);
+      }
+    },
+    [processFile]
+  );
 
   return (
-    <div className="w-full">
+    <div className="space-y-4">
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>PDF Support Temporarily Disabled</AlertTitle>
+        <AlertDescription>
+          PDF parsing is temporarily disabled. Please upload a DOC, DOCX, or TXT
+          file instead.
+        </AlertDescription>
+      </Alert>
+
       <div
-        className={`
-          border-2 border-dashed rounded-lg p-6 
-          flex flex-col items-center justify-center
-          transition-colors
-          ${
-            dragActive
-              ? "border-primary bg-primary/5"
-              : "border-muted-foreground/25"
-          }
-          ${selectedFile ? "bg-muted/50" : ""}
-        `}
+        className={`border-2 border-dashed rounded-lg p-6 text-center ${
+          dragActive
+            ? "border-primary bg-primary/5"
+            : "border-muted-foreground/25"
+        }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
-        <Input
-          ref={inputRef}
-          type="file"
-          className="hidden"
-          accept=".pdf,.docx"
-          onChange={handleChange}
-        />
-
-        {!selectedFile ? (
-          <>
-            <Upload className="h-10 w-10 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium mb-1">Drag & drop your resume</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              or click to browse files
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+            <p className="text-sm text-muted-foreground">
+              Processing your resume...
             </p>
-            <Button onClick={openFileSelector} variant="outline">
-              Select File
+          </div>
+        ) : file ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-center">
+              <FileText className="h-10 w-10 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium">{file.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {(file.size / 1024).toFixed(2)} KB
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setFile(null)}
+              className="mt-2"
+            >
+              Change File
             </Button>
-            <p className="text-xs text-muted-foreground mt-4">
-              Supported formats: PDF, DOCX (Max 5MB)
-            </p>
-          </>
+          </div>
         ) : (
-          <div className="flex flex-col items-center">
-            <File className="h-10 w-10 text-primary mb-4" />
-            <p className="text-lg font-medium mb-1">File selected</p>
-            <div className="flex items-center bg-muted p-2 rounded-md mt-2">
-              <span className="text-sm truncate max-w-[200px]">
-                {selectedFile.name}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-2 h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeFile();
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+          <div className="space-y-4">
+            <div className="flex items-center justify-center">
+              <Upload className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <div className="space-y-2">
+              <p className="font-medium">Drag and drop your resume</p>
+              <p className="text-sm text-muted-foreground">
+                Supports DOC, DOCX, and TXT files (max 5MB)
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <Input
+                  id="file-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".doc,.docx,.txt"
+                  onChange={handleFileChange}
+                />
+                <Button variant="secondary" className="mt-2">
+                  Browse Files
+                </Button>
+              </label>
             </div>
           </div>
         )}

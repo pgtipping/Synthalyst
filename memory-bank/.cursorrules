@@ -789,3 +789,58 @@ try {
 - GitHub has push protection that blocks commits containing secrets
 - If a push is rejected due to containing secrets, you must remove the secrets from the git history
 - Never use the GitHub option to allow the secret, as this is a security risk
+
+# ApplyRight Feature Implementation - June 14, 2023
+
+## Document Parsing Strategy
+
+When implementing document parsing for the ApplyRight feature, we encountered issues with PDF.js integration. The PDF.js library requires specific configuration to work properly in a Next.js environment, particularly with its worker files.
+
+### PDF.js Integration Issues
+
+The main issue was that the PDF.js worker file couldn't be found during the build process, resulting in the error:
+
+```
+Error: ENOENT: no such file or directory, open 'C:\Users\pgeor\OneDrive\Documents\Web Dev\synthalyst\nextjs-app\node_modules\pdfjs-dist\build\pdf.js'
+```
+
+### Temporary Solution
+
+To ensure the feature works reliably, we've temporarily disabled PDF support and limited file uploads to DOC, DOCX, and TXT formats. This approach allows users to use the core functionality while we work on a more robust solution for PDF parsing.
+
+### Future PDF Integration Options
+
+For future implementation of PDF support, consider these options:
+
+1. Use a CDN-hosted version of the PDF.js worker file
+2. Implement server-side PDF parsing
+3. Use a third-party API for PDF parsing
+
+## UI Component Structure
+
+The ApplyRight feature follows a step-by-step approach with these main components:
+
+1. `FileUpload`: Handles file uploads and document parsing
+2. `JobDescription`: Allows users to input job descriptions
+3. `ResumePreview`: Displays the transformed resume
+4. `CoverLetterPreview`: Displays the generated cover letter
+5. `HowItWorks`: Explains the ApplyRight process
+6. `FeaturesSection`: Showcases the features
+7. `PricingSection`: Displays pricing tiers
+
+This modular approach makes the code more maintainable and easier to update.
+
+## API Integration
+
+The ApplyRight feature uses the Gemini API for resume transformation. The API route is implemented at `/api/apply-right/transform` and includes:
+
+1. Request validation using Zod
+2. Error handling
+3. Fallback mode for when the API is unavailable
+
+## User Experience Considerations
+
+1. Clear feedback through toast notifications
+2. Step-by-step guided process
+3. Responsive design for all screen sizes
+4. Comprehensive error handling

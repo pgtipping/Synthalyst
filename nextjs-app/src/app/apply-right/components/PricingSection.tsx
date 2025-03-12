@@ -2,144 +2,128 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Check, X } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 interface PricingSectionProps {
-  isPremiumUser: boolean;
+  isPremium: boolean;
+  onUpgrade: () => void;
 }
 
-export function PricingSection({ isPremiumUser }: PricingSectionProps) {
+export function PricingSection({ isPremium, onUpgrade }: PricingSectionProps) {
   return (
-    <div className="py-12">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Unlock advanced features and get more out of your resume
-          transformation experience.
+    <section className="space-y-6">
+      <div className="text-center space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Pricing</h2>
+        <p className="text-muted-foreground max-w-3xl mx-auto">
+          Choose the plan that works best for you
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Free Tier */}
-        <Card
-          className={`border-2 ${
-            !isPremiumUser ? "border-primary" : "border-muted"
-          }`}
-        >
-          <CardHeader>
-            <CardTitle className="text-2xl">Free</CardTitle>
-            <CardDescription>Basic resume transformation</CardDescription>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">$0</span>
-              <span className="text-muted-foreground ml-2">/ forever</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FeatureItem included>One-click resume transformation</FeatureItem>
-            <FeatureItem included>Basic ATS optimization</FeatureItem>
-            <FeatureItem included>
-              Professional language enhancements
-            </FeatureItem>
-            <FeatureItem included>Basic job description targeting</FeatureItem>
-            <FeatureItem included>One free cover letter</FeatureItem>
-            <FeatureItem included>Standard PDF export</FeatureItem>
-            <FeatureItem>Multiple transformation iterations</FeatureItem>
-            <FeatureItem>Advanced ATS optimization</FeatureItem>
-            <FeatureItem>Multiple design templates</FeatureItem>
-            <FeatureItem>Interview Prep App access</FeatureItem>
-          </CardContent>
-          <CardFooter>
-            {!isPremiumUser ? (
-              <div className="w-full text-center">
-                <p className="text-sm text-primary font-medium mb-2">
-                  Current Plan
-                </p>
-                <Button variant="outline" className="w-full" disabled>
-                  Free Plan
-                </Button>
-              </div>
-            ) : (
-              <Button variant="outline" className="w-full">
-                Downgrade
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
+        <div className="border rounded-lg p-6 space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">Free</h3>
+            <p className="text-muted-foreground">Basic resume transformation</p>
+          </div>
+          <div className="text-3xl font-bold">$0</div>
+          <ul className="space-y-2 my-6">
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span>One-click resume transformation</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span>Basic ATS optimization</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span>Standard PDF export</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span>One free cover letter</span>
+            </li>
+          </ul>
+          <Button variant="outline" className="w-full" disabled={true}>
+            Current Plan
+          </Button>
+        </div>
 
         {/* Premium Tier */}
-        <Card
-          className={`border-2 ${
-            isPremiumUser ? "border-primary" : "border-muted"
-          }`}
-        >
-          <CardHeader>
-            <CardTitle className="text-2xl">Premium</CardTitle>
-            <CardDescription>Advanced resume optimization</CardDescription>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">$9.99</span>
-              <span className="text-muted-foreground ml-2">/ month</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FeatureItem included>One-click resume transformation</FeatureItem>
-            <FeatureItem included>Basic ATS optimization</FeatureItem>
-            <FeatureItem included>
-              Professional language enhancements
-            </FeatureItem>
-            <FeatureItem included>Basic job description targeting</FeatureItem>
-            <FeatureItem included>One free cover letter</FeatureItem>
-            <FeatureItem included>Standard PDF export</FeatureItem>
-            <FeatureItem included>
-              Multiple transformation iterations
-            </FeatureItem>
-            <FeatureItem included>Advanced ATS optimization</FeatureItem>
-            <FeatureItem included>Multiple design templates</FeatureItem>
-            <FeatureItem included>Interview Prep App access</FeatureItem>
-          </CardContent>
-          <CardFooter>
-            {isPremiumUser ? (
-              <div className="w-full text-center">
-                <p className="text-sm text-primary font-medium mb-2">
-                  Current Plan
-                </p>
-                <Button variant="outline" className="w-full" disabled>
-                  Premium Plan
-                </Button>
-              </div>
-            ) : (
-              <Button className="w-full">Upgrade to Premium</Button>
-            )}
-          </CardFooter>
-        </Card>
+        <div className="border rounded-lg p-6 space-y-4 bg-primary/5 border-primary/20 relative">
+          <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-lg rounded-tr-lg">
+            RECOMMENDED
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">Premium</h3>
+            <p className="text-muted-foreground">
+              Advanced resume optimization
+            </p>
+          </div>
+          <div className="text-3xl font-bold">
+            $9.99
+            <span className="text-base font-normal text-muted-foreground">
+              /month
+            </span>
+          </div>
+          <ul className="space-y-2 my-6">
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+              <span>Everything in Free, plus:</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+              <span>Multiple transformation iterations</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+              <span>Advanced ATS optimization</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+              <span>Multiple design templates</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+              <span>Multiple cover letter templates</span>
+            </li>
+          </ul>
+          <Button className="w-full" onClick={onUpgrade} disabled={isPremium}>
+            {isPremium ? "Current Plan" : "Upgrade Now"}
+          </Button>
+        </div>
+
+        {/* Custom Plan */}
+        <div className="border rounded-lg p-6 space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">Enterprise</h3>
+            <p className="text-muted-foreground">For teams and businesses</p>
+          </div>
+          <div className="text-3xl font-bold">Custom</div>
+          <ul className="space-y-2 my-6">
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span>Everything in Premium, plus:</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span>Bulk resume processing</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span>Team management dashboard</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span>Priority support</span>
+            </li>
+          </ul>
+          <Button variant="outline" className="w-full" asChild>
+            <a href="/contact">Contact Sales</a>
+          </Button>
+        </div>
       </div>
-    </div>
-  );
-}
-
-interface FeatureItemProps {
-  children: React.ReactNode;
-  included?: boolean;
-}
-
-function FeatureItem({ children, included = false }: FeatureItemProps) {
-  return (
-    <div className="flex items-center">
-      {included ? (
-        <Check className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-      ) : (
-        <X className="h-5 w-5 text-muted-foreground mr-2 flex-shrink-0" />
-      )}
-      <span className={included ? "" : "text-muted-foreground"}>
-        {children}
-      </span>
-    </div>
+    </section>
   );
 }

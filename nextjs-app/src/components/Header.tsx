@@ -18,6 +18,7 @@ import {
   Sparkles,
   Users,
   Mail,
+  FileCheck,
 } from "lucide-react";
 import { useToast } from "@/lib/toast-migration";
 import {
@@ -102,6 +103,11 @@ export default function Header() {
       icon: <Users className="w-4 h-4 mr-2" />,
       title: "Competency Manager",
       href: "/competency-manager",
+    },
+    {
+      icon: <FileCheck className="w-4 h-4 mr-2" />,
+      title: "ApplyRight",
+      href: "/apply-right",
     },
   ];
 

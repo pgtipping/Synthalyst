@@ -735,3 +735,97 @@ This script modifies a shadcn/ui component to add a new variant.
 ### Toast System
 
 The project has migrated from the old toast system to the new sonner toast system. A toast migration utility has been created at `@/lib/toast-migration.ts`
+
+```
+
+# Technical Context - Updated on June 14, 2023
+
+## Technologies Used
+
+### Core Technologies
+
+- **Next.js**: The main framework for building the application
+- **React**: For building the user interface
+- **TypeScript**: For type-safe code
+- **Tailwind CSS**: For styling
+- **Shadcn UI**: For UI components
+- **NextAuth.js**: For authentication
+- **Prisma**: For database access
+- **PostgreSQL**: As the database
+- **Vercel**: For deployment
+
+### AI and API Integrations
+
+- **Google Gemini API**: For generating blog posts, improving content, and transforming resumes in the ApplyRight feature
+- **OpenAI API**: For various AI-powered features
+- **OpenRouter API**: For accessing Llama 3.2 3b model
+- **SendGrid**: For email functionality
+
+### Document Processing (ApplyRight Feature) - June 14, 2023
+
+- **mammoth**: For parsing Word documents (DOC, DOCX)
+- **PDF.js**: For parsing PDF documents (temporarily disabled)
+
+## Development Setup
+
+### Environment Variables
+
+The application requires several environment variables to be set up:
+
+- **Authentication**: `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- **Database**: `DATABASE_URL`
+- **API Keys**: `GEMINI_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY`
+- **Email**: `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`, `REPLY_TO_EMAIL`
+- **API Configuration**: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_APP_URL`
+- **Rate Limiting**: `RATE_LIMIT_MAX_REQUESTS`, `RATE_LIMIT_WINDOW_SIZE`
+- **Caching**: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
+
+### Running the Application
+
+1. Install dependencies: `npm install`
+2. Set up environment variables in `.env.local`
+3. Run the development server: `npm run dev`
+4. Build the application: `npm run build`
+5. Start the production server: `npm start`
+
+## Technical Constraints
+
+### ApplyRight Feature - June 14, 2023
+
+1. **PDF Parsing**: PDF.js integration is currently problematic, leading to build errors. PDF support is temporarily disabled.
+2. **Document Size**: File uploads are limited to 5MB to prevent performance issues.
+3. **API Rate Limiting**: The Gemini API has rate limits that need to be considered.
+4. **Export Formats**: Currently limited to plain text exports. DOCX and PDF exports are planned for future implementation.
+
+### General Constraints
+
+1. **API Rate Limits**: Various external APIs have rate limits that need to be managed.
+2. **Database Performance**: Complex queries should be optimized to prevent performance issues.
+3. **Authentication**: The application uses NextAuth.js, which has specific requirements for session management.
+4. **Deployment**: The application is deployed on Vercel, which has specific limitations and requirements.
+
+## Dependencies
+
+### ApplyRight Feature - June 14, 2023
+
+- **mammoth**: For parsing Word documents
+- **pdfjs-dist**: For parsing PDF documents (temporarily disabled)
+- **sonner**: For toast notifications
+- **lucide-react**: For icons
+- **next/navigation**: For navigation
+- **next-auth/react**: For authentication
+- **@/components/ui**: For UI components from Shadcn UI
+
+### Core Dependencies
+
+- **next**: The Next.js framework
+- **react**: The React library
+- **typescript**: For type-safe code
+- **tailwindcss**: For styling
+- **prisma**: For database access
+- **next-auth**: For authentication
+- **zod**: For schema validation
+- **axios**: For HTTP requests
+- **date-fns**: For date manipulation
+- **react-hook-form**: For form handling
+```

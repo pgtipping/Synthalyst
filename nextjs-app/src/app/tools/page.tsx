@@ -17,6 +17,7 @@ import {
   Languages,
   UserPlus,
   Home,
+  FileCheck,
 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -79,6 +80,14 @@ export default function ToolsPage() {
       description:
         "Define and manage competency frameworks for your organization.",
       link: "/competency-manager",
+      status: "available",
+    },
+    {
+      icon: <FileCheck className="w-8 h-8" />,
+      title: "ApplyRight",
+      description:
+        "Transform your resume with AI-powered enhancements and optimizations for job applications.",
+      link: "/apply-right",
       status: "available",
     },
     {
