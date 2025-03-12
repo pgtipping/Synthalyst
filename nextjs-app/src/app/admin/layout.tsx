@@ -7,8 +7,12 @@ import {
   Users,
   Mail,
   FileText,
+  BarChart,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
+import { ReactNode } from "react";
+import { Breadcrumb } from "@/components/admin/Breadcrumb";
 
 // Extend the session type to include role
 interface ExtendedSession {
@@ -29,35 +33,45 @@ const adminNavItems = [
   {
     title: "Dashboard",
     href: "/admin",
-    icon: <LayoutDashboard className="h-4 w-4" />,
+    icon: LayoutDashboard,
   },
   {
     title: "Communications",
     href: "/admin/communications",
-    icon: <MessageSquare className="h-4 w-4" />,
+    icon: MessageSquare,
   },
   {
     title: "Blog",
     href: "/admin/blog",
-    icon: <FileText className="h-4 w-4" />,
+    icon: FileText,
   },
   {
     title: "Newsletter",
     href: "/admin/newsletter",
-    icon: <Mail className="h-4 w-4" />,
+    icon: Mail,
   },
   {
     title: "Users",
     href: "/admin/users",
-    icon: <Users className="h-4 w-4" />,
+    icon: Users,
+  },
+  {
+    title: "Monitoring",
+    href: "/admin/monitoring",
+    icon: BarChart,
+  },
+  {
+    title: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
   },
 ];
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface AdminLayoutProps {
+  children: ReactNode;
+}
+
+export default async function AdminLayout({ children }: AdminLayoutProps) {
   const session = (await getServerSession(
     authOptions
   )) as ExtendedSession | null;
@@ -72,25 +86,39 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b">
-        <div className="container mx-auto px-4">
-          <nav className="flex items-center space-x-6 overflow-x-auto py-4">
-            {adminNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary"
-              >
-                {item.icon}
-                <span>{item.title}</span>
-              </Link>
-            ))}
-          </nav>
+    <div className="min-h-screen bg-gray-100">
+      <nav className="bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between">
+            <div className="flex">
+              <div className="flex flex-shrink-0 items-center">
+                <Link href="/admin" className="text-xl font-bold text-gray-900">
+                  Admin
+                </Link>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                {adminNavItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.title}
+                      href={item.href}
+                      className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors"
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="ml-2">{item.title}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-8">{children}</div>
+      </nav>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <Breadcrumb />
+        <main className="bg-white shadow-sm rounded-lg p-6">{children}</main>
       </div>
     </div>
   );

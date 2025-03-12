@@ -832,3 +832,54 @@ Now that we've addressed the accessibility issues, we'll focus on implementing t
    - Total Blocking Time: 1743ms (needs improvement)
    - Time to Interactive: 23994ms (needs optimization)
    - JavaScript execution time needs reduction
+
+# Active Context - [2024-03-21 15:45:00]
+
+## Current Focus
+
+- Enhanced admin dashboard navigation and monitoring capabilities
+- Implementation of Redis monitoring and metrics tracking
+- Improved user experience with breadcrumb navigation
+
+## Recent Changes
+
+### Admin Navigation Enhancement - [2024-03-21 15:45:00]
+
+- Added breadcrumb navigation to improve user orientation within admin pages
+- Created reusable Breadcrumb component with automatic path generation
+- Integrated breadcrumbs into admin layout with proper styling and accessibility
+
+### Redis Monitoring Implementation - [2024-03-21 15:45:00]
+
+- Created comprehensive Redis monitoring dashboard
+- Added real-time metrics tracking for cache and rate limiting
+- Implemented system controls for resetting metrics and cache
+- Added automatic refresh functionality for monitoring data
+
+## Active Decisions
+
+### Navigation Structure
+
+- Maintained consistent navigation hierarchy across admin pages
+- Used semantic HTML and ARIA labels for accessibility
+- Implemented mobile-responsive design for all navigation elements
+
+### Monitoring Dashboard
+
+- Auto-refresh interval set to 30 seconds for real-time updates
+- Limited error display to last 5 entries for better performance
+- Protected monitoring endpoints with authentication and rate limiting
+
+## Next Steps
+
+1. Monitor the performance impact of automatic metric refreshing
+2. Consider implementing metric export functionality
+3. Add more detailed analytics for cache usage patterns
+4. Consider adding visual graphs for metric trends over time
+
+## Current Considerations
+
+- Ensure monitoring doesn't impact application performance
+- Maintain proper error handling and logging
+- Keep UI responsive across all device sizes
+- Follow security best practices for admin access

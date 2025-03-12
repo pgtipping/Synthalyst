@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 import { z } from "zod";
 
 // Initialize the Google Generative AI with the API key
@@ -7,8 +7,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 /**
  * Gets the Gemini model instance
  */
-export function getGeminiModel(modelName = "gemini-2.0-flash") {
-  return genAI.getGenerativeModel({ model: modelName });
+export async function getGeminiModel(): Promise<GenerativeModel> {
+  return genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 }
 
 // Define the schema for a resource
@@ -64,7 +64,7 @@ export async function generateResourcesWithGemini(
 ): Promise<Resource[]> {
   try {
     // Get the Gemini 2.0 Flash model
-    const model = getGeminiModel(); // Use the default "gemini-2.0-flash" model
+    const model = await getGeminiModel();
 
     // Create a prompt for Gemini
     const prompt = `
@@ -134,4 +134,85 @@ export async function generateResourcesWithGemini(
     // Return an empty array if there's an error
     return [];
   }
+}
+
+export async function streamGeminiResponse(
+  prompt: string,
+  options: {
+    timeout?: number;
+    maxRetries?: number;
+    temperature?: number;
+  } = {}
+) {
+  const { timeout = 30000, maxRetries = 3, temperature = 0.7 } = options;
+
+  const model = await getGeminiModel();
+
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const result = await model.generateContentStream(
+        {
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature,
+            topK: 40,
+            topP: 0.95,
+          },
+        },
+        { signal: controller.signal }
+      );
+
+      clearTimeout(timeoutId);
+      return result;
+    } catch (error) {
+      attempt++;
+      if (attempt === maxRetries) throw error;
+      // Exponential backoff
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.pow(2, attempt) * 100)
+      );
+    }
+  }
+}
+
+// Cache for storing frequently used responses
+const responseCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
+export async function getCachedGeminiResponse(
+  prompt: string,
+  options: {
+    bypassCache?: boolean;
+    timeout?: number;
+    maxRetries?: number;
+  } = {}
+) {
+  const { bypassCache = false, timeout = 30000, maxRetries = 3 } = options;
+
+  // Generate cache key from prompt
+  const cacheKey = prompt.toLowerCase().trim();
+
+  // Check cache if not bypassing
+  if (!bypassCache) {
+    const cached = responseCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.data;
+    }
+  }
+
+  // Get fresh response
+  const response = await streamGeminiResponse(prompt, { timeout, maxRetries });
+
+  // Cache the response
+  const responseData = await response.response.text();
+  responseCache.set(cacheKey, {
+    data: responseData,
+    timestamp: Date.now(),
+  });
+
+  return responseData;
 }

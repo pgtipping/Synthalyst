@@ -1101,3 +1101,141 @@ All email templates follow a consistent structure:
    - Contact information
    - Social media links
    - Legal disclaimers
+
+# System Patterns - [2024-03-21 15:45:00]
+
+## Navigation Patterns
+
+### Breadcrumb Navigation - [2024-03-21 15:45:00]
+
+```typescript
+// Component-based breadcrumb generation
+const generateBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
+  const paths = pathname
+    .split("/")
+    .filter(Boolean)
+    .map((path) => ({
+      label: formatPathLabel(path),
+      href: generatePathHref(pathname, path),
+    }));
+  return [{ label: "Home", href: "/" }, ...paths];
+};
+```
+
+### Admin Layout Structure - [2024-03-21 15:45:00]
+
+```typescript
+// Consistent admin layout pattern
+<div className="min-h-screen bg-gray-100">
+  <nav className="bg-white shadow-sm">{/* Navigation items */}</nav>
+  <div className="container mx-auto">
+    <Breadcrumb />
+    <main className="bg-white shadow-sm rounded-lg">{children}</main>
+  </div>
+</div>
+```
+
+## Monitoring Patterns
+
+### Redis Monitoring - [2024-03-21 15:45:00]
+
+```typescript
+// Metrics tracking pattern
+interface RedisMetrics {
+  timestamp: string;
+  metrics: {
+    rateLimitHits: number;
+    cacheHits: number;
+    cacheMisses: number;
+    cacheHitRate: string;
+    errors: Array<{
+      timestamp: string;
+      operation: string;
+      error: string;
+    }>;
+  };
+  cache: {
+    totalKeys: number;
+    totalSize: number;
+    keysByPattern: Record<string, number>;
+  };
+  rateLimiting: {
+    analytics: Record<string, number>;
+    currentLimits: {
+      success: boolean;
+      limit: number;
+      remaining: number;
+      reset: string;
+    };
+  };
+}
+```
+
+### Auto-Refresh Pattern - [2024-03-21 15:45:00]
+
+```typescript
+// Auto-refresh hook pattern
+useEffect(() => {
+  fetchData();
+  const interval = setInterval(fetchData, refreshInterval);
+  return () => clearInterval(interval);
+}, []);
+```
+
+## Component Patterns
+
+### Card Layout Pattern - [2024-03-21 15:45:00]
+
+```typescript
+<Card>
+  <CardHeader>
+    <CardTitle>{title}</CardTitle>
+    <CardDescription>{description}</CardDescription>
+  </CardHeader>
+  <CardContent>{content}</CardContent>
+</Card>
+```
+
+### Icon Component Pattern - [2024-03-21 15:45:00]
+
+```typescript
+// Dynamic icon rendering pattern
+const Icon = item.icon;
+<Icon className="h-4 w-4" />;
+```
+
+## Authentication Patterns
+
+### Admin Route Protection - [2024-03-21 15:45:00]
+
+```typescript
+if (!session?.user.role === "ADMIN") {
+  redirect("/");
+}
+```
+
+## API Patterns
+
+### Monitoring Endpoint Pattern - [2024-03-21 15:45:00]
+
+```typescript
+export async function GET(req: NextRequest) {
+  // Auth check
+  if (!isAuthorized(req)) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  // Rate limiting
+  const limiter = await rateLimit.check(req, limit, window);
+  if (!limiter.success) {
+    return new Response("Too Many Requests", { status: 429 });
+  }
+
+  // Get metrics
+  const metrics = await getMetrics();
+
+  return new Response(JSON.stringify(metrics), {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+```
