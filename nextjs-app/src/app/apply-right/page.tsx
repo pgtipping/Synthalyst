@@ -242,7 +242,7 @@ export default function ApplyRight() {
               <CardHeader>
                 <CardTitle>Upload Your Resume</CardTitle>
                 <CardDescription>
-                  Upload your current resume in DOC, DOCX, or TXT format
+                  Upload your current resume in PDF, DOC, DOCX, or TXT format
                 </CardDescription>
               </CardHeader>
               <CardContent>

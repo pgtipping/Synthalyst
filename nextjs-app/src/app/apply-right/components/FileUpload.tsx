@@ -4,9 +4,8 @@ import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Upload, FileText, Loader2, AlertCircle } from "lucide-react";
+import { Upload, FileText, Loader2 } from "lucide-react";
 import { parseDocument } from "../utils/documentParser";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface FileUploadProps {
   onFileUpload: (file: File, text: string) => void;
@@ -20,21 +19,14 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
   const processFile = async (selectedFile: File) => {
     // Check file type
     const validTypes = [
+      "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "text/plain",
     ];
 
-    // Temporarily disable PDF uploads
-    if (selectedFile.type === "application/pdf") {
-      toast.error(
-        "PDF parsing is temporarily disabled. Please upload a DOC, DOCX, or TXT file instead."
-      );
-      return;
-    }
-
     if (!validTypes.includes(selectedFile.type)) {
-      toast.error("Please upload a DOC, DOCX, or TXT file");
+      toast.error("Please upload a PDF, DOC, DOCX, or TXT file");
       return;
     }
 
@@ -104,15 +96,6 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
 
   return (
     <div className="space-y-4">
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>PDF Support Temporarily Disabled</AlertTitle>
-        <AlertDescription>
-          PDF parsing is temporarily disabled. Please upload a DOC, DOCX, or TXT
-          file instead.
-        </AlertDescription>
-      </Alert>
-
       <div
         className={`border-2 border-dashed rounded-lg p-6 text-center ${
           dragActive
@@ -158,7 +141,7 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
             <div className="space-y-2">
               <p className="font-medium">Drag and drop your resume</p>
               <p className="text-sm text-muted-foreground">
-                Supports DOC, DOCX, and TXT files (max 5MB)
+                Supports PDF, DOC, DOCX, and TXT files (max 5MB)
               </p>
             </div>
             <div className="flex justify-center">
@@ -167,7 +150,7 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
                   id="file-upload"
                   type="file"
                   className="hidden"
-                  accept=".doc,.docx,.txt"
+                  accept=".pdf,.doc,.docx,.txt"
                   onChange={handleFileChange}
                 />
                 <Button variant="secondary" className="mt-2">

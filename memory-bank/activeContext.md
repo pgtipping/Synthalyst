@@ -413,9 +413,14 @@ We are implementing the ApplyRight app as described in the project brief. This a
 
 We've successfully implemented the core components of the ApplyRight feature:
 
-1. **Document Parsing**: Created a utility for extracting text from various document formats (DOC, DOCX, TXT). PDF support is temporarily disabled due to issues with the PDF.js library.
+1. **Document Parsing**: Created a utility for extracting text from various document formats (PDF, DOC, DOCX, TXT) using:
+
+   - mammoth for Word documents (DOC, DOCX)
+   - react-pdftotext for PDF documents
+   - Native File API for text files
 
 2. **User Interface Components**:
+
    - `FileUpload`: Handles file uploads and document parsing
    - `JobDescription`: Allows users to input job descriptions
    - `ResumePreview`: Displays the transformed resume
@@ -427,28 +432,24 @@ We've successfully implemented the core components of the ApplyRight feature:
 3. **API Integration**: Implemented the API route for transforming resumes using the Gemini API.
 
 4. **User Flow**:
-   - Upload resume (DOC, DOCX, TXT)
+   - Upload resume (PDF, DOC, DOCX, TXT)
    - Optionally add job description
    - Transform resume
    - View and download transformed resume and cover letter
 
 ### Known Issues and Limitations
 
-1. **PDF Support**: PDF parsing is temporarily disabled due to issues with the PDF.js library. Users are currently limited to uploading DOC, DOCX, and TXT files.
-
-2. **Future Enhancements**:
-   - Implement robust PDF parsing
+1. **Future Enhancements**:
    - Add more export format options
    - Enhance the resume transformation algorithm
    - Implement premium features for authenticated users
 
 ## Recent Changes
 
-- Implemented the ApplyRight feature with document parsing capabilities
-- Created UI components for the ApplyRight feature
-- Integrated with the Gemini API for resume transformation
-- Temporarily disabled PDF support due to library issues
-- Successfully built and tested the feature
+- Implemented PDF support in the ApplyRight feature using react-pdftotext
+- Updated the FileUpload component to accept PDF files
+- Updated the UI to reflect PDF support
+- Successfully tested the feature with PDF files
 
 ## Next Steps
 

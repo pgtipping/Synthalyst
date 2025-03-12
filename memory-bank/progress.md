@@ -1204,3 +1204,35 @@ The Interview Prep App is planned as a companion feature to ApplyRight and has n
 2. **API Rate Limiting**: Need to implement proper rate limiting for the API routes.
 3. **Error Handling**: Some edge cases may not be properly handled.
 4. **Performance Optimization**: Some components may need optimization for better performance.
+
+## ApplyRight Feature [2023-06-14]
+
+### What Works
+
+- ✅ Document parsing for PDF, DOC, DOCX, and TXT files
+- ✅ Resume upload and text extraction
+- ✅ Job description input
+- ✅ Resume transformation using Gemini API
+- ✅ Cover letter generation
+- ✅ Basic UI with step-by-step process
+- ✅ Mobile-responsive design
+- ✅ Error handling and user feedback
+
+### What's Left to Build
+
+- ⬜ Enhanced export options (DOCX, PDF)
+- ⬜ Premium features for authenticated users
+- ⬜ Iterative refinement for premium users
+- ⬜ Advanced optimization for premium users
+- ⬜ Multiple design templates
+- ⬜ LinkedIn-optimized version
+
+### Current Status
+
+The ApplyRight feature is functional with the core features implemented. Users can upload resumes in PDF, DOC, DOCX, or TXT format, optionally add a job description, and get a transformed resume and cover letter. The UI guides users through the process with clear steps and feedback.
+
+### Known Issues
+
+- ⚠️ Limited export options (currently text only)
+- ⚠️ Basic resume transformation (no advanced optimization)
+- ⚠️ No premium features implemented yet

@@ -1,6 +1,7 @@
 "use client";
 
 import mammoth from "mammoth";
+import pdfToText from "react-pdftotext";
 
 /**
  * Parse a document file and extract its text content
@@ -13,9 +14,7 @@ export async function parseDocument(file: File): Promise<string> {
   try {
     // Handle different file types
     if (fileType === "application/pdf") {
-      // For PDF files, we'll use a simpler approach for now
-      // In production, you might want to use a more robust solution
-      return "PDF parsing is temporarily disabled. Please upload a DOC, DOCX, or TXT file instead.";
+      return await parsePdf(file);
     } else if (
       fileType ===
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
@@ -31,6 +30,23 @@ export async function parseDocument(file: File): Promise<string> {
     console.error("Error parsing document:", error);
     throw new Error(
       "Failed to extract text from document. Please try a different file."
+    );
+  }
+}
+
+/**
+ * Parse a PDF document and extract its text content
+ * @param file The PDF document to parse
+ * @returns A promise that resolves to the extracted text
+ */
+async function parsePdf(file: File): Promise<string> {
+  try {
+    const text = await pdfToText(file);
+    return text.trim();
+  } catch (error) {
+    console.error("Error parsing PDF:", error);
+    throw new Error(
+      "Failed to extract text from PDF. Please try a different file format."
     );
   }
 }

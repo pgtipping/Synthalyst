@@ -792,11 +792,11 @@ try {
 
 # ApplyRight Feature Implementation - June 14, 2023
 
-## Document Parsing Strategy
+## Document Parsing Strategy - [2023-06-14]
 
-When implementing document parsing for the ApplyRight feature, we encountered issues with PDF.js integration. The PDF.js library requires specific configuration to work properly in a Next.js environment, particularly with its worker files.
+When implementing document parsing for the ApplyRight feature, we initially encountered issues with PDF.js integration. The PDF.js library required specific configuration to work properly in a Next.js environment, particularly with its worker files.
 
-### PDF.js Integration Issues
+### Initial PDF.js Integration Issues
 
 The main issue was that the PDF.js worker file couldn't be found during the build process, resulting in the error:
 
@@ -804,17 +804,35 @@ The main issue was that the PDF.js worker file couldn't be found during the buil
 Error: ENOENT: no such file or directory, open 'C:\Users\pgeor\OneDrive\Documents\Web Dev\synthalyst\nextjs-app\node_modules\pdfjs-dist\build\pdf.js'
 ```
 
-### Temporary Solution
+### Solution: react-pdftotext
 
-To ensure the feature works reliably, we've temporarily disabled PDF support and limited file uploads to DOC, DOCX, and TXT formats. This approach allows users to use the core functionality while we work on a more robust solution for PDF parsing.
+After researching alternatives, we implemented PDF support using the react-pdftotext package, which provides a lightweight client-side solution for extracting text from PDF files. This package works well with Next.js and doesn't require complex configuration.
 
-### Future PDF Integration Options
+Key benefits of react-pdftotext:
 
-For future implementation of PDF support, consider these options:
+1. Client-side processing (no server-side code needed)
+2. Simple API with Promise-based interface
+3. Lightweight with minimal dependencies
+4. Works well with Next.js without configuration issues
+5. Memory-safe implementation
 
-1. Use a CDN-hosted version of the PDF.js worker file
-2. Implement server-side PDF parsing
-3. Use a third-party API for PDF parsing
+Implementation:
+
+```typescript
+import pdfToText from "react-pdftotext";
+
+async function parsePdf(file: File): Promise<string> {
+  try {
+    const text = await pdfToText(file);
+    return text.trim();
+  } catch (error) {
+    console.error("Error parsing PDF:", error);
+    throw new Error(
+      "Failed to extract text from PDF. Please try a different file format."
+    );
+  }
+}
+```
 
 ## UI Component Structure
 

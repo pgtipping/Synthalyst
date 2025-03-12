@@ -764,7 +764,8 @@ The project has migrated from the old toast system to the new sonner toast syste
 ### Document Processing (ApplyRight Feature) - June 14, 2023
 
 - **mammoth**: For parsing Word documents (DOC, DOCX)
-- **PDF.js**: For parsing PDF documents (temporarily disabled)
+- **react-pdftotext**: For parsing PDF documents
+- **Native File API**: For parsing text files (TXT)
 
 ## Development Setup
 
