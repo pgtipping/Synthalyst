@@ -159,7 +159,10 @@ export default function Header() {
 
     return (
       <Link href="/login">
-        <Button variant="ghost" className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          className="flex items-center gap-2 text-gray-900 border-gray-400"
+        >
           <User className="w-4 h-4" />
           Login
         </Button>

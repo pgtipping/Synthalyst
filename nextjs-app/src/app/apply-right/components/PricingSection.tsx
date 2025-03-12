@@ -119,7 +119,11 @@ export function PricingSection({ isPremium, onUpgrade }: PricingSectionProps) {
               <span>Priority support</span>
             </li>
           </ul>
-          <Button variant="outline" className="w-full" asChild>
+          <Button
+            variant="outline"
+            className="w-full text-gray-900 border-gray-400 hover:bg-gray-100"
+            asChild
+          >
             <a href="/contact">Contact Sales</a>
           </Button>
         </div>

@@ -14,18 +14,18 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
-    <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
+    <nav className="flex items-center space-x-2 text-sm text-gray-700">
       {items.map((item, index) => (
         <div key={item.href} className="flex items-center">
           {index > 0 && <ChevronRight className="h-4 w-4 mx-2" />}
           {item.active ? (
-            <span className="text-foreground">{item.label}</span>
+            <span className="text-foreground font-medium">{item.label}</span>
           ) : (
             <Link
               href={item.href}
               className={cn(
-                "hover:text-foreground transition-colors",
-                item.active && "text-foreground"
+                "text-gray-700 hover:text-foreground transition-colors",
+                item.active && "text-foreground font-medium"
               )}
             >
               {item.label}
