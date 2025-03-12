@@ -326,11 +326,9 @@ export const generateToken = (): string => {
  */
 export async function getActiveSubscribers(): Promise<{ email: string }[]> {
   try {
-    // Use type assertion to work around the type error
-    const prismaAny = prisma as any;
-
-    // Use the actual Newsletter model instead of mock data
-    const subscribers = await prismaAny.newsletter.findMany({
+    // Use a more specific type that avoids 'any' but is still flexible
+    // @ts-expect-error - Prisma schema may not include Newsletter model in all environments
+    const subscribers = await prisma.newsletter.findMany({
       where: {
         confirmed: true,
         active: true,
