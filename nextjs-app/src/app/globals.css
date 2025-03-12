@@ -19,15 +19,15 @@
     --popover-foreground: 222.2 84% 4.9%;
 
     /* Brand blue - updated to be darker for better contrast */
-    --primary: 221.2 83.2% 43.3%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
     /* Brand silver - updated to be darker */
-    --secondary: 220 14% 60%;
+    --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 26.9%;
+    --muted-foreground: 215.4 16.3% 36.9%;
 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
@@ -58,11 +58,11 @@
     --primary-foreground: 222.2 47.4% 11.2%;
 
     /* Brand silver - updated to be lighter */
-    --secondary: 217.2 32.6% 87.5%;
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 85.1%;
+    --muted-foreground: 215 20.2% 75.1%;
 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;

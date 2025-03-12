@@ -57,15 +57,11 @@ export function PricingSection({ isPremium, onUpgrade }: PricingSectionProps) {
           </div>
           <div className="space-y-2">
             <h3 className="text-2xl font-bold">Premium</h3>
-            <p className="text-muted-foreground">
-              Advanced resume optimization
-            </p>
+            <p className="text-gray-700">Advanced resume optimization</p>
           </div>
           <div className="text-3xl font-bold">
             $9.99
-            <span className="text-base font-normal text-muted-foreground">
-              /month
-            </span>
+            <span className="text-base font-normal text-gray-700">/month</span>
           </div>
           <ul className="space-y-2 my-6">
             <li className="flex items-start">

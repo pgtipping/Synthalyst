@@ -12,20 +12,27 @@ import ClientLayout from "@/components/ClientLayout";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+// Import critical CSS
+import "./critical.css";
+
+// Configure fonts with display: swap for better performance
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const moonDance = Moon_Dance({
   variable: "--font-moon-dance",
   subsets: ["latin"],
   weight: "400",
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -203,6 +210,30 @@ export default function RootLayout({
           name="google-site-verification"
           content="google-site-verification-code"
         />
+        {/* Preload critical fonts */}
+        <link
+          rel="preload"
+          href="/fonts/geist-sans.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        {/* Add non-critical CSS with proper loading */}
+        <link rel="preload" href="/styles/non-critical.css" as="style" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              const link = document.createElement('link');
+              link.rel = 'stylesheet';
+              link.href = '/styles/non-critical.css';
+              document.head.appendChild(link);
+            `,
+          }}
+        />
+        {/* Fallback for browsers that don't support JS */}
+        <noscript>
+          <link rel="stylesheet" href="/styles/non-critical.css" />
+        </noscript>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${moonDance.variable} antialiased`}
