@@ -136,3 +136,33 @@ export async function processInboundEmail(email: {
     };
   }
 }
+
+// Function to send a reply to a contact submission
+export async function sendContactReply(
+  to: string,
+  subject: string,
+  htmlMessage: string,
+  fromName: string = "Synthalyst Support",
+  fromEmail: string = process.env.EMAIL_FROM || "noreply@synthalyst.com",
+  replyToEmail: string = process.env.EMAIL_REPLY_TO || "support@synthalyst.com"
+) {
+  try {
+    // Create a formatted from address with name
+    const from = `${fromName} <${fromEmail}>`;
+
+    // Send the email using the existing sendEmail function
+    await sendEmail({
+      to,
+      subject,
+      text: htmlMessage.replace(/<br>/g, "\n").replace(/<[^>]*>/g, ""), // Convert HTML to plain text
+      html: htmlMessage,
+      from,
+      replyTo: replyToEmail,
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error sending contact reply:", error);
+    return false;
+  }
+}

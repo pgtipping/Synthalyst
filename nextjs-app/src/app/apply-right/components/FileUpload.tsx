@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = async (selectedFile: File) => {
     // Check file type
@@ -94,6 +95,13 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
     [processFile]
   );
 
+  const openFileDialog = () => {
+    // Trigger click on the hidden file input
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div
@@ -101,12 +109,22 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
           dragActive
             ? "border-primary bg-primary/5"
             : "border-muted-foreground/25"
-        }`}
+        } ${!file && !isLoading ? "cursor-pointer" : ""}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
+        onClick={!file && !isLoading ? openFileDialog : undefined}
       >
+        <Input
+          ref={fileInputRef}
+          id="file-upload"
+          type="file"
+          className="hidden"
+          accept=".pdf,.doc,.docx,.txt"
+          onChange={handleFileChange}
+        />
+
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
@@ -127,7 +145,10 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
             </div>
             <Button
               variant="outline"
-              onClick={() => setFile(null)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the parent div's onClick
+                setFile(null);
+              }}
               className="mt-2"
             >
               Change File
@@ -145,18 +166,16 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
               </p>
             </div>
             <div className="flex justify-center">
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <Input
-                  id="file-upload"
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.doc,.docx,.txt"
-                  onChange={handleFileChange}
-                />
-                <Button variant="secondary" className="mt-2">
-                  Browse Files
-                </Button>
-              </label>
+              <Button
+                variant="secondary"
+                className="mt-2"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent double triggering
+                  openFileDialog();
+                }}
+              >
+                Browse Files
+              </Button>
             </div>
           </div>
         )}

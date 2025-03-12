@@ -34,7 +34,7 @@ export function HowItWorks() {
       icon: <Download className="h-8 w-8 text-primary" />,
       title: "Download & Apply",
       description:
-        "Download your transformed resume and cover letter, then apply with confidence knowing your application is optimized.",
+        "Download your transformed resume and cover letter as professional PDF documents, then apply with confidence knowing your application is optimized.",
     },
   ];
 
