@@ -19,6 +19,8 @@ import {
   Users,
   Mail,
   FileCheck,
+  Briefcase,
+  Package,
 } from "lucide-react";
 import { useToast } from "@/lib/toast-migration";
 import {
@@ -108,6 +110,16 @@ export default function Header() {
       icon: <FileCheck className="w-4 h-4 mr-2" />,
       title: "ApplyRight",
       href: "/apply-right",
+    },
+    {
+      icon: <Briefcase className="w-4 h-4 mr-2" />,
+      title: "Interview Prep",
+      href: "/interview-prep",
+    },
+    {
+      icon: <Package className="w-4 h-4 mr-2" />,
+      title: "Career Bundle",
+      href: "/career-bundle",
     },
   ];
 

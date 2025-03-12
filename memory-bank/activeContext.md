@@ -1,6 +1,80 @@
-# Active Development Context [2025-03-12 20:27:00]
+# Active Development Context [2024-07-10 10:30:00]
 
 ## Current Focus
+
+### ApplyRight and Interview Prep Integration [2024-07-10 10:30:00]
+
+We have successfully implemented data sharing functionality between the ApplyRight and Interview Prep applications, enhancing the user experience and creating a seamless workflow between these two tools:
+
+1. **ApplyRight Enhancements**:
+
+   - Added fields for job title and company name in the JobDescription component
+   - Implemented storage of job details, resume text, and timestamp in localStorage
+   - Added a "Next Steps" section with cards for Interview Prep and Career Bundle
+   - Updated the link to Interview Prep to include a query parameter `?from=applyright`
+
+2. **Interview Prep Enhancements**:
+
+   - Added detection of data coming from ApplyRight using the query parameter
+   - Implemented a timestamp system to track when data was imported
+   - Added a prominent notification card when data is imported from ApplyRight
+   - Created functionality to clear imported data if needed
+   - Added a back button to return to ApplyRight
+
+3. **Data Sharing Implementation**:
+   - When a user transforms their resume in ApplyRight, the job details and resume text are stored in localStorage
+   - A timestamp is also stored to track when the data was imported
+   - The Interview Prep page detects the imported data and displays a notification
+   - The job details form is pre-filled with the imported data
+   - The user can clear the imported data or return to ApplyRight if needed
+
+### Free vs. Premium User Functionality [2024-07-10 10:30:00]
+
+#### ApplyRight (Free Tier)
+
+- Resume Upload: Users can upload their resume in PDF, DOC, DOCX, or TXT format
+- Job Description Input: Users can enter job title, company name, and job description
+- Basic Resume Transformation: One-time transformation with professional enhancements
+- Basic ATS Optimization: Simple keyword alignment with job description
+- Resume Preview: View transformed resume with highlighted changes
+- Basic Export Options: Download transformed resume as PDF with standard formatting
+- Basic Cover Letter: Generate one cover letter based on resume and job description
+- Data Sharing: Job details and resume can be shared with Interview Prep app
+
+#### ApplyRight (Paid Tier)
+
+- All Free Tier Features: Everything in the free tier
+- Iterative Refinement: Multiple transformation iterations with specific directions
+- Advanced ATS Optimization: Industry-specific enhancements and competitive positioning
+- Multiple Design Templates: Various resume design options
+- Enhanced Export Options: Multiple file formats (PDF, DOCX) and LinkedIn-optimized versions
+- Advanced Cover Letter Options: Multiple templates and customizable tone/emphasis
+- Multiple Versions: Create different versions for different companies
+
+#### Interview Prep App (Free Tier)
+
+- Job Details Input: Users can enter job title, company, industry, job level, description, and required skills
+- Basic Interview Preparation Plan: Receive a tailored interview preparation plan
+- Practice Questions: Access to a limited set of practice questions (approximately 5) based on job details
+- Data Import from ApplyRight: Can receive and use job details and resume data from ApplyRight
+
+#### Interview Prep App (Paid Tier)
+
+- All Free Tier Features: Everything in the free tier
+- Comprehensive Question Set: Access to more practice questions (approximately 10)
+- Mock Interview Functionality: Interactive mock interviews with AI
+- Question Library: Access to a comprehensive library of interview questions organized by job type and industry
+- Performance Feedback: Receive feedback on interview responses
+- Export Functionality: Download interview prep plan as PDF
+
+### Career Bundle Benefits [2024-07-10 10:30:00]
+
+- Complete Solution: End-to-end job application journey with seamless workflow between apps
+- Data Sharing: Automatic sharing of job details and resume between apps
+- Cost Savings: 20% discount compared to individual subscriptions
+- Single Subscription Management: Manage both services under one subscription
+- Premium Features: Access to all premium features across both applications
+- Priority Support: Enhanced customer support for bundle subscribers
 
 ### Performance and Accessibility Optimization [2025-03-12 20:27:00]
 
@@ -74,6 +148,16 @@ The next phase of optimization will focus on:
 We are transitioning to Phase 3, focusing on Enhanced LLM Integration after completing Phase 2.
 
 ### Recent Updates
+
+#### ApplyRight and Interview Prep Integration [2024-07-10 10:30:00]
+
+- Implemented data sharing functionality between ApplyRight and Interview Prep
+- Added job title and company name fields to the JobDescription component
+- Implemented localStorage storage for job details, resume text, and timestamp
+- Added a "Next Steps" section in ApplyRight with cards for Interview Prep and Career Bundle
+- Created notification system in Interview Prep for data imported from ApplyRight
+- Added functionality to clear imported data and navigate back to ApplyRight
+- Fixed linter errors and improved overall user experience
 
 #### Accessibility and SEO Improvements Completed [2025-03-12 20:27:00]
 
@@ -193,6 +277,21 @@ Objectives:
 
 ## Recent Changes
 
+### ApplyRight and Interview Prep Integration [2024-07-10 10:30:00]
+
+- Implemented data sharing functionality between ApplyRight and Interview Prep:
+  - Added job title and company name fields to JobDescription component
+  - Implemented localStorage storage for job details, resume text, and timestamp
+  - Added "Next Steps" section in ApplyRight with cards for Interview Prep and Career Bundle
+  - Created notification system in Interview Prep for data imported from ApplyRight
+  - Added functionality to clear imported data and navigate back to ApplyRight
+  - Fixed linter errors and improved overall user experience
+- Enhanced the user flow between the two applications:
+  - Added query parameter to track when users come from ApplyRight
+  - Implemented timestamp tracking for data imports
+  - Created a clear visual indication of imported data
+  - Improved mobile responsiveness of both applications
+
 ### Blog Management Implementation [2024-03-11T08:30:00]
 
 - Created blog management page with comprehensive features:
@@ -239,10 +338,11 @@ Objectives:
 
 ## Next Steps
 
-1. Design LLM integration architecture
-2. Implement core AI features
-3. Add user feedback mechanisms
-4. Ensure performance optimization
+1. Continue performance optimization efforts
+2. Design LLM integration architecture
+3. Implement core AI features
+4. Add user feedback mechanisms
+5. Ensure performance optimization
 
 ### Admin Dashboard Implementation [2024-03-11T07:30:00]
 

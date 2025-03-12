@@ -30,9 +30,11 @@ import {
   Download,
   Sparkles,
   Loader2,
+  Briefcase,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { jsPDF } from "jspdf";
+import Link from "next/link";
 
 export default function ApplyRight() {
   const { data: session, status } = useSession();
@@ -47,6 +49,8 @@ export default function ApplyRight() {
   const [changesMade, setChangesMade] = useState<string[]>([]);
   const [keywordsExtracted, setKeywordsExtracted] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [jobTitle, setJobTitle] = useState("");
+  const [company, setCompany] = useState("");
 
   // Check if user is premium based on session
   const checkPremiumStatus = () => {
@@ -65,8 +69,14 @@ export default function ApplyRight() {
     setActiveTab("job-description");
   };
 
-  const handleJobDescriptionSubmit = (description: string) => {
+  const handleJobDescriptionSubmit = (
+    description: string,
+    title: string,
+    companyName: string
+  ) => {
     setJobDescription(description);
+    setJobTitle(title);
+    setCompany(companyName);
     // Auto-advance to next tab
     setActiveTab("transform");
   };
@@ -99,6 +109,23 @@ export default function ApplyRight() {
         setCoverLetter(data.coverLetter);
         setChangesMade(data.changesMade || []);
         setKeywordsExtracted(data.keywordsExtracted || []);
+
+        // Store job details for Interview Prep
+        const jobDetails = {
+          jobTitle,
+          company,
+          description: jobDescription,
+          requiredSkills: keywordsExtracted,
+        };
+        localStorage.setItem(
+          "applyRightJobDetails",
+          JSON.stringify(jobDetails)
+        );
+        localStorage.setItem("applyRightResumeText", resumeText);
+        localStorage.setItem(
+          "applyRightDataImportTime",
+          new Date().toLocaleString()
+        );
 
         // Auto-advance to next tab
         setActiveTab("results");
@@ -774,6 +801,10 @@ export default function ApplyRight() {
               <CardContent>
                 <JobDescription
                   value={jobDescription}
+                  jobTitle={jobTitle}
+                  company={company}
+                  onJobTitleChange={setJobTitle}
+                  onCompanyChange={setCompany}
                   onChange={setJobDescription}
                   onSubmit={handleJobDescriptionSubmit}
                 />
@@ -785,7 +816,15 @@ export default function ApplyRight() {
                 >
                   Back
                 </Button>
-                <Button onClick={() => setActiveTab("transform")}>
+                <Button
+                  onClick={() =>
+                    handleJobDescriptionSubmit(
+                      jobDescription,
+                      jobTitle,
+                      company
+                    )
+                  }
+                >
                   Next
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -993,14 +1032,64 @@ export default function ApplyRight() {
           </TabsContent>
         </Tabs>
 
-        <div className="space-y-12 mt-12">
-          <HowItWorks />
-          <FeaturesSection />
+        {transformedResume && (
+          <div className="bg-muted p-6 rounded-lg mt-8">
+            <h2 className="text-xl font-bold mb-4">Next Steps</h2>
+            <div className="flex flex-col md:flex-row gap-4">
+              <Card className="flex-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Prepare for Interviews
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Now that your resume is optimized, prepare for interviews
+                    with our AI-powered Interview Prep tool.
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild className="w-full">
+                    <Link href="/interview-prep?from=applyright">
+                      Go to Interview Prep
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="flex-1">
+                <CardHeader>
+                  <CardTitle>Save on Bundle</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Get ApplyRight and Interview Prep together at a discounted
+                    price with our Career Success Bundle.
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/career-bundle">
+                      View Bundle Options
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        <HowItWorks />
+        <FeaturesSection />
+        {!checkPremiumStatus() && (
           <PricingSection
-            isPremium={status === "authenticated"}
+            isPremium={checkPremiumStatus()}
             onUpgrade={handleSignIn}
           />
-        </div>
+        )}
       </div>
     </div>
   );
