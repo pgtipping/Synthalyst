@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { ToastProvider } from "@/components/ui/use-toast";
 
 // Import original components
 import ClientLayout from "@/components/ClientLayout";
@@ -207,14 +208,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${moonDance.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ClientLayout>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <Toaster />
-          <Analytics />
-          <SpeedInsights />
-        </ClientLayout>
+        <ToastProvider>
+          <ClientLayout>
+            <Header />
+            <main>{children}</main>
+            <Footer />
+            <Toaster />
+            <Analytics />
+            <SpeedInsights />
+          </ClientLayout>
+        </ToastProvider>
       </body>
     </html>
   );

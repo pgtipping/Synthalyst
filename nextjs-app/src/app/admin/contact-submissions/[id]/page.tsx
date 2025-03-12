@@ -15,8 +15,11 @@ import {
   Clock,
   Tag,
   AlertCircle,
-  MessageSquare,
+  User,
+  CornerDownRight,
 } from "lucide-react";
+import QuickReplyForm from "./components/QuickReplyForm";
+import ThreadTimeline from "./components/ThreadTimeline";
 
 // Define the ContactSubmission interface
 interface ContactSubmission {
@@ -82,7 +85,7 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
         TO_CHAR(csr."createdAt", 'YYYYMMDDHH24MISS')) as "reference"
     FROM "ContactSubmissionReply" csr
     WHERE csr."contactSubmissionId" = ${id}
-    ORDER BY csr."createdAt" DESC
+    ORDER BY csr."createdAt" ASC
   `;
 
   // Status badge colors
@@ -100,52 +103,138 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
     feedback: "bg-teal-100 text-teal-800",
   };
 
-  return (
-    <div className="space-y-6">
-      <Breadcrumb
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Admin", href: "/admin" },
-          { label: "Contact Submissions", href: "/admin/contact-submissions" },
-          {
-            label: "Details",
-            href: `/admin/contact-submissions/${id}`,
-            active: true,
-          },
-        ]}
-      />
+  // Format date for display
+  const formatDate = (date: Date | string) => {
+    return format(new Date(date), "MMM d, yyyy 'at' h:mm a");
+  };
 
+  // Check if there are related inbound emails
+  const relatedEmails = await prisma.inboundEmail.findMany({
+    where: {
+      fromEmail: submission.email,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 5,
+  });
+
+  // Create a combined thread of the original submission and all replies
+  const threadItems = [
+    {
+      id: submission.id,
+      type: "submission",
+      content: submission.message,
+      sender: submission.name,
+      email: submission.email,
+      createdAt: submission.createdAt,
+      reference: null,
+    },
+    ...replies.map((reply) => ({
+      id: reply.id,
+      type: "reply",
+      content: reply.content,
+      sender: "Admin",
+      email: "admin@synthalyst.com",
+      createdAt: reply.createdAt,
+      reference: reply.reference,
+    })),
+    ...relatedEmails.map((email) => ({
+      id: email.id,
+      type: "email",
+      content: email.textContent || email.htmlContent || "No content available",
+      sender: email.fromFull,
+      email: email.fromEmail,
+      createdAt: email.createdAt,
+      reference: null,
+    })),
+  ].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
+  return (
+    <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Submission Details</h1>
-        <Link href="/admin/contact-submissions">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to List
+        <Breadcrumb
+          items={[
+            { label: "Admin", href: "/admin" },
+            {
+              label: "Contact Submissions",
+              href: "/admin/contact-submissions",
+            },
+            { label: "Details", href: `/admin/contact-submissions/${id}` },
+          ]}
+        />
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/admin/contact-submissions">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Link>
           </Button>
-        </Link>
+          <DeleteSubmissionButton id={id} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Submission Info */}
-        <Card className="md:col-span-2">
+        {/* Contact Information */}
+        <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>Submission Information</CardTitle>
+            <CardTitle className="text-xl font-bold">
+              Contact Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold">{submission.subject}</h3>
-              <div className="flex flex-wrap gap-2 mt-2">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    statusColors[
-                      submission.status as keyof typeof statusColors
-                    ] || "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {submission.status}
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-3">
+              <User className="h-5 w-5 text-gray-500 mt-0.5" />
+              <div>
+                <h3 className="font-medium">{submission.name}</h3>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Mail className="h-4 w-4" />
+                  <a
+                    href={`mailto:${submission.email}`}
+                    className="hover:underline"
+                  >
+                    {submission.email}
+                  </a>
+                </div>
+                {submission.phone && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Phone className="h-4 w-4" />
+                    <a
+                      href={`tel:${submission.phone}`}
+                      className="hover:underline"
+                    >
+                      {submission.phone}
+                    </a>
+                  </div>
+                )}
+                {submission.company && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Building className="h-4 w-4" />
+                    <span>{submission.company}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-500">
+                  Submitted on {formatDate(submission.createdAt)}
                 </span>
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-500">
+                  Last updated on {formatDate(submission.updatedAt)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <Tag className="h-4 w-4 text-gray-500" />
                 <span
-                  className={`px-2 py-1 rounded-full text-xs ${
+                  className={`text-xs px-2 py-1 rounded-full ${
                     inquiryTypeColors[
                       submission.inquiryType as keyof typeof inquiryTypeColors
                     ] || "bg-gray-100 text-gray-800"
@@ -154,211 +243,79 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
                   {submission.inquiryType}
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-gray-500" />
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    statusColors[
+                      submission.status as keyof typeof statusColors
+                    ] || "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {submission.status}
+                </span>
+              </div>
             </div>
 
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                Message
-              </h4>
-              <div className="bg-muted/30 p-4 rounded-md whitespace-pre-wrap">
-                {submission.message}
-              </div>
+            <div className="pt-4">
+              <h3 className="font-medium mb-2">Subject</h3>
+              <p className="text-gray-700">{submission.subject}</p>
             </div>
 
             {submission.notes && (
-              <div className="border-t pt-4">
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  Admin Notes
-                </h4>
-                <div className="bg-muted/30 p-4 rounded-md whitespace-pre-wrap">
+              <div className="pt-4">
+                <h3 className="font-medium mb-2">Admin Notes</h3>
+                <p className="text-gray-700 whitespace-pre-wrap">
                   {submission.notes}
-                </div>
+                </p>
               </div>
             )}
+
+            <div className="pt-4 flex flex-col gap-2">
+              <Button asChild variant="outline" className="w-full">
+                <Link href={`/admin/contact-submissions/${id}/edit`}>
+                  Edit Submission
+                </Link>
+              </Button>
+              <Button asChild className="w-full">
+                <Link href={`/admin/contact-submissions/${id}/reply`}>
+                  Full Reply
+                </Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Contact Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
+        {/* Conversation Thread */}
+        <Card className="md:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-xl font-bold">
+              Conversation Thread
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">
+                {threadItems.length} message
+                {threadItems.length !== 1 ? "s" : ""}
+              </span>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                <span className="text-sm font-medium text-primary">
-                  {submission.name.charAt(0).toUpperCase()}
-                </span>
-              </span>
-              <div>
-                <h3 className="font-medium">{submission.name}</h3>
-              </div>
-            </div>
+          <CardContent className="space-y-6">
+            {/* Thread Timeline Component */}
+            <ThreadTimeline items={threadItems} />
 
-            <div className="flex items-center space-x-3">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <a
-                href={`mailto:${submission.email}`}
-                className="text-sm hover:underline"
-              >
-                {submission.email}
-              </a>
-            </div>
-
-            {submission.phone && (
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <a
-                  href={`tel:${submission.phone}`}
-                  className="text-sm hover:underline"
-                >
-                  {submission.phone}
-                </a>
-              </div>
-            )}
-
-            {submission.company && (
-              <div className="flex items-center space-x-3">
-                <Building className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{submission.company}</span>
-              </div>
-            )}
-
-            <div className="border-t my-4"></div>
-
-            <div className="flex items-center space-x-3">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">
-                {format(new Date(submission.createdAt), "MMMM d, yyyy")}
-              </span>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">
-                {format(new Date(submission.createdAt), "h:mm a")}
-              </span>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Tag className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{submission.inquiryType}</span>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <AlertCircle className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{submission.status}</span>
-            </div>
-
-            {submission.lastRepliedAt && (
-              <div className="flex items-center space-x-3">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">
-                  Last replied:{" "}
-                  {format(
-                    new Date(submission.lastRepliedAt),
-                    "MMM d, yyyy h:mm a"
-                  )}
-                </span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Reply History */}
-      {replies.length > 0 && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Reply History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {replies.map((reply, index) => (
-                <div
-                  key={reply.id}
-                  className={`relative pl-6 ${
-                    index !== replies.length - 1
-                      ? "before:absolute before:left-2 before:top-8 before:bottom-0 before:w-0.5 before:bg-border"
-                      : ""
-                  }`}
-                >
-                  <div className="relative bg-muted/30 p-4 rounded-md">
-                    {/* Visual connector dot */}
-                    <div className="absolute -left-6 top-6 w-4 h-4 rounded-full bg-primary/20 border-2 border-primary" />
-
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="space-y-1">
-                        <div className="text-sm text-muted-foreground">
-                          {format(new Date(reply.createdAt), "MMMM d, yyyy")}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {format(new Date(reply.createdAt), "h:mm a")}
-                        </div>
-                      </div>
-                      {reply.reference && (
-                        <div className="flex items-center space-x-2">
-                          <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-mono">
-                            {reply.reference}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="mt-3 prose prose-sm max-w-none">
-                      <div className="whitespace-pre-wrap">{reply.content}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {/* Quick Reply Form */}
+            <div className="pt-4 border-t border-gray-200">
+              <h3 className="font-medium mb-4 flex items-center gap-2">
+                <CornerDownRight className="h-4 w-4" />
+                Quick Reply
+              </h3>
+              <QuickReplyForm
+                submissionId={id}
+                recipientEmail={submission.email}
+              />
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-3">
-        <form
-          action={`/api/admin/contact-submissions/${id}/update-status`}
-          method="POST"
-        >
-          <input type="hidden" name="status" value="in-progress" />
-          <Button
-            type="submit"
-            variant="outline"
-            className="bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-          >
-            Mark as In Progress
-          </Button>
-        </form>
-
-        <form
-          action={`/api/admin/contact-submissions/${id}/update-status`}
-          method="POST"
-        >
-          <input type="hidden" name="status" value="resolved" />
-          <Button
-            type="submit"
-            variant="outline"
-            className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
-          >
-            Mark as Resolved
-          </Button>
-        </form>
-
-        <Link href={`/admin/contact-submissions/${id}/edit`}>
-          <Button variant="outline">Edit Notes</Button>
-        </Link>
-
-        <Link href={`/admin/contact-submissions/${id}/reply`}>
-          <Button
-            variant="outline"
-            className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200"
-          >
-            Reply
-          </Button>
-        </Link>
-
-        <DeleteSubmissionButton submissionId={id} />
       </div>
     </div>
   );

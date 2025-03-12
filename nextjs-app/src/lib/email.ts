@@ -1,76 +1,138 @@
-import sgMail from "@sendgrid/mail";
+import nodemailer from "nodemailer";
+import { prisma } from "@/lib/prisma";
 
-// Initialize SendGrid with API key
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-} else {
-  console.warn(
-    "SENDGRID_API_KEY is not set. Email functionality will not work."
-  );
-}
-
-export interface EmailData {
+interface EmailOptions {
   to: string;
-  from: string | { email: string; name: string };
-  replyTo?: string;
   subject: string;
   text: string;
-  html: string;
+  html?: string;
+  from?: string;
+  replyTo?: string;
 }
 
-/**
- * Send an email using SendGrid
- * @param emailData The email data to send
- * @returns A promise that resolves when the email is sent
- */
-export async function sendEmail(emailData: EmailData): Promise<boolean> {
+export async function sendEmail({
+  to,
+  subject,
+  text,
+  html,
+  from = process.env.EMAIL_FROM || "noreply@synthalyst.com",
+  replyTo = process.env.EMAIL_REPLY_TO || "support@synthalyst.com",
+}: EmailOptions) {
+  // Create a transporter
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_SERVER_HOST,
+    port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
+    secure: process.env.EMAIL_SERVER_SECURE === "true",
+    auth: {
+      user: process.env.EMAIL_SERVER_USER,
+      pass: process.env.EMAIL_SERVER_PASSWORD,
+    },
+  });
+
+  // Send the email
+  const info = await transporter.sendMail({
+    from,
+    to,
+    replyTo,
+    subject,
+    text,
+    html: html || text.replace(/\n/g, "<br>"),
+  });
+
+  return info;
+}
+
+// Function to parse incoming emails and create contact submissions
+export async function processInboundEmail(email: {
+  fromEmail: string;
+  fromFull: string;
+  subject: string;
+  textContent?: string;
+  htmlContent?: string;
+  reference?: string;
+}) {
   try {
-    if (!process.env.SENDGRID_API_KEY) {
-      console.error("Cannot send email: SENDGRID_API_KEY is not set");
-      return false;
+    const {
+      fromEmail,
+      fromFull,
+      subject,
+      textContent,
+      htmlContent,
+      reference,
+    } = email;
+
+    // Extract name from fromFull (e.g., "John Doe <john@example.com>")
+    const nameMatch = fromFull.match(/^([^<]+)</);
+    const name = nameMatch ? nameMatch[1].trim() : fromEmail.split("@")[0];
+
+    // Check if this is a reply to an existing submission
+    if (reference && reference.startsWith("REF-")) {
+      // Extract the submission ID from the reference
+      const submissionIdMatch = reference.match(/REF-([a-zA-Z0-9-]+)-/);
+
+      if (submissionIdMatch) {
+        const submissionId = submissionIdMatch[1];
+
+        // Check if the submission exists
+        const submission = await prisma.contactSubmission.findFirst({
+          where: {
+            id: {
+              startsWith: submissionId,
+            },
+          },
+        });
+
+        if (submission) {
+          // Create a reply
+          await prisma.contactSubmissionReply.create({
+            data: {
+              contactSubmissionId: submission.id,
+              content: textContent || htmlContent || "No content",
+              reference: reference,
+            },
+          });
+
+          // Update the submission status
+          await prisma.contactSubmission.update({
+            where: {
+              id: submission.id,
+            },
+            data: {
+              status: "in-progress",
+            },
+          });
+
+          return {
+            success: true,
+            action: "reply_created",
+            submissionId: submission.id,
+          };
+        }
+      }
     }
 
-    await sgMail.send(emailData as sgMail.MailDataRequired);
-    console.log(`Email sent successfully to ${emailData.to}`);
-    return true;
+    // If not a reply or submission not found, create a new submission
+    const newSubmission = await prisma.contactSubmission.create({
+      data: {
+        name,
+        email: fromEmail,
+        subject,
+        inquiryType: "email",
+        message: textContent || htmlContent || "No content",
+        status: "new",
+      },
+    });
+
+    return {
+      success: true,
+      action: "submission_created",
+      submissionId: newSubmission.id,
+    };
   } catch (error) {
-    console.error("Error sending email:", error);
-    return false;
+    console.error("Error processing inbound email:", error);
+    return {
+      success: false,
+      error: "Failed to process inbound email",
+    };
   }
-}
-
-/**
- * Send a reply to a contact submission
- * @param to Recipient email address
- * @param subject Email subject
- * @param message Email message (HTML)
- * @param fromName Name to display in the from field
- * @param replyToEmail Email address for replies
- * @param fromEmail Email address for the sender
- * @returns A promise that resolves to true if the email was sent successfully
- */
-export async function sendContactReply(
-  to: string,
-  subject: string,
-  message: string,
-  fromName: string = "Synthalyst Support",
-  replyToEmail?: string,
-  fromEmail?: string
-): Promise<boolean> {
-  const from = {
-    email: fromEmail || process.env.SENDGRID_FROM_EMAIL || "",
-    name: fromName,
-  };
-
-  // Format the message as HTML
-  const htmlMessage = message.replace(/\n/g, "<br>");
-
-  return sendEmail({
-    to,
-    from,
-    replyTo: replyToEmail,
-    subject,
-    text: message,
-    html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">${htmlMessage}</div>`,
-  });
 }
