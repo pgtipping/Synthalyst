@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "node scripts/handle-db-build.js && next build",
-    "start": "next start",
+    "start": "next start -p 3001",
     "lint": "next lint",
     "test": "dotenv -e .env.test -- jest",
     "test:watch": "dotenv -e .env.test -- jest --watch",
