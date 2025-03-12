@@ -54,8 +54,8 @@ export const sendWelcomeEmail = async (email: string): Promise<boolean> => {
           <p>You'll receive our newsletter with valuable content about:</p>
           <ul>
             <li>AI and machine learning developments</li>
-            <li>Training plan creation tips</li>
-            <li>Productivity enhancements</li>
+            <li>Exciting new product information</li>
+            <li>Application upgrades with new feature details</li>
             <li>And much more!</li>
           </ul>
           <p>If you have any questions or feedback, feel free to reply to this email.</p>
@@ -239,7 +239,10 @@ export const sendNewsletterToSubscribers = async (
 
       // Use a more specific type for batch sending
       interface BatchMessage {
-        personalizations: { to: string; substitutions: Record<string, string> }[];
+        personalizations: {
+          to: string;
+          substitutions: Record<string, string>;
+        }[];
         from: string;
         subject: string;
         html: string;
