@@ -1236,3 +1236,15 @@ The ApplyRight feature is functional with the core features implemented. Users c
 - ⚠️ Limited export options (currently text only)
 - ⚠️ Basic resume transformation (no advanced optimization)
 - ⚠️ No premium features implemented yet
+
+## What Works (2025-03-12)
+
+- **ApplyRight Feature**:
+  - Resume upload with drag-and-drop and click-anywhere functionality
+  - Document parsing for DOC, DOCX, TXT, and PDF formats
+  - Job description input with clear single-button navigation
+  - Resume transformation using Gemini API
+  - Cover letter generation
+  - PDF downloads for transformed documents
+  - Responsive UI with clear user guidance
+  - Premium feature indicators for authenticated users

@@ -842,19 +842,20 @@ async function parsePdf(file: File): Promise<string> {
 }
 ```
 
-## UI Component Structure
+## UI Component Structure (2025-03-12)
 
-The ApplyRight feature follows a step-by-step approach with these main components:
+The ApplyRight feature follows a step-by-step wizard pattern with the following components:
 
-1. `FileUpload`: Handles file uploads and document parsing
-2. `JobDescription`: Allows users to input job descriptions
-3. `ResumePreview`: Displays the transformed resume
-4. `CoverLetterPreview`: Displays the generated cover letter
-5. `HowItWorks`: Explains the ApplyRight process
-6. `FeaturesSection`: Showcases the features
-7. `PricingSection`: Displays pricing tiers
+1. **FileUpload** - Handles resume file uploads with drag-and-drop and click-to-browse functionality
+2. **JobDescription** - Allows users to input job description text with a single "Continue" button
+3. **Transform** - Processes the resume against the job description
+4. **Results** - Displays and allows download of transformed documents
 
-This modular approach makes the code more maintainable and easier to update.
+### UI Improvements
+
+- Made the entire drop area in FileUpload component clickable, not just the button
+- Removed redundant "Next" button in job description step to avoid confusion with the "Continue" button
+- Ensured consistent button placement and styling throughout the wizard flow
 
 ## API Integration
 

@@ -446,16 +446,16 @@ We've successfully implemented the core components of the ApplyRight feature:
    - Enhance the resume transformation algorithm
    - Implement premium features for authenticated users
 
-## Recent Changes
+## Recent Changes (2025-03-12)
 
-- Implemented PDF support in the ApplyRight feature using react-pdftotext with dynamic imports
-- Updated the document parser to handle PDF files on the client side only
-- Updated the FileUpload component to accept PDF files
-- Updated the UI to reflect PDF support
+- Fixed UI confusion in the ApplyRight feature by removing the redundant "Next" button in the job description step, leaving only the "Continue" button for a clearer user experience
+- Implemented client-side only PDF parsing in the ApplyRight feature using dynamic imports to avoid server-side rendering issues
+- Updated the FileUpload component to make the entire drop area clickable, improving usability
+- Added PDF support to the ApplyRight feature using the react-pdftotext package
+- Updated the document parser to handle PDF files on the client side
+- Modified the FileUpload component to accept PDF files
+- Updated UI to reflect PDF support
 - Successfully tested the feature with PDF files
-- Enhanced the download functionality to generate professional PDF documents instead of plain text files
-- Added proper PDF formatting with headers, footers, and intelligent text layout
-- Updated UI text to clearly indicate PDF download options
 
 ## Next Steps
 

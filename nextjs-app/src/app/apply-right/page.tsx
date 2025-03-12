@@ -390,12 +390,16 @@ export default function ApplyRight() {
                   onSubmit={handleJobDescriptionSubmit}
                 />
               </CardContent>
-              <CardFooter className="flex justify-start">
+              <CardFooter className="flex justify-between">
                 <Button
                   variant="outline"
                   onClick={() => setActiveTab("upload")}
                 >
                   Back
+                </Button>
+                <Button onClick={() => setActiveTab("transform")}>
+                  Next
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardFooter>
             </Card>
