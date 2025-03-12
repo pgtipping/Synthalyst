@@ -676,14 +676,36 @@ model NewsletterBounceEvent {
 }
 
 model NewsletterUnsubscribeEvent {
-  id           String               @id @default(cuid())
-  newsletterId String
-  subscriberId String
-  reason       String?
-  createdAt    DateTime             @default(now())
-  newsletter   NewsletterSend       @relation(fields: [newsletterId], references: [id])
-  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+  id            String    @id @default(cuid())
+  subscriberId  String
+  sendId        String?
+  createdAt     DateTime  @default(now())
+  ipAddress     String?
+  userAgent     String?
+  subscriber    NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+  send          NewsletterSend?      @relation(fields: [sendId], references: [id])
 
-  @@index([newsletterId])
   @@index([subscriberId])
+  @@index([sendId])
+}
+
+// Inbound Email Processing
+
+model InboundEmail {
+  id              String    @id @default(cuid())
+  fromEmail       String
+  fromFull        String
+  to              String
+  subject         String
+  textContent     String?   @db.Text
+  htmlContent     String?   @db.Text
+  attachmentCount Int       @default(0)
+  processed       Boolean   @default(false)
+  processedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  notes           String?   @db.Text
+  
+  @@index([fromEmail])
+  @@index([processed])
 }

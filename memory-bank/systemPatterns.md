@@ -1001,3 +1001,75 @@ flowchart TD
 - Integration testing
 - Accessibility testing
 - Performance testing
+
+## Email System Architecture [2025-03-12T00:30:00]
+
+### SendGrid Integration
+
+The application uses SendGrid for all email-related functionality:
+
+1. **Transactional Emails**
+
+   - Welcome emails for new users and newsletter subscribers
+   - Password reset emails
+   - Notification emails
+
+2. **Newsletter Management**
+
+   - Subscription management
+   - Email campaigns
+   - Analytics tracking
+
+3. **Inbound Email Processing**
+   - Email reply handling via webhook
+   - Support ticket creation from emails
+   - Email-to-task conversion
+
+### Email Webhook System
+
+The application implements a webhook endpoint at `/api/webhooks/email` that processes incoming emails from SendGrid's Inbound Parse feature:
+
+1. **Configuration**
+
+   - Receiving domain: synthalyst.com
+   - Destination URL: https://synthalyst.com/api/webhooks/email
+   - MX Records properly configured for the domain
+
+2. **Processing Logic**
+
+   - Email classification based on recipient address
+   - Newsletter reply handling
+   - Support email processing
+   - General email storage
+
+3. **Data Storage**
+
+   - `InboundEmail` model for storing general emails
+   - `NewsletterReply` model for newsletter-specific replies
+   - Proper email parsing and content extraction
+
+4. **Security Considerations**
+   - Webhook authentication
+   - Email validation
+   - Content sanitization
+
+### Email Templates
+
+All email templates follow a consistent structure:
+
+1. **Header**
+
+   - Logo
+   - Navigation links (when applicable)
+
+2. **Body**
+
+   - Main content section
+   - Call-to-action buttons
+   - Supporting information
+
+3. **Footer**
+   - Unsubscribe links (for newsletters)
+   - Contact information
+   - Social media links
+   - Legal disclaimers
