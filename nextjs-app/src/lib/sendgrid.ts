@@ -1,8 +1,27 @@
 import sgMail from "@sendgrid/mail";
 // Restore the Prisma import since we now have the Newsletter model
 import { prisma } from "@/lib/prisma";
-// Remove unused imports since we're using mock data for now
-// import { PrismaClient } from "@prisma/client";
+// Import PrismaClient for type definition
+import { PrismaClient } from "@prisma/client";
+
+// Define a type for the newsletter model
+interface NewsletterModel {
+  findMany: (args: {
+    where?: {
+      confirmed?: boolean;
+      active?: boolean;
+      unsubscribed?: boolean;
+    };
+    select?: {
+      email?: boolean;
+    };
+  }) => Promise<{ email: string }[]>;
+}
+
+// Define a type for Prisma with optional newsletter property
+interface PrismaWithNewsletter extends PrismaClient {
+  newsletter?: NewsletterModel;
+}
 
 // Set your SendGrid API key
 let sendgridInitialized = false;
@@ -326,9 +345,27 @@ export const generateToken = (): string => {
  */
 export async function getActiveSubscribers(): Promise<{ email: string }[]> {
   try {
-    // Use a more specific type that avoids 'any' but is still flexible
-    // @ts-expect-error - Prisma schema may not include Newsletter model in all environments
-    const subscribers = await prisma.newsletter.findMany({
+    // Cast prisma to our extended type
+    const prismaClient = prisma as PrismaWithNewsletter;
+
+    // Check if the Newsletter model exists in the Prisma client
+    if (!prismaClient || !prismaClient.newsletter) {
+      console.warn("Newsletter model not found in Prisma client");
+
+      // For development, return mock data if configured
+      if (
+        process.env.NODE_ENV === "development" &&
+        process.env.MOCK_NEWSLETTER === "true"
+      ) {
+        console.log("DEV MODE: Returning mock subscribers");
+        return [{ email: "test1@example.com" }, { email: "test2@example.com" }];
+      }
+
+      return [];
+    }
+
+    // Safely access the newsletter model with proper typing
+    const subscribers = await prismaClient.newsletter.findMany({
       where: {
         confirmed: true,
         active: true,
