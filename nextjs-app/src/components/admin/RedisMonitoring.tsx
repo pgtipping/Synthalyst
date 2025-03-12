@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -17,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 interface RedisMetrics {
   timestamp: string;
@@ -57,7 +59,6 @@ export function RedisMonitoring() {
   const [metrics, setMetrics] = useState<RedisMetrics | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   // Function to fetch metrics
   const fetchMetrics = async () => {
@@ -77,52 +78,30 @@ export function RedisMonitoring() {
 
       const data = await response.json();
       setMetrics(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch metrics");
-      toast({
-        title: "Error",
-        description: "Failed to fetch Redis metrics",
-        variant: "destructive",
-      });
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch metrics"
+      );
+      toast.error("Failed to fetch Redis metrics");
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to reset metrics
-  const resetMetrics = async (
-    action: "reset_metrics" | "reset_cache" | "reset_rate_limits"
-  ) => {
+  const handleResetMetrics = async () => {
     try {
-      setLoading(true);
-      const response = await fetch("/api/monitoring/redis", {
+      const response = await fetch("/api/monitoring/redis/reset", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_API_KEY}`,
-        },
-        body: JSON.stringify({ action }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.ok) {
+        toast.success("Redis metrics have been reset successfully.");
+        fetchMetrics();
+      } else {
+        toast.error("Failed to reset metrics. Please try again.");
       }
-
-      toast({
-        title: "Success",
-        description: `Successfully reset ${action.replace("_", " ")}`,
-      });
-
-      // Refresh metrics after reset
-      await fetchMetrics();
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: `Failed to reset ${action.replace("_", " ")}`,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -297,25 +276,11 @@ export function RedisMonitoring() {
         </CardHeader>
         <CardContent className="flex gap-4">
           <Button
-            onClick={() => resetMetrics("reset_metrics")}
+            onClick={() => handleResetMetrics()}
             disabled={loading}
             variant="outline"
           >
             Reset Metrics
-          </Button>
-          <Button
-            onClick={() => resetMetrics("reset_cache")}
-            disabled={loading}
-            variant="outline"
-          >
-            Clear Cache
-          </Button>
-          <Button
-            onClick={() => resetMetrics("reset_rate_limits")}
-            disabled={loading}
-            variant="outline"
-          >
-            Reset Rate Limits
           </Button>
         </CardContent>
       </Card>
