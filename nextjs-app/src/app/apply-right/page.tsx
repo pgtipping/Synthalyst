@@ -169,11 +169,11 @@ export default function ApplyRight() {
     }
 
     // Set up the document with a professional header
-    doc.setFillColor(240, 240, 240);
+    doc.setFillColor(245, 245, 245);
     doc.rect(0, 0, pageWidth, 35, "F");
 
     // Add candidate name as header
-    doc.setTextColor(50, 50, 50);
+    doc.setTextColor(40, 40, 40);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.text(candidateName, pageWidth / 2, 15, { align: "center" });
@@ -185,7 +185,7 @@ export default function ApplyRight() {
         lines[i].includes("|") ||
         (lines[i].includes("[") && lines[i].includes("]"))
       ) {
-        contactInfo = lines[i].trim();
+        contactInfo = lines[i].replace(/\[|\]/g, "").trim();
         break;
       }
     }
@@ -262,6 +262,7 @@ export default function ApplyRight() {
         line.trim().startsWith("-") ||
         line.trim().startsWith("*")
       ) {
+        // Clean up the bullet text by removing the bullet character
         const bulletText = line.trim().substring(1).trim();
 
         // Determine indentation level based on leading spaces
@@ -312,7 +313,7 @@ export default function ApplyRight() {
         // Style for company/position
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
-        doc.setTextColor(50, 50, 50);
+        doc.setTextColor(40, 40, 40);
 
         const textLines = doc.splitTextToSize(line.trim(), contentWidth);
         doc.text(textLines, margin, yPosition);
@@ -389,115 +390,144 @@ export default function ApplyRight() {
     });
 
     // Document margins and dimensions
-    const margin = 20;
+    const margin = 25; // Wider margins for a formal letter
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
 
-    // Split text into lines for processing
+    // Split the cover letter into lines
     const lines = coverLetter.split("\n");
-    let yPosition = 30;
 
-    // Try to extract recipient name and company if available
-    let recipientName = "";
-    let companyName = "";
-
-    // Look for "Dear" line to extract recipient info
-    for (let i = 0; i < Math.min(15, lines.length); i++) {
-      if (lines[i].trim().startsWith("Dear ")) {
-        const dearLine = lines[i].trim();
-        recipientName = dearLine.replace("Dear ", "").replace(",", "").trim();
-
-        // Try to extract company name from the next few lines
-        for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
-          if (
-            lines[j].includes("Company") ||
-            lines[j].includes("Inc") ||
-            lines[j].includes("Ltd")
-          ) {
-            companyName = lines[j].trim();
-            break;
-          }
-        }
-        break;
-      }
-    }
-
-    // Find date if present
-    let dateString = "";
-    for (let i = 0; i < Math.min(5, lines.length); i++) {
-      if (
-        lines[i].match(
-          /^(January|February|March|April|May|June|July|August|September|October|November|December)/i
-        )
-      ) {
-        dateString = lines[i].trim();
-        break;
-      }
-    }
-
-    // Add date at the top right if found
-    if (dateString) {
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(11);
-      doc.setTextColor(80, 80, 80);
-      doc.text(dateString, pageWidth - margin, 30, { align: "right" });
-      yPosition = 45;
-    }
-
-    // Add sender info at the top left (extract from the bottom of the letter)
+    // Extract sender information (usually at the top)
     let senderName = "";
-    for (let i = lines.length - 1; i >= Math.max(0, lines.length - 10); i--) {
+    const senderInfo = [];
+    const recipientInfo = [];
+    let dateInfo = "";
+    let contentStartIndex = 0;
+
+    // Process the header section to extract sender, recipient, and date
+    for (let i = 0; i < Math.min(20, lines.length); i++) {
       const line = lines[i].trim();
+
+      // Skip empty lines
+      if (line === "") continue;
+
+      // Try to find the sender's name (usually the first non-empty line)
       if (
-        line &&
-        !line.startsWith("Sincerely") &&
-        !line.includes("Thank you")
+        !senderName &&
+        line.length > 0 &&
+        !line.includes("*") &&
+        !line.includes("[")
       ) {
         senderName = line;
+        continue;
+      }
+
+      // Collect sender contact information
+      if (
+        senderName &&
+        senderInfo.length < 3 &&
+        !line.includes("*") &&
+        !line.includes("[")
+      ) {
+        senderInfo.push(line);
+        continue;
+      }
+
+      // Try to find the date (usually contains numbers and months)
+      if (
+        !dateInfo &&
+        (line.match(/\b\d{1,2}(st|nd|rd|th)?\b/) ||
+          line.match(
+            /\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/
+          ) ||
+          line.match(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/))
+      ) {
+        dateInfo = line.replace(/\*/g, "").trim();
+        continue;
+      }
+
+      // Collect recipient information (usually after sender info and before greeting)
+      if (
+        senderInfo.length > 0 &&
+        !line.startsWith("Dear") &&
+        !line.includes("*") &&
+        line !== ""
+      ) {
+        recipientInfo.push(line);
+        continue;
+      }
+
+      // Find where the actual content starts (usually with "Dear" or a greeting)
+      if (
+        line.startsWith("Dear") ||
+        line.includes("Dear") ||
+        line.includes("To Whom")
+      ) {
+        contentStartIndex = i;
         break;
       }
     }
 
+    // Set up the document with a professional header
+    let yPosition = 30;
+
+    // Add sender information at the top
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(40, 40, 40);
+
     if (senderName) {
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      doc.setTextColor(50, 50, 50);
-      doc.text(senderName, margin, 30);
+      doc.text(senderName, margin, yPosition);
+      yPosition += 6;
     }
 
-    // Add recipient info
-    if (recipientName) {
-      yPosition = Math.max(yPosition, 60);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(11);
-      doc.setTextColor(50, 50, 50);
-      doc.text(recipientName, margin, yPosition);
+    // Add sender contact details
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(60, 60, 60);
+
+    senderInfo.forEach((info) => {
+      doc.text(info, margin, yPosition);
       yPosition += 5;
+    });
 
-      if (companyName) {
-        doc.text(companyName, margin, yPosition);
-        yPosition += 5;
-      }
+    // Add some space after sender info
+    yPosition += 10;
 
+    // Add date
+    if (dateInfo) {
+      doc.text(dateInfo, margin, yPosition);
+      yPosition += 10;
+    } else {
+      // Add current date if no date found
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+      doc.text(formattedDate, margin, yPosition);
       yPosition += 10;
     }
+
+    // Add recipient information
+    doc.setFont("helvetica", "normal");
+    recipientInfo.forEach((info) => {
+      doc.text(info, margin, yPosition);
+      yPosition += 5;
+    });
+
+    // Add space after recipient info
+    yPosition += 10;
 
     // Process the cover letter content
     let inGreeting = false;
     let inClosing = false;
+    let paragraphStart = true;
 
     // Process line by line for better control
-    lines.forEach((line, index) => {
-      // Skip lines we've already processed
-      if (
-        (index < 5 && line.trim() === dateString) ||
-        line.trim() === senderName ||
-        line.trim() === recipientName ||
-        line.trim() === companyName ||
-        line.trim() === ""
-      ) {
-        return;
-      }
+    for (let i = contentStartIndex; i < lines.length; i++) {
+      const line = lines[i].trim();
 
       // Check if we need a new page
       if (yPosition > 270) {
@@ -505,89 +535,69 @@ export default function ApplyRight() {
         yPosition = 30;
       }
 
-      // Handle greeting line (Dear...)
-      if (line.trim().startsWith("Dear ") || line.trim().startsWith("To ")) {
-        inGreeting = true;
+      // Skip empty lines but mark paragraph start
+      if (line === "") {
+        yPosition += 5;
+        paragraphStart = true;
+        continue;
+      }
+
+      // Detect greeting (usually starts with "Dear")
+      if (line.startsWith("Dear") || line.includes("To Whom")) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(11);
-        doc.setTextColor(50, 50, 50);
-
-        const textLines = doc.splitTextToSize(line.trim(), contentWidth);
-        doc.text(textLines, margin, yPosition);
-
-        yPosition += 6 * textLines.length;
-        return;
+        doc.setTextColor(40, 40, 40);
+        doc.text(line, margin, yPosition);
+        yPosition += 10;
+        inGreeting = true;
+        continue;
       }
 
-      // Handle closing line (Sincerely, etc.)
-      if (
-        line.trim().startsWith("Sincerely,") ||
-        line.trim().startsWith("Best regards,") ||
-        line.trim().startsWith("Regards,") ||
-        line.trim().startsWith("Yours truly,") ||
-        line.trim().startsWith("Thank you,")
-      ) {
-        inClosing = true;
-        yPosition += 5; // Add extra space before closing
-
-        doc.setFont("helvetica", "italic");
-        doc.setFontSize(11);
-        doc.setTextColor(50, 50, 50);
-
-        const textLines = doc.splitTextToSize(line.trim(), contentWidth);
-        doc.text(textLines, margin, yPosition);
-
-        yPosition += 6 * textLines.length;
-        return;
-      }
-
-      // Handle signature line (after closing)
-      if (inClosing && line.trim() && line.trim() !== senderName) {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(50, 50, 50);
-
-        const textLines = doc.splitTextToSize(line.trim(), contentWidth);
-        doc.text(textLines, margin, yPosition);
-
-        yPosition += 6 * textLines.length;
-        return;
-      }
-
-      // Handle date line
+      // Detect closing (usually "Sincerely", "Best regards", etc.)
       if (
         line.match(
-          /^(January|February|March|April|May|June|July|August|September|October|November|December)/i
-        ) &&
-        !dateString
+          /^(Sincerely|Best regards|Regards|Yours truly|Respectfully|Thank you)/i
+        )
       ) {
-        // Skip if we already processed the date
-        return;
+        // Add extra space before closing
+        yPosition += 5;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.setTextColor(40, 40, 40);
+        doc.text(line, margin, yPosition);
+        inClosing = true;
+        yPosition += 15; // Space for signature
+        continue;
       }
 
-      // Regular paragraph
+      // Handle signature after closing
+      if (inClosing) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text(senderName || "Applicant Name", margin, yPosition);
+        inClosing = false;
+        continue;
+      }
+
+      // Regular paragraphs
       doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
-      doc.setTextColor(50, 50, 50);
-
-      // First paragraph after greeting gets special treatment
-      if (inGreeting && !inClosing) {
-        inGreeting = false; // Reset after first paragraph
-
-        // Add extra space after greeting
-        if (yPosition < 90) yPosition = 90;
-      }
+      doc.setTextColor(40, 40, 40);
 
       // Wrap and add the text
-      const textLines = doc.splitTextToSize(line.trim(), contentWidth);
-      doc.text(textLines, margin, yPosition);
+      const textLines = doc.splitTextToSize(line, contentWidth);
+
+      // Add paragraph indentation for paragraph starts
+      if (paragraphStart && !inGreeting) {
+        doc.text(textLines, margin, yPosition);
+      } else {
+        doc.text(textLines, margin, yPosition);
+      }
 
       // Move position based on number of wrapped lines
       yPosition += 6 * textLines.length;
-
-      // Add paragraph spacing
-      yPosition += 3;
-    });
+      paragraphStart = false;
+    }
 
     // Add footer with page numbers
     const pageCount = doc.getNumberOfPages();
@@ -600,14 +610,14 @@ export default function ApplyRight() {
       });
     }
 
-    // Save the PDF with a professional name
+    // Save the PDF with the sender's name if available
     const filename = senderName
       ? `${senderName.replace(/\s+/g, "_")}_Cover_Letter.pdf`
       : "Professional_Cover_Letter.pdf";
 
     doc.save(filename);
 
-    toast.success("Cover letter downloaded as PDF successfully!");
+    toast.success("Cover Letter downloaded as PDF successfully!");
   };
 
   const handleSignIn = () => {

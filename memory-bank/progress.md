@@ -1280,3 +1280,20 @@ The ApplyRight feature is functional with the core features implemented. Users c
   - Updated the API endpoint for updating submission status
   - Fixed type error in the admin page
   - Created a new API endpoint for updating contact submission status
+
+## Recent Progress (2023-07-15)
+
+### ApplyRight Feature Enhancements
+
+We've successfully implemented significant improvements to the ApplyRight feature:
+
+- ✅ Enhanced the resume preview component with better formatting and styling
+- ✅ Improved the cover letter preview component with professional typography and layout
+- ✅ Upgraded the PDF generation functionality for both resumes and cover letters
+- ✅ Fixed bullet point duplication issues in the resume preview
+- ✅ Cleaned up formatting for section headers by removing asterisks and adding border styling
+- ✅ Improved display of candidate name and contact information
+- ✅ Added special formatting for different document sections
+- ✅ Implemented dynamic filename generation based on user information
+
+These enhancements provide a more professional and polished experience for users, making the ApplyRight feature more valuable and user-friendly.

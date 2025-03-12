@@ -959,3 +959,43 @@ The PDF generation for both resumes and cover letters has been significantly imp
    - Consistent styling throughout the document
 
 These improvements significantly enhance the user experience by providing more professional-looking previews and downloads, making the ApplyRight feature more valuable to users.
+
+### ApplyRight UI and PDF Improvements - [2023-07-15]
+
+- The resume preview component uses intelligent section detection to apply appropriate styling:
+
+  - Candidate name (usually at the top, often with asterisks) gets large, centered styling
+  - Contact information (contains |, @, or brackets) gets centered, smaller styling
+  - Section headers (contains \*\* or starts with #) get bold styling with a bottom border
+  - Bullet points are rendered with CSS styling instead of text bullets to avoid duplication
+  - Company/position lines (contains Ltd, Inc, LLC, or dates) get semi-bold styling
+  - Summary sections get slightly lighter text color
+
+- The cover letter preview component uses special formatting for different sections:
+
+  - Date lines (contains month names or date formats) are right-aligned
+  - Sender and recipient information get proper spacing
+  - Greeting lines (starts with "Dear" or "To Whom") get extra spacing
+  - Closing lines (Sincerely, Best regards, etc.) get special formatting
+  - Signature lines get bold styling with extra spacing
+  - All text uses serif fonts for a more formal appearance
+
+- Resume PDF generation includes:
+
+  - Professional header with light gray background
+  - Candidate name extraction from the first few lines
+  - Contact information display below the name
+  - Section headers with background color and divider lines
+  - Bullet points with proper indentation based on the original spacing
+  - Special handling for company/position lines
+  - Different styling for summary sections
+  - Page numbers in the footer
+  - Dynamic filename based on candidate name
+
+- Cover Letter PDF generation includes:
+  - Proper business letter format with wider margins
+  - Intelligent extraction of sender, recipient, and date information
+  - Special formatting for greeting and closing sections
+  - Proper paragraph spacing for readability
+  - Page numbers in the footer
+  - Dynamic filename based on sender name

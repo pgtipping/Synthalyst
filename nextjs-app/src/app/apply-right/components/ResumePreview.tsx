@@ -1,51 +1,82 @@
 "use client";
 
 import React from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
 
 interface ResumePreviewProps {
   content: string;
 }
 
-export function ResumePreview({ content }: ResumePreviewProps) {
-  // Format the content with proper line breaks and spacing
-  const formattedContent = content.split("\n").map((line, index, array) => {
-    // Check if the line is a header (starts with # or ##) or contains ** for emphasis
-    if (line.startsWith("# ") || line.startsWith("## ")) {
-      const headerText = line.replace(/^#+ /, "");
+const ResumePreview: React.FC<ResumePreviewProps> = ({ content }) => {
+  if (!content) {
+    return (
+      <div className="p-4 border rounded-md bg-white shadow-sm min-h-[500px] text-gray-400 flex items-center justify-center">
+        <p>Your resume preview will appear here...</p>
+      </div>
+    );
+  }
+
+  // Split the content into lines
+  const lines = content.split("\n");
+
+  // Format the content with proper styling
+  const formattedContent = lines.map((line, index) => {
+    // Skip empty lines
+    if (line.trim() === "") {
+      return <div key={index} className="h-4"></div>;
+    }
+
+    // Clean text by removing unwanted characters
+    const cleanText = (text: string) => {
+      return text.replace(/\*/g, "").replace(/\[|\]/g, "");
+    };
+
+    // Check if this is a candidate name line (usually at the top, often with asterisks)
+    if (
+      index < 3 &&
+      (line.includes("*[Candidate Name]*") ||
+        (line.includes("**") && !line.includes("|") && !line.includes("@")))
+    ) {
       return (
-        <h3 key={index} className="font-bold text-lg mt-6 mb-2 text-primary">
-          {headerText}
-        </h3>
+        <h1
+          key={index}
+          className="text-2xl font-bold text-center mb-2 text-gray-800"
+        >
+          {cleanText(line)}
+        </h1>
       );
     }
 
-    // Check if the line contains a name (usually at the top of the resume)
+    // Check if this is contact information (usually contains | or email symbols)
     if (
-      line.includes("*[Candidate Name]*") ||
-      (index < 3 && line.includes("**"))
+      index < 5 &&
+      (line.includes("|") ||
+        line.includes("@") ||
+        (line.includes("[") && line.includes("]")))
     ) {
       return (
-        <h2 key={index} className="font-bold text-2xl mt-2 mb-4 text-center">
-          {line.replace(/\*/g, "")}
-        </h2>
-      );
-    }
-
-    // Handle contact information line (usually contains phone, email, LinkedIn)
-    if (
-      (index < 5 && line.includes("[") && line.includes("]")) ||
-      (index < 5 && line.includes("|"))
-    ) {
-      return (
-        <div key={index} className="text-center mb-4 text-muted-foreground">
-          {line}
+        <div key={index} className="text-center text-sm text-gray-600 mb-4">
+          {cleanText(line)}
         </div>
       );
     }
 
-    // Check if the line is a bullet point
+    // Check if this is a section header (marked with asterisks or starting with #)
+    if (
+      (line.includes("**") && line.trim().length < 50) ||
+      line.startsWith("# ") ||
+      line.startsWith("## ")
+    ) {
+      return (
+        <h2
+          key={index}
+          className="text-lg font-bold mt-4 mb-2 pb-1 text-gray-800 border-b border-gray-300"
+        >
+          {cleanText(line)}
+        </h2>
+      );
+    }
+
+    // Check if this is a bullet point
     if (
       line.trim().startsWith("•") ||
       line.trim().startsWith("-") ||
@@ -57,56 +88,41 @@ export function ResumePreview({ content }: ResumePreviewProps) {
         ? Math.floor(indentMatch[0].length / 2)
         : 0;
 
-      return (
-        <li
-          key={index}
-          className={cn(
-            "ml-6 pl-2 mb-1.5 relative before:absolute before:content-[''] before:w-1.5 before:h-1.5 before:bg-primary/70 before:rounded-full before:left-[-0.75rem] before:top-[0.5rem]",
-            indentLevel > 0 && `ml-${6 + indentLevel * 4}`
-          )}
-        >
-          {line.trim().substring(1).trim()}
-        </li>
-      );
-    }
+      // Remove the bullet character and clean the text
+      const bulletText = cleanText(line.trim().substring(1).trim());
 
-    // Handle section titles (often marked with asterisks)
-    if (line.includes("**") && line.trim().length < 50) {
-      const cleanText = line.replace(/\*/g, "");
       return (
-        <h4
+        <div
           key={index}
-          className="font-semibold text-base mt-4 mb-2 border-b pb-1 border-muted"
+          className="flex mb-1 text-gray-700"
+          style={{ paddingLeft: `${indentLevel * 1.5}rem` }}
         >
-          {cleanText}
-        </h4>
-      );
-    }
-
-    // Handle company or position lines (often have dates at the end)
-    if (
-      line.includes("Ltd") ||
-      line.includes("Inc") ||
-      line.includes("LLC") ||
-      (line.includes("-") && (line.includes("20") || line.includes("19")))
-    ) {
-      return (
-        <div key={index} className="font-medium mt-3 mb-1">
-          {line}
+          <span className="mr-2">•</span>
+          <span>{bulletText}</span>
         </div>
       );
     }
 
-    // Empty lines create spacing
-    if (line.trim() === "") {
-      return <div key={index} className="h-2" />;
+    // Check if this is a company or position line (often has dates)
+    if (
+      (line.includes("Ltd") ||
+        line.includes("Inc") ||
+        line.includes("LLC") ||
+        (line.includes("-") && (line.includes("20") || line.includes("19")))) &&
+      line.trim().length < 100
+    ) {
+      return (
+        <div key={index} className="font-semibold mt-3 mb-1 text-gray-800">
+          {cleanText(line)}
+        </div>
+      );
     }
 
-    // Regular text - check if it's part of a summary section
+    // Check if this is part of a summary section
     const isSummary =
       index > 0 &&
-      index < 20 &&
-      array
+      index < 15 &&
+      lines
         .slice(Math.max(0, index - 5), index)
         .some(
           (l) =>
@@ -114,25 +130,22 @@ export function ResumePreview({ content }: ResumePreviewProps) {
             l.toLowerCase().includes("profile")
         );
 
+    // Regular text
     return (
-      <p
+      <div
         key={index}
-        className={cn("mb-1.5", isSummary ? "text-muted-foreground" : "")}
+        className={`mb-1 ${isSummary ? "text-gray-600" : "text-gray-700"}`}
       >
-        {line}
-      </p>
+        {cleanText(line)}
+      </div>
     );
   });
 
   return (
-    <ScrollArea className="h-[400px] w-full rounded-md border p-6">
-      <div className="space-y-1 font-sans text-sm">
-        {content ? (
-          <div className="max-w-3xl mx-auto">{formattedContent}</div>
-        ) : (
-          <p className="text-muted-foreground">No content to display</p>
-        )}
-      </div>
-    </ScrollArea>
+    <div className="p-6 border rounded-md bg-white shadow-sm min-h-[500px] max-h-[700px] overflow-y-auto">
+      <div className="max-w-2xl mx-auto">{formattedContent}</div>
+    </div>
   );
-}
+};
+
+export default ResumePreview;

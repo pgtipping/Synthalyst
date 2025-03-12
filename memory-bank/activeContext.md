@@ -487,3 +487,45 @@ We've successfully implemented the core components of the ApplyRight feature:
 - **API Integration**: We're using the Gemini API for resume transformation, which provides good results but may need fine-tuning for specific use cases.
 - **User Experience**: We've designed the UI to guide users through the process with clear steps and feedback.
 - **Error Handling**: We've implemented comprehensive error handling to provide clear feedback to users when issues occur.
+
+## Current Focus (2023-07-15)
+
+### ApplyRight Feature Improvements
+
+We've made significant improvements to the ApplyRight feature, focusing on the resume and cover letter preview components, as well as the PDF generation functionality:
+
+1. **Resume Preview Improvements**:
+
+   - Fixed bullet point duplication by properly handling bullet characters
+   - Cleaned up formatting for section headers by removing asterisks and adding border styling
+   - Improved display of candidate name and contact information
+   - Enhanced visual hierarchy with better spacing and typography
+   - Added special formatting for different resume sections (summary, experience, etc.)
+
+2. **Cover Letter Preview Improvements**:
+
+   - Added special formatting for date, greeting, and closing sections
+   - Improved paragraph spacing and line height for better readability
+   - Enhanced typography with serif fonts for a more formal appearance
+   - Better handling of sender and recipient information
+
+3. **PDF Generation Enhancements**:
+
+   - **Resume PDF**:
+
+     - Professional header with candidate name and contact information
+     - Improved section headers with background colors and divider lines
+     - Better bullet point formatting with proper indentation
+     - Intelligent detection of resume components (summary, experience, etc.)
+     - Dynamic filename generation based on candidate's name
+     - Professional footer with page numbers
+
+   - **Cover Letter PDF**:
+     - Professional business letter format with proper spacing
+     - Intelligent extraction and positioning of date, recipient, and sender information
+     - Special formatting for greeting and closing sections
+     - Better paragraph spacing and line height
+     - Dynamic filename generation based on sender's name
+     - Professional footer with page numbers
+
+These improvements significantly enhance the user experience by providing more professional-looking previews and downloads, thereby increasing the value of the ApplyRight feature to users.
