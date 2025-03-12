@@ -270,20 +270,20 @@ export default function Header() {
           <nav className="flex items-center space-x-8 ml-12">
             <Link
               href="/about"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-gray-700 hover:text-foreground transition-colors"
             >
               About
             </Link>
             <Link
               href="/services"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-gray-700 hover:text-foreground transition-colors"
             >
               Services
             </Link>
 
             {/* Tools Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center text-muted-foreground hover:text-foreground transition-colors dropdown-tools-trigger">
+              <DropdownMenuTrigger className="flex items-center text-gray-700 hover:text-foreground transition-colors dropdown-tools-trigger">
                 Tools
                 <ChevronDown className="ml-1 h-4 w-4" />
               </DropdownMenuTrigger>
@@ -292,7 +292,7 @@ export default function Header() {
                   <DropdownMenuItem key={index} asChild>
                     <Link
                       href={tool.href}
-                      className="flex items-center text-black"
+                      className="flex items-center text-gray-700"
                     >
                       {tool.icon}
                       <span>{tool.title}</span>
@@ -302,7 +302,7 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link
                     href="/tools"
-                    className="flex items-center font-medium text-primary"
+                    className="flex items-center font-medium text-gray-900"
                   >
                     View All Tools
                   </Link>
@@ -312,13 +312,13 @@ export default function Header() {
 
             <Link
               href="/blog"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-gray-700 hover:text-foreground transition-colors"
             >
               Blog
             </Link>
             <Link
               href="/contact"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-gray-700 hover:text-foreground transition-colors"
             >
               Contact
             </Link>
@@ -337,14 +337,14 @@ export default function Header() {
             <nav className="container flex flex-col space-y-4 p-4">
               <Link
                 href="/about"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-gray-700 hover:text-foreground transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 About
               </Link>
               <Link
                 href="/services"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-gray-700 hover:text-foreground transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Services
@@ -357,7 +357,7 @@ export default function Header() {
                   <Link
                     key={index}
                     href={tool.href}
-                    className="flex items-center text-sm text-black hover:text-black/80 transition-colors py-1"
+                    className="flex items-center text-sm text-gray-700 hover:text-gray-700/80 transition-colors py-1"
                     onClick={() => setMenuOpen(false)}
                   >
                     {tool.icon}
@@ -366,7 +366,7 @@ export default function Header() {
                 ))}
                 <Link
                   href="/tools"
-                  className="flex items-center text-sm font-medium text-primary py-1"
+                  className="flex items-center text-sm font-medium text-gray-900 py-1"
                   onClick={() => setMenuOpen(false)}
                 >
                   View All Tools
@@ -375,14 +375,14 @@ export default function Header() {
 
               <Link
                 href="/blog"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-gray-700 hover:text-foreground transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Blog
               </Link>
               <Link
                 href="/contact"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-gray-700 hover:text-foreground transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Contact

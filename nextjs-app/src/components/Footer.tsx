@@ -109,25 +109,25 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-300">
             © {currentYear} Synthalyst. All rights reserved.
           </p>
           <div className="mt-4 md:mt-0 flex space-x-6">
             <Link
               href="/terms"
-              className="text-sm text-gray-500 hover:text-white transition-colors"
+              className="text-sm text-gray-300 hover:text-white transition-colors"
             >
               Terms of Service
             </Link>
             <Link
               href="/privacy"
-              className="text-sm text-gray-500 hover:text-white transition-colors"
+              className="text-sm text-gray-300 hover:text-white transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
               href="/cookies"
-              className="text-sm text-gray-500 hover:text-white transition-colors"
+              className="text-sm text-gray-300 hover:text-white transition-colors"
             >
               Cookie Policy
             </Link>
