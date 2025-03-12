@@ -109,27 +109,6 @@ a {
   @apply text-blue-500 no-underline hover:text-blue-700 transition-colors;
 }
 
-ul {
-  @apply list-disc list-inside;
-}
-
-.shadow-overlay {
-  @apply bg-black bg-opacity-50;
-}
-
-.container {
-  @apply max-w-7xl mx-auto;
-}
-
-.hero-gradient {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary)) 0%,
-    hsl(var(--primary)) 50%,
-    hsl(var(--secondary)) 100%
-  );
-}
-
 /* Accessibility improvements for buttons */
 button,
 .button {
@@ -147,46 +126,7 @@ button.bg-gray-200,
   @apply text-black;
 }
 
-/* Custom brand color classes */
-.text-brand-blue {
-  @apply text-blue-600;
-}
-
-.bg-brand-blue {
-  @apply bg-blue-600;
-}
-
-.text-brand-silver {
-  @apply text-black;
-}
-
-.bg-brand-silver {
-  @apply bg-gray-300;
-}
-
-.text-brand-black {
-  @apply text-black;
-}
-
-.bg-brand-black {
-  @apply bg-gray-900;
-}
-
-/* Custom focus styles for dropdown triggers */
-.dropdown-tools-trigger:focus-visible,
-[role="combobox"]:focus-visible,
-[data-state="open"]:focus-visible,
-.dropdown-trigger:focus-visible {
-  outline: none;
-  box-shadow: none;
-  border-radius: 4px;
-  transition: box-shadow 0.2s ease;
-}
-
-.dropdown-tools-trigger:focus:not(:focus-visible),
-[role="combobox"]:focus:not(:focus-visible),
-[data-state="open"]:focus:not(:focus-visible),
-.dropdown-trigger:focus:not(:focus-visible) {
-  outline: none;
-  box-shadow: none;
-}
+/* Note: Non-critical styles have been moved to non-critical.css */
+/* This includes: brand color classes, list styles, shadow overlay, */
+/* hero gradient, dropdown focus styles, animations, utility classes, */
+/* card styles, form styles, table styles, and print styles */

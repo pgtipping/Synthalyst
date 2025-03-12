@@ -829,4 +829,98 @@ The application requires several environment variables to be set up:
 - **axios**: For HTTP requests
 - **date-fns**: For date manipulation
 - **react-hook-form**: For form handling
+
+## CSS Architecture
+
+### File Structure
+
 ```
+
+nextjs-app/
+├── src/
+│ └── app/
+│ ├── critical.css # Critical above-the-fold styles
+│ └── globals.css # Core Tailwind and base styles
+└── public/
+└── styles/
+└── non-critical.css # Async-loaded styles
+
+````
+
+### Loading Strategy
+
+1. Critical CSS:
+   - Inlined in the head
+   - Contains essential above-the-fold styles
+   - Uses CSS variables for theming
+
+2. Global CSS:
+   - Core Tailwind utilities
+   - Base styles and resets
+   - Theme variables
+
+3. Non-Critical CSS:
+   - Loaded asynchronously
+   - Contains styles for below-the-fold content
+   - Includes utility classes and animations
+
+### CSS Variables
+
+```css
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --secondary: 210 40% 96.1%;
+  /* ... other variables ... */
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  /* ... dark theme variables ... */
+}
+````
+
+### Performance Considerations
+
+1. CSS Loading:
+
+   - Critical CSS inlined
+   - Non-critical CSS loaded async
+   - Font display: swap for better performance
+
+2. Optimization:
+   - Removed duplicate styles
+   - Consolidated selectors
+   - Mobile-first responsive design
+
+## Development Guidelines
+
+### CSS Best Practices
+
+1. Use CSS variables for:
+
+   - Colors
+   - Spacing
+   - Border radius
+   - Transitions
+
+2. Follow BEM-like naming:
+
+   - Block: `.card`
+   - Element: `.card__title`
+   - Modifier: `.card--featured`
+
+3. Responsive Design:
+
+   - Mobile-first approach
+   - Standard breakpoints:
+     - 640px (sm)
+     - 768px (md)
+     - 1024px (lg)
+
+4. Performance:
+   - Minimize specificity
+   - Avoid deep nesting
+   - Use utility classes for common patterns

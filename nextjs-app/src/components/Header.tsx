@@ -273,20 +273,20 @@ export default function Header() {
           <nav className="flex items-center space-x-8 ml-12">
             <Link
               href="/about"
-              className="text-gray-700 hover:text-foreground transition-colors"
+              className="text-gray-900 hover:text-foreground transition-colors"
             >
               About
             </Link>
             <Link
               href="/services"
-              className="text-gray-700 hover:text-foreground transition-colors"
+              className="text-gray-900 hover:text-foreground transition-colors"
             >
               Services
             </Link>
 
             {/* Tools Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center text-gray-700 hover:text-foreground transition-colors dropdown-tools-trigger">
+              <DropdownMenuTrigger className="flex items-center text-gray-900 hover:text-foreground transition-colors dropdown-tools-trigger">
                 Tools
                 <ChevronDown className="ml-1 h-4 w-4" />
               </DropdownMenuTrigger>
@@ -295,7 +295,7 @@ export default function Header() {
                   <DropdownMenuItem key={index} asChild>
                     <Link
                       href={tool.href}
-                      className="flex items-center text-gray-700"
+                      className="flex items-center text-gray-900"
                     >
                       {tool.icon}
                       <span>{tool.title}</span>
@@ -315,13 +315,13 @@ export default function Header() {
 
             <Link
               href="/blog"
-              className="text-gray-700 hover:text-foreground transition-colors"
+              className="text-gray-900 hover:text-foreground transition-colors"
             >
               Blog
             </Link>
             <Link
               href="/contact"
-              className="text-gray-700 hover:text-foreground transition-colors"
+              className="text-gray-900 hover:text-foreground transition-colors"
             >
               Contact
             </Link>
@@ -340,14 +340,14 @@ export default function Header() {
             <nav className="container flex flex-col space-y-4 p-4">
               <Link
                 href="/about"
-                className="text-gray-700 hover:text-foreground transition-colors"
+                className="text-gray-900 hover:text-foreground transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 About
               </Link>
               <Link
                 href="/services"
-                className="text-gray-700 hover:text-foreground transition-colors"
+                className="text-gray-900 hover:text-foreground transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Services
@@ -360,7 +360,7 @@ export default function Header() {
                   <Link
                     key={index}
                     href={tool.href}
-                    className="flex items-center text-sm text-gray-700 hover:text-gray-700/80 transition-colors py-1"
+                    className="flex items-center text-sm text-gray-900 hover:text-gray-900/80 transition-colors py-1"
                     onClick={() => setMenuOpen(false)}
                   >
                     {tool.icon}
@@ -378,14 +378,14 @@ export default function Header() {
 
               <Link
                 href="/blog"
-                className="text-gray-700 hover:text-foreground transition-colors"
+                className="text-gray-900 hover:text-foreground transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Blog
               </Link>
               <Link
                 href="/contact"
-                className="text-gray-700 hover:text-foreground transition-colors"
+                className="text-gray-900 hover:text-foreground transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Contact

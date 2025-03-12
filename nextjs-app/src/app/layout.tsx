@@ -218,7 +218,8 @@ export default function RootLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        {/* Add non-critical CSS with proper loading */}
+
+        {/* Load non-critical CSS asynchronously */}
         <link rel="preload" href="/styles/non-critical.css" as="style" />
         <script
           dangerouslySetInnerHTML={{
@@ -230,7 +231,6 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Fallback for browsers that don't support JS */}
         <noscript>
           <link rel="stylesheet" href="/styles/non-critical.css" />
         </noscript>

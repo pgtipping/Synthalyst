@@ -19,11 +19,13 @@ footer {
   border: 1px solid hsl(var(--border));
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
+  overflow: hidden;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.card:hover,
+.card-hover:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
@@ -73,7 +75,7 @@ footer {
 
 .form-input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
   border: 1px solid hsl(var(--input));
   background-color: transparent;
@@ -116,10 +118,10 @@ th {
 }
 
 .fade-in {
-  animation: fadeIn 0.5s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-@keyframes slideUp {
+@keyframes slideIn {
   from {
     transform: translateY(20px);
     opacity: 0;
@@ -130,8 +132,8 @@ th {
   }
 }
 
-.slide-up {
-  animation: slideUp 0.5s ease-in-out;
+.slide-in {
+  animation: slideIn 0.4s ease-out;
 }
 
 /* Grid layout */
@@ -166,43 +168,35 @@ th {
 .text-center {
   text-align: center;
 }
-
 .text-right {
   text-align: right;
 }
-
 .flex {
   display: flex;
 }
-
 .flex-col {
   flex-direction: column;
 }
-
 .items-center {
   align-items: center;
 }
-
 .justify-center {
   justify-content: center;
 }
-
 .justify-between {
   justify-content: space-between;
 }
 
+/* Spacing utilities */
 .gap-1 {
   gap: 0.25rem;
 }
-
 .gap-2 {
   gap: 0.5rem;
 }
-
 .gap-4 {
   gap: 1rem;
 }
-
 .gap-8 {
   gap: 2rem;
 }
@@ -210,15 +204,12 @@ th {
 .mt-1 {
   margin-top: 0.25rem;
 }
-
 .mt-2 {
   margin-top: 0.5rem;
 }
-
 .mt-4 {
   margin-top: 1rem;
 }
-
 .mt-8 {
   margin-top: 2rem;
 }
@@ -226,15 +217,12 @@ th {
 .mb-1 {
   margin-bottom: 0.25rem;
 }
-
 .mb-2 {
   margin-bottom: 0.5rem;
 }
-
 .mb-4 {
   margin-bottom: 1rem;
 }
-
 .mb-8 {
   margin-bottom: 2rem;
 }
@@ -242,15 +230,111 @@ th {
 .p-1 {
   padding: 0.25rem;
 }
-
 .p-2 {
   padding: 0.5rem;
 }
-
 .p-4 {
   padding: 1rem;
 }
-
 .p-8 {
   padding: 2rem;
+}
+
+/* Text utilities */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-2,
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  -webkit-line-clamp: 2;
+}
+.line-clamp-3 {
+  -webkit-line-clamp: 3;
+}
+
+/* Custom brand colors */
+.text-brand-blue {
+  color: #2563eb;
+}
+.bg-brand-blue {
+  background-color: #2563eb;
+}
+.text-brand-silver {
+  color: #000000;
+}
+.bg-brand-silver {
+  background-color: #d1d5db;
+}
+.text-brand-black {
+  color: #000000;
+}
+.bg-brand-black {
+  background-color: #111827;
+}
+
+/* List styles */
+ul {
+  list-style-type: disc;
+  list-style-position: inside;
+}
+ol {
+  list-style-type: decimal;
+  list-style-position: inside;
+}
+
+/* Shadow overlay for modals */
+.shadow-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Hero gradient */
+.hero-gradient {
+  background: linear-gradient(135deg, #2563eb 0%, #2563eb 50%, #e5e7eb 100%);
+}
+
+/* Custom focus styles for dropdown triggers */
+.dropdown-tools-trigger:focus-visible,
+[role="combobox"]:focus-visible,
+[data-state="open"]:focus-visible,
+.dropdown-trigger:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease;
+}
+
+.dropdown-tools-trigger:focus:not(:focus-visible),
+[role="combobox"]:focus:not(:focus-visible),
+[data-state="open"]:focus:not(:focus-visible),
+.dropdown-trigger:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Print styles */
+@media print {
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background-color: white !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
 }

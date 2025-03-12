@@ -1029,3 +1029,74 @@ These improvements significantly enhance the user experience by providing more p
 - The overall match score should align with the visual indicators (all green = 100%)
 
 These insights will help maintain high-quality output in the ApplyRight feature and can be applied to other LLM-powered features in the application.
+
+## Accessibility Standards [2025-03-12 20:24:00]
+
+- All UI elements must meet WCAG 2.1 AA standards for color contrast
+- Navigation links use text-gray-900 for sufficient contrast against light backgrounds
+- Form elements must have proper labels or aria-labels
+- Buttons without visible text must have aria-labels
+- All interactive elements must have proper focus states
+- The application has achieved a perfect accessibility score of 100/100
+- Do not attempt to fix accessibility issues that have already been resolved
+
+# CSS Architecture Rules - March 12, 2024, 20:45:00
+
+## CSS File Organization
+
+1. Critical CSS (`/src/app/critical.css`):
+
+   - Only include above-the-fold styles
+   - Keep file size under 14KB (compressed)
+   - Use CSS variables for theming
+
+2. Global CSS (`/src/app/globals.css`):
+
+   - Include Tailwind directives
+   - Define CSS variables
+   - Base element styles
+
+3. Non-Critical CSS (`/public/styles/non-critical.css`):
+   - Below-the-fold styles
+   - Utility classes
+   - Component variations
+   - Animations and transitions
+
+## CSS Loading Rules
+
+1. Critical CSS:
+
+   - Must be inlined in the head
+   - No render-blocking imports
+   - Use preload for critical fonts
+
+2. Non-Critical CSS:
+   - Must be loaded asynchronously
+   - Include fallback for no-JS
+   - Use resource hints
+
+## CSS Best Practices
+
+1. Mobile-First Development:
+
+   - Start with mobile styles
+   - Use standard breakpoints
+   - Test on multiple devices
+
+2. Performance:
+
+   - Minimize specificity
+   - Avoid deep nesting
+   - Use utility classes
+   - Consolidate duplicate styles
+
+3. Accessibility:
+
+   - Maintain WCAG contrast ratios
+   - Provide focus indicators
+   - Support reduced motion
+
+4. Dark Mode:
+   - Use CSS variables
+   - Test color contrast
+   - Maintain readability
