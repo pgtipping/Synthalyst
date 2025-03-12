@@ -1,7 +1,8 @@
 "use client";
 
 import mammoth from "mammoth";
-import pdfToText from "react-pdftotext";
+// Remove the direct import of pdfToText
+// import pdfToText from "react-pdftotext";
 
 /**
  * Parse a document file and extract its text content
@@ -41,6 +42,16 @@ export async function parseDocument(file: File): Promise<string> {
  */
 async function parsePdf(file: File): Promise<string> {
   try {
+    // Dynamically import the PDF parser only when needed (client-side only)
+    if (typeof window === "undefined") {
+      // We're on the server, return a message
+      return "PDF parsing is only available in the browser. The file will be processed when viewed in the browser.";
+    }
+
+    // We're in the browser, dynamically import the PDF parser
+    const pdfToTextModule = await import("react-pdftotext");
+    const pdfToText = pdfToTextModule.default;
+
     const text = await pdfToText(file);
     return text.trim();
   } catch (error) {

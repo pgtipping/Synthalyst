@@ -804,25 +804,33 @@ The main issue was that the PDF.js worker file couldn't be found during the buil
 Error: ENOENT: no such file or directory, open 'C:\Users\pgeor\OneDrive\Documents\Web Dev\synthalyst\nextjs-app\node_modules\pdfjs-dist\build\pdf.js'
 ```
 
-### Solution: react-pdftotext
+### Solution: Client-Side Only PDF Parsing
 
-After researching alternatives, we implemented PDF support using the react-pdftotext package, which provides a lightweight client-side solution for extracting text from PDF files. This package works well with Next.js and doesn't require complex configuration.
+After researching alternatives, we implemented PDF support using the react-pdftotext package with dynamic imports to ensure it only runs on the client side. This approach avoids server-side rendering issues with the PDF.js dependency.
 
-Key benefits of react-pdftotext:
+Key benefits of this approach:
 
-1. Client-side processing (no server-side code needed)
-2. Simple API with Promise-based interface
-3. Lightweight with minimal dependencies
-4. Works well with Next.js without configuration issues
+1. Avoids server-side rendering issues with PDF.js
+2. Uses dynamic imports to load the PDF parser only when needed
+3. Provides a clean fallback for server-side rendering
+4. Works well with Next.js without complex configuration
 5. Memory-safe implementation
 
 Implementation:
 
 ```typescript
-import pdfToText from "react-pdftotext";
-
 async function parsePdf(file: File): Promise<string> {
   try {
+    // Dynamically import the PDF parser only when needed (client-side only)
+    if (typeof window === "undefined") {
+      // We're on the server, return a message
+      return "PDF parsing is only available in the browser. The file will be processed when viewed in the browser.";
+    }
+
+    // We're in the browser, dynamically import the PDF parser
+    const pdfToTextModule = await import("react-pdftotext");
+    const pdfToText = pdfToTextModule.default;
+
     const text = await pdfToText(file);
     return text.trim();
   } catch (error) {

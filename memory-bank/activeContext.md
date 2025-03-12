@@ -439,14 +439,17 @@ We've successfully implemented the core components of the ApplyRight feature:
 
 ### Known Issues and Limitations
 
-1. **Future Enhancements**:
+1. **PDF Support**: PDF parsing is implemented using react-pdftotext with dynamic imports to ensure it only runs on the client side. This approach avoids server-side rendering issues with the PDF.js dependency.
+
+2. **Future Enhancements**:
    - Add more export format options
    - Enhance the resume transformation algorithm
    - Implement premium features for authenticated users
 
 ## Recent Changes
 
-- Implemented PDF support in the ApplyRight feature using react-pdftotext
+- Implemented PDF support in the ApplyRight feature using react-pdftotext with dynamic imports
+- Updated the document parser to handle PDF files on the client side only
 - Updated the FileUpload component to accept PDF files
 - Updated the UI to reflect PDF support
 - Successfully tested the feature with PDF files
