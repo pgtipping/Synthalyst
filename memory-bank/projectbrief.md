@@ -348,25 +348,144 @@ Web app that calculates the affordability of an apartment based on user's input 
 
 This app will be integrated into the main app as a page.
 
-### Resume Builder
+### ApplyRight
 
-Web app that allows users to build a professional resume in a few simple steps.
+A powerful resume transformation tool that instantly improves resumes with professional enhancements and targeted optimizations.
 
-- The app will use an LLM to generate the resume following best practices for resume writing
-- users can build their resume from scratch or use an existing template
-- users can upload their existing resume, enter details of the job they will like to use the resume to apply for and the LLM will adapt the resume to best-suit the job requirements highlighting the user's relevant skills and experience that are most likely to get the user the interview.
-- llm creates a cover letter for the user based on the job description and the user's resume
-- users can download the resume as a PDF
-- users can post the resume to their LinkedIn profile
-- users can get feedback on their resume
-- users can use the resume and cover letter to apply for jobs (this will be a paid service)
+- Core Features (Free Tier):
+  - One-Click Resume Transformation:
+    - Upload resume → Get improved version instantly
+    - Professional language and formatting enhancements
+    - Accomplishment-focused rewording
+    - Explanation of changes made (educational component)
+    - Basic ATS optimization
+  - Job Description Targeting:
+    - Optional job description input
+    - Basic keyword alignment
+    - Relevant skills highlighting
+    - Simple content rebalancing
+  - Basic Export Options:
+    - Download as PDF
+    - Standard formatting
+    - Single design template
+  - Basic Cover Letter Generation:
+    - One free cover letter based on resume and job description
+    - Standard template
+    - Professional formatting
+    - Download as PDF
+- Premium Features (Paid Tier):
+  - Iterative Refinement:
+    - Multiple transformation iterations
+    - Provide specific directions to the LLM
+    - Fine-tune targeting for specific roles
+    - Personalized adjustments based on feedback
+  - Advanced Optimization:
+    - Industry-specific enhancements
+    - Advanced ATS optimization
+    - Competitive positioning against job market
+    - Multiple design templates
+  - Enhanced Export Options:
+    - LinkedIn-optimized version
+    - Multiple design templates
+    - Customizable formatting
+    - Different file formats (DOCX, PDF, TXT)
+  - Advanced Cover Letter Options:
+    - Multiple cover letter templates
+    - Customizable tone and emphasis
+    - Multiple versions for different companies
+    - Tailored to specific job requirements
+  - Interview Prep App Access
+
+Implementation Approach:
+
+User Flow:
+
+- Free tier: Upload Resume → (Optional) Add Job application details → Transform → Generate Cover Letter → Download
+- Paid tier: Same initial flow + Iterative Refinement + Advanced Features + Interview Prep App
+
+Technical Architecture:
+
+- Document parsing (PDF, DOCX)
+- Job description analysis engine
+- LLM transformation pipeline
+- Before/after comparison view
+- Iterative feedback system for paid users
+- Secure document storage
+
+LLM Implementation:
+
+- Resume transformation prompts with specific enhancement targets
+- Job description analysis for keyword extraction and skill identification
+- Cover letter generation based on resume content and job requirements
+
+User Interface:
+
+- Clean, professional design
+- Side-by-side comparison
+- Clear upgrade path to premium features
+- Mobile-responsive layout
+- Intuitive workflow between resume and cover letter
 
 ### Interview Prep App
 
-Web app that allows users to prepare for interviews with the help of an LLM.
+This is a web app that helps users prepare for interviews with LLM assistance. Key features include:
 
-- users can add details of the job they will like to use the resume to apply for and the LLM will adapt the interview prep plan to best-suit the job requirements
-- app can do a mock interview with the user and provide feedback on the user's performance (paid service)
-- mock interview will be done using llm text and user voice, and llm voice and user voice as options.
-- app should have a library of interview questions and answers by job and industry(paid service)
-- users can download the interview prep plan as a PDF
+- Job-Specific Preparation:
+  - Users can input job details
+  - LLM adapts interview prep plan to match job requirements
+  - LLM generates practice interview questions based on job application requirements, e.g., job/role description, experience, skills, etc.
+- Mock Interview Functionality (Paid Service):
+  - Interactive mock interviews with LLM
+  - Multiple interaction modes: LLM text + user voice, LLM voice + user voice
+  - Performance feedback from LLM
+- Question Library (Paid Service):
+  - Comprehensive library of interview questions and answers
+  - Organized by job type and industry
+- Export Functionality:
+  - Download interview prep plan as PDF
+
+### ApplyRight + Interview Prep Bundle
+
+Strategic Benefits:
+
+- Complete Career Solution:
+  - Provides users with an end-to-end job application solution
+  - Creates a more compelling value proposition
+  - Addresses the full job application journey (resume → cover letter → interview)
+- Cross-Promotion Opportunities:
+  - Users of one app can be introduced to the other
+  - Increases user engagement across both platforms
+  - Creates natural upsell opportunities
+- Unified Subscription Model:
+  - Simplifies billing and user management
+  - Offers better perceived value than separate subscriptions
+  - Allows for flexible pricing tiers (individual apps or bundle)
+
+Implementation Approach:
+
+- Unified Dashboard:
+  - Central hub showing both ApplyRight and Interview Prep features
+  - Seamless navigation between apps
+  - Shared user profile and job information
+- Data Sharing Between Apps:
+  - Resume data feeds into interview preparation
+  - Job descriptions used across both apps
+  - Consistent user experience with shared data
+- Bundled Premium Features:
+  - ApplyRight Premium:
+    - Iterative resume refinement
+    - Multiple cover letter templates
+    - LinkedIn optimization
+    - Advanced formatting options
+  - Interview Prep Premium:
+    - Job-specific interview questions
+    - Personalized answer suggestions
+    - Mock interview simulations
+    - Performance feedback
+    - Industry-specific question libraries
+
+Tiered Pricing Structure:
+
+- Free tier: Basic features of both apps
+- Single app premium: Full features of either ApplyRight or Interview Prep
+- Bundle premium: Full features of both apps at a discount
