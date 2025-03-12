@@ -2,6 +2,20 @@
 
 ## Recent Updates
 
+### Vercel Build Error Fixes [2024-07-10 15:45:00]
+
+- Fixed build errors that were preventing successful deployment on Vercel:
+  - Added "use client" directive to Breadcrumb.tsx which was using the usePathname hook
+  - Added "use client" directive to RedisMonitoring.tsx which was using useEffect and useState hooks
+  - Installed the missing @upstash/ratelimit package
+  - Updated toast calls in RedisMonitoring.tsx to use the correct Sonner API format
+  - Fixed variable naming and removed unused parameters
+- These changes have been committed and pushed to the repository, which should resolve the Vercel build errors
+- Identified issues from Vercel build logs:
+  - Missing "use client" directives in components using React hooks
+  - Missing dependency (@upstash/ratelimit)
+  - Incorrect toast implementation in RedisMonitoring component
+
 ### ApplyRight and Interview Prep Integration [2024-07-10 10:30:00]
 
 - Implemented data sharing functionality between ApplyRight and Interview Prep:
@@ -77,6 +91,14 @@
   - ✅ Implement proper SEO enhancements
 
 ## Completed Features
+
+### Vercel Build Error Fixes [2024-07-10 15:45:00]
+
+- ✅ Added "use client" directive to Breadcrumb.tsx
+- ✅ Added "use client" directive to RedisMonitoring.tsx
+- ✅ Installed missing @upstash/ratelimit package
+- ✅ Fixed toast implementation in RedisMonitoring component
+- ✅ Committed and pushed changes to the repository
 
 ### ApplyRight and Interview Prep Integration [2024-07-10 10:30:00]
 
