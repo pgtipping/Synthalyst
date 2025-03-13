@@ -1,6 +1,8 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { Html } from "react-pdf-html";
-import React from "react";
+import React, { useEffect } from "react";
+// Import the crypto polyfill
+import { initCrypto } from "@/lib/crypto-polyfill";
 
 // Create styles
 const styles = StyleSheet.create({
@@ -307,6 +309,11 @@ export default function TrainingPlanPDF({
   resources,
   createdAt,
 }: TrainingPlanPDFProps) {
+  // Initialize crypto polyfill when component mounts
+  useEffect(() => {
+    initCrypto();
+  }, []);
+
   // Process resources to group them by type
   const resourcesByType: Record<string, Resource[]> = {};
   if (resources && resources.length > 0) {

@@ -34,6 +34,18 @@ import { useSearchParams } from "next/navigation";
 import InterviewPrepPDF from "@/components/InterviewPrepPDF";
 import PDFRenderer from "@/components/PDFRenderer";
 
+// Add these interfaces at the top of the file after the imports:
+interface Section {
+  type: "timeline" | "phase" | "goal" | "objective" | "star" | "category";
+  title: string;
+  content?: string;
+  items?: string[];
+}
+
+interface PrepPlan {
+  sections: Section[];
+}
+
 // Custom Markdown renderer function
 function SimpleMarkdown({ text }: { text: string }) {
   if (!text) return null;
@@ -231,7 +243,7 @@ export default function InterviewPrep() {
     resumeText: "", // This will be populated if coming from ApplyRight
   });
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
-  const [prepPlan, setPrepPlan] = useState<string>("");
+  const [prepPlan, setPrepPlan] = useState<PrepPlan>({ sections: [] });
   const [isProcessing, setIsProcessing] = useState(false);
   const [comingFromApplyRight, setComingFromApplyRight] = useState(false);
   const [dataImportTime, setDataImportTime] = useState<string | null>(null);
@@ -333,7 +345,7 @@ export default function InterviewPrep() {
       const data = await response.json();
 
       if (data.success) {
-        setPrepPlan(data.prepPlan);
+        setPrepPlan(data.prepPlan as PrepPlan);
         setGeneratedQuestions(data.questions || []);
 
         // Auto-advance to next tab
@@ -765,8 +777,47 @@ export default function InterviewPrep() {
                           </Button>
                         </PDFRenderer>
                       </div>
-                      <div className="prose prose-sm max-w-none dark:prose-invert">
-                        <SimpleMarkdown text={prepPlan} />
+                      <div className="space-y-4">
+                        {prepPlan.sections.map((section, index) => {
+                          const sectionClass =
+                            {
+                              timeline: "bg-blue-50 border-l-4 border-blue-500",
+                              phase: "bg-gray-50 border-l-4 border-gray-500",
+                              goal: "bg-green-50 border-l-4 border-green-500",
+                              objective:
+                                "bg-yellow-50 border-l-4 border-yellow-500",
+                              star: "bg-purple-50 border-l-4 border-purple-500",
+                              category: "bg-red-50 border-l-4 border-red-500",
+                            }[section.type] || "bg-white";
+
+                          return (
+                            <div
+                              key={index}
+                              className={`p-4 rounded-md ${sectionClass}`}
+                            >
+                              <h3 className="font-semibold text-lg mb-2">
+                                {section.title}
+                              </h3>
+                              {section.content && (
+                                <p className="text-gray-700">
+                                  {section.content}
+                                </p>
+                              )}
+                              {section.items && (
+                                <ul className="list-disc list-inside space-y-1 mt-2">
+                                  {section.items.map((item, itemIndex) => (
+                                    <li
+                                      key={itemIndex}
+                                      className="text-gray-700 pl-2"
+                                    >
+                                      {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 

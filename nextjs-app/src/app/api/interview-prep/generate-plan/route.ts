@@ -96,6 +96,7 @@ export async function POST(request: Request) {
             ? `Job Description: ${data.jobDetails.description}`
             : ""
         }
+        
         ${
           data.jobDetails.requiredSkills &&
           data.jobDetails.requiredSkills.length > 0
@@ -113,13 +114,37 @@ export async function POST(request: Request) {
         7. Suggest questions the candidate should ask the interviewer.
         8. Include tips for follow-up after the interview.
         
-        Format your response as a clear, structured preparation plan that the candidate can follow in the days leading up to their interview.
+        IMPORTANT: Format your response as a JSON object with the following structure:
+        {
+          "sections": [
+            {
+              "type": "timeline",
+              "title": "Timeline Overview",
+              "content": "Content here..."
+            },
+            {
+              "type": "phase",
+              "title": "Research Phase (3-5 days before)",
+              "items": [
+                "Research point 1",
+                "Research point 2"
+              ]
+            },
+            {
+              "type": "goal",
+              "title": "Overarching Goal",
+              "content": "Content here..."
+            }
+          ]
+        }
+
+        Section types can be: timeline, phase, goal, objective, star, category
+        Each section should have a title and either content (string) or items (array of strings)
       `;
 
       // Generate the interview prep plan
       const prepPlanResult = await model.generateContent(prepPlanPrompt);
       const prepPlanResponse = await prepPlanResult.response;
-      const prepPlan = prepPlanResponse.text();
 
       // Create the prompt for practice questions
       const questionsPrompt = `
@@ -186,7 +211,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: true,
-          prepPlan,
+          prepPlan: JSON.parse(prepPlanResponse.text()),
           questions,
           message: "Interview prep plan generated successfully",
         },

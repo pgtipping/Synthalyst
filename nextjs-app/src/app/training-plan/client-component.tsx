@@ -17,6 +17,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import { initCrypto } from "@/lib/crypto-polyfill";
 
 export default function TrainingPlanClient() {
   const searchParams = useSearchParams();
@@ -24,6 +25,12 @@ export default function TrainingPlanClient() {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const { data: session } = useSession();
   const [usageCount, setUsageCount] = useState(0);
+
+  // Initialize crypto polyfill
+  useEffect(() => {
+    // Initialize crypto polyfills to prevent SHA224 errors
+    initCrypto();
+  }, []);
 
   // Update the active tab if the URL changes
   useEffect(() => {

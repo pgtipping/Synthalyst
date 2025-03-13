@@ -40,12 +40,34 @@ const nextConfig = {
         new webpack.ProvidePlugin({
           process: "process/browser",
         }),
+        // Add explicit crypto polyfill
+        new webpack.ProvidePlugin({
+          crypto: "crypto-browserify",
+        }),
       ];
 
-      // Improved minification settings for production
+      // Modified minification settings for production to prevent SHA224 errors
       if (process.env.NODE_ENV === "production") {
-        // Enable terser for better minification
+        // Enable terser for better minification but with safer settings
         config.optimization.minimize = true;
+
+        // Ensure we don't mangle crypto-related properties
+        if (config.optimization.minimizer) {
+          config.optimization.minimizer.forEach((minimizer) => {
+            if (minimizer.constructor.name === "TerserPlugin") {
+              minimizer.options.terserOptions = {
+                ...minimizer.options.terserOptions,
+                keep_classnames: true,
+                keep_fnames: true,
+                mangle: {
+                  ...minimizer.options.terserOptions?.mangle,
+                  reserved: ["SHA224", "crypto", "subtle"],
+                },
+              };
+            }
+          });
+        }
+
         config.optimization.minimizer = [
           new webpack.optimize.ModuleConcatenationPlugin(),
           ...config.optimization.minimizer,

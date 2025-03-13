@@ -1434,3 +1434,22 @@ These insights will help maintain high-quality output in the ApplyRight feature 
   ```
 - The component uses a series of regex replacements to transform markdown-like syntax into styled HTML
 - Order of replacements matters to avoid conflicts between patterns
+
+### SHA224 Crypto Module Fix - [2025-03-13 18:15:00]
+
+- If encountering "Cannot set properties of undefined (setting 'SHA224')" error:
+  1. Ensure crypto-browserify is properly configured as a fallback for the crypto module
+  2. Use the crypto-polyfill.js utility to initialize the crypto library before PDF operations
+  3. Initialize the crypto polyfill in components that use PDF generation
+  4. Use the pdf-utils.js utility functions for safer PDF generation and download
+  5. Modify webpack configuration to prevent mangling of crypto-related properties
+- The error occurs in production builds due to minification issues with the crypto library
+- The solution involves:
+  - Proper initialization of the crypto library
+  - Prevention of property mangling during minification
+  - Safe utility functions for PDF operations
+- Affected components:
+  - TrainingPlanClient
+  - TrainingPlanPDF
+  - PDFRenderer
+  - Any component that uses PDF generation
