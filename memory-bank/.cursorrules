@@ -1233,3 +1233,136 @@ These insights will help maintain high-quality output in the ApplyRight feature 
 - Validate response structure
 - Test pagination and filtering
 - Mock external dependencies
+
+## SEO and Performance Optimization Patterns - [2025-03-13 01:55:00]
+
+- Metadata implementation:
+
+  - Use the `metadata` export in layout.tsx or page.tsx files
+  - Include title, description, keywords, and OpenGraph data
+  - Add canonical URLs using the alternates property
+  - Example:
+    ```typescript
+    export const metadata: Metadata = {
+      title: "Page Title | Synthalyst",
+      description: "Page description for better SEO",
+      keywords: ["keyword1", "keyword2"],
+      openGraph: {
+        title: "Page Title | Synthalyst",
+        description: "Page description for better SEO",
+        url: "https://synthalyst.com/page-path",
+        type: "website",
+        images: [{ url: "/icons/og-image.png", width: 1200, height: 630 }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Page Title | Synthalyst",
+        description: "Page description for better SEO",
+        images: ["/icons/twitter-image.png"],
+      },
+      alternates: {
+        canonical: "https://synthalyst.com/page-path",
+      },
+    };
+    ```
+
+- Structured data implementation:
+
+  - Use JSON-LD format in layout.tsx or page.tsx files
+  - Add the script tag in the component's return statement
+  - Example:
+
+    ```typescript
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "Application Name",
+      description: "Application description",
+    };
+
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        {children}
+      </>
+    );
+    ```
+
+- Resource hints for performance:
+
+  - Add preconnect for domains that will be used
+  - Add dns-prefetch for domains that might be used
+  - Example:
+    ```html
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin="anonymous"
+    />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    ```
+
+- JavaScript optimization:
+
+  - Use conditional execution for deferred JavaScript
+  - Implement Intersection Observer for lazy loading
+  - Preload critical images
+  - Example:
+
+    ```javascript
+    // Defer non-critical JavaScript
+    if (document.readyState === "complete") {
+      deferJsLoad();
+    } else {
+      window.addEventListener("load", deferJsLoad);
+    }
+
+    // Lazy load images with Intersection Observer
+    if ("IntersectionObserver" in window) {
+      const lazyLoadObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const target = entry.target;
+            if (target.dataset.src) {
+              target.src = target.dataset.src;
+              target.removeAttribute("data-src");
+            }
+            lazyLoadObserver.unobserve(target);
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-src]").forEach((el) => {
+        lazyLoadObserver.observe(el);
+      });
+    }
+    ```
+
+- Webpack configuration for performance:
+  - Implement code splitting with cache groups
+  - Add better minification settings for production
+  - Example:
+    ```javascript
+    // In next.config.js
+    config.optimization = {
+      splitChunks: {
+        chunks: "all",
+        cacheGroups: {
+          vendor: {
+            name: "vendor",
+            test: /node_modules/,
+            priority: 20,
+          },
+          common: {
+            name: "common",
+            minChunks: 2,
+            priority: 10,
+          },
+        },
+      },
+    };
+    ```
