@@ -10,6 +10,13 @@
 
 ## Recent Changes (Updated March 13, 2025)
 
+- Fixed OVERARCHING GOAL formatting and adjusted font sizes for section headings:
+
+  - Ensured OVERARCHING GOAL section starts on a new line with proper styling
+  - Reduced font sizes for TIMELINE, PHASE, and OVERARCHING GOAL sections from text-lg to text-md
+  - Adjusted PDF export component to maintain consistent styling with the web view
+  - Improved visual hierarchy by making section headings more proportional to the main subject
+
 - Fixed formatting of TIMELINE and PHASE sections in interview prep plan:
   - Added specific regex patterns to handle TIMELINE, PHASE, OVERARCHING GOAL, and Objective sections
   - Ensured these sections start on new lines with proper styling

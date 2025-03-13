@@ -80,7 +80,7 @@ function SimpleMarkdown({ text }: { text: string }) {
   // Handle OVERARCHING GOAL: section - ensure it starts on a new line
   formattedText = formattedText.replace(
     /(\S+\s*)OVERARCHING GOAL:/g,
-    '$1<br /><span class="text-lg font-bold text-primary/90 mt-4 mb-2 inline-block">OVERARCHING GOAL:</span>'
+    '$1<br /><span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">OVERARCHING GOAL:</span>'
   );
 
   // Handle TIMELINE: section - ensure it starts on a new line (adjust font size from text-lg to text-md)
