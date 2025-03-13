@@ -1588,3 +1588,50 @@ This approach has successfully eliminated all TypeScript errors in the codebase,
   - Implement code splitting and lazy loading
   - Optimize server-side rendering
   - Minimize main thread work
+
+## Accessibility Best Practices - [2025-03-14 21:30:00]
+
+### Button Accessibility - [2025-03-14 21:30:00]
+
+- All buttons must have accessible names through one of these methods:
+  - Inner text visible to screen readers
+  - aria-label attribute
+  - aria-labelledby attribute
+  - title attribute
+  - Explicit or implicit label
+- Icon-only buttons must always have an aria-label attribute
+- Examples of proper button accessibility:
+
+  ```tsx
+  // Button with icon only
+  <Button
+    type="button"
+    variant="ghost"
+    size="icon"
+    onClick={handleClick}
+    aria-label="Remove item"
+  >
+    <X className="h-4 w-4" />
+  </Button>
+
+  // Select trigger with accessible name
+  <SelectTrigger className="w-32" aria-label="Select duration unit">
+    <SelectValue placeholder="Unit" />
+  </SelectTrigger>
+  ```
+
+### Color Contrast - [2025-03-14 21:30:00]
+
+- All text must have a contrast ratio of at least 4.5:1 against its background
+- Large text (18pt or 14pt bold) must have a contrast ratio of at least 3:1
+- Use the "default" button variant instead of "outline" for better contrast
+- Examples of proper color contrast:
+  ```tsx
+  // Good contrast with default variant
+  <Button asChild variant="default">
+    <Link href="/blog/training-plan-creator-guide">
+      <HelpCircle className="mr-2 h-4 w-4" />
+      Read the comprehensive guide
+    </Link>
+  </Button>
+  ```

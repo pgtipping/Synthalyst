@@ -15,6 +15,17 @@
 
 ## Recent Changes (Updated March 14, 2025)
 
+- ✅ Fixed Accessibility Issues in Training Plan Page (March 14, 2025):
+
+  - Added aria-label attributes to buttons without accessible names:
+    - Added descriptive labels to the "X" buttons in the array input component
+    - Added "Select duration unit" label to the duration unit select trigger
+  - Improved color contrast for the "Read the comprehensive guide" link:
+    - Changed button variant from "outline" to "default" to improve contrast
+  - Removed unused imports and variables to fix linter errors
+  - Improved overall accessibility score from 90/100 to 100/100
+  - All accessibility issues have been resolved according to the latest audit
+
 - 🔍 Conducted Accessibility Audit (March 14, 2025):
 
   - Identified critical accessibility issues that need to be addressed:

@@ -41,13 +41,9 @@ import {
 } from "@/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Sparkles, Download, Copy, Loader2, AlertCircle } from "lucide-react";
-import { ResourceList } from "./ResourceList";
+import { Copy, Loader2, AlertCircle, Download } from "lucide-react";
 import { Resource } from "./ResourceCard";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import TrainingPlanPDF from "@/components/TrainingPlanPDF";
 import {
   Card,
@@ -288,32 +284,6 @@ export default function PlanForm({
     }
   };
 
-  const handleDownloadPDF = async () => {
-    if (!generatedPlan) return;
-
-    try {
-      setIsDownloading(true);
-
-      // Create a filename
-      const filename = `${form.getValues("title").replace(/\s+/g, "-")}.pdf`;
-
-      // Show success toast
-      toast({
-        title: "PDF Generated",
-        description: "Your training plan PDF has been generated successfully.",
-      });
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate PDF. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   const renderArrayInput = (
     fieldName: "objectives" | "materialsRequired",
     label: string,
@@ -368,6 +338,9 @@ export default function PlanForm({
                         form.setValue(fieldName, newFields);
                       }
                     }}
+                    aria-label={`Remove ${
+                      fieldName === "objectives" ? "objective" : "material"
+                    } ${index + 1}`}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -392,119 +365,6 @@ export default function PlanForm({
         )}
       />
     );
-  };
-
-  // Update the GeneratedPlanDisplay component
-  const GeneratedPlanDisplay = ({ plan }: { plan: GeneratedPlan }) => {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5 text-yellow-500" />
-            <h3 className="text-lg font-semibold">Generated Training Plan</h3>
-          </div>
-          <div className="flex items-center space-x-2">
-            {plan.isPremiumUser && (
-              <Badge
-                variant="default"
-                className="bg-gradient-to-r from-amber-500 to-amber-300 text-xs"
-              >
-                Premium
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        <div
-          className="prose prose-lg max-w-none dark:prose-invert border rounded-md p-6 bg-white dark:bg-gray-950
-                    prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100 
-                    prose-h1:text-2xl prose-h1:mb-6 prose-h1:text-center prose-h1:text-indigo-700 dark:prose-h1:text-indigo-400
-                    prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-4 prose-h2:text-indigo-700 dark:prose-h2:text-indigo-400
-                    prose-h3:text-lg prose-h3:mt-5 prose-h3:mb-3 prose-h3:text-indigo-600 dark:prose-h3:text-indigo-500
-                    prose-h4:text-base prose-h4:mt-4 prose-h4:mb-2 prose-h4:text-indigo-500 dark:prose-h4:text-indigo-300
-                    prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:my-3 prose-p:leading-relaxed
-                    prose-ul:my-3 prose-li:my-1 prose-li:text-gray-700 dark:prose-li:text-gray-300
-                    prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100
-                    [&_.training-plan]:space-y-4
-                    [&_.module]:border-l-2 [&_.module]:border-indigo-200 [&_.module]:pl-4 [&_.module]:py-2 [&_.module]:my-4
-                    [&_.premium-resource]:bg-gradient-to-r [&_.premium-resource]:from-amber-50 [&_.premium-resource]:to-amber-100 
-                    [&_.premium-resource]:dark:from-amber-950 [&_.premium-resource]:dark:to-amber-900
-                    [&_.premium-resource]:p-4 [&_.premium-resource]:rounded-md [&_.premium-resource]:my-4 [&_.premium-resource]:border-l-4 [&_.premium-resource]:border-amber-400"
-          dangerouslySetInnerHTML={{ __html: plan.content }}
-        />
-
-        {/* Display resources if available */}
-        {plan.resources && plan.resources.length > 0 && (
-          <ResourceList
-            resources={plan.resources}
-            isPremiumUser={plan.isPremiumUser}
-          />
-        )}
-
-        <div className="flex flex-wrap gap-2 mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopyToClipboard}
-            disabled={isCopying}
-          >
-            {isCopying ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Copying...
-              </>
-            ) : (
-              <>
-                <Copy className="mr-2 h-4 w-4" />
-                Copy to Clipboard
-              </>
-            )}
-          </Button>
-
-          <PDFRenderer
-            document={
-              <TrainingPlanPDF
-                title={form.getValues("title")}
-                content={plan.content}
-                resources={plan.resources}
-                createdAt={new Date().toISOString()}
-              />
-            }
-            fileName={`${form.getValues("title").replace(/\s+/g, "-")}.pdf`}
-          >
-            <Button variant="outline" size="sm" disabled={isDownloading}>
-              {isDownloading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating PDF...
-                </>
-              ) : (
-                <>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download PDF
-                </>
-              )}
-            </Button>
-          </PDFRenderer>
-        </div>
-      </div>
-    );
-  };
-
-  // These functions are defined but not currently used in the UI
-  // They are kept for future implementation
-  const _handleDownloadPDF = async () => {
-    // Implementation...
-    const _filename = `Training_Plan_${
-      new Date().toISOString().split("T")[0]
-    }.pdf`;
-    // Rest of implementation...
-  };
-
-  // This component is defined but not currently used in the UI
-  // It is kept for future implementation
-  const _GeneratedPlanDisplay = ({ plan }: { plan: GeneratedPlan }) => {
-    // Component implementation...
   };
 
   return (
@@ -603,7 +463,10 @@ export default function PlanForm({
                       }}
                       defaultValue="weeks"
                     >
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger
+                        className="w-32"
+                        aria-label="Select duration unit"
+                      >
                         <SelectValue placeholder="Unit" />
                       </SelectTrigger>
                       <SelectContent>

@@ -95,7 +95,7 @@ export default function TrainingPlanClient() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button asChild variant="outline">
+            <Button asChild variant="default">
               <Link href="/blog/training-plan-creator-guide">
                 <HelpCircle className="mr-2 h-4 w-4" />
                 Read the comprehensive guide
