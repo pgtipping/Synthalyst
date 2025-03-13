@@ -1509,3 +1509,36 @@ The project uses TypeScript for type safety. We've implemented a comprehensive t
    - Update TYPE_CHECKING_PLAN.md with progress and next steps
 
 This approach has successfully eliminated all TypeScript errors in the codebase, improving code quality and reducing potential runtime errors.
+
+### CSS Conflict Resolution Patterns - [2025-03-14 15:35:00]
+
+- When encountering styling differences between development and production environments:
+  1. Inspect the production environment to identify conflicting CSS classes
+  2. Create custom classes with the `synthalyst-` prefix to avoid conflicts
+  3. Use higher specificity selectors or `!important` flags when necessary
+  4. Implement responsive behavior using media queries
+  5. Test changes in both development and production environments
+- Common sources of CSS conflicts:
+  - Non-critical CSS loaded asynchronously in production
+  - Third-party CSS overriding application styles
+  - CSS ordering differences in production builds
+  - Minification and optimization changing CSS specificity
+- Example solution pattern:
+
+  ```css
+  /* Custom class with prefix */
+  .synthalyst-custom-element {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  /* Responsive behavior */
+  @media (min-width: 640px) {
+    .synthalyst-custom-element {
+      flex-direction: row !important;
+    }
+  }
+  ```
+
+- Always maintain responsive behavior when fixing CSS conflicts
+- Document CSS fixes in comments for future reference

@@ -130,3 +130,14 @@ Blog
 - Prisma for database interactions
 - NextAuth for authentication
 - Vercel for deployment
+
+### CSS Conflict Resolution
+
+- **Custom Prefixed Classes**: Using `synthalyst-` prefix for custom classes to avoid conflicts
+- **CSS Specificity Management**: Using higher specificity selectors when needed
+- **Important Flag Usage**: Strategic use of `!important` for critical styling
+- **Media Queries**: Implementing responsive behavior with breakpoint-specific styles
+- **Development vs. Production**: Strategies for handling CSS differences between environments
+  - Identifying conflicting styles in production
+  - Creating override classes with higher specificity
+  - Testing in both environments to ensure consistency
