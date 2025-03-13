@@ -1542,3 +1542,49 @@ This approach has successfully eliminated all TypeScript errors in the codebase,
 
 - Always maintain responsive behavior when fixing CSS conflicts
 - Document CSS fixes in comments for future reference
+
+## Accessibility and Performance Insights - [2025-03-14 21:30:00]
+
+### Accessibility Audit Results - [2025-03-14 21:30:00]
+
+- Critical accessibility issues identified:
+  - Buttons without accessible names in the Training Plan page
+  - Color contrast issues with links (3.67 ratio, below the required 4.5:1)
+- Overall accessibility score: 90/100
+- Prioritized recommendations:
+  - Add proper labels to all interactive elements
+  - Improve color contrast for better readability
+  - Fix low contrast text for better readability
+- All buttons must have accessible names through one of these methods:
+  - Inner text visible to screen readers
+  - aria-label attribute
+  - aria-labelledby attribute
+  - title attribute
+  - Explicit or implicit label
+- Color contrast must meet WCAG standards:
+  - Text must have a contrast ratio of at least 4.5:1 against its background
+  - Large text (18pt or 14pt bold) must have a contrast ratio of at least 3:1
+
+### Performance Audit Results - [2025-03-14 21:30:00]
+
+- Performance issues identified:
+  - Slow Largest Contentful Paint (LCP): 3031ms (failing Core Web Vital)
+  - Slow First Contentful Paint (FCP): 1668ms
+  - High JavaScript execution time
+  - Total Time to Interactive (TTI): 37718ms
+- Overall performance score: 52/100
+- Prioritized recommendations:
+  - Improve Largest Contentful Paint (LCP)
+  - Reduce JavaScript execution time
+- Core Web Vitals targets:
+  - LCP should be under 2.5 seconds
+  - FID (First Input Delay) should be under 100ms
+  - CLS (Cumulative Layout Shift) should be under 0.1
+- Performance optimization strategies:
+  - Optimize CSS loading strategy
+  - Implement JavaScript optimization techniques
+  - Configure image optimization
+  - Reduce render-blocking resources
+  - Implement code splitting and lazy loading
+  - Optimize server-side rendering
+  - Minimize main thread work

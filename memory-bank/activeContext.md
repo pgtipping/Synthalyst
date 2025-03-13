@@ -10,8 +10,33 @@
 - Resolving PDF generation issues related to crypto library initialization
 - Fixing TypeScript type errors throughout the codebase to improve type safety
 - Resolving styling issues in production environment
+- Addressing accessibility issues identified in the accessibility audit
+- Improving performance metrics based on performance audit results
 
 ## Recent Changes (Updated March 14, 2025)
+
+- 🔍 Conducted Accessibility Audit (March 14, 2025):
+
+  - Identified critical accessibility issues that need to be addressed:
+    - Buttons without accessible names in the Training Plan page
+    - Color contrast issues with links (3.67 ratio, below the required 4.5:1)
+  - Overall accessibility score: 90/100
+  - Prioritized recommendations:
+    - Add proper labels to all interactive elements
+    - Improve color contrast for better readability
+    - Fix low contrast text for better readability
+
+- 🔍 Conducted Performance Audit (March 14, 2025):
+
+  - Identified performance issues that need optimization:
+    - Slow Largest Contentful Paint (LCP): 3031ms (failing Core Web Vital)
+    - Slow First Contentful Paint (FCP): 1668ms
+    - High JavaScript execution time
+    - Total Time to Interactive (TTI): 37718ms
+  - Overall performance score: 52/100
+  - Prioritized recommendations:
+    - Improve Largest Contentful Paint (LCP)
+    - Reduce JavaScript execution time
 
 - ✅ Fixed All TypeScript Type Errors (March 14, 2025):
 
