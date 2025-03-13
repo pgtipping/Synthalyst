@@ -103,10 +103,16 @@ export function JobDetailsForm({
       description: values.description || "",
       requiredSkills: Array.isArray(values.requiredSkills)
         ? values.requiredSkills
-        : [],
+        : ((typeof values.requiredSkills === "string"
+            ? values.requiredSkills
+                .split(",")
+                .map((skill) => skill.trim())
+                .filter(Boolean)
+            : []) as string[]),
       resumeText: initialValues.resumeText || "",
     };
 
+    console.log("Submitting form with values:", formattedValues);
     onSubmit(formattedValues);
   };
 

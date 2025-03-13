@@ -10,6 +10,40 @@
 
 ## Recent Changes (Updated March 13, 2025)
 
+- ✅ Fixed 404 error for logo.png file (March 13, 2025):
+
+  - Successfully resolved the 404 error by copying the logo.png file to the public directory
+  - Confirmed that the logo now loads correctly without any console errors
+  - Improved overall application stability and user experience by eliminating resource loading errors
+
+- ✅ Fixed TIMELINE and PHASE formatting in interview prep plan (March 13, 2025):
+
+  - Successfully implemented proper formatting for TIMELINE and PHASE sections
+  - Ensured these sections start on new lines with appropriate styling
+  - Improved readability and professional appearance of the interview prep plan
+  - Enhanced the PDF export to properly display these formatted sections
+  - Added additional regex patterns to handle sections at the beginning of lines
+
+- ✅ Added useIsomorphicLayoutEffect utility (March 13, 2025):
+
+  - Created a cross-platform version of useLayoutEffect that falls back to useEffect on the server
+  - Helps prevent useLayoutEffect warnings during server-side rendering
+  - Improves overall application stability and development experience
+  - Follows React best practices for isomorphic applications
+
+- ✅ Enhanced API debugging for interview prep plan generation (March 13, 2025):
+
+  - Added request body logging to help identify validation errors
+  - Improved error handling in the API route
+  - Added better handling of requiredSkills field in the form submission
+  - Fixed potential type issues in the JobDetailsForm component
+
+- Reduced OVERARCHING GOAL font size to match TIMELINE and PHASE sections:
+
+  - Changed font size class from text-lg to text-md for consistent visual hierarchy
+  - Ensured all special section headings have the same size and styling
+  - Improved overall visual consistency in the interview prep plan
+
 - Fixed OVERARCHING GOAL formatting and adjusted font sizes for section headings:
 
   - Ensured OVERARCHING GOAL section starts on a new line with proper styling
@@ -29,7 +63,6 @@
   - Improved the PDF export formatting with better styling and layout
   - Fixed issues with markdown formatting showing through in the rendered output
   - Added proper container styling with rounded corners and subtle shadows
-- Fixed missing logo.png file by creating a copy from logo-high-res.png to resolve 404 errors
 - Added PDF export functionality to the Interview Prep feature:
   - Created a new InterviewPrepPDF component for rendering the interview prep plan as a PDF
   - Implemented text processing to properly format Markdown content in the PDF

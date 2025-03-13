@@ -20,9 +20,20 @@ const requestSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // Log the request body for debugging
+    const requestBody = await request.json();
+    logger.info("Request body:", requestBody);
+
+    // Clone the request since we've already consumed the body
+    const clonedRequest = new Request(request.url, {
+      method: request.method,
+      headers: request.headers,
+      body: JSON.stringify(requestBody),
+    });
+
     // Validate the request body against our schema
     const data = await validateRequest(
-      request,
+      clonedRequest,
       requestSchema,
       false // Don't require authentication for now
     );

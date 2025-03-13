@@ -1366,3 +1366,71 @@ These insights will help maintain high-quality output in the ApplyRight feature 
       },
     };
     ```
+
+## Fixed Issues [2025-03-13 06:20:00]
+
+### Logo 404 Error
+
+- The application was showing a 404 error for logo.png in the console
+- Fixed by copying the logo.png file to the public directory
+- This ensures the logo loads correctly without any console errors
+
+### Interview Prep Plan Formatting
+
+- TIMELINE and PHASE sections were not properly formatted in the interview prep plan
+- Fixed by implementing proper regex patterns and styling in the SimpleMarkdown component
+- Enhanced the PDF export component to properly handle these special sections
+- This improves readability and professional appearance of the interview prep plan
+
+### React Server-Side Rendering Best Practices - [2025-03-13 06:50:00]
+
+- Use `useIsomorphicLayoutEffect` instead of `useLayoutEffect` for components that might be rendered on the server
+- The utility is located at `src/lib/useIsomorphicLayoutEffect.ts`
+- This prevents the "useLayoutEffect does nothing on the server" warning
+- Implementation:
+
+  ```typescript
+  import { useLayoutEffect, useEffect } from "react";
+
+  // Use useLayoutEffect on the client, but fall back to useEffect during SSR
+  const useIsomorphicLayoutEffect =
+    typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+  export default useIsomorphicLayoutEffect;
+  ```
+
+- Import and use it like this:
+
+  ```typescript
+  import useIsomorphicLayoutEffect from "@/lib/useIsomorphicLayoutEffect";
+
+  function MyComponent() {
+    useIsomorphicLayoutEffect(() => {
+      // Your layout effect code here
+    }, []);
+
+    return <div>My Component</div>;
+  }
+  ```
+
+### SimpleMarkdown Component Patterns - [2025-03-13 06:50:00]
+
+- The SimpleMarkdown component in `src/app/interview-prep/page.tsx` handles custom markdown formatting
+- Special section handling requires regex patterns for both:
+  - Sections at the beginning of lines (e.g., `^TIMELINE:`)
+  - Sections in the middle of text (e.g., `(\S+\s*)TIMELINE:`)
+- Example pattern for handling both cases:
+  ```typescript
+  // Handle when it appears in the middle of text
+  formattedText = formattedText.replace(
+    /(\S+\s*)TIMELINE:/g,
+    '$1<br /><span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">TIMELINE:</span>'
+  );
+  // Also handle when it appears at the beginning of a line
+  formattedText = formattedText.replace(
+    /^TIMELINE:/gm,
+    '<span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">TIMELINE:</span>'
+  );
+  ```
+- The component uses a series of regex replacements to transform markdown-like syntax into styled HTML
+- Order of replacements matters to avoid conflicts between patterns

@@ -82,17 +82,32 @@ function SimpleMarkdown({ text }: { text: string }) {
     /(\S+\s*)OVERARCHING GOAL:/g,
     '$1<br /><span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">OVERARCHING GOAL:</span>'
   );
+  // Also handle when it appears at the beginning of a line
+  formattedText = formattedText.replace(
+    /^OVERARCHING GOAL:/gm,
+    '<span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">OVERARCHING GOAL:</span>'
+  );
 
   // Handle TIMELINE: section - ensure it starts on a new line (adjust font size from text-lg to text-md)
   formattedText = formattedText.replace(
     /(\S+\s*)TIMELINE:/g,
     '$1<br /><span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">TIMELINE:</span>'
   );
+  // Also handle when it appears at the beginning of a line
+  formattedText = formattedText.replace(
+    /^TIMELINE:/gm,
+    '<span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">TIMELINE:</span>'
+  );
 
   // Handle PHASE sections - ensure they start on a new line (adjust font size from text-lg to text-md)
   formattedText = formattedText.replace(
     /(\S+\s*)PHASE (\d+):/g,
     '$1<br /><span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">PHASE $2:</span>'
+  );
+  // Also handle when it appears at the beginning of a line
+  formattedText = formattedText.replace(
+    /^PHASE (\d+):/gm,
+    '<span class="text-md font-bold text-primary/90 mt-4 mb-2 inline-block">PHASE $1:</span>'
   );
 
   // Handle Objective: section
