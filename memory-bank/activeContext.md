@@ -7,8 +7,18 @@
 - Implementing proper metadata, JSON-LD structured data, and dynamic sitemap generation
 - Fixing accessibility issues to ensure WCAG compliance
 - Improving performance through CSS and JavaScript optimizations
+- Resolving PDF generation issues related to crypto library initialization
 
 ## Recent Changes (Updated March 13, 2025)
+
+- ✅ Fixed SHA224 Crypto Error in PDF Generation (March 13, 2025):
+
+  - Created a crypto-polyfill.js utility to properly initialize the crypto library and handle the SHA224 property
+  - Updated the PDFRenderer component to initialize the crypto polyfill
+  - Created pdf-utils.js with safer PDF generation and download functions
+  - Modified webpack configuration to prevent mangling of crypto-related properties
+  - Ensured PDF generation works correctly in both development and production environments
+  - Implemented a comprehensive solution that addresses the issue at multiple levels (library, component, build, utility)
 
 - ✅ Fixed 404 error for logo.png file (March 13, 2025):
 
