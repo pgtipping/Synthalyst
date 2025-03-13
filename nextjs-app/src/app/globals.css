@@ -163,3 +163,23 @@ button.bg-gray-200,
   width: 0.875rem;
   fill: hsl(var(--primary));
 }
+
+/* Override any conflicting styles from non-critical.css */
+.synthalyst-radio-group {
+  display: grid !important;
+  flex-direction: row !important;
+}
+
+/* When used in a flex container, ensure proper layout */
+.flex .synthalyst-radio-group {
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+/* Ensure radio button layout is always horizontal */
+.synthalyst-radio-layout {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}

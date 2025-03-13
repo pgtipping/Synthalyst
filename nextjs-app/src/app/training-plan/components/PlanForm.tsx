@@ -554,7 +554,7 @@ export default function PlanForm({
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="flex flex-col space-y-1 sm:flex-row sm:space-y-0 sm:space-x-4"
+                      className="synthalyst-radio-layout flex flex-row space-x-4"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="Beginner" id="beginner" />
