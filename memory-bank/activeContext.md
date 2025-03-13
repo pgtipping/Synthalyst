@@ -2,7 +2,7 @@
 
 ## Current Work Focus
 
-- Enhancing the Interview Prep feature with PDF export functionality
+- Enhancing the Interview Prep feature with PDF export functionality and improved formatting
 - Optimizing the Next.js application for SEO, accessibility, and performance
 - Implementing proper metadata, JSON-LD structured data, and dynamic sitemap generation
 - Fixing accessibility issues to ensure WCAG compliance
@@ -10,6 +10,13 @@
 
 ## Recent Changes (Updated March 13, 2025)
 
+- Improved interview prep plan formatting for better readability and professional appearance:
+  - Enhanced the SimpleMarkdown component with comprehensive regex replacements for consistent formatting
+  - Added proper styling for different section types (headers, lists, STAR format, etc.)
+  - Implemented visual hierarchy with borders, background colors, and proper spacing
+  - Improved the PDF export formatting with better styling and layout
+  - Fixed issues with markdown formatting showing through in the rendered output
+  - Added proper container styling with rounded corners and subtle shadows
 - Fixed missing logo.png file by creating a copy from logo-high-res.png to resolve 404 errors
 - Added PDF export functionality to the Interview Prep feature:
   - Created a new InterviewPrepPDF component for rendering the interview prep plan as a PDF

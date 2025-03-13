@@ -77,6 +77,30 @@ function SimpleMarkdown({ text }: { text: string }) {
     '<h3 class="text-lg font-semibold text-primary/80 mt-4 mb-2">$1</h3>'
   );
 
+  // Handle TIMELINE: section - ensure it starts on a new line
+  formattedText = formattedText.replace(
+    /(\S+\s*)TIMELINE:/g,
+    '$1<br /><span class="text-lg font-bold text-primary/90 mt-4 mb-2 inline-block">TIMELINE:</span>'
+  );
+
+  // Handle PHASE sections - ensure they start on a new line
+  formattedText = formattedText.replace(
+    /(\S+\s*)PHASE (\d+):/g,
+    '$1<br /><span class="text-lg font-bold text-primary/90 mt-4 mb-2 inline-block">PHASE $2:</span>'
+  );
+
+  // Handle OVERARCHING GOAL: section
+  formattedText = formattedText.replace(
+    /OVERARCHING GOAL:/g,
+    '<span class="text-lg font-bold text-primary/90 mt-4 mb-2 inline-block">OVERARCHING GOAL:</span>'
+  );
+
+  // Handle Objective: section
+  formattedText = formattedText.replace(
+    /Objective:/g,
+    '<span class="font-bold text-primary/90 mt-3 mb-1 inline-block">Objective:</span>'
+  );
+
   // Handle special formatting for STAR format template and similar patterns
   // Replace lines starting with "* " (asterisk followed by space) with styled headings
   formattedText = formattedText.replace(
@@ -112,6 +136,12 @@ function SimpleMarkdown({ text }: { text: string }) {
   formattedText = formattedText.replace(
     /^(Leadership|HR Operations|Compensation & Benefits|Technical Skills|Communication|Problem Solving|Cultural Fit):/gm,
     '<h3 class="text-md font-semibold my-2 text-primary/80 border-l-4 border-primary/30 pl-2 py-1">$1:</h3>'
+  );
+
+  // Handle specific sections like "Website Deep Dive:", "About Us/Mission/Values:", etc.
+  formattedText = formattedText.replace(
+    /^(Website Deep Dive|About Us\/Mission\/Values|Products\/Services|News\/Blog\/Press Releases|Team\/Leadership):/gm,
+    '<h3 class="text-md font-bold my-2 text-primary/90 border-l-4 border-primary/30 pl-2 py-1">$1:</h3>'
   );
 
   // Handle phase headers like "Research Phase", "Practice Phase", etc.
@@ -150,7 +180,7 @@ function SimpleMarkdown({ text }: { text: string }) {
   // Replace paragraphs (lines with content)
   // But not lines that we've already processed
   formattedText = formattedText.replace(
-    /^(?!<h|<li|<ul|<ol|<p)([^<\n].+)$/gm,
+    /^(?!<h|<li|<ul|<ol|<p|<span|<br)([^<\n].+)$/gm,
     '<p class="my-2">$1</p>'
   );
 

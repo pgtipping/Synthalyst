@@ -206,6 +206,45 @@ export default function InterviewPrepPDF({
       else if (cleanLine.startsWith("### ")) {
         return { type: "h3", content: cleanLine.substring(4) };
       }
+      // Check if it contains TIMELINE:
+      else if (cleanLine.includes("TIMELINE:")) {
+        const parts = cleanLine.split("TIMELINE:");
+        return {
+          type: "timeline",
+          prefix: parts[0].trim(),
+          content: parts.length > 1 ? parts[1].trim() : "",
+        };
+      }
+      // Check if it contains PHASE n:
+      else if (/PHASE \d+:/.test(cleanLine)) {
+        const match = cleanLine.match(/(.*)(PHASE \d+:)(.*)/);
+        if (match) {
+          return {
+            type: "phase",
+            prefix: match[1].trim(),
+            phaseType: match[2],
+            content: match[3].trim(),
+          };
+        }
+      }
+      // Check if it contains OVERARCHING GOAL:
+      else if (cleanLine.includes("OVERARCHING GOAL:")) {
+        const parts = cleanLine.split("OVERARCHING GOAL:");
+        return {
+          type: "goal",
+          prefix: parts[0].trim(),
+          content: parts.length > 1 ? parts[1].trim() : "",
+        };
+      }
+      // Check if it contains Objective:
+      else if (cleanLine.includes("Objective:")) {
+        const parts = cleanLine.split("Objective:");
+        return {
+          type: "objective",
+          prefix: parts[0].trim(),
+          content: parts.length > 1 ? parts[1].trim() : "",
+        };
+      }
       // Check if it's a phase header (Research Phase, Practice Phase, etc.)
       else if (
         /^(Research Phase|Practice Phase|Day Before Preparation|Interview Day|Follow-up)( \(\d+-\d+ days before\))?:/.test(
@@ -215,8 +254,23 @@ export default function InterviewPrepPDF({
         const match = cleanLine.match(/^([^:]+):(.*)/);
         if (match) {
           return {
-            type: "phase",
+            type: "phaseHeader",
             phaseType: match[1],
+            content: match[2].trim(),
+          };
+        }
+      }
+      // Check if it's a specific section like Website Deep Dive, About Us/Mission/Values, etc.
+      else if (
+        /^(Website Deep Dive|About Us\/Mission\/Values|Products\/Services|News\/Blog\/Press Releases|Team\/Leadership):/.test(
+          cleanLine
+        )
+      ) {
+        const match = cleanLine.match(/^([^:]+):(.*)/);
+        if (match) {
+          return {
+            type: "specialSection",
+            sectionType: match[1],
             content: match[2].trim(),
           };
         }
@@ -330,11 +384,78 @@ export default function InterviewPrepPDF({
                     {line.content}
                   </Text>
                 );
+              case "timeline":
+                return (
+                  <View key={index} style={{ marginTop: 8, marginBottom: 8 }}>
+                    {line.prefix && (
+                      <Text style={styles.text}>{line.prefix}</Text>
+                    )}
+                    <Text style={[styles.sectionSubtitle, { marginTop: 4 }]}>
+                      TIMELINE:
+                    </Text>
+                    {line.content && (
+                      <Text style={styles.text}>{line.content}</Text>
+                    )}
+                  </View>
+                );
               case "phase":
+                return (
+                  <View key={index} style={{ marginTop: 8, marginBottom: 8 }}>
+                    {line.prefix && (
+                      <Text style={styles.text}>{line.prefix}</Text>
+                    )}
+                    <Text style={[styles.sectionSubtitle, { marginTop: 4 }]}>
+                      {line.phaseType}
+                    </Text>
+                    {line.content && (
+                      <Text style={styles.text}>{line.content}</Text>
+                    )}
+                  </View>
+                );
+              case "goal":
+                return (
+                  <View key={index} style={{ marginTop: 8, marginBottom: 8 }}>
+                    {line.prefix && (
+                      <Text style={styles.text}>{line.prefix}</Text>
+                    )}
+                    <Text style={[styles.sectionSubtitle, { marginTop: 4 }]}>
+                      OVERARCHING GOAL:
+                    </Text>
+                    {line.content && (
+                      <Text style={styles.text}>{line.content}</Text>
+                    )}
+                  </View>
+                );
+              case "objective":
+                return (
+                  <View key={index} style={{ marginTop: 8, marginBottom: 8 }}>
+                    {line.prefix && (
+                      <Text style={styles.text}>{line.prefix}</Text>
+                    )}
+                    <Text style={[styles.starTitle, { marginTop: 4 }]}>
+                      Objective:
+                    </Text>
+                    {line.content && (
+                      <Text style={styles.text}>{line.content}</Text>
+                    )}
+                  </View>
+                );
+              case "phaseHeader":
                 return (
                   <View key={index} style={styles.phaseSection}>
                     <Text style={styles.phaseTitle}>
                       {line.phaseType || ""}
+                    </Text>
+                    {line.content && (
+                      <Text style={styles.text}>{line.content}</Text>
+                    )}
+                  </View>
+                );
+              case "specialSection":
+                return (
+                  <View key={index} style={styles.categorySection}>
+                    <Text style={styles.categoryTitle}>
+                      {line.sectionType || ""}:
                     </Text>
                     {line.content && (
                       <Text style={styles.text}>{line.content}</Text>
