@@ -27,8 +27,6 @@ import {
   Users,
   Library,
   Check,
-  MessageSquare,
-  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

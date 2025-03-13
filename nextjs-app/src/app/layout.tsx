@@ -227,6 +227,17 @@ export default function RootLayout({
       <head>
         <link rel="canonical" href="https://synthalyst.com" />
         <link rel="alternate" hrefLang="en" href="https://synthalyst.com" />
+
+        {/* Resource hints for external domains */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
+
         <meta name="theme-color" content="#4285F4" />
         <meta
           name="google-site-verification"
@@ -237,15 +248,6 @@ export default function RootLayout({
           name="facebook-domain-verification"
           content="facebook-domain-verification-code"
         />
-        {/* Preload critical fonts */}
-        <link
-          rel="preload"
-          href="/fonts/geist-sans.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-
         {/* Load non-critical CSS asynchronously */}
         <link rel="preload" href="/styles/non-critical.css" as="style" />
         <script
@@ -295,7 +297,11 @@ export default function RootLayout({
               };
               
               // Execute after page load
-              window.addEventListener('load', deferJsLoad);
+              if (document.readyState === 'complete') {
+                deferJsLoad();
+              } else {
+                window.addEventListener('load', deferJsLoad);
+              }
               
               // Optimize CSS loading
               const optimizeCssLoading = () => {
@@ -305,10 +311,52 @@ export default function RootLayout({
                   layoutCss.setAttribute('media', 'print');
                   layoutCss.onload = () => layoutCss.setAttribute('media', 'all');
                 }
+                
+                // Preload critical images
+                const preloadImages = () => {
+                  const images = [
+                    '/icons/logo.png',
+                    '/icons/og-image.png'
+                  ];
+                  
+                  images.forEach(src => {
+                    const link = document.createElement('link');
+                    link.rel = 'preload';
+                    link.as = 'image';
+                    link.href = src;
+                    document.head.appendChild(link);
+                  });
+                };
+                
+                // Execute image preloading after a short delay
+                setTimeout(preloadImages, 100);
               };
               
               // Execute immediately
               optimizeCssLoading();
+              
+              // Use Intersection Observer to lazy load below-the-fold content
+              if ('IntersectionObserver' in window) {
+                const lazyLoadObserver = new IntersectionObserver((entries) => {
+                  entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                      const target = entry.target;
+                      if (target.dataset.src) {
+                        target.src = target.dataset.src;
+                        target.removeAttribute('data-src');
+                      }
+                      lazyLoadObserver.unobserve(target);
+                    }
+                  });
+                });
+                
+                // Observe all elements with data-src attribute
+                document.addEventListener('DOMContentLoaded', () => {
+                  document.querySelectorAll('[data-src]').forEach(el => {
+                    lazyLoadObserver.observe(el);
+                  });
+                });
+              }
             `,
           }}
         />

@@ -5,6 +5,10 @@ const nextConfig = {
     // Other experimental features can go here
     optimizeCss: true, // Enable CSS optimization
     optimizePackageImports: ["@/components", "@/lib", "@/hooks"], // Optimize package imports
+    // Add modern JavaScript optimization
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
   },
   // Enable source maps in production
   productionBrowserSourceMaps: true,
@@ -38,8 +42,16 @@ const nextConfig = {
         }),
       ];
 
-      // Disable minification to fix SHA224 error with react-pdf
-      if (config.optimization) {
+      // Improved minification settings for production
+      if (process.env.NODE_ENV === "production") {
+        // Enable terser for better minification
+        config.optimization.minimize = true;
+        config.optimization.minimizer = [
+          new webpack.optimize.ModuleConcatenationPlugin(),
+          ...config.optimization.minimizer,
+        ];
+      } else {
+        // Disable minification for development to fix SHA224 error with react-pdf
         config.optimization.minimize = false;
       }
     }
@@ -48,7 +60,7 @@ const nextConfig = {
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
-        minimize: true, // Enable minification for production
+        minimize: process.env.NODE_ENV === "production", // Enable minification for production
         splitChunks: {
           chunks: "all",
           maxInitialRequests: 25,
@@ -78,6 +90,21 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
               chunks: "all",
               priority: 30,
+            },
+            // Separate UI components
+            ui: {
+              name: "ui",
+              test: /[\\/]components[\\/]ui[\\/]/,
+              chunks: "all",
+              priority: 15,
+              reuseExistingChunk: true,
+            },
+            // Separate large libraries
+            largeLibs: {
+              name: "large-libs",
+              test: /[\\/]node_modules[\\/](@radix-ui|@react-pdf|chart\.js|recharts)[\\/]/,
+              chunks: "all",
+              priority: 25,
             },
           },
         },
