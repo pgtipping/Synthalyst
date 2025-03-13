@@ -27,9 +27,103 @@ import {
   Users,
   Library,
   Check,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import InterviewPrepPDF from "@/components/InterviewPrepPDF";
+import PDFRenderer from "@/components/PDFRenderer";
+
+// Custom Markdown renderer function
+function SimpleMarkdown({ text }: { text: string }) {
+  if (!text) return null;
+
+  // Process the text in steps
+  let formattedText = text;
+
+  // Handle special formatting for STAR format template
+  // Replace lines starting with "* " (asterisk followed by space) with styled headings
+  formattedText = formattedText.replace(
+    /^\* ([^:]+):/gm,
+    '<h3 class="text-md font-bold my-2 text-primary">$1:</h3>'
+  );
+
+  // Handle "Action:" and similar special headings
+  formattedText = formattedText.replace(
+    /^(Action|Situation|Task|Result):/gm,
+    '<h3 class="text-md font-bold my-2 text-primary">$1:</h3>'
+  );
+
+  // Handle "Step 2: Anticipate Common Interview Questions:" format
+  formattedText = formattedText.replace(
+    /^\* (Step \d+: .+?):/gm,
+    '<h3 class="text-md font-bold my-3 text-primary">$1:</h3>'
+  );
+
+  // Handle specific categories like "Leadership:", "HR Operations:", etc.
+  formattedText = formattedText.replace(
+    /^\* (Leadership|HR Operations|Compensation & Benefits):/gm,
+    '<h3 class="text-md font-semibold my-2 text-primary/80 border-l-4 border-primary/30 pl-2">$1:</h3>'
+  );
+
+  // Replace headers (# Header)
+  formattedText = formattedText.replace(
+    /^# (.+)$/gm,
+    '<h1 class="text-xl font-bold my-3">$1</h1>'
+  );
+  formattedText = formattedText.replace(
+    /^## (.+)$/gm,
+    '<h2 class="text-lg font-bold my-2">$1</h2>'
+  );
+  formattedText = formattedText.replace(
+    /^### (.+)$/gm,
+    '<h3 class="text-md font-bold my-2">$1</h3>'
+  );
+
+  // Replace lists (- item or * item or 1. item)
+  // But not lines that we've already processed as headings
+  formattedText = formattedText.replace(
+    /^(?!<h3)[\*\-] (.+)$/gm,
+    '<li class="ml-4 list-disc">$1</li>'
+  );
+  formattedText = formattedText.replace(
+    /^\d+\. (.+)$/gm,
+    '<li class="ml-4 list-decimal">$1</li>'
+  );
+
+  // Group list items
+  formattedText = formattedText.replace(/<\/li>\n<li/g, "</li><li");
+  formattedText = formattedText.replace(
+    /<li class="ml-4 list-disc">(.+?)(<\/li>)+/g,
+    '<ul class="my-2">$&</ul>'
+  );
+  formattedText = formattedText.replace(
+    /<li class="ml-4 list-decimal">(.+?)(<\/li>)+/g,
+    '<ol class="my-2">$&</ol>'
+  );
+
+  // Replace bold and italic
+  formattedText = formattedText.replace(
+    /\*\*(.+?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+  formattedText = formattedText.replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+  // Replace paragraphs (lines with content)
+  // But not lines that we've already processed
+  formattedText = formattedText.replace(
+    /^(?!<h|<li|<ul|<ol|<p)([^<\n].+)$/gm,
+    '<p class="my-2">$1</p>'
+  );
+
+  // Fix any double paragraph tags
+  formattedText = formattedText.replace(
+    /<p class="my-2">(.+?)<\/p>\n/g,
+    '<p class="my-2">$1</p>'
+  );
+
+  return <div dangerouslySetInnerHTML={{ __html: formattedText }} />;
+}
 
 export default function InterviewPrep() {
   const { data: session, status } = useSession();
@@ -551,21 +645,67 @@ export default function InterviewPrep() {
               <CardContent>
                 {prepPlan ? (
                   <div className="space-y-6">
-                    <div className="bg-muted p-4 rounded-md">
-                      <h2 className="font-medium mb-2">
-                        Your Interview Prep Plan:
-                      </h2>
-                      <p className="text-sm whitespace-pre-line">{prepPlan}</p>
+                    <div className="bg-muted p-6 rounded-md shadow-sm border">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="font-medium text-lg flex items-center">
+                          <FileText className="h-5 w-5 mr-2 text-primary" />
+                          Your Interview Prep Plan
+                        </h2>
+                        <PDFRenderer
+                          document={
+                            <InterviewPrepPDF
+                              jobTitle={jobDetails.jobTitle}
+                              company={jobDetails.company}
+                              industry={jobDetails.industry}
+                              prepPlan={prepPlan}
+                              questions={generatedQuestions}
+                            />
+                          }
+                          fileName={`interview-prep-plan-${jobDetails.jobTitle
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}.pdf`}
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-1"
+                          >
+                            <Download className="h-4 w-4" />
+                            <span>Export PDF</span>
+                          </Button>
+                        </PDFRenderer>
+                      </div>
+                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                        <SimpleMarkdown text={prepPlan} />
+                      </div>
                     </div>
 
                     <div className="space-y-4">
                       <h2 className="font-medium">Practice Questions:</h2>
                       {generatedQuestions.map((question, index) => (
-                        <div key={index} className="border rounded-md p-4">
-                          <p className="font-medium mb-2">
-                            Question {index + 1}:
-                          </p>
-                          <p className="text-sm">{question}</p>
+                        <div
+                          key={index}
+                          className="border rounded-md p-5 hover:bg-muted/50 transition-colors shadow-sm"
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge
+                              variant="outline"
+                              className="bg-primary/10 text-primary"
+                            >
+                              Question {index + 1}
+                            </Badge>
+                            {index < 3 && (
+                              <Badge
+                                variant="outline"
+                                className="bg-green-50 text-green-700 border-green-200"
+                              >
+                                Recommended
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-sm space-y-2">
+                            <SimpleMarkdown text={question} />
+                          </div>
                         </div>
                       ))}
                     </div>

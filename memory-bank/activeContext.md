@@ -1,7 +1,8 @@
-# Active Context - SEO and Performance Optimization (March 13, 2025)
+# Active Context - Feature Enhancement and Optimization (March 13, 2025)
 
 ## Current Work Focus
 
+- Enhancing the Interview Prep feature with PDF export functionality
 - Optimizing the Next.js application for SEO, accessibility, and performance
 - Implementing proper metadata, JSON-LD structured data, and dynamic sitemap generation
 - Fixing accessibility issues to ensure WCAG compliance
@@ -9,6 +10,12 @@
 
 ## Recent Changes (Updated March 13, 2025)
 
+- Added PDF export functionality to the Interview Prep feature:
+  - Created a new InterviewPrepPDF component for rendering the interview prep plan as a PDF
+  - Implemented text processing to properly format Markdown content in the PDF
+  - Added an "Export PDF" button to the interview prep plan section
+  - Fixed formatting issues with asterisks in the STAR format template
+  - Enhanced the visual presentation of the interview prep plan with better styling
 - Fixed 404 error by removing preload link for non-existent font file
 - Added resource hints (preconnect, dns-prefetch) for external domains to improve resource loading
 - Optimized JavaScript loading:
