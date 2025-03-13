@@ -41,73 +41,111 @@ function SimpleMarkdown({ text }: { text: string }) {
   // Process the text in steps
   let formattedText = text;
 
-  // Handle special formatting for STAR format template
+  // First, clean up any extra whitespace and normalize line breaks
+  formattedText = formattedText
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n");
+
+  // Handle bold text (before other replacements to avoid conflicts)
+  formattedText = formattedText.replace(
+    /\*\*(.+?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
+  // Handle italic text (before other replacements to avoid conflicts)
+  formattedText = formattedText.replace(/\*([^*]+?)\*/g, "<em>$1</em>");
+
+  // Handle main title (usually starts with # or has all caps INTERVIEW PREPARATION PLAN)
+  formattedText = formattedText.replace(
+    /^# (.+)$/m,
+    '<h1 class="text-2xl font-bold text-primary mb-4 mt-2 pb-2 border-b border-primary/20">$1</h1>'
+  );
+  formattedText = formattedText.replace(
+    /^(INTERVIEW PREPARATION PLAN.+)$/m,
+    '<h1 class="text-2xl font-bold text-primary mb-4 mt-2 pb-2 border-b border-primary/20">$1</h1>'
+  );
+
+  // Handle section headers (## headers)
+  formattedText = formattedText.replace(
+    /^## (.+)$/gm,
+    '<h2 class="text-xl font-bold text-primary/90 mt-6 mb-3 pb-1 border-b border-primary/10">$1</h2>'
+  );
+
+  // Handle subsection headers (### headers)
+  formattedText = formattedText.replace(
+    /^### (.+)$/gm,
+    '<h3 class="text-lg font-semibold text-primary/80 mt-4 mb-2">$1</h3>'
+  );
+
+  // Handle special formatting for STAR format template and similar patterns
   // Replace lines starting with "* " (asterisk followed by space) with styled headings
   formattedText = formattedText.replace(
     /^\* ([^:]+):/gm,
-    '<h3 class="text-md font-bold my-2 text-primary">$1:</h3>'
+    '<h3 class="text-md font-bold my-2 text-primary/90 border-l-4 border-primary/30 pl-2 py-1">$1:</h3>'
   );
 
   // Handle "Action:" and similar special headings
   formattedText = formattedText.replace(
     /^(Action|Situation|Task|Result):/gm,
-    '<h3 class="text-md font-bold my-2 text-primary">$1:</h3>'
+    '<h3 class="text-md font-bold my-2 text-primary/90 border-l-4 border-primary/30 pl-2 py-1">$1:</h3>'
   );
 
   // Handle "Step 2: Anticipate Common Interview Questions:" format
   formattedText = formattedText.replace(
     /^\* (Step \d+: .+?):/gm,
-    '<h3 class="text-md font-bold my-3 text-primary">$1:</h3>'
+    '<h3 class="text-md font-bold my-3 text-primary/90 bg-primary/5 p-2 rounded-md">$1:</h3>'
+  );
+
+  // Also handle without the asterisk
+  formattedText = formattedText.replace(
+    /^(Step \d+: .+?):/gm,
+    '<h3 class="text-md font-bold my-3 text-primary/90 bg-primary/5 p-2 rounded-md">$1:</h3>'
   );
 
   // Handle specific categories like "Leadership:", "HR Operations:", etc.
   formattedText = formattedText.replace(
-    /^\* (Leadership|HR Operations|Compensation & Benefits):/gm,
-    '<h3 class="text-md font-semibold my-2 text-primary/80 border-l-4 border-primary/30 pl-2">$1:</h3>'
+    /^\* (Leadership|HR Operations|Compensation & Benefits|Technical Skills|Communication|Problem Solving|Cultural Fit):/gm,
+    '<h3 class="text-md font-semibold my-2 text-primary/80 border-l-4 border-primary/30 pl-2 py-1">$1:</h3>'
   );
 
-  // Replace headers (# Header)
+  // Also handle without the asterisk
   formattedText = formattedText.replace(
-    /^# (.+)$/gm,
-    '<h1 class="text-xl font-bold my-3">$1</h1>'
-  );
-  formattedText = formattedText.replace(
-    /^## (.+)$/gm,
-    '<h2 class="text-lg font-bold my-2">$1</h2>'
-  );
-  formattedText = formattedText.replace(
-    /^### (.+)$/gm,
-    '<h3 class="text-md font-bold my-2">$1</h3>'
+    /^(Leadership|HR Operations|Compensation & Benefits|Technical Skills|Communication|Problem Solving|Cultural Fit):/gm,
+    '<h3 class="text-md font-semibold my-2 text-primary/80 border-l-4 border-primary/30 pl-2 py-1">$1:</h3>'
   );
 
-  // Replace lists (- item or * item or 1. item)
-  // But not lines that we've already processed as headings
+  // Handle phase headers like "Research Phase", "Practice Phase", etc.
+  formattedText = formattedText.replace(
+    /^(Research Phase|Practice Phase|Day Before Preparation|Interview Day|Follow-up)( \(\d+-\d+ days before\))?:/gm,
+    '<h3 class="text-lg font-bold my-3 text-primary/90 bg-primary/5 p-2 rounded-md">$1$2:</h3>'
+  );
+
+  // Replace lists (- item or * item) but not lines that we've already processed as headings
   formattedText = formattedText.replace(
     /^(?!<h3)[\*\-] (.+)$/gm,
-    '<li class="ml-4 list-disc">$1</li>'
+    '<li class="ml-4 list-disc mb-2">$1</li>'
   );
+
+  // Replace numbered lists (1. item)
   formattedText = formattedText.replace(
     /^\d+\. (.+)$/gm,
-    '<li class="ml-4 list-decimal">$1</li>'
+    '<li class="ml-4 list-decimal mb-2">$1</li>'
   );
 
   // Group list items
   formattedText = formattedText.replace(/<\/li>\n<li/g, "</li><li");
+
+  // Wrap unordered lists
   formattedText = formattedText.replace(
-    /<li class="ml-4 list-disc">(.+?)(<\/li>)+/g,
-    '<ul class="my-2">$&</ul>'
-  );
-  formattedText = formattedText.replace(
-    /<li class="ml-4 list-decimal">(.+?)(<\/li>)+/g,
-    '<ol class="my-2">$&</ol>'
+    /<li class="ml-4 list-disc mb-2">(.+?)(<\/li>)+/g,
+    '<ul class="my-3 space-y-1 pl-2">$&</ul>'
   );
 
-  // Replace bold and italic
+  // Wrap ordered lists
   formattedText = formattedText.replace(
-    /\*\*(.+?)\*\*/g,
-    "<strong>$1</strong>"
+    /<li class="ml-4 list-decimal mb-2">(.+?)(<\/li>)+/g,
+    '<ol class="my-3 space-y-1 pl-2">$&</ol>'
   );
-  formattedText = formattedText.replace(/\*(.+?)\*/g, "<em>$1</em>");
 
   // Replace paragraphs (lines with content)
   // But not lines that we've already processed
@@ -122,7 +160,14 @@ function SimpleMarkdown({ text }: { text: string }) {
     '<p class="my-2">$1</p>'
   );
 
-  return <div dangerouslySetInnerHTML={{ __html: formattedText }} />;
+  // Add a container with proper styling
+  return (
+    <div className="prose prose-sm max-w-none dark:prose-invert">
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+        <div dangerouslySetInnerHTML={{ __html: formattedText }} />
+      </div>
+    </div>
+  );
 }
 
 export default function InterviewPrep() {

@@ -4,13 +4,18 @@ const styles = StyleSheet.create({
   page: {
     padding: 30,
     fontFamily: "Helvetica",
+    backgroundColor: "#FFFFFF",
   },
   header: {
     marginBottom: 20,
+    borderBottom: "1 solid #4F46E5",
+    paddingBottom: 10,
   },
   title: {
     fontSize: 24,
     marginBottom: 10,
+    color: "#4F46E5",
+    fontWeight: "bold",
   },
   subtitle: {
     fontSize: 14,
@@ -18,45 +23,106 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   section: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#4F46E5",
+    paddingBottom: 2,
+    borderBottom: "0.5 solid #E5E7EB",
+  },
+  sectionSubtitle: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
+    marginTop: 12,
+    color: "#4F46E5",
   },
-  sectionSubtitle: {
+  subSectionTitle: {
     fontSize: 14,
     fontWeight: "bold",
     marginBottom: 6,
+    marginTop: 10,
+    color: "#6366F1",
   },
   text: {
     fontSize: 12,
     marginBottom: 5,
-    lineHeight: 1.4,
+    lineHeight: 1.5,
+    color: "#374151",
   },
   list: {
     marginLeft: 15,
+    marginTop: 5,
+    marginBottom: 10,
   },
   listItem: {
     fontSize: 12,
-    marginBottom: 3,
+    marginBottom: 5,
+    lineHeight: 1.4,
+    textIndent: -10,
+    paddingLeft: 10,
   },
   starSection: {
-    marginBottom: 10,
+    marginBottom: 12,
+    marginLeft: 10,
+    borderLeft: "1 solid #E5E7EB",
+    paddingLeft: 8,
   },
   starTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "bold",
+    marginBottom: 3,
+    color: "#4F46E5",
+  },
+  phaseSection: {
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: "#F3F4F6",
+    padding: 8,
+    borderRadius: 4,
+  },
+  phaseTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#4F46E5",
+    marginBottom: 5,
+  },
+  categorySection: {
+    marginTop: 8,
+    marginBottom: 8,
+    borderLeft: "2 solid #E5E7EB",
+    paddingLeft: 8,
+  },
+  categoryTitle: {
+    fontSize: 13,
+    fontWeight: "bold",
+    color: "#6366F1",
+    marginBottom: 3,
+  },
+  stepSection: {
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: "#F3F4F6",
+    padding: 8,
+    borderRadius: 4,
+  },
+  stepTitle: {
+    fontSize: 13,
+    fontWeight: "bold",
+    color: "#4F46E5",
+    marginBottom: 5,
   },
   metadata: {
     marginTop: 20,
-    borderTop: "1 solid #ccc",
+    borderTop: "1 solid #E5E7EB",
     paddingTop: 10,
   },
   metadataItem: {
     fontSize: 10,
-    color: "#666",
+    color: "#6B7280",
     marginBottom: 3,
   },
   footer: {
@@ -66,7 +132,27 @@ const styles = StyleSheet.create({
     right: 30,
     textAlign: "center",
     fontSize: 10,
-    color: "#666",
+    color: "#6B7280",
+    borderTop: "0.5 solid #E5E7EB",
+    paddingTop: 5,
+  },
+  questionNumber: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#4F46E5",
+    marginBottom: 3,
+  },
+  questionText: {
+    fontSize: 12,
+    marginBottom: 5,
+    lineHeight: 1.5,
+    color: "#374151",
+  },
+  questionContainer: {
+    marginBottom: 15,
+    padding: 8,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 4,
   },
 });
 
@@ -87,52 +173,106 @@ export default function InterviewPrepPDF({
 }: InterviewPrepPDFProps) {
   // Process the prep plan text to extract sections
   const processText = (text: string) => {
+    // Clean up the text
+    const cleanText = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+
     // Split the text into lines
-    const lines = text.split("\n");
+    const lines = cleanText.split("\n");
 
     // Process the lines to identify sections, lists, etc.
     const processedLines = lines.map((line) => {
-      // Check if it's a header (starts with #)
-      if (line.startsWith("# ")) {
-        return { type: "h1", content: line.substring(2) };
-      } else if (line.startsWith("## ")) {
-        return { type: "h2", content: line.substring(3) };
-      } else if (line.startsWith("### ")) {
-        return { type: "h3", content: line.substring(4) };
-      }
-      // Check if it's a list item
-      else if (line.match(/^[\*\-] /)) {
-        return { type: "listItem", content: line.substring(2) };
-      } else if (line.match(/^\d+\. /)) {
+      // Remove any markdown bold/italic markers
+      const cleanLine = line
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/\*([^*]+?)\*/g, "$1");
+
+      // Check if it's a main header (starts with # or is INTERVIEW PREPARATION PLAN)
+      if (
+        cleanLine.startsWith("# ") ||
+        /^INTERVIEW PREPARATION PLAN/i.test(cleanLine)
+      ) {
         return {
-          type: "numberedListItem",
-          content: line.substring(line.indexOf(". ") + 2),
+          type: "h1",
+          content: cleanLine.startsWith("# ")
+            ? cleanLine.substring(2)
+            : cleanLine,
         };
       }
-      // Check if it's a STAR format section
-      else if (
-        line.startsWith("* Situation:") ||
-        line.startsWith("* Task:") ||
-        line.startsWith("* Action:") ||
-        line.startsWith("* Result:")
-      ) {
-        const [type, content] = line.substring(2).split(":");
-        return { type: "starSection", starType: type, content: content.trim() };
+      // Check if it's a section header
+      else if (cleanLine.startsWith("## ")) {
+        return { type: "h2", content: cleanLine.substring(3) };
       }
-      // Check if it's a special section like "Leadership:"
+      // Check if it's a subsection header
+      else if (cleanLine.startsWith("### ")) {
+        return { type: "h3", content: cleanLine.substring(4) };
+      }
+      // Check if it's a phase header (Research Phase, Practice Phase, etc.)
       else if (
-        line.match(/^\* (Leadership|HR Operations|Compensation & Benefits):/)
+        /^(Research Phase|Practice Phase|Day Before Preparation|Interview Day|Follow-up)( \(\d+-\d+ days before\))?:/.test(
+          cleanLine
+        )
       ) {
-        const [type, content] = line.substring(2).split(":");
+        const match = cleanLine.match(/^([^:]+):(.*)/);
+        if (match) {
+          return {
+            type: "phase",
+            phaseType: match[1],
+            content: match[2].trim(),
+          };
+        }
+      }
+      // Check if it's a step (Step 1:, Step 2:, etc.)
+      else if (/^(\* )?(Step \d+: .+?):/.test(cleanLine)) {
+        const match = cleanLine.match(/^(\* )?(Step \d+: .+?):(.*)/);
+        if (match) {
+          return {
+            type: "step",
+            stepType: match[2],
+            content: match[3].trim(),
+          };
+        }
+      }
+      // Check if it's a STAR format section
+      else if (/^(\* )?(Situation|Task|Action|Result):/.test(cleanLine)) {
+        const match = cleanLine.match(/^(\* )?([^:]+):(.*)/);
+        if (match) {
+          return {
+            type: "starSection",
+            starType: match[2],
+            content: match[3].trim(),
+          };
+        }
+      }
+      // Check if it's a special category section
+      else if (
+        /^(\* )?(Leadership|HR Operations|Compensation & Benefits|Technical Skills|Communication|Problem Solving|Cultural Fit):/.test(
+          cleanLine
+        )
+      ) {
+        const match = cleanLine.match(/^(\* )?([^:]+):(.*)/);
+        if (match) {
+          return {
+            type: "category",
+            categoryType: match[2],
+            content: match[3].trim(),
+          };
+        }
+      }
+      // Check if it's a list item
+      else if (cleanLine.match(/^[\*\-] /)) {
+        return { type: "listItem", content: cleanLine.substring(2) };
+      }
+      // Check if it's a numbered list item
+      else if (cleanLine.match(/^\d+\. /)) {
         return {
-          type: "specialSection",
-          sectionType: type,
-          content: content.trim(),
+          type: "numberedListItem",
+          number: parseInt(cleanLine.match(/^(\d+)\./)?.[1] || "1"),
+          content: cleanLine.substring(cleanLine.indexOf(". ") + 2),
         };
       }
       // Otherwise, it's a paragraph
-      else if (line.trim()) {
-        return { type: "paragraph", content: line };
+      else if (cleanLine.trim()) {
+        return { type: "paragraph", content: cleanLine };
       }
       // Empty line
       else {
@@ -144,6 +284,11 @@ export default function InterviewPrepPDF({
   };
 
   const processedPlan = processText(prepPlan);
+
+  // Process questions to clean up markdown
+  const processedQuestions = questions.map((q) =>
+    q.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*([^*]+?)\*/g, "$1")
+  );
 
   return (
     <Document>
@@ -160,9 +305,9 @@ export default function InterviewPrepPDF({
 
         {/* Prep Plan */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preparation Plan</Text>
-
           {processedPlan.map((line, index) => {
+            if (!line) return null;
+
             switch (line.type) {
               case "h1":
                 return (
@@ -181,30 +326,56 @@ export default function InterviewPrepPDF({
                 );
               case "h3":
                 return (
-                  <Text key={index} style={styles.starTitle}>
+                  <Text key={index} style={styles.subSectionTitle}>
                     {line.content}
                   </Text>
                 );
+              case "phase":
+                return (
+                  <View key={index} style={styles.phaseSection}>
+                    <Text style={styles.phaseTitle}>
+                      {line.phaseType || ""}
+                    </Text>
+                    {line.content && (
+                      <Text style={styles.text}>{line.content}</Text>
+                    )}
+                  </View>
+                );
+              case "step":
+                return (
+                  <View key={index} style={styles.stepSection}>
+                    <Text style={styles.stepTitle}>{line.stepType || ""}</Text>
+                    {line.content && (
+                      <Text style={styles.text}>{line.content}</Text>
+                    )}
+                  </View>
+                );
               case "listItem":
+                return (
+                  <Text key={index} style={styles.listItem}>
+                    • {line.content}
+                  </Text>
+                );
               case "numberedListItem":
                 return (
                   <Text key={index} style={styles.listItem}>
-                    {line.type === "listItem" ? "• " : `${index + 1}. `}
-                    {line.content}
+                    {line.number || index + 1}. {line.content}
                   </Text>
                 );
               case "starSection":
                 return (
                   <View key={index} style={styles.starSection}>
-                    <Text style={styles.starTitle}>{line.starType}:</Text>
-                    <Text style={styles.text}>{line.content}</Text>
+                    <Text style={styles.starTitle}>{line.starType || ""}:</Text>
+                    <Text style={styles.text}>{line.content || ""}</Text>
                   </View>
                 );
-              case "specialSection":
+              case "category":
                 return (
-                  <View key={index} style={styles.starSection}>
-                    <Text style={styles.starTitle}>{line.sectionType}:</Text>
-                    <Text style={styles.text}>{line.content}</Text>
+                  <View key={index} style={styles.categorySection}>
+                    <Text style={styles.categoryTitle}>
+                      {line.categoryType || ""}:
+                    </Text>
+                    <Text style={styles.text}>{line.content || ""}</Text>
                   </View>
                 );
               case "paragraph":
@@ -220,16 +391,16 @@ export default function InterviewPrepPDF({
         </View>
 
         {/* Practice Questions */}
-        {questions.length > 0 && (
+        {processedQuestions.length > 0 && (
           <View style={styles.section} break>
             <Text style={styles.sectionTitle}>Practice Questions</Text>
             <View style={styles.list}>
-              {questions.map((question, index) => (
-                <View key={index} style={{ marginBottom: 10 }}>
-                  <Text style={[styles.listItem, { fontWeight: "bold" }]}>
-                    Question {index + 1}:
+              {processedQuestions.map((question, index) => (
+                <View key={index} style={styles.questionContainer}>
+                  <Text style={styles.questionNumber}>
+                    Question {index + 1}
                   </Text>
-                  <Text style={styles.text}>{question}</Text>
+                  <Text style={styles.questionText}>{question}</Text>
                 </View>
               ))}
             </View>
