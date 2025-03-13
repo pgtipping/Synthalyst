@@ -26,19 +26,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#4F46E5",
-    paddingBottom: 2,
-    borderBottom: "0.5 solid #E5E7EB",
-  },
-  sectionSubtitle: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "#3b82f6", // primary blue
     marginBottom: 8,
     marginTop: 12,
-    color: "#4F46E5",
+  },
+  sectionSubtitle: {
+    fontSize: 14, // Reduced from 16 to 14
+    fontWeight: "bold",
+    color: "rgba(59, 130, 246, 0.9)", // primary blue with opacity
+    marginBottom: 6,
+    marginTop: 10,
   },
   subSectionTitle: {
     fontSize: 14,

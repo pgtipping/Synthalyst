@@ -10,6 +10,11 @@
 
 ## Recent Changes (Updated March 13, 2025)
 
+- Fixed formatting of TIMELINE and PHASE sections in interview prep plan:
+  - Added specific regex patterns to handle TIMELINE, PHASE, OVERARCHING GOAL, and Objective sections
+  - Ensured these sections start on new lines with proper styling
+  - Updated the PDF export component to properly handle these special sections
+  - Added support for additional section types like Website Deep Dive, About Us/Mission/Values, etc.
 - Improved interview prep plan formatting for better readability and professional appearance:
   - Enhanced the SimpleMarkdown component with comprehensive regex replacements for consistent formatting
   - Added proper styling for different section types (headers, lists, STAR format, etc.)
