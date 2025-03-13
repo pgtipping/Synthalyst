@@ -1453,3 +1453,24 @@ These insights will help maintain high-quality output in the ApplyRight feature 
   - TrainingPlanPDF
   - PDFRenderer
   - Any component that uses PDF generation
+
+### TypeScript Type Checking Strategy - [2025-03-13 19:30:00]
+
+- The project uses a phased approach to TypeScript type checking:
+
+  1. Phase 1: Use relaxed type checking with test files excluded
+  2. Phase 2: Fix critical production code type errors
+  3. Phase 3: Fix test file type errors
+  4. Phase 4: Enable strict type checking
+
+- Type checking can be run with `npm run typecheck`
+- A custom TypeScript configuration is used: `tsconfig.typecheck.json`
+- The Next.js configuration is set to use this custom TypeScript config
+- Common type errors to fix:
+
+  - Next.js 15 route parameters should use `Promise<{ id: string }>` type
+  - Prisma schema mismatches (properties that don't exist in the schema)
+  - Component prop type errors (props that don't match component definitions)
+  - Missing type declarations for external libraries
+
+- Documentation for the type checking plan is in `TYPE_CHECKING_PLAN.md`
