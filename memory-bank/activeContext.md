@@ -10,6 +10,7 @@
 
 ## Recent Changes (Updated March 13, 2025)
 
+- Fixed missing logo.png file by creating a copy from logo-high-res.png to resolve 404 errors
 - Added PDF export functionality to the Interview Prep feature:
   - Created a new InterviewPrepPDF component for rendering the interview prep plan as a PDF
   - Implemented text processing to properly format Markdown content in the PDF
@@ -51,7 +52,7 @@
 - Optimize images and other media assets
 - Implement server-side rendering for critical pages
 - Add more comprehensive structured data for different page types
-- Fix the 404 error for the missing logo.png file
+- Verify that all required assets are properly included in the project to prevent 404 errors
 
 ## Active Decisions and Considerations
 
