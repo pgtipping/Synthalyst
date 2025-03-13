@@ -1100,3 +1100,136 @@ These insights will help maintain high-quality output in the ApplyRight feature 
    - Use CSS variables
    - Test color contrast
    - Maintain readability
+
+# Cursor Rules - Synthalyst Web Application [2025-03-13]
+
+## Project Structure [2025-03-13]
+
+### Directory Organization [2025-03-13]
+
+- The main application code is in the `nextjs-app` directory
+- All development should be done within this directory
+- The development server runs on port 3001
+
+### File Naming Conventions [2025-03-13]
+
+- Use kebab-case for file names (e.g., `file-name.tsx`)
+- Use PascalCase for component names (e.g., `ComponentName.tsx`)
+- Use camelCase for utility functions and hooks (e.g., `useHookName.ts`)
+
+## SEO Implementation [2025-03-13]
+
+### Metadata [2025-03-13]
+
+- Use Next.js Metadata API for all metadata
+- Define metadata in layout.tsx for site-wide metadata
+- Override metadata in page.tsx files for page-specific metadata
+- Include title, description, and OpenGraph data for all pages
+
+### JSON-LD [2025-03-13]
+
+- Implement JSON-LD structured data for all pages
+- Use the script tag with type="application/ld+json"
+- Include appropriate schema based on page content
+- Validate JSON-LD using Google's Structured Data Testing Tool
+
+### Sitemap and Robots [2025-03-13]
+
+- Use dynamic sitemap.ts for sitemap generation
+- Use dynamic robots.ts for robots.txt configuration
+- Do not create static files in the public directory for these
+
+## Accessibility Guidelines [2025-03-13]
+
+### Color Contrast [2025-03-13]
+
+- Ensure all text has sufficient color contrast (4.5:1 for normal text, 3:1 for large text)
+- Use text-gray-900 instead of text-gray-700 for better contrast
+- Update muted-foreground color variables in both light and dark modes
+
+### Heading Structure [2025-03-13]
+
+- Use proper heading hierarchy (h1 -> h2 -> h3)
+- Avoid skipping heading levels
+- Each page should have only one h1 element
+
+### ARIA Attributes [2025-03-13]
+
+- Add aria-label to buttons without visible text
+- Add proper labels to form elements
+- Use aria-hidden for decorative elements
+
+## Performance Optimization [2025-03-13]
+
+### CSS Strategy [2025-03-13]
+
+- Use critical.css for above-the-fold content
+- Load non-critical CSS asynchronously
+- Use Tailwind CSS for utility-first styling
+- Minimize custom CSS
+
+### JavaScript Optimization [2025-03-13]
+
+- Use next/script with appropriate strategy
+- Implement code splitting for large components
+- Defer non-critical JavaScript
+- Minimize third-party scripts
+
+### Image Optimization [2025-03-13]
+
+- Use next/image for automatic optimization
+- Implement responsive images with srcset
+- Use WebP format when supported
+- Implement lazy loading for below-the-fold images
+
+## Component Patterns [2025-03-13]
+
+### Layout Components [2025-03-13]
+
+- Use RootLayout for site-wide layout
+- Define page-specific layouts as needed
+- Include proper metadata in layout components
+
+### Page Components [2025-03-13]
+
+- Use page.tsx for page components
+- Override metadata in page components
+- Implement JSON-LD in page components
+
+### UI Components [2025-03-13]
+
+- Use shadcn/ui components when available
+- Create custom components when needed
+- Ensure all components are accessible
+
+## API Patterns [2025-03-13]
+
+### API Routes [2025-03-13]
+
+- Use Next.js API routes for backend functionality
+- Implement proper error handling
+- Use TypeScript for type safety
+- Validate input with Zod
+
+### Data Fetching [2025-03-13]
+
+- Use server components for data fetching when possible
+- Implement proper error handling
+- Use TypeScript for type safety
+- Cache data when appropriate
+
+## Testing Guidelines [2025-03-13]
+
+### Component Testing [2025-03-13]
+
+- Test rendering and user interactions
+- Test form validation and submission
+- Test loading states and error handling
+- Test accessibility
+
+### API Testing [2025-03-13]
+
+- Test success and error cases
+- Validate response structure
+- Test pagination and filtering
+- Mock external dependencies

@@ -1,176 +1,309 @@
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { format } from "date-fns";
+import { CalendarIcon, Clock, Tag, ThumbsUp, Eye } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { SocialShare } from "@/components/SocialShare";
-import type { Metadata } from "next";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { prisma } from "@/lib/prisma";
+import { getValidImageUrl } from "@/lib/utils";
+import ShareButtons from "@/components/ShareButtons";
+import CommentSection from "@/components/CommentSection";
+import RelatedPosts from "@/components/RelatedPosts";
 
-interface BlogPostPageProps {
-  params: {
-    slug: string;
-  };
-}
-
-interface RelatedPost {
-  id: string;
-  title: string;
-  excerpt: string;
-}
-
-interface Comment {
-  id: string;
-  content: string;
-  createdAt: string;
-  author: {
-    name: string;
-  };
-}
-
-// Generate metadata for social sharing
+// Generate dynamic metadata for the blog post
 export async function generateMetadata({
   params,
-}: BlogPostPageProps): Promise<Metadata> {
-  // Ensure params.slug is available
-  const slug = params.slug;
-  if (!slug) {
-    return {};
-  }
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const { slug } = params;
 
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error("API URL is not defined");
+    const post = await prisma.post.findUnique({
+      where: { slug },
+      include: {
+        author: true,
+        categories: true,
+      },
+    });
+
+    if (!post) {
+      return {
+        title: "Post Not Found | Synthalyst Blog",
+        description: "The requested blog post could not be found.",
+      };
     }
 
-    const response = await fetch(`${apiUrl}/api/posts/${slug}`);
-    const post = await response.json();
-
     return {
-      title: post.title,
-      description: post.excerpt,
+      title: `${post.title} | Synthalyst Blog`,
+      description: post.excerpt || `Read ${post.title} on Synthalyst Blog`,
+      keywords: post.categories.map((category) => category.name),
+      authors: [
+        {
+          name: post.author?.name || "Synthalyst Team",
+          url: post.author?.name
+            ? `/author/${post.author.name.toLowerCase().replace(/\s+/g, "-")}`
+            : undefined,
+        },
+      ],
+      alternates: {
+        canonical: `https://synthalyst.com/blog/${slug}`,
+      },
       openGraph: {
         title: post.title,
-        description: post.excerpt,
+        description: post.excerpt || `Read ${post.title} on Synthalyst Blog`,
+        url: `https://synthalyst.com/blog/${slug}`,
         type: "article",
-        publishedTime: post.createdAt,
-        authors: [post.author.name || "Synthalyst Team"],
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/blog/${slug}`,
+        publishedTime: post.createdAt.toISOString(),
+        modifiedTime: post.updatedAt.toISOString(),
+        authors: [post.author?.name || "Synthalyst Team"],
+        tags: post.categories.map((category) => category.name),
+        images: [
+          {
+            url:
+              getValidImageUrl(post.coverImage) ||
+              "https://synthalyst.com/images/blog-default.jpg",
+            width: 1200,
+            height: 630,
+            alt: post.title,
+          },
+        ],
       },
       twitter: {
         card: "summary_large_image",
         title: post.title,
-        description: post.excerpt,
+        description: post.excerpt || `Read ${post.title} on Synthalyst Blog`,
+        images: [
+          getValidImageUrl(post.coverImage) ||
+            "https://synthalyst.com/images/blog-default.jpg",
+        ],
       },
     };
-  } catch {
-    return {};
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Blog Post | Synthalyst Blog",
+      description: "Read our latest blog posts on Synthalyst Blog",
+    };
   }
 }
 
-async function BlogPostPage({ params }: BlogPostPageProps) {
-  // Ensure params.slug is available before using it
-  const slug = await params.slug;
-  if (!slug) {
-    notFound();
-  }
+export default async function BlogPostPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const { slug } = params;
 
   try {
-    // Ensure API URL is defined
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error("API URL is not defined");
-    }
+    const post = await prisma.post.findUnique({
+      where: { slug },
+      include: {
+        author: true,
+        categories: true,
+      },
+    });
 
-    // Fetch data server-side
-    const [postRes, relatedRes, commentsRes] = await Promise.all([
-      fetch(`${apiUrl}/api/posts/${slug}`),
-      fetch(`${apiUrl}/api/posts/${slug}/related`),
-      fetch(`${apiUrl}/api/posts/${slug}/comments`),
-    ]);
-
-    if (!postRes.ok) {
+    if (!post) {
       notFound();
     }
 
-    const post = await postRes.json();
-    const related = await relatedRes.json();
-    const comments = await commentsRes.json();
+    // Increment view count
+    await prisma.post.update({
+      where: { id: post.id },
+      data: { views: { increment: 1 } },
+    });
+
+    // Format dates
+    const publishDate = format(post.createdAt, "MMMM d, yyyy");
+    const readingTime = Math.max(
+      1,
+      Math.ceil(post.content.split(/\s+/).length / 200)
+    );
+
+    // Prepare JSON-LD structured data
+    const blogPostJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.excerpt || `Read ${post.title} on Synthalyst Blog`,
+      image:
+        getValidImageUrl(post.coverImage) ||
+        "https://synthalyst.com/images/blog-default.jpg",
+      datePublished: post.createdAt.toISOString(),
+      dateModified: post.updatedAt.toISOString(),
+      author: {
+        "@type": "Person",
+        name: post.author?.name || "Synthalyst Team",
+        url: post.author?.name
+          ? `https://synthalyst.com/author/${post.author.name
+              .toLowerCase()
+              .replace(/\s+/g, "-")}`
+          : "https://synthalyst.com",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Synthalyst",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://synthalyst.com/icons/logo.png",
+        },
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": `https://synthalyst.com/blog/${slug}`,
+      },
+      keywords: post.categories.map((category) => category.name).join(", "),
+    };
 
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Breadcrumb
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Blog", href: "/blog" },
-            { label: post.title, href: `/blog/${slug}`, active: true },
-          ]}
+      <>
+        {/* JSON-LD structured data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(blogPostJsonLd),
+          }}
         />
 
-        <article className="prose prose-lg dark:prose-invert mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="mb-0">{post.title}</h1>
-            <SocialShare
-              title={post.title}
-              url={`${process.env.NEXT_PUBLIC_APP_URL}/blog/${post.slug}`}
-              description={post.excerpt}
-            />
-          </div>
-          <div className="flex items-center space-x-4 text-gray-500">
-            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-            <span>•</span>
-            <span>{post.author.name || "Synthalyst Team"}</span>
-          </div>
-          <div dangerouslySetInnerHTML={{ __html: post.content }} />
-        </article>
+        <div className="container max-w-4xl mx-auto px-4 py-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Blog", href: "/blog" },
+              { label: post.title, href: `/blog/${slug}`, active: true },
+            ]}
+            className="mb-6"
+          />
 
-        {/* Related Posts */}
-        {related.length > 0 && (
-          <section className="mt-12">
-            <h2 className="text-2xl font-semibold mb-6">Related Posts</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {related.map((relatedPost: RelatedPost) => (
-                <div
-                  key={relatedPost.id}
-                  className="bg-white rounded-lg shadow p-6"
-                >
-                  <h3 className="text-xl font-semibold mb-2">
-                    {relatedPost.title}
-                  </h3>
-                  <p className="text-gray-600">{relatedPost.excerpt}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Comments Section */}
-        <section className="mt-12">
-          <h2 className="text-2xl font-semibold mb-6">Comments</h2>
-          <div className="space-y-6">
-            {comments.length > 0 ? (
-              comments.map((comment: Comment) => (
-                <div
-                  key={comment.id}
-                  className="bg-white rounded-lg shadow p-6"
-                >
-                  <div className="flex items-center space-x-4 mb-4">
-                    <span className="font-semibold">{comment.author.name}</span>
-                    <span className="text-gray-500">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p>{comment.content}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No comments yet.</p>
+          <article className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {post.coverImage && (
+              <div className="relative w-full h-[400px]">
+                <Image
+                  src={getValidImageUrl(post.coverImage)}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
             )}
-          </div>
-        </section>
-      </div>
+
+            <div className="p-6 md:p-8">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {post.categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/blog/category/${category.slug}`}
+                  >
+                    <Badge
+                      variant="secondary"
+                      className="hover:bg-secondary/80"
+                    >
+                      {category.name}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">
+                {post.title}
+              </h1>
+
+              <div className="flex items-center gap-4 text-gray-500 mb-6">
+                <div className="flex items-center">
+                  <CalendarIcon className="w-4 h-4 mr-1" />
+                  <span className="text-sm">{publishDate}</span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="w-4 h-4 mr-1" />
+                  <span className="text-sm">{readingTime} min read</span>
+                </div>
+                <div className="flex items-center">
+                  <Eye className="w-4 h-4 mr-1" />
+                  <span className="text-sm">{post.views} views</span>
+                </div>
+              </div>
+
+              <div className="flex items-center mb-8">
+                <Avatar className="h-10 w-10 mr-3">
+                  <AvatarImage
+                    src={post.author?.image || "/images/default-avatar.png"}
+                    alt={post.author?.name || "Author"}
+                  />
+                  <AvatarFallback>
+                    {post.author?.name?.charAt(0) || "A"}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">
+                    {post.author?.name || "Synthalyst Team"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {post.author?.bio?.substring(0, 60) || "Synthalyst Author"}
+                    {post.author?.bio && post.author.bio.length > 60
+                      ? "..."
+                      : ""}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className="prose prose-lg max-w-none mb-8"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
+
+              <Separator className="my-8" />
+
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">
+                    <ThumbsUp className="w-4 h-4 mr-1" />
+                    Like ({post.likes})
+                  </Button>
+                  <ShareButtons
+                    url={`https://synthalyst.com/blog/${slug}`}
+                    title={post.title}
+                    summary={post.excerpt || ""}
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {post.categories.map((category) => (
+                    <Link
+                      key={category.id}
+                      href={`/blog/category/${category.slug}`}
+                    >
+                      <Badge
+                        variant="outline"
+                        className="hover:bg-secondary/10"
+                      >
+                        <Tag className="w-3 h-3 mr-1" />
+                        {category.name}
+                      </Badge>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <CommentSection postId={post.id} />
+
+          <RelatedPosts
+            currentPostId={post.id}
+            categoryIds={post.categories.map((cat) => cat.id)}
+          />
+        </div>
+      </>
     );
   } catch (error) {
     console.error("Error fetching blog post:", error);
     notFound();
   }
 }
-
-export default BlogPostPage;

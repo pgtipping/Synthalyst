@@ -74,6 +74,16 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
   }
+
+  /* Improve color contrast for accessibility */
+  .sm\:inline {
+    color: #4b5563 !important; /* Darker gray for better contrast */
+  }
+
+  /* Improve color contrast for muted text */
+  .text-muted-foreground {
+    color: #4b5563 !important; /* Darker gray for better contrast */
+  }
 }
 
 @layer base {

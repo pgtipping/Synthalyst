@@ -195,6 +195,28 @@ export const metadata: Metadata = {
   },
 };
 
+// Organization JSON-LD structured data
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Synthalyst",
+  url: "https://synthalyst.com",
+  logo: "https://synthalyst.com/icons/logo.png",
+  sameAs: [
+    "https://twitter.com/synthalyst",
+    "https://www.linkedin.com/company/synthalyst",
+    "https://www.facebook.com/synthalyst",
+  ],
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: "+1-800-123-4567",
+    contactType: "customer service",
+    availableLanguage: ["English"],
+  },
+  description:
+    "A comprehensive platform offering AI-powered tools, content, and services for professional development, productivity enhancement, and business solutions.",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -209,6 +231,11 @@ export default function RootLayout({
         <meta
           name="google-site-verification"
           content="google-site-verification-code"
+        />
+        <meta name="yandex-verification" content="yandex-verification-code" />
+        <meta
+          name="facebook-domain-verification"
+          content="facebook-domain-verification-code"
         />
         {/* Preload critical fonts */}
         <link
@@ -234,6 +261,57 @@ export default function RootLayout({
         <noscript>
           <link rel="stylesheet" href="/styles/non-critical.css" />
         </noscript>
+
+        {/* JSON-LD structured data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
+
+        <link
+          rel="preload"
+          href="/_next/static/css/app/layout.css"
+          as="style"
+        />
+        <link rel="stylesheet" href="/_next/static/css/app/layout.css" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Defer non-critical JavaScript
+              const deferJsLoad = () => {
+                const nonCriticalScripts = document.querySelectorAll('script[data-defer]');
+                nonCriticalScripts.forEach(script => {
+                  const newScript = document.createElement('script');
+                  Array.from(script.attributes).forEach(attr => {
+                    if (attr.name !== 'data-defer') {
+                      newScript.setAttribute(attr.name, attr.value);
+                    }
+                  });
+                  newScript.innerHTML = script.innerHTML;
+                  script.parentNode.replaceChild(newScript, script);
+                });
+              };
+              
+              // Execute after page load
+              window.addEventListener('load', deferJsLoad);
+              
+              // Optimize CSS loading
+              const optimizeCssLoading = () => {
+                // Add layout.css with media="print" and then switch to "all" once loaded
+                const layoutCss = document.querySelector('link[href*="layout.css"]');
+                if (layoutCss) {
+                  layoutCss.setAttribute('media', 'print');
+                  layoutCss.onload = () => layoutCss.setAttribute('media', 'all');
+                }
+              };
+              
+              // Execute immediately
+              optimizeCssLoading();
+            `,
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${moonDance.variable} antialiased`}

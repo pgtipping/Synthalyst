@@ -3,7 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     // Other experimental features can go here
+    optimizeCss: true, // Enable CSS optimization
+    optimizePackageImports: ["@/components", "@/lib", "@/hooks"], // Optimize package imports
   },
+  // Enable source maps in production
+  productionBrowserSourceMaps: true,
   webpack: (config, { isServer, webpack }) => {
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
 
@@ -44,9 +48,11 @@ const nextConfig = {
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
-        minimize: false, // Disable minification to fix SHA224 error
+        minimize: true, // Enable minification for production
         splitChunks: {
           chunks: "all",
+          maxInitialRequests: 25,
+          minSize: 20000,
           cacheGroups: {
             default: false,
             vendors: false,
@@ -65,6 +71,13 @@ const nextConfig = {
               priority: 10,
               reuseExistingChunk: true,
               enforce: true,
+            },
+            // Separate React and related packages
+            react: {
+              name: "react",
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              chunks: "all",
+              priority: 30,
             },
           },
         },
@@ -101,7 +114,11 @@ const nextConfig = {
       "picsum.photos",
       "placehold.co",
       "res.cloudinary.com",
+      "synthalyst.com",
     ],
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [

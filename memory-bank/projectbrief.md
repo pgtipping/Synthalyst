@@ -1,3 +1,62 @@
+# Project Brief - Synthalyst Web Application
+
+## Project Overview
+
+Synthalyst is a Next.js web application focused on providing AI-powered tools for career development, content creation, and professional growth. The application includes multiple tools such as ApplyRight for resume optimization, Interview Prep for interview preparation, and a blog platform for content sharing.
+
+## Core Requirements
+
+### SEO Optimization
+
+- Implement proper metadata for all pages
+- Add JSON-LD structured data for better search engine understanding
+- Create dynamic sitemap generation
+- Configure robots.txt for proper crawling
+- Ensure all pages have appropriate meta tags
+
+### Accessibility Compliance
+
+- Meet WCAG 2.1 AA standards
+- Ensure proper color contrast for all text elements
+- Implement proper heading structure
+- Add appropriate ARIA attributes
+- Ensure keyboard navigation works correctly
+
+### Performance Optimization
+
+- Optimize CSS loading strategy
+- Implement JavaScript optimization techniques
+- Configure image optimization
+- Reduce render-blocking resources
+- Improve Core Web Vitals metrics
+
+### Mobile Responsiveness
+
+- Ensure all pages work correctly on mobile devices
+- Implement responsive design patterns
+- Test on various screen sizes and devices
+- Optimize touch interactions for mobile users
+
+## Technical Stack
+
+- Next.js (App Router)
+- React
+- TypeScript
+- Tailwind CSS
+- Prisma (for database interactions)
+- NextAuth (for authentication)
+- Vercel (for deployment)
+
+## Success Criteria
+
+- SEO score of 90+ on Lighthouse audits
+- Accessibility score of 90+ on Lighthouse audits
+- Performance score of 80+ on Lighthouse audits
+- Best Practices score of 90+ on Lighthouse audits
+- Mobile-friendly design across all pages
+- Proper implementation of structured data
+- Dynamic metadata generation for all pages
+
 # Project Brief - Synthalyst Web App
 
 This app is a Comprehensive Business and Productivity Platform designed to offer a blend of content, digital tools, and AI-powered services to individuals and businesses. It serves as a hub for professional development, productivity enhancement, and business solutions.

@@ -24,6 +24,11 @@ import {
   FileText,
   ArrowLeft,
   RefreshCw,
+  Users,
+  Library,
+  Check,
+  MessageSquare,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -311,21 +316,21 @@ export default function InterviewPrep() {
               <CardContent>
                 <div className="grid gap-4">
                   <div className="flex flex-col gap-2">
-                    <h3 className="font-medium">1. Enter Job Details</h3>
+                    <h2 className="font-medium">1. Enter Job Details</h2>
                     <p className="text-sm text-muted-foreground">
                       Provide information about the job you&apos;re applying for
                     </p>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <h3 className="font-medium">
+                    <h2 className="font-medium">
                       2. Get Personalized Prep Plan
-                    </h3>
+                    </h2>
                     <p className="text-sm text-muted-foreground">
                       Our AI creates a tailored interview preparation plan
                     </p>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <h3 className="font-medium">3. Practice with AI</h3>
+                    <h2 className="font-medium">3. Practice with AI</h2>
                     <p className="text-sm text-muted-foreground">
                       Engage in mock interviews and get feedback on your
                       responses
@@ -340,25 +345,51 @@ export default function InterviewPrep() {
                 <CardTitle>Features</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4">
-                  <div className="flex flex-col gap-2">
-                    <h3 className="font-medium">Job-Specific Preparation</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Tailored interview questions based on job requirements
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <h3 className="font-medium">Mock Interviews</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Practice with AI-powered mock interviewer
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <h3 className="font-medium">Question Library</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Access to comprehensive library of interview questions
-                    </p>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="p-2 bg-primary/10 rounded-full mb-4">
+                          <FileText className="h-6 w-6 text-primary" />
+                        </div>
+                        <h2 className="font-medium">
+                          Job-Specific Preparation
+                        </h2>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Tailored interview questions and preparation based on
+                          the job description
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="p-2 bg-primary/10 rounded-full mb-4">
+                          <Users className="h-6 w-6 text-primary" />
+                        </div>
+                        <h2 className="font-medium">Mock Interviews</h2>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Practice with our AI interviewer and receive feedback
+                          on your responses
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="p-2 bg-primary/10 rounded-full mb-4">
+                          <Library className="h-6 w-6 text-primary" />
+                        </div>
+                        <h2 className="font-medium">Question Library</h2>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Access thousands of interview questions across
+                          different roles and industries
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </CardContent>
             </Card>
@@ -369,26 +400,141 @@ export default function InterviewPrep() {
                   <CardTitle>Pricing</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4">
-                    <div className="flex flex-col gap-2">
-                      <h3 className="font-medium">Free Tier</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Basic interview preparation with limited features
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <h3 className="font-medium">Premium Tier</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Full access to all features including mock interviews
-                        and question library
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <h3 className="font-medium">Bundle Discount</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Save when you bundle with ApplyRight
-                      </p>
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <Card className="border-primary/20">
+                      <CardHeader>
+                        <CardTitle className="text-center">Free</CardTitle>
+                        <CardDescription className="text-center">
+                          Basic interview preparation
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center text-3xl font-bold mb-4">
+                          $0
+                        </div>
+                        <ul className="space-y-2 mb-6">
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              5 practice questions per job
+                            </span>
+                          </li>
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Basic feedback on responses
+                            </span>
+                          </li>
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Job-specific preparation
+                            </span>
+                          </li>
+                        </ul>
+                        <h2 className="font-medium">Free Tier</h2>
+                      </CardContent>
+                      <CardFooter>
+                        <Button className="w-full" onClick={handleSignIn}>
+                          Get Started
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                    <Card className="border-primary bg-primary/5 shadow-md relative">
+                      <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                        POPULAR
+                      </div>
+                      <CardHeader>
+                        <CardTitle className="text-center">Premium</CardTitle>
+                        <CardDescription className="text-center">
+                          Advanced interview coaching
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center text-3xl font-bold mb-4">
+                          $19<span className="text-sm font-normal">/month</span>
+                        </div>
+                        <ul className="space-y-2 mb-6">
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Unlimited practice questions
+                            </span>
+                          </li>
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Detailed feedback with improvement tips
+                            </span>
+                          </li>
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Mock interview simulations
+                            </span>
+                          </li>
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Interview strategy coaching
+                            </span>
+                          </li>
+                        </ul>
+                        <h2 className="font-medium">Premium Tier</h2>
+                      </CardContent>
+                      <CardFooter>
+                        <Button className="w-full bg-primary hover:bg-primary/90">
+                          Upgrade Now
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                    <Card className="border-primary/20">
+                      <CardHeader>
+                        <CardTitle className="text-center">
+                          Career Bundle
+                        </CardTitle>
+                        <CardDescription className="text-center">
+                          Complete career toolkit
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center text-3xl font-bold mb-4">
+                          $29<span className="text-sm font-normal">/month</span>
+                        </div>
+                        <ul className="space-y-2 mb-6">
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              All Premium features
+                            </span>
+                          </li>
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Job Description Generator
+                            </span>
+                          </li>
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Training Plan Creator
+                            </span>
+                          </li>
+                          <li className="flex items-center">
+                            <Check className="h-5 w-5 text-primary mr-2" />
+                            <span className="text-sm">
+                              Competency Framework Builder
+                            </span>
+                          </li>
+                        </ul>
+                        <h2 className="font-medium">Bundle Discount</h2>
+                      </CardContent>
+                      <CardFooter>
+                        <Button className="w-full" variant="outline">
+                          Learn More
+                        </Button>
+                      </CardFooter>
+                    </Card>
                   </div>
                 </CardContent>
               </Card>
@@ -408,14 +554,14 @@ export default function InterviewPrep() {
                 {prepPlan ? (
                   <div className="space-y-6">
                     <div className="bg-muted p-4 rounded-md">
-                      <h3 className="font-medium mb-2">
+                      <h2 className="font-medium mb-2">
                         Your Interview Prep Plan:
-                      </h3>
+                      </h2>
                       <p className="text-sm whitespace-pre-line">{prepPlan}</p>
                     </div>
 
                     <div className="space-y-4">
-                      <h3 className="font-medium">Practice Questions:</h3>
+                      <h2 className="font-medium">Practice Questions:</h2>
                       {generatedQuestions.map((question, index) => (
                         <div key={index} className="border rounded-md p-4">
                           <p className="font-medium mb-2">

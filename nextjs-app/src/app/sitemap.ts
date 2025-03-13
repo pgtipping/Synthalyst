@@ -1,119 +1,130 @@
 import { MetadataRoute } from "next/types";
+import { prisma } from "@/lib/prisma";
 
-type ChangeFrequency =
-  | "always"
-  | "hourly"
-  | "daily"
-  | "weekly"
-  | "monthly"
-  | "yearly"
-  | "never";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Get all blog posts
+  const posts = await prisma.post.findMany({
+    select: {
+      slug: true,
+      updatedAt: true,
+    },
+    where: {
+      published: true,
+    },
+  });
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://synthalyst.com";
-  const lastModified = new Date().toISOString();
+  // Get all blog categories
+  const categories = await prisma.category.findMany({
+    select: {
+      slug: true,
+      updatedAt: true,
+    },
+  });
 
-  // Main pages
-  const mainPages = [
+  // Static pages with their last modified date
+  const staticPages = [
     {
-      url: `${baseUrl}/`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
+      url: "https://synthalyst.com",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/about`,
-      lastModified,
-      changeFrequency: "monthly" as ChangeFrequency,
+      url: "https://synthalyst.com/about",
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/services`,
-      lastModified,
-      changeFrequency: "monthly" as ChangeFrequency,
+      url: "https://synthalyst.com/services",
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/contact`,
-      lastModified,
-      changeFrequency: "monthly" as ChangeFrequency,
+      url: "https://synthalyst.com/contact",
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/blog`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
+      url: "https://synthalyst.com/blog",
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    },
+    {
+      url: "https://synthalyst.com/jd-developer",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    },
+    {
+      url: "https://synthalyst.com/training-plan",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    },
+    {
+      url: "https://synthalyst.com/competency-manager",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    },
+    {
+      url: "https://synthalyst.com/interview-questions",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    },
+    {
+      url: "https://synthalyst.com/2do",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    {
+      url: "https://synthalyst.com/knowledge-gpt",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    {
+      url: "https://synthalyst.com/learning-content",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    {
+      url: "https://synthalyst.com/premium",
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
+    {
+      url: "https://synthalyst.com/get-started",
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
       priority: 0.8,
     },
   ];
 
-  // Tool pages
-  const toolPages = [
-    {
-      url: `${baseUrl}/jd-developer`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/training-plan`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/competency-manager`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/interview-questions`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/2do`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/knowledge-gpt`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/learning-content`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/the-synth`,
-      lastModified,
-      changeFrequency: "weekly" as ChangeFrequency,
-      priority: 0.7,
-    },
-  ];
+  // Blog post pages
+  const blogPages = posts.map((post) => ({
+    url: `https://synthalyst.com/blog/${post.slug}`,
+    lastModified: post.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
 
-  // Premium pages
-  const premiumPages = [
-    {
-      url: `${baseUrl}/premium`,
-      lastModified,
-      changeFrequency: "monthly" as ChangeFrequency,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/get-started`,
-      lastModified,
-      changeFrequency: "monthly" as ChangeFrequency,
-      priority: 0.8,
-    },
-  ];
+  // Category pages
+  const categoryPages = categories.map((category) => ({
+    url: `https://synthalyst.com/blog/category/${category.slug}`,
+    lastModified: category.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
 
-  return [...mainPages, ...toolPages, ...premiumPages];
+  // Combine all pages
+  return [...staticPages, ...blogPages, ...categoryPages];
 }
