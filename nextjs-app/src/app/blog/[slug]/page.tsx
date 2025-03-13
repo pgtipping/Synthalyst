@@ -14,6 +14,79 @@ import { getValidImageUrl } from "@/lib/utils";
 import ShareButtons from "@/components/ShareButtons";
 import CommentSection from "@/components/CommentSection";
 import RelatedPosts from "@/components/RelatedPosts";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+
+// Mock data for a blog post
+const getMockPost = (slug: string) => {
+  return {
+    id: "1",
+    slug,
+    title: "Understanding Next.js App Router and Server Components",
+    excerpt:
+      "Learn how Next.js App Router and Server Components work together to create fast, SEO-friendly web applications.",
+    content: `
+      <h2>Introduction to Next.js App Router</h2>
+      <p>Next.js App Router is a new routing system introduced in Next.js 13 that provides a more intuitive and powerful way to handle routing in your application.</p>
+      
+      <h2>Server Components</h2>
+      <p>Server Components allow you to render components on the server, reducing the amount of JavaScript sent to the client and improving performance.</p>
+      
+      <h2>Benefits of App Router</h2>
+      <ul>
+        <li>Improved performance with streaming and partial rendering</li>
+        <li>Better SEO with server-rendered content</li>
+        <li>More intuitive routing with nested layouts</li>
+        <li>Built-in support for loading and error states</li>
+      </ul>
+      
+      <h2>Conclusion</h2>
+      <p>Next.js App Router and Server Components represent a significant step forward in web development, allowing developers to build faster, more SEO-friendly applications with less client-side JavaScript.</p>
+    `,
+    coverImage: "https://placehold.co/1200x630?text=Next.js+App+Router",
+    publishedAt: new Date("2025-03-10"),
+    author: {
+      name: "John Doe",
+      avatar: "https://placehold.co/100x100?text=JD",
+    },
+    category: "Web Development",
+  };
+};
+
+// Mock data for related posts
+const getMockRelatedPosts = () => {
+  return [
+    {
+      id: "2",
+      slug: "optimizing-nextjs-performance",
+      title: "Optimizing Next.js Performance",
+      excerpt:
+        "Learn how to optimize your Next.js application for better performance and user experience.",
+      coverImage: "https://placehold.co/800x400?text=Performance",
+      publishedAt: new Date("2025-03-08"),
+      category: "Performance",
+    },
+    {
+      id: "3",
+      slug: "nextjs-seo-best-practices",
+      title: "Next.js SEO Best Practices",
+      excerpt:
+        "Discover the best practices for optimizing your Next.js application for search engines.",
+      coverImage: "https://placehold.co/800x400?text=SEO",
+      publishedAt: new Date("2025-03-05"),
+      category: "SEO",
+    },
+    {
+      id: "4",
+      slug: "nextjs-accessibility",
+      title: "Building Accessible Next.js Applications",
+      excerpt:
+        "Learn how to make your Next.js applications accessible to all users.",
+      coverImage: "https://placehold.co/800x400?text=Accessibility",
+      publishedAt: new Date("2025-03-01"),
+      category: "Accessibility",
+    },
+  ];
+};
 
 // Generate dynamic metadata for the blog post
 export async function generateMetadata({
@@ -161,6 +234,8 @@ export default async function BlogPostPage({
       keywords: post.categories.map((category) => category.name).join(", "),
     };
 
+    const relatedPosts = getMockRelatedPosts();
+
     return (
       <>
         {/* JSON-LD structured data */}
@@ -295,10 +370,7 @@ export default async function BlogPostPage({
 
           <CommentSection postId={post.id} />
 
-          <RelatedPosts
-            currentPostId={post.id}
-            categoryIds={post.categories.map((cat) => cat.id)}
-          />
+          <RelatedPosts currentPostId={post.id} posts={relatedPosts} />
         </div>
       </>
     );

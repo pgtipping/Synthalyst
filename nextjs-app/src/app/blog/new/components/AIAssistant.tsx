@@ -1,287 +1,104 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, Wand2, Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 
 interface AIAssistantProps {
-  onContentGenerated: (content: string) => void;
-  onTagsGenerated?: (categories: string[], tags: string[]) => void;
-  currentContent?: string;
+  onSuggestionAccept: (suggestion: string) => void;
 }
 
-export function AIAssistant({
-  onContentGenerated,
-  onTagsGenerated,
-  currentContent = "",
-}: AIAssistantProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [streamedContent, setStreamedContent] = useState("");
+export default function AIAssistant({ onSuggestionAccept }: AIAssistantProps) {
   const [prompt, setPrompt] = useState("");
-  const [isStreaming, setIsStreaming] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const { toast } = useToast();
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      // Cleanup: abort any ongoing requests when component unmounts
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(e.target.value);
+  };
 
-  const handleAIRequest = async (
-    type: "generate" | "improve" | "suggest_tags" | "open_question"
-  ) => {
+  const generateSuggestions = async () => {
+    if (!prompt.trim()) return;
+
+    setIsLoading(true);
+
     try {
-      setIsGenerating(true);
-      setStreamedContent("");
-      setIsStreaming(true);
+      // In a real app, this would call an API endpoint
+      // const response = await fetch('/api/ai/suggestions', {
+      //   method: 'POST',
+      //   body: JSON.stringify({ prompt }),
+      //   headers: { 'Content-Type': 'application/json' }
+      // });
+      // const data = await response.json();
 
-      // Create new AbortController for this request
-      abortControllerRef.current = new AbortController();
+      // Mock response
+      const mockSuggestions = [
+        "10 Ways to Optimize Your Next.js Application for Better Performance",
+        "Understanding Server Components in Next.js: A Comprehensive Guide",
+        "Building Accessible Web Applications with Next.js and React",
+        "The Future of Web Development: Next.js, React Server Components, and Beyond",
+      ];
 
-      const response = await fetch("/api/llm", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: type === "generate" ? prompt : currentContent,
-          type,
-          options: {
-            stream: true,
-            timeout: 30000,
-            maxRetries: 3,
-          },
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No reader available");
-
-      const decoder = new TextDecoder();
-      let content = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        content += chunk;
-        setStreamedContent(content);
-      }
-
-      if (type === "suggest_tags" && onTagsGenerated) {
-        // Parse the AI response into categories and tags
-        const lines = content.split("\n");
-        const categories: string[] = [];
-        const tags: string[] = [];
-
-        let isParsingCategories = false;
-        let isParsingTags = false;
-
-        lines.forEach((line: string) => {
-          if (line.toLowerCase().includes("categories:")) {
-            isParsingCategories = true;
-            isParsingTags = false;
-          } else if (line.toLowerCase().includes("tags:")) {
-            isParsingCategories = false;
-            isParsingTags = true;
-          } else if (line.trim()) {
-            const items = line
-              .replace(/^[-*•]/, "")
-              .split(",")
-              .map((item) => item.trim())
-              .filter(Boolean);
-
-            if (isParsingCategories) {
-              categories.push(...items);
-            } else if (isParsingTags) {
-              tags.push(...items);
-            }
-          }
-        });
-
-        onTagsGenerated(categories, tags);
-      } else {
-        onContentGenerated(content);
-      }
+      // Simulate API delay
+      setTimeout(() => {
+        setSuggestions(mockSuggestions);
+        setIsLoading(false);
+      }, 1500);
     } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") {
-        toast({
-          title: "Generation cancelled",
-          description: "Content generation was cancelled.",
-        });
-      } else {
-        console.error("Error generating content:", error);
-        toast({
-          title: "Error",
-          description: "Failed to generate content. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setIsGenerating(false);
-      setIsStreaming(false);
-      abortControllerRef.current = null;
+      console.error("Error generating suggestions:", error);
+      setIsLoading(false);
     }
   };
 
-  const cancelGeneration = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+  const handleAcceptSuggestion = (suggestion: string) => {
+    onSuggestionAccept(suggestion);
+    setSuggestions([]);
+    setPrompt("");
   };
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="generate" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="generate">Generate</TabsTrigger>
-          <TabsTrigger value="improve">Improve</TabsTrigger>
-          <TabsTrigger value="suggest_tags">Tags</TabsTrigger>
-          <TabsTrigger value="open_question">Ask AI</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="generate">
-          <Card>
-            <CardHeader>
-              <CardTitle>Generate Content</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Textarea
-                  placeholder="Enter your prompt here..."
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="min-h-[100px]"
-                />
-                <div className="flex items-center gap-4">
-                  <Button
-                    onClick={() => handleAIRequest("generate")}
-                    disabled={isGenerating || !prompt}
-                    className="w-full sm:w-auto"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {isStreaming ? "Generating..." : "Processing..."}
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="mr-2 h-4 w-4" />
-                        Generate Content
-                      </>
-                    )}
-                  </Button>
-                  {isGenerating && (
-                    <Button
-                      onClick={cancelGeneration}
-                      variant="outline"
-                      className="w-full sm:w-auto"
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="improve">
-          <Card>
-            <CardHeader>
-              <CardTitle>Improve Content</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => handleAIRequest("improve")}
-                disabled={isGenerating || !currentContent}
-                className="w-full"
-              >
-                <Wand2 className="mr-2 h-4 w-4" />
-                {isGenerating ? (
-                  <>{isStreaming ? "Analyzing..." : "Processing..."}</>
-                ) : (
-                  "Improve Content"
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="suggest_tags">
-          <Card>
-            <CardHeader>
-              <CardTitle>Generate Tags</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => handleAIRequest("suggest_tags")}
-                disabled={isGenerating || !currentContent}
-                className="w-full"
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                {isGenerating ? (
-                  <>{isStreaming ? "Analyzing..." : "Processing..."}</>
-                ) : (
-                  "Generate Tags"
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="open_question">
-          <Card>
-            <CardHeader>
-              <CardTitle>Ask AI Assistant</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Textarea
-                  placeholder="Ask a question about your content..."
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="min-h-[100px]"
-                />
-                <Button
-                  onClick={() => handleAIRequest("open_question")}
-                  disabled={isGenerating || !prompt}
-                  className="w-full"
-                >
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  {isGenerating ? (
-                    <>{isStreaming ? "Thinking..." : "Processing..."}</>
-                  ) : (
-                    "Ask Question"
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {streamedContent && (
-        <div className="relative rounded-lg border p-4 mt-4">
-          <div className="prose max-w-none dark:prose-invert">
-            {streamedContent}
-          </div>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>AI Assistant</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Textarea
+            placeholder="Describe what you want to write about..."
+            value={prompt}
+            onChange={handlePromptChange}
+            className="min-h-[100px]"
+          />
+          <Button
+            onClick={generateSuggestions}
+            disabled={isLoading || !prompt.trim()}
+            className="w-full"
+          >
+            {isLoading ? "Generating..." : "Generate Suggestions"}
+          </Button>
         </div>
-      )}
-    </div>
+
+        {suggestions.length > 0 && (
+          <div className="space-y-3 mt-4">
+            <h3 className="text-sm font-medium">Suggestions</h3>
+            <ul className="space-y-2">
+              {suggestions.map((suggestion, index) => (
+                <li key={index} className="border rounded-md p-3">
+                  <p className="text-sm mb-2">{suggestion}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAcceptSuggestion(suggestion)}
+                  >
+                    Use This
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
