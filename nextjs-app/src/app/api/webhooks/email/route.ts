@@ -330,10 +330,9 @@ async function sendNotificationEmail(
 
     await sendEmail({
       to: adminEmail,
-      from: {
-        email: process.env.SENDGRID_FROM_EMAIL || "noreply@synthalyst.com",
-        name: "Synthalyst Contact System",
-      },
+      from: `Synthalyst Contact System <${
+        process.env.SENDGRID_FROM_EMAIL || "noreply@synthalyst.com"
+      }>`,
       subject: `[Synthalyst] ${subject}`,
       text: textWithLink,
       html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">${htmlWithLink}</div>`,
@@ -366,7 +365,8 @@ async function storeInboundEmail(
     // Store in database (assuming we have an InboundEmail model)
     // If the model doesn't exist, this will fail gracefully
     try {
-      // @ts-expect-error - The InboundEmail model might not exist yet
+      // Create inbound email record
+      // The InboundEmail model might not exist yet
       await prisma.inboundEmail.create({
         data: {
           fromEmail: email,

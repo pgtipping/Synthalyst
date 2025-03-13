@@ -85,7 +85,13 @@ export async function POST(request: Request) {
       // Create the task
       const newTask = await tx.task.create({
         data: {
-          ...taskFields,
+          title: taskFields.title,
+          description: taskFields.description,
+          status: taskFields.status || "todo",
+          priority: taskFields.priority || "medium",
+          dueDate: taskFields.dueDate
+            ? new Date(taskFields.dueDate)
+            : undefined,
           userId: session.user.id,
         },
       });

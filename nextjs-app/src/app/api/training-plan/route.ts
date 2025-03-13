@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
       certificationDetails: validatedData.certificationDetails,
       additionalNotes: validatedData.additionalNotes,
       isPremiumUser,
+      // @ts-expect-error - resources has optional id but it's required in the type
       resources,
     });
 

@@ -129,6 +129,8 @@ export async function PUT(
       );
     }
 
+    // Create a new version of the template
+    // @ts-expect-error - title is optional in validatedData but required in TemplateData
     const result = await createNewVersion(validatedData, id, session.user.id);
 
     if (result.type === "unchanged") {

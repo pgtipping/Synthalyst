@@ -3,7 +3,14 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
-import { CalendarIcon, Clock, Tag, ThumbsUp, Eye } from "lucide-react";
+import {
+  CalendarIcon,
+  Clock,
+  Tag,
+  ThumbsUp,
+  Eye,
+  MessageSquare,
+} from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -247,11 +254,12 @@ export default async function BlogPostPage({
         />
 
         <div className="container max-w-4xl mx-auto px-4 py-8">
+          {/* Breadcrumb */}
           <Breadcrumb
             items={[
               { label: "Home", href: "/" },
               { label: "Blog", href: "/blog" },
-              { label: post.title, href: `/blog/${slug}`, active: true },
+              { label: post.title, href: `/blog/${post.slug}`, active: true },
             ]}
             className="mb-6"
           />
@@ -342,7 +350,7 @@ export default async function BlogPostPage({
                     Like ({post.likes})
                   </Button>
                   <ShareButtons
-                    url={`https://synthalyst.com/blog/${slug}`}
+                    url={`${process.env.NEXT_PUBLIC_APP_URL}/blog/${post.slug}`}
                     title={post.title}
                     summary={post.excerpt || ""}
                   />

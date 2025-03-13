@@ -1,5 +1,4 @@
 import { Redis } from "@upstash/redis";
-import { Ratelimit } from "@upstash/ratelimit";
 
 interface RedisMetrics {
   rateLimitHits: number;
@@ -79,10 +78,7 @@ class RedisMonitor {
       ]);
 
       return {
-        rateLimitHits: Object.values(rateMetrics || {}).reduce(
-          (a, b) => a + Number(b),
-          0
-        ),
+        rateLimitHits: calculateRateLimitHits(rateMetrics || {}),
         cacheHits: Number(cacheMetrics?.hits || 0),
         cacheMisses: Number(cacheMetrics?.misses || 0),
         errors: errors.map((e) => JSON.parse(e)),
@@ -111,6 +107,17 @@ class RedisMonitor {
       this.trackError("resetMetrics", error);
     }
   }
+}
+
+// Helper function to calculate rate limit hits with proper typing
+function calculateRateLimitHits(metrics: Record<string, unknown>): number {
+  let total = 0;
+  for (const value of Object.values(metrics)) {
+    if (typeof value === "string") {
+      total += Number(value);
+    }
+  }
+  return total;
 }
 
 export const redisMonitor = new RedisMonitor();

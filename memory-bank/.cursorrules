@@ -1474,3 +1474,38 @@ These insights will help maintain high-quality output in the ApplyRight feature 
   - Missing type declarations for external libraries
 
 - Documentation for the type checking plan is in `TYPE_CHECKING_PLAN.md`
+
+## TypeScript Type Checking [2025-03-14 12:00:00]
+
+The project uses TypeScript for type safety. We've implemented a comprehensive type checking strategy:
+
+1. **Component Props**: All component props must be properly typed with interfaces or types.
+
+   - Example: `interface BreadcrumbProps { items: BreadcrumbItem[]; className?: string; }`
+   - Components should destructure props in their function signatures
+   - Optional props should use the `?` syntax
+
+2. **API Routes**: API routes should validate input with Zod and have proper type annotations.
+
+   - Use Zod schemas for request validation
+   - Explicitly type request handlers with appropriate return types
+   - Handle type mismatches with proper error messages
+
+3. **Type Assertions**: Use `@ts-expect-error` comments sparingly and only when necessary.
+
+   - Always include a clear explanation of why the error is being suppressed
+   - Example: `// @ts-expect-error - TypeScript doesn't preserve required properties when spreading`
+   - Prefer fixing the underlying type issue over suppressing errors
+
+4. **Library Compatibility**: Handle third-party library type issues with appropriate workarounds.
+
+   - Use type assertions when necessary for library compatibility
+   - Create adapter functions or wrapper components for problematic libraries
+   - Document any workarounds in comments
+
+5. **Type Checking Process**:
+   - Run `npm run typecheck` before committing changes
+   - Address all type errors before merging code
+   - Update TYPE_CHECKING_PLAN.md with progress and next steps
+
+This approach has successfully eliminated all TypeScript errors in the codebase, improving code quality and reducing potential runtime errors.

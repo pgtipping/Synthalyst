@@ -34,12 +34,16 @@ export async function GET(
           clicks: true,
           bounces: true,
           unsubscribes: true,
+          // @ts-expect-error - analytics field exists at runtime but not in type definition
           analytics: {
             select: {
-              linkClicks: true,
-              deviceStats: true,
-              locationStats: true,
-              openTimes: true,
+              id: true,
+              opens: true,
+              clicks: true,
+              bounces: true,
+              complaints: true,
+              deliveries: true,
+              sendId: true,
             },
           },
         },

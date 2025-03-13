@@ -123,7 +123,7 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
   const threadItems = [
     {
       id: submission.id,
-      type: "submission",
+      type: "submission" as const,
       content: submission.message,
       sender: submission.name,
       email: submission.email,
@@ -132,7 +132,7 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
     },
     ...replies.map((reply) => ({
       id: reply.id,
-      type: "reply",
+      type: "reply" as const,
       content: reply.content,
       sender: "Admin",
       email: "admin@synthalyst.com",
@@ -141,7 +141,7 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
     })),
     ...relatedEmails.map((email) => ({
       id: email.id,
-      type: "email",
+      type: "email" as const,
       content: email.textContent || email.htmlContent || "No content available",
       sender: email.fromFull,
       email: email.fromEmail,
@@ -166,13 +166,13 @@ export default async function ContactSubmissionDetailPage(props: PageProps) {
           ]}
         />
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
+          <Button variant="ghost" asChild>
             <Link href="/admin/contact-submissions">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Link>
           </Button>
-          <DeleteSubmissionButton id={id} />
+          <DeleteSubmissionButton submissionId={id} />
         </div>
       </div>
 

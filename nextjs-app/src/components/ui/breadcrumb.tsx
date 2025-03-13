@@ -10,11 +10,17 @@ interface BreadcrumbItem {
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
+  className?: string;
 }
 
-export function Breadcrumb({ items }: BreadcrumbProps) {
+export function Breadcrumb({ items, className }: BreadcrumbProps) {
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-700">
+    <nav
+      className={cn(
+        "flex items-center space-x-2 text-sm text-gray-700",
+        className
+      )}
+    >
       {items.map((item, index) => (
         <div key={item.href} className="flex items-center">
           {index > 0 && <ChevronRight className="h-4 w-4 mx-2" />}

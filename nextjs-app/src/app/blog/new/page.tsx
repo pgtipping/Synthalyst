@@ -54,6 +54,10 @@ const NewBlogPost = () => {
     published: true,
     featured: false,
   });
+  const [showAI, setShowAI] = useState(false);
+  const [content, setContent] = useState("");
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [tagIds, setTagIds] = useState<string[]>([]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,13 +85,6 @@ const NewBlogPost = () => {
 
     try {
       // Transform categories and tags arrays to IDs
-      const categoryIds = formData.categories.map((cat: string) =>
-        cat.toLowerCase().replace(/\s+/g, "-")
-      );
-      const tagIds = formData.tags.map((tag: string) =>
-        tag.toLowerCase().replace(/\s+/g, "-")
-      );
-
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: {
@@ -146,15 +143,22 @@ const NewBlogPost = () => {
 
       <ContentGuide />
 
-      <AIAssistant
-        onContentGenerated={(content) => {
-          setFormData({ ...formData, content });
-        }}
-        onTagsGenerated={(categories, tags) => {
-          setFormData({ ...formData, categories, tags });
-        }}
-        currentContent={formData.content}
-      />
+      {/* AI Assistant */}
+      {showAI && (
+        <div className="mt-8">
+          <AIAssistant
+            onContentGenerated={(content) => {
+              setContent(content);
+              setShowAI(false);
+            }}
+            onTagsGenerated={(categories, tags) => {
+              setCategoryIds(categories);
+              setTagIds(tags);
+            }}
+            currentContent={content}
+          />
+        </div>
+      )}
 
       {error && (
         <div className="mb-6 rounded-md bg-destructive/10 p-4 text-destructive">

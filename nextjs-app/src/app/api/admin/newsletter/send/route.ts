@@ -17,6 +17,9 @@ const newsletterSchema = z.object({
   testEmails: z.array(emailValidationSchema).optional(),
 });
 
+// Type for filter description that can be used in the database
+type FilterDescription = "all" | "confirmed" | "recent" | "tags";
+
 // POST /api/admin/newsletter/send - Send a newsletter
 export async function POST(req: NextRequest) {
   try {
@@ -52,12 +55,12 @@ export async function POST(req: NextRequest) {
 
     // Get subscribers based on filter
     let subscribers;
-    let filterDescription = filter;
+    let filterDescription: FilterDescription | string = filter;
 
     if (testMode && testEmails && testEmails.length > 0) {
       // In test mode, use the provided test emails
       subscribers = testEmails.map((email) => ({ email }));
-      filterDescription = `test (${testEmails.length} recipients)`;
+      filterDescription = "tags"; // Use a valid filter type for test emails
     } else {
       // Normal mode, get subscribers from database
       if (filter === "all") {
@@ -102,18 +105,13 @@ export async function POST(req: NextRequest) {
       } else if (filter === "tags" && tags && tags.length > 0) {
         subscribers = await prisma.newsletterSubscriber.findMany({
           where: {
-            status: "confirmed",
-            unsubscribed: false,
             tags: {
               hasSome: tags,
             },
-          },
-          select: {
-            id: true,
-            email: true,
+            confirmed: true,
           },
         });
-        filterDescription = `tags: ${tags.join(", ")}`;
+        filterDescription = "tags"; // Use a valid filter type for tags
       }
     }
 

@@ -47,7 +47,8 @@ model User {
   email               String                        @unique
   emailVerified       DateTime?
   image               String?
-  role                String                        @default("user")
+  role                String                        @default("USER")
+  bio                 String?
   createdAt           DateTime                      @default(now())
   updatedAt           DateTime                      @updatedAt
   password            String?
@@ -55,7 +56,7 @@ model User {
   chatMessages        ChatMessage[]
   comments            Comment[]
   competencies        CompetencyFramework[]
-  frameworkFeedback   CompetencyFrameworkFeedback[]
+  frameworkFeedback   CompetencyFrameworkFeedback[] @relation("UserToFrameworkFeedback")
   competencyMatrices  CompetencyMatrix[]
   documents           Document[]
   jobDescriptions     JobDescription[]
@@ -556,14 +557,17 @@ model ContactSubmissionReply {
 }
 
 model CompetencyFrameworkFeedback {
-  id          String              @id @default(cuid())
-  rating      Int
-  feedback    String?
-  frameworkId String
-  userId      String?
-  createdAt   DateTime            @default(now())
-  framework   CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
-  user        User?               @relation(fields: [userId], references: [id])
+  id                       String              @id @default(cuid())
+  rating                   Int
+  feedback                 String?
+  isPublic                 Boolean             @default(false)
+  llmQualityFeedback       String?
+  llmImprovementSuggestion String?
+  frameworkId              String
+  userId                   String?
+  createdAt                DateTime            @default(now())
+  framework                CompetencyFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  user                     User?               @relation("UserToFrameworkFeedback", fields: [userId], references: [id])
 }
 
 model NewsletterSubscriber {

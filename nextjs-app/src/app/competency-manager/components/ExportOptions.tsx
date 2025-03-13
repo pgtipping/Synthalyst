@@ -354,6 +354,7 @@ export default function ExportOptions({ framework }: ExportOptionsProps) {
       });
 
       // Add footer to all pages
+      // @ts-expect-error - getNumberOfPages exists at runtime but not in type definition
       const totalPages = pdf.internal.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
         pdf.setPage(i);

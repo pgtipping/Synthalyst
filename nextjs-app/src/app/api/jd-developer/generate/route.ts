@@ -63,12 +63,38 @@ export async function POST(request: Request) {
 
     // Generate enhanced job description using LLM
     const enhancedDescription = await generateJobDescription({
-      ...validatedData,
+      title: validatedData.title,
+      employmentType: validatedData.employmentType,
+      industry: validatedData.industry,
+      level: validatedData.level,
+      department: validatedData.department,
+      location: validatedData.location,
+      description: validatedData.description,
+      responsibilities: validatedData.responsibilities,
+      salary: validatedData.salary
+        ? {
+            range: {
+              min: validatedData.salary.range.min,
+              max: validatedData.salary.range.max,
+            },
+            type: validatedData.salary.type,
+            currency: validatedData.salary.currency,
+          }
+        : undefined,
+      company: validatedData.company,
       userEmail: session?.user?.email || "anonymous@user.com", // Provide a default email for anonymous users
       // Ensure arrays are always provided
       requirements: {
-        required: validatedData.requirements.required || [],
-        preferred: validatedData.requirements.preferred || [],
+        required: (validatedData.requirements.required || []).map((req) => ({
+          name: req.name || "",
+          level: req.level || "intermediate",
+          description: req.description || "",
+        })),
+        preferred: (validatedData.requirements.preferred || []).map((req) => ({
+          name: req.name || "",
+          level: req.level || "intermediate",
+          description: req.description || "",
+        })),
       },
       qualifications: {
         education: validatedData.qualifications.education || [],

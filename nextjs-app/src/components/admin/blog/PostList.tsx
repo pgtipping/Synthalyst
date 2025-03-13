@@ -21,13 +21,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Search } from "lucide-react";
 
+// Extend the Post type to include the properties we need
+interface ExtendedPost extends Post {
+  author?: {
+    name: string;
+  };
+  _count?: {
+    comments: number;
+  };
+}
+
 interface PostListProps {
-  initialPosts: Post[];
+  initialPosts: ExtendedPost[];
   totalPosts: number;
 }
 
 export default function PostList({ initialPosts, totalPosts }: PostListProps) {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState<ExtendedPost[]>(initialPosts);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;

@@ -30,20 +30,10 @@ const formSchema = z.object({
   industry: z.string().optional().default(""),
   jobLevel: z.string().optional().default(""),
   description: z.string().optional().default(""),
-  requiredSkills: z
-    .string()
-    .optional()
-    .default("")
-    .transform((val) =>
-      val
-        ? val
-            .split(",")
-            .map((skill) => skill.trim())
-            .filter(Boolean)
-        : []
-    ),
+  requiredSkills: z.string().optional().default(""),
 });
 
+// Use the inferred type from the schema
 type FormValues = z.infer<typeof formSchema>;
 
 // Define the type for the form submission
@@ -89,7 +79,11 @@ export function JobDetailsForm({
       industry: initialValues.industry || "",
       jobLevel: initialValues.jobLevel || "",
       description: initialValues.description || "",
-      requiredSkills: initialValues.requiredSkills.join(", ") || "",
+      requiredSkills: Array.isArray(initialValues.requiredSkills)
+        ? initialValues.requiredSkills.join(", ")
+        : typeof initialValues.requiredSkills === "string"
+        ? initialValues.requiredSkills
+        : "",
     },
   });
 
@@ -101,14 +95,10 @@ export function JobDetailsForm({
       industry: values.industry || "",
       jobLevel: values.jobLevel || "",
       description: values.description || "",
-      requiredSkills: Array.isArray(values.requiredSkills)
-        ? values.requiredSkills
-        : ((typeof values.requiredSkills === "string"
-            ? values.requiredSkills
-                .split(",")
-                .map((skill) => skill.trim())
-                .filter(Boolean)
-            : []) as string[]),
+      requiredSkills: values.requiredSkills
+        .split(",")
+        .map((skill: string) => skill.trim())
+        .filter(Boolean),
       resumeText: initialValues.resumeText || "",
     };
 

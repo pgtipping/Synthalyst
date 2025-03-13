@@ -179,18 +179,30 @@ export async function trackNewsletterBounce(
  */
 export async function trackNewsletterUnsubscribe(
   newsletterId: string,
-  subscriberId: string,
-  reason?: string
+  subscriberId: string
 ): Promise<void> {
   try {
-    // Record the unsubscribe event
-    await prisma.newsletterUnsubscribeEvent.create({
-      data: {
-        newsletterId,
-        subscriberId,
-        reason: reason || "User unsubscribed",
-      },
+    // Get subscriber email
+    const subscriber = await prisma.newsletterSubscriber.findUnique({
+      where: { id: subscriberId },
     });
+
+    if (!subscriber) {
+      console.error(`Subscriber not found: ${subscriberId}`);
+      return;
+    }
+
+    // Record unsubscribe event
+    try {
+      await prisma.newsletterUnsubscribeEvent.create({
+        data: {
+          subscriber: { connect: { id: subscriberId } },
+          send: newsletterId ? { connect: { id: newsletterId } } : undefined,
+        },
+      });
+    } catch (error) {
+      console.error("Error tracking newsletter unsubscribe:", error);
+    }
 
     // Update the newsletter unsubscribes count
     await prisma.newsletterSend.update({

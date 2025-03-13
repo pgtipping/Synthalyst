@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { toast } from "react-hot-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 const ContactForm: React.FC = () => {
   const [name, setName] = useState("");
@@ -10,6 +10,8 @@ const ContactForm: React.FC = () => {
   const [submissionStatus, setSubmissionStatus] = useState<
     "submitting" | "success" | "error"
   >("submitting");
+
+  const { addToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,15 +49,19 @@ const ContactForm: React.FC = () => {
       setSubmissionStatus("success");
 
       // Show success message
-      toast.success(
-        reference
-          ? "Your reply has been submitted successfully. We'll process it as part of your existing conversation."
-          : "Your message has been submitted successfully. We'll get back to you soon."
-      );
+      addToast({
+        title: "Message sent!",
+        description: "We'll get back to you as soon as possible.",
+        variant: "success",
+      });
     } catch (error) {
       console.error("Error submitting form:", error);
       setSubmissionStatus("error");
-      toast.error("Failed to submit form. Please try again.");
+      addToast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

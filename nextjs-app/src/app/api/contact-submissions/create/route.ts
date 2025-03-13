@@ -39,7 +39,7 @@ export async function POST(request: Request) {
           subject: validatedData.subject,
           message: validatedData.message,
           status: "new",
-          parentSubmissionId, // Link to parent if this is a reply
+          inquiryType: "General",
         },
       });
 

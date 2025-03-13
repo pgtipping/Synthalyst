@@ -8,11 +8,10 @@ export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
   try {
-    // Apply rate limiting
-    const limiter = await rateLimit.check(req, 60, "1h"); // 60 requests per hour
-
-    if (!limiter.success) {
-      return new Response("Too Many Requests", { status: 429 });
+    // Apply rate limiting - 60 requests per hour
+    const limiter = await rateLimit.check(req, 60, 3600); // 3600 seconds = 1 hour
+    if (limiter) {
+      return limiter;
     }
 
     const { prompt, options = {} } = await req.json();
@@ -41,7 +40,26 @@ export async function POST(req: NextRequest) {
       // Track the streaming request
       await redisMonitor.trackCache(cacheKey, false);
 
-      return new Response(response.stream, {
+      // Convert the stream to a ReadableStream for the Response
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          try {
+            if (!response || !response.stream) {
+              throw new Error("No response stream available");
+            }
+
+            for await (const chunk of response.stream) {
+              const text = JSON.stringify(chunk);
+              controller.enqueue(new TextEncoder().encode(text + "\n"));
+            }
+            controller.close();
+          } catch (error) {
+            controller.error(error);
+          }
+        },
+      });
+
+      return new Response(readableStream, {
         headers: {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",

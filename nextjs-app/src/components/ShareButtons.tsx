@@ -14,16 +14,21 @@ interface ShareButtonsProps {
   url: string;
   title: string;
   description?: string;
+  summary?: string; // Alias for description
 }
 
 export default function ShareButtons({
   url,
   title,
   description = "",
+  summary,
 }: ShareButtonsProps) {
   // Use the current URL if not provided
   const shareUrl =
     url || (typeof window !== "undefined" ? window.location.href : "");
+
+  // Use summary as description if provided
+  const finalDescription = description || summary || "";
 
   // Share handlers
   const handleTwitterShare = () => {
@@ -49,7 +54,9 @@ export default function ShareButtons({
 
   const handleEmailShare = () => {
     const subject = encodeURIComponent(title);
-    const body = encodeURIComponent(`${description}\n\nRead more: ${shareUrl}`);
+    const body = encodeURIComponent(
+      `${finalDescription}\n\nRead more: ${shareUrl}`
+    );
     const emailUrl = `mailto:?subject=${subject}&body=${body}`;
     window.open(emailUrl);
   };

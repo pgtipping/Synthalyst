@@ -6,11 +6,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AIAssistantProps {
-  onSuggestionAccept: (suggestion: string) => void;
+  onSuggestionAccept?: (suggestion: string) => void;
+  onContentGenerated?: (content: string) => void;
+  onTagsGenerated?: (categories: string[], tags: string[]) => void;
+  currentContent?: string;
 }
 
-export default function AIAssistant({ onSuggestionAccept }: AIAssistantProps) {
-  const [prompt, setPrompt] = useState("");
+export default function AIAssistant({
+  onSuggestionAccept,
+  onContentGenerated,
+  onTagsGenerated,
+  currentContent = "",
+}: AIAssistantProps) {
+  const [prompt, setPrompt] = useState(currentContent || "");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,6 +52,23 @@ export default function AIAssistant({ onSuggestionAccept }: AIAssistantProps) {
       setTimeout(() => {
         setSuggestions(mockSuggestions);
         setIsLoading(false);
+
+        // If content generation is requested, generate mock content
+        if (onContentGenerated) {
+          const mockContent =
+            "# " +
+            mockSuggestions[0] +
+            "\n\n" +
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, quis aliquam nisl nunc quis nisl.";
+          onContentGenerated(mockContent);
+        }
+
+        // If tag generation is requested, generate mock tags
+        if (onTagsGenerated) {
+          const mockCategories = ["Technology", "Web Development"];
+          const mockTags = ["Next.js", "React", "Performance"];
+          onTagsGenerated(mockCategories, mockTags);
+        }
       }, 1500);
     } catch (error) {
       console.error("Error generating suggestions:", error);
@@ -52,7 +77,7 @@ export default function AIAssistant({ onSuggestionAccept }: AIAssistantProps) {
   };
 
   const handleAcceptSuggestion = (suggestion: string) => {
-    onSuggestionAccept(suggestion);
+    onSuggestionAccept?.(suggestion);
     setSuggestions([]);
     setPrompt("");
   };

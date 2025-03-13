@@ -208,11 +208,15 @@ export async function getCachedGeminiResponse(
   const response = await streamGeminiResponse(prompt, { timeout, maxRetries });
 
   // Cache the response
-  const responseData = await response.response.text();
-  responseCache.set(cacheKey, {
-    data: responseData,
-    timestamp: Date.now(),
-  });
+  if (response && response.response) {
+    const responseData = await (await response.response).text();
+    responseCache.set(cacheKey, {
+      data: responseData,
+      timestamp: Date.now(),
+    });
+    return responseData;
+  }
 
-  return responseData;
+  // Return empty string if response is undefined
+  return "";
 }

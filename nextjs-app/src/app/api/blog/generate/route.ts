@@ -173,11 +173,11 @@ Please format the blog post in Markdown format.
 `;
 
       // Get the Gemini model
-      const model = getGeminiModel();
+      const model = await getGeminiModel();
 
       // Generate the blog post
       const result = await model.generateContent(prompt);
-      const blogContent = result.response.text();
+      const blogContent = await result.response.text();
 
       // Return the generated blog post
       return successResponse({
