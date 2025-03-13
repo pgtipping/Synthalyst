@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Copy, Check, Mail, Share2, Globe, Lock } from "lucide-react";
+import { Copy, Check, Mail, Globe, Lock } from "lucide-react";
 import { CompetencyFramework } from "../types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -151,13 +151,21 @@ export default function SharingOptions({
           <div className="flex flex-col space-y-2">
             <p className="text-sm font-medium">Share this link:</p>
             <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                value={shareUrl}
-                readOnly
-                className="flex-1 p-2 text-sm border rounded-md bg-white"
-                onClick={(e) => e.currentTarget.select()}
-              />
+              <div className="flex-1 relative">
+                <label htmlFor="share-url" className="sr-only">
+                  Share URL
+                </label>
+                <input
+                  id="share-url"
+                  type="text"
+                  value={shareUrl}
+                  readOnly
+                  aria-label="Share URL"
+                  placeholder="Share URL"
+                  className="w-full p-2 text-sm border rounded-md bg-white"
+                  onClick={(e) => e.currentTarget.select()}
+                />
+              </div>
               <Button
                 variant="outline"
                 size="sm"
