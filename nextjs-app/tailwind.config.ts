@@ -30,6 +30,9 @@ const config: Config = {
     "h-3.5",
     "w-3.5",
     "fill-primary",
+    "synthalyst-radio-item",
+    "synthalyst-radio-indicator",
+    "synthalyst-radio-circle",
   ],
   theme: {
     container: {

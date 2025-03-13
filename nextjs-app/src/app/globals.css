@@ -140,3 +140,26 @@ button.bg-gray-200,
 /* This includes: brand color classes, list styles, shadow overlay, */
 /* hero gradient, dropdown focus styles, animations, utility classes, */
 /* card styles, form styles, table styles, and print styles */
+
+/* Radio button styles to ensure they're properly displayed in production */
+.synthalyst-radio-item {
+  aspect-ratio: 1/1;
+  height: 1rem;
+  width: 1rem;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--primary));
+  color: hsl(var(--primary));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.synthalyst-radio-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.synthalyst-radio-circle {
+  height: 0.875rem;
+  width: 0.875rem;
+  fill: hsl(var(--primary));
+}
