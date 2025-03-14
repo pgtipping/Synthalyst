@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Square, Loader2, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AudioRecorderProps {
@@ -38,9 +37,15 @@ export function AudioRecorder({
   const [isInitializing, setIsInitializing] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
-  const { addToast } = useToast();
+  const [statusMessage, setStatusMessage] = useState("Ready to record");
+  const [statusDetail, setStatusDetail] = useState(
+    "Click the START RECORDING button to begin"
+  );
+  const [statusType, setStatusType] = useState<
+    "default" | "recording" | "success" | "error"
+  >("default");
 
-  // Initialize audio recorder
+  // Initialize audio recorder with higher quality settings
   const { state, audioUrl, startRecording, stopRecording, requestPermission } =
     useAudioRecorder({
       maxDuration,
@@ -48,15 +53,17 @@ export function AudioRecorder({
         if (onRecordingComplete && audioUrl) {
           onRecordingComplete(blob, audioUrl);
         }
-        // Show toast when recording is complete
-        addToast({
-          title: "Recording complete",
-          description: `Audio recorded successfully (${formatFileSize(
-            blob.size
-          )})`,
-          variant: "success",
-        });
+        // Update status message instead of toast
+        setStatusMessage("Recording complete");
+        setStatusDetail(
+          `Audio recorded successfully (${formatFileSize(blob.size)})`
+        );
+        setStatusType("success");
       },
+      // Use higher quality audio settings
+      mimeType: "audio/webm;codecs=opus",
+      audioBitsPerSecond: 128000,
+      noiseReduction: false, // Disable noise reduction for better voice quality
     });
 
   // Format duration as MM:SS
@@ -88,8 +95,14 @@ export function AudioRecorder({
     if (autoRequestPermission) {
       const init = async () => {
         try {
+          setStatusMessage("Initializing microphone...");
+          setStatusDetail("Please wait while we set up your microphone");
           const hasPermission = await requestPermission();
           setPermissionDenied(!hasPermission);
+          if (hasPermission) {
+            setStatusMessage("Ready to record");
+            setStatusDetail("Click the START RECORDING button to begin");
+          }
         } catch {
           setPermissionDenied(true);
         } finally {
@@ -112,32 +125,38 @@ export function AudioRecorder({
 
     if (!state.hasPermission) {
       console.log("No permission, requesting...");
+      setStatusMessage("Requesting microphone access");
+      setStatusDetail("Please allow access when prompted");
+      setStatusType("default");
+
       const hasPermission = await requestPermission();
       if (!hasPermission) {
         console.error("Permission denied");
         setPermissionDenied(true);
+        setStatusMessage("Microphone access denied");
+        setStatusDetail("Please check your browser settings");
+        setStatusType("error");
         return;
       }
       setPermissionDenied(false);
     }
 
     console.log("Starting recording...");
+    setStatusMessage("Starting recording...");
+    setStatusDetail("Initializing microphone");
+
     const success = await startRecording();
     if (success) {
-      // Show toast when recording starts
-      addToast({
-        title: "Recording started",
-        description: "Your microphone is now recording audio",
-        variant: "success",
-      });
+      // Update status message instead of toast
+      setStatusMessage("Recording in progress");
+      setStatusDetail("Speak clearly into your microphone");
+      setStatusType("recording");
     } else {
       console.error("Failed to start recording");
-      // Show an error message to the user
-      addToast({
-        variant: "destructive",
-        title: "Recording failed",
-        description: "Please check your browser settings and try again.",
-      });
+      // Update status message instead of toast
+      setStatusMessage("Recording failed");
+      setStatusDetail("Please check your microphone and try again");
+      setStatusType("error");
     }
   };
 
@@ -147,8 +166,19 @@ export function AudioRecorder({
     setIsButtonPressed(true);
     setTimeout(() => setIsButtonPressed(false), 200);
 
+    setStatusMessage("Processing recording...");
+    setStatusDetail("Please wait while we process your audio");
+
     stopRecording();
   };
+
+  // Monitor for auto-stop and update status
+  useEffect(() => {
+    if (state.isRecording && state.duration >= maxDuration - 1000) {
+      setStatusMessage("Almost at maximum duration");
+      setStatusDetail("Recording will stop automatically in 1 second");
+    }
+  }, [state.isRecording, state.duration, maxDuration]);
 
   if (isInitializing) {
     return (
@@ -176,9 +206,14 @@ export function AudioRecorder({
           variant="outline"
           size="sm"
           onClick={() =>
-            requestPermission().then((hasPermission) =>
-              setPermissionDenied(!hasPermission)
-            )
+            requestPermission().then((hasPermission) => {
+              setPermissionDenied(!hasPermission);
+              if (hasPermission) {
+                setStatusMessage("Microphone access granted");
+                setStatusDetail("You can now start recording");
+                setStatusType("default");
+              }
+            })
           }
         >
           Request Permission
@@ -268,26 +303,25 @@ export function AudioRecorder({
             {state.isRecording ? (
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-red-700 dark:text-red-400">
-                  Recording in progress
+                  {statusMessage} - {formatDuration(state.duration)}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Click the STOP RECORDING button when finished
-                </span>
-              </div>
-            ) : audioUrl ? (
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-green-700">
-                  Recording complete
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Listen to your recording below
+                  {statusDetail}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col">
-                <span className="text-sm font-medium">Ready to record</span>
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    statusType === "success" && "text-green-700",
+                    statusType === "error" && "text-red-700"
+                  )}
+                >
+                  {statusMessage}
+                </span>
                 <span className="text-xs text-muted-foreground">
-                  Click the START RECORDING button to begin
+                  {statusDetail}
                 </span>
               </div>
             )}

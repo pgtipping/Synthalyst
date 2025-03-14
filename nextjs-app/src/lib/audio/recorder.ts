@@ -108,11 +108,14 @@ export class AudioRecorder {
     }
 
     try {
+      // Use higher quality audio settings for better voice recording
       const constraints: MediaStreamConstraints = {
         audio: {
-          echoCancellation: this.options.noiseReduction,
-          noiseSuppression: this.options.noiseReduction,
-          autoGainControl: this.options.noiseReduction,
+          echoCancellation: false, // Disable echo cancellation for clearer voice
+          noiseSuppression: false, // Disable noise suppression for better quality
+          autoGainControl: false, // Disable auto gain for consistent volume
+          sampleRate: 48000, // Higher sample rate for better quality
+          channelCount: 1, // Mono recording is sufficient for voice
         },
       };
 
@@ -140,14 +143,18 @@ export class AudioRecorder {
     if (!this.stream) return;
 
     try {
-      this.audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
+
+      this.audioContext = new AudioContextClass();
       const source = this.audioContext.createMediaStreamSource(this.stream);
       this.analyser = this.audioContext.createAnalyser();
       this.analyser.fftSize = 256;
       source.connect(this.analyser);
-    } catch (error) {
-      console.error("Error setting up audio context:", error);
+    } catch (err) {
+      console.error("Error setting up audio context:", err);
     }
   }
 
