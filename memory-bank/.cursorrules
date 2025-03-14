@@ -1840,3 +1840,61 @@ When working with audio components in the application:
      );
    }
    ```
+
+### AudioRecorder Component Pattern - March 14, 2025
+
+- The AudioRecorder component provides high-quality audio recording for the Mock Interview feature
+- Key implementation details:
+
+  ```tsx
+  // Import the component
+  import { AudioRecorder } from "@/components/interview-prep/AudioRecorder";
+
+  // Use the component with callback for handling the completed recording
+  <AudioRecorder
+    onRecordingComplete={(blob, url) => {
+      // Handle the recording blob and URL
+      setAudioBlob(blob);
+      setAudioUrl(url);
+    }}
+    maxDuration={120000} // 2 minutes in milliseconds
+    showPlayer={true}
+    showProgress={true}
+    autoRequestPermission={true}
+  />;
+  ```
+
+- Configuration options:
+
+  - `onRecordingComplete`: Callback function that receives the audio blob and URL
+  - `maxDuration`: Maximum recording duration in milliseconds (default: 2 minutes)
+  - `showPlayer`: Whether to show the audio player (default: true)
+  - `showProgress`: Whether to show the progress bar (default: true)
+  - `autoRequestPermission`: Whether to auto-request microphone permission (default: true)
+
+- Audio quality settings:
+
+  - Uses "audio/webm;codecs=opus" format for optimal voice quality
+  - Disables noise reduction, echo cancellation, and auto gain control
+  - Uses 48000Hz sample rate for better voice clarity
+  - Configures mono recording (single channel) for voice
+
+- UI feedback features:
+
+  - Real-time status messages that update as recording progresses
+  - Color coding (red for recording, green for success)
+  - Button animations for better click feedback
+  - Warning messages when approaching maximum duration
+  - Progress bar showing recording duration
+
+- Error handling:
+
+  - Descriptive error messages for common issues
+  - Clear instructions for resolving permission problems
+  - Visual indicators for error states
+
+- Best practices:
+  - Always provide an onRecordingComplete handler
+  - Consider mobile users with appropriate button sizes
+  - Test on different browsers (Chrome, Firefox, Safari)
+  - Provide alternative text input for accessibility
