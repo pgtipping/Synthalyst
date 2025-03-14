@@ -1,12 +1,12 @@
-import { writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
-
-const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
+import { audioStorage } from "@/lib/storage/audioStorage";
+import { db } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    // Get the audio blob from the request
     const formData = await request.formData();
     const audioFile = formData.get("audio") as Blob;
 
@@ -17,22 +17,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create a unique filename
-    const filename = `${uuidv4()}.webm`;
-    const filepath = path.join(UPLOADS_DIR, filename);
+    // Check file size if configured
+    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10); // Default 10MB
+    if (audioFile.size > maxSize) {
+      return NextResponse.json(
+        { error: "Audio file too large" },
+        { status: 400 }
+      );
+    }
 
-    // Convert blob to buffer
-    const buffer = Buffer.from(await audioFile.arrayBuffer());
+    // Check MIME type if configured
+    const allowedTypes = (
+      process.env.ALLOWED_AUDIO_MIME_TYPES ||
+      "audio/webm,audio/mp4,audio/mpeg,audio/wav"
+    ).split(",");
+    if (audioFile.type && !allowedTypes.includes(audioFile.type)) {
+      return NextResponse.json(
+        { error: "Invalid audio file type" },
+        { status: 400 }
+      );
+    }
 
-    // Ensure uploads directory exists
-    await writeFile(filepath, buffer);
+    // Get user session if available
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
 
-    // Return the file URL
-    const fileUrl = `/uploads/${filename}`;
+    // Save the audio file using our storage utility
+    const { url, filename } = await audioStorage.saveAudio(audioFile);
 
+    // Store recording information in the database
+    const recording = await db.audioRecording.create({
+      data: {
+        filename,
+        url,
+        userId: userId || null,
+      },
+    });
+
+    // Return the URL to the saved audio file
     return NextResponse.json({
-      success: true,
-      url: fileUrl,
+      url,
+      filename,
+      id: recording.id,
     });
   } catch (error) {
     console.error("Error saving audio:", error);
@@ -44,31 +70,44 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const filename = url.searchParams.get("filename");
-
-  if (!filename) {
-    return NextResponse.json(
-      { error: "No filename provided" },
-      { status: 400 }
-    );
-  }
-
-  const filepath = path.join(UPLOADS_DIR, filename);
-
   try {
-    // Return file as downloadable
-    const response = new NextResponse(filepath);
-    response.headers.set("Content-Type", "audio/webm");
-    response.headers.set(
-      "Content-Disposition",
-      `attachment; filename="${filename}"`
-    );
-    return response;
+    const { searchParams } = new URL(request.url);
+    const filename = searchParams.get("filename");
+    const id = searchParams.get("id");
+
+    if (!filename && !id) {
+      return NextResponse.json(
+        { error: "No filename or id provided" },
+        { status: 400 }
+      );
+    }
+
+    let audioFilename = filename;
+
+    // If id is provided, look up the recording in the database
+    if (id) {
+      const recording = await db.audioRecording.findUnique({
+        where: { id },
+      });
+
+      if (!recording) {
+        return NextResponse.json(
+          { error: "Recording not found" },
+          { status: 404 }
+        );
+      }
+
+      audioFilename = recording.filename;
+    }
+
+    // Get the URL for the audio file
+    const url = await audioStorage.getAudioUrl(audioFilename!);
+
+    return NextResponse.json({ url });
   } catch (error) {
-    console.error("Error serving audio:", error);
+    console.error("Error retrieving audio:", error);
     return NextResponse.json(
-      { error: "Failed to serve audio file" },
+      { error: "Failed to retrieve audio file" },
       { status: 500 }
     );
   }

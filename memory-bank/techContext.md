@@ -120,3 +120,42 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
 - **Database**: PostgreSQL (local for development, managed service for production)
 - **API Keys**: Required for Gemini, OpenAI, and other services
 - **Environment Variables**: Stored in .env.local (development) and Vercel (production)
+
+## Audio Recording Technologies
+
+### Browser APIs
+
+- **MediaRecorder API**: Used for capturing audio from the user's microphone
+- **Web Audio API**: Used for audio processing and visualization
+- **Blob API**: Used for handling audio data as binary large objects
+- **URL.createObjectURL**: Used for creating temporary URLs for audio playback
+
+### Storage Solutions
+
+- **Local Filesystem**: Used in development for storing audio files in the `/public/uploads` directory
+- **AWS S3**: Used in production for scalable and reliable storage of audio files
+- **Signed URLs**: Used for secure, time-limited access to audio files in S3
+
+### Database Integration
+
+- **Prisma ORM**: Used for database operations and schema management
+- **PostgreSQL**: Used as the primary database for storing audio recording metadata
+- **Database Models**: AudioRecording model for tracking recordings
+
+### Libraries and Dependencies
+
+- **uuid**: Used for generating unique identifiers for audio files
+- **@aws-sdk/client-s3**: Used for S3 operations in production
+- **@aws-sdk/s3-request-presigner**: Used for generating signed URLs for S3 objects
+
+### Environment Configuration
+
+- **AUDIO_STORAGE_TYPE**: Determines which storage implementation to use ("local" or "s3")
+- **AWS_REGION**: AWS region for S3 operations
+- **AWS_ACCESS_KEY_ID**: AWS access key for authentication
+- **AWS_SECRET_ACCESS_KEY**: AWS secret key for authentication
+- **AWS_S3_BUCKET**: S3 bucket name for storing audio files
+- **AWS_S3_AUDIO_PATH**: Path within the S3 bucket for audio files
+- **AWS_S3_URL_EXPIRATION**: Expiration time in seconds for signed URLs
+- **MAX_AUDIO_FILE_SIZE**: Maximum allowed size for audio files
+- **ALLOWED_AUDIO_MIME_TYPES**: Comma-separated list of allowed MIME types

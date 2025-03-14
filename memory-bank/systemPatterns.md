@@ -528,3 +528,104 @@ Blog
   - Identifying conflicting styles in production
   - Creating override classes with higher specificity
   - Testing in both environments to ensure consistency
+
+## Audio Recording Architecture
+
+### Storage Abstraction Pattern
+
+We've implemented a flexible storage abstraction for audio recordings that follows the Strategy pattern:
+
+```typescript
+// Interface defining the storage operations
+export interface AudioStorage {
+  saveAudio(
+    audioBlob: Blob,
+    filename?: string
+  ): Promise<{ url: string; filename: string }>;
+  getAudioUrl(filename: string): Promise<string>;
+}
+
+// Concrete implementation for local filesystem storage
+class LocalAudioStorage implements AudioStorage {
+  // Implementation details...
+}
+
+// Concrete implementation for AWS S3 storage
+class S3AudioStorage implements AudioStorage {
+  // Implementation details...
+}
+
+// Factory function to create the appropriate storage implementation
+export function createAudioStorage(): AudioStorage {
+  const storageType = process.env.AUDIO_STORAGE_TYPE || "local";
+
+  switch (storageType) {
+    case "s3":
+      return new S3AudioStorage();
+    case "local":
+    default:
+      return new LocalAudioStorage();
+  }
+}
+
+// Export a singleton instance
+export const audioStorage = createAudioStorage();
+```
+
+This pattern allows us to:
+
+1. Switch between storage implementations without changing client code
+2. Add new storage providers easily by implementing the AudioStorage interface
+3. Test different storage implementations independently
+4. Configure the storage type via environment variables
+
+### API Route Design
+
+The audio API routes follow RESTful principles:
+
+1. **POST /api/audio** - Upload a new audio recording
+
+   - Accepts multipart/form-data with an "audio" field
+   - Validates file size and MIME type
+   - Stores the file using the configured storage provider
+   - Creates a database record for tracking
+   - Returns the URL, filename, and ID of the recording
+
+2. **GET /api/audio** - Retrieve an audio recording
+   - Accepts either a filename or recording ID as query parameters
+   - Looks up the recording in the database if ID is provided
+   - Generates a URL for accessing the audio file
+   - Returns the URL to the client
+
+### Database Integration
+
+Audio recordings are tracked in the database using the AudioRecording model:
+
+```prisma
+model AudioRecording {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+```
+
+This allows us to:
+
+1. Associate recordings with users
+2. Track metadata about recordings
+3. Implement access control based on ownership
+4. Query and filter recordings
+
+### Client-Side Component Design
+
+The AudioRecorder component follows a stateful component pattern:
+
+1. Manages internal state for recording status, playback, and errors
+2. Provides a clean API for parent components
+3. Handles browser compatibility issues internally
+4. Provides clear visual feedback to users

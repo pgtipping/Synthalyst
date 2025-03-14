@@ -799,3 +799,14 @@ model UserSavedQuestion {
 
   @@unique([userId, questionId])
 }
+
+model AudioRecording {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}

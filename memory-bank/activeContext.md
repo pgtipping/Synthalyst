@@ -81,3 +81,81 @@ We've implemented significant improvements to the audio recording functionality:
 1. Port 3001 conflicts need to be resolved before starting development server
 2. Audio recording support varies by browser
 3. Permission handling needs to be tested across different devices
+
+# Active Context - 2024-03-15
+
+## Current Focus
+
+We are currently focused on improving the audio recording functionality in the Interview Prep application. The audio recording component is used to record user responses to interview questions, which can then be analyzed for feedback.
+
+### Recent Audio Recording Improvements
+
+1. **Storage Strategy Abstraction**
+
+   - Created a flexible storage system that can switch between local file system and AWS S3 storage
+   - Implemented in `src/lib/storage/audioStorage.ts` with a clean interface for saving and retrieving audio files
+   - Storage type can be configured via environment variables
+
+2. **AWS S3 Integration**
+
+   - Added support for storing audio files in AWS S3 for production environments
+   - Implemented secure signed URLs for accessing audio files
+   - Added necessary environment variables in `.env.example`
+
+3. **Database Integration**
+
+   - Created an `AudioRecording` model in the Prisma schema to track audio recordings
+   - Updated API routes to store recording metadata in the database
+   - Added user association for recordings when a user is authenticated
+
+4. **Enhanced Error Handling**
+
+   - Added validation for file size and MIME types
+   - Improved error messages and user feedback
+   - Added proper cleanup of resources
+
+5. **Improved User Experience**
+   - Added recording timer with MM:SS format
+   - Implemented progress bar for recording duration
+   - Added clear status indicators for recording, uploading, and playback
+
+## Next Steps
+
+1. **Testing**
+
+   - Create comprehensive tests for the AudioRecorder component
+   - Test the API routes for audio upload and retrieval
+   - Test the storage abstraction with both local and S3 storage
+
+2. **Audio Processing**
+
+   - Implement audio analysis for feedback on speaking clarity, pace, and filler words
+   - Add transcription capabilities for text-based analysis
+
+3. **User Interface Enhancements**
+
+   - Add waveform visualization during recording and playback
+   - Implement audio trimming and editing capabilities
+   - Add support for recording multiple takes
+
+4. **Security Enhancements**
+   - Implement proper authentication checks for audio access
+   - Add rate limiting to prevent abuse
+   - Implement automatic cleanup of old recordings
+
+## Active Decisions
+
+1. **Storage Strategy**
+
+   - Local file system storage for development
+   - AWS S3 storage for production
+   - Configurable via environment variables
+
+2. **File Format**
+
+   - Using WebM format for good compression and quality
+   - Fallback to other formats based on browser support
+
+3. **Database Integration**
+   - Tracking audio recordings in the database for better organization
+   - Associating recordings with users when authenticated
