@@ -36,7 +36,7 @@ export function AudioRecorder({
 }: AudioRecorderProps) {
   const [isInitializing, setIsInitializing] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
-  const { toast } = useToast();
+  const { addToast } = useToast();
 
   // Initialize audio recorder
   const { state, audioUrl, startRecording, stopRecording, requestPermission } =
@@ -47,7 +47,7 @@ export function AudioRecorder({
           onRecordingComplete(blob, audioUrl);
         }
         // Show toast when recording is complete
-        toast({
+        addToast({
           title: "Recording complete",
           description: `Audio recorded successfully (${formatFileSize(
             blob.size
@@ -117,14 +117,14 @@ export function AudioRecorder({
     const success = await startRecording();
     if (success) {
       // Show toast when recording starts
-      toast({
+      addToast({
         title: "Recording started",
         description: "Your microphone is now recording audio",
       });
     } else {
       console.error("Failed to start recording");
       // Show an error message to the user
-      toast({
+      addToast({
         variant: "destructive",
         title: "Recording failed",
         description: "Please check your browser settings and try again.",
