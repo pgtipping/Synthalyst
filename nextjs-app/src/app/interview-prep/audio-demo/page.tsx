@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Toaster } from "@/components/ui/use-toast";
 
 export default function AudioDemoPage() {
   const [audioBlob, setAudioBlob] = useState<Blob | undefined>(undefined);
@@ -194,6 +195,7 @@ export default function AudioDemoPage() {
           </TabsContent>
         </Tabs>
       </div>
+      <Toaster />
     </div>
   );
 }

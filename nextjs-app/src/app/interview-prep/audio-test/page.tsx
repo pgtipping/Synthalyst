@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AudioRecorder } from "@/components/interview-prep";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/toaster";
 import Link from "next/link";
 
 export default function AudioTestPage() {
@@ -34,6 +35,17 @@ export default function AudioTestPage() {
 
         <div className="p-6 border rounded-lg bg-card">
           <h2 className="text-xl font-semibold mb-4">Basic Audio Recorder</h2>
+
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <h3 className="font-medium text-blue-800 mb-2">Instructions:</h3>
+            <ol className="list-decimal pl-5 space-y-1 text-sm text-blue-700">
+              <li>Click the microphone button to start recording</li>
+              <li>You should see visual feedback that recording has started</li>
+              <li>Speak into your microphone</li>
+              <li>Click the stop button (square icon) when finished</li>
+              <li>Your recording will appear below for playback</li>
+            </ol>
+          </div>
 
           <AudioRecorder
             onRecordingComplete={handleRecordingComplete}
@@ -73,6 +85,9 @@ export default function AudioTestPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast notifications */}
+      <Toaster />
     </div>
   );
 }

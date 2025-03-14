@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Square, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AudioRecorderProps {
   /** Callback when recording is completed */
@@ -35,6 +36,7 @@ export function AudioRecorder({
 }: AudioRecorderProps) {
   const [isInitializing, setIsInitializing] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const { toast } = useToast();
 
   // Initialize audio recorder
   const { state, audioUrl, startRecording, stopRecording, requestPermission } =
@@ -44,6 +46,13 @@ export function AudioRecorder({
         if (onRecordingComplete && audioUrl) {
           onRecordingComplete(blob, audioUrl);
         }
+        // Show toast when recording is complete
+        toast({
+          title: "Recording complete",
+          description: `Audio recorded successfully (${formatFileSize(
+            blob.size
+          )})`,
+        });
       },
     });
 
@@ -55,6 +64,17 @@ export function AudioRecorder({
     return `${minutes.toString().padStart(2, "0")}:${seconds
       .toString()
       .padStart(2, "0")}`;
+  };
+
+  // Format file size in KB or MB
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) {
+      return `${bytes} bytes`;
+    } else if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    } else {
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
   };
 
   // Calculate progress percentage
@@ -95,12 +115,20 @@ export function AudioRecorder({
 
     console.log("Starting recording...");
     const success = await startRecording();
-    if (!success) {
+    if (success) {
+      // Show toast when recording starts
+      toast({
+        title: "Recording started",
+        description: "Your microphone is now recording audio",
+      });
+    } else {
       console.error("Failed to start recording");
       // Show an error message to the user
-      alert(
-        "Failed to start recording. Please check your browser settings and try again."
-      );
+      toast({
+        variant: "destructive",
+        title: "Recording failed",
+        description: "Please check your browser settings and try again.",
+      });
     }
   };
 
@@ -160,8 +188,25 @@ export function AudioRecorder({
 
   return (
     <div className={cn("flex flex-col space-y-4", className)}>
+      {/* Recording status banner - only shown when recording */}
+      {state.isRecording && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3 flex items-center animate-pulse">
+          <div className="h-3 w-3 rounded-full bg-red-500 mr-3"></div>
+          <span className="text-red-700 dark:text-red-400 font-medium">
+            Recording in progress - {formatDuration(state.duration)}
+          </span>
+        </div>
+      )}
+
       {/* Recording controls */}
-      <div className="flex items-center justify-between">
+      <div
+        className={cn(
+          "flex items-center justify-between p-4 rounded-md",
+          state.isRecording
+            ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+            : "bg-muted/50"
+        )}
+      >
         <div className="flex items-center">
           {state.isRecording ? (
             <Button
@@ -169,8 +214,13 @@ export function AudioRecorder({
               size="icon"
               onClick={stopRecording}
               aria-label="Stop recording"
+              className="relative"
             >
               <Square className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
             </Button>
           ) : (
             <Button
@@ -186,18 +236,28 @@ export function AudioRecorder({
 
           <div className="ml-4">
             {state.isRecording ? (
-              <div className="flex items-center">
-                <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse mr-2" />
-                <span className="text-sm font-medium">
-                  Recording... {formatDuration(state.duration)}
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-red-700 dark:text-red-400">
+                  Recording in progress
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Click the stop button when finished
                 </span>
               </div>
             ) : audioUrl ? (
-              <span className="text-sm font-medium">Recording complete</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">Recording complete</span>
+                <span className="text-xs text-muted-foreground">
+                  Listen to your recording below
+                </span>
+              </div>
             ) : (
-              <span className="text-sm text-muted-foreground">
-                Click to start recording
-              </span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">Ready to record</span>
+                <span className="text-xs text-muted-foreground">
+                  Click the microphone button to start
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -205,7 +265,13 @@ export function AudioRecorder({
 
       {/* Progress bar */}
       {showProgress && state.isRecording && (
-        <Progress value={progressPercentage} className="h-1" />
+        <div className="space-y-1">
+          <Progress value={progressPercentage} className="h-2" />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{formatDuration(state.duration)}</span>
+            <span>{formatDuration(maxDuration)}</span>
+          </div>
+        </div>
       )}
 
       {/* Audio player */}

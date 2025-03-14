@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast, Toaster } from "@/components/ui/use-toast";
 import { Loader2, AlertCircle } from "lucide-react";
 import FeedbackLayout from "@/components/FeedbackLayout";
 import Link from "next/link";
@@ -698,6 +698,7 @@ export default function MockInterviewPage() {
           </div>
         )}
       </div>
+      <Toaster />
     </FeedbackLayout>
   );
 }
