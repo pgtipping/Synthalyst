@@ -1,4 +1,4 @@
-# System Patterns - Updated on June 12, 2024
+# System Patterns - Updated on March 14, 2025
 
 ## System Architecture
 
@@ -13,6 +13,33 @@ The application follows a modern Next.js architecture with the following key com
 ## Interview Prep Feature Architecture
 
 The Interview Prep feature follows a modular architecture with clear separation of concerns:
+
+### User Flow
+
+The Interview Prep feature is designed with a logical user flow:
+
+1. **Interview Prep Plan** (First Activity):
+
+   - Users input job details or import from ApplyRight
+   - System generates a personalized preparation plan
+   - Users can export the plan as PDF
+
+2. **Mock Interview**:
+
+   - Users practice with AI-generated questions
+   - System provides feedback on responses
+   - Summary page shows overall performance
+
+3. **Question Library**:
+   - Users browse and filter questions
+   - Save questions for later review
+   - Add notes to saved questions
+
+This flow guides users through the preparation process, emphasizing planning before practice.
+
+### Premium Feature Testing
+
+For testing purposes, all authenticated users are treated as premium users. This allows for comprehensive testing of premium features before implementing actual subscription checks. The `checkPremiumStatus` function in the Interview Prep Plan component is configured to return `true` for any authenticated user.
 
 ### Data Models
 
@@ -60,28 +87,41 @@ The Interview Prep feature follows a modular architecture with clear separation 
      - Evaluate a response with detailed feedback
 
 2. **Question Library API**:
+
    - `/api/interview-prep/questions` (GET, POST):
      - GET: Browse questions with filters
-     - POST: Save a question
+     - POST: Save a question to personal library
    - `/api/interview-prep/questions/[id]` (GET, PUT, DELETE):
-     - GET: Get question details
-     - PUT: Update notes
-     - DELETE: Remove from saved questions
+     - GET: Retrieve a saved question
+     - PUT: Update notes for a saved question
+     - DELETE: Remove a question from personal library
 
-### UI Components
+3. **Interview Prep Plan API**:
+   - `/api/interview-prep/generate-plan` (POST):
+     - Generate a personalized interview preparation plan
+     - Create practice questions based on job details
 
-1. **Mock Interview**:
+### Component Structure
 
-   - `interview-prep/mock-interview/page.tsx`: Main mock interview page
-   - `interview-prep/mock-interview/summary/page.tsx`: Interview summary page
+1. **Page Components**:
 
-2. **Question Library**:
+   - `InterviewPrepPage`: Main landing page with feature overview
+   - `InterviewPrepPlan`: Plan generation page
+   - `MockInterviewPage`: Mock interview session page
+   - `InterviewSummaryPage`: Session summary page
+   - `QuestionsPage`: Question library browsing page
+   - `QuestionDetailPage`: Individual question page
 
-   - `interview-prep/questions/page.tsx`: Question browsing page
-   - `interview-prep/questions/[id]/page.tsx`: Question detail page
+2. **Shared Components**:
 
-3. **Main Entry Point**:
-   - `interview-prep/page.tsx`: Main Interview Prep landing page
+   - `JobDetailsForm`: Form for collecting job details
+   - `InterviewPrepPDF`: PDF rendering component
+   - `PDFRenderer`: PDF download component
+   - `FeedbackLayout`: Layout with feedback button
+
+3. **Utility Components**:
+   - `crypto-polyfill.js`: Polyfills for PDF generation
+   - `pdf-utils.js`: Utilities for PDF generation and download
 
 ## Key Design Patterns
 

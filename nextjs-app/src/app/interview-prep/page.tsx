@@ -15,10 +15,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare,
   BookOpen,
-  Clock,
   BarChart,
-  Lightbulb,
   CheckCircle2,
+  FileText,
 } from "lucide-react";
 import FeedbackLayout from "@/components/FeedbackLayout";
 import Link from "next/link";
@@ -48,7 +47,41 @@ export default function InterviewPrepPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="h-5 w-5 mr-2 text-primary" />
+                Interview Prep Plan
+              </CardTitle>
+              <CardDescription>
+                Generate a personalized interview preparation plan
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm">
+                  Create a tailored interview preparation plan based on your job
+                  application. Get a structured timeline, preparation steps, and
+                  practice questions.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge variant="outline">Personalized</Badge>
+                  <Badge variant="outline">PDF Export</Badge>
+                  <Badge variant="outline">Practice Questions</Badge>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={() => router.push("/interview-prep/plan")}
+                className="w-full"
+              >
+                Create Prep Plan
+              </Button>
+            </CardFooter>
+          </Card>
+
           <Card className="relative overflow-hidden">
             <div className="absolute top-0 right-0 p-2">
               <Badge variant="default">New</Badge>
@@ -205,22 +238,6 @@ export default function InterviewPrepPage() {
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">
-                          Prepare Questions to Ask
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Develop thoughtful questions about the role, team,
-                          company culture, and growth opportunities to ask your
-                          interviewer.
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -229,83 +246,73 @@ export default function InterviewPrepPage() {
             <TabsContent value="during" className="mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Interview Day Tips</CardTitle>
+                  <CardTitle>During the Interview</CardTitle>
                   <CardDescription>
-                    Strategies for success during your interview
+                    Tips for making a great impression during your interview
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
-                        <Lightbulb className="h-5 w-5 text-amber-500" />
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                       </div>
                       <div>
                         <h3 className="font-medium">
-                          First Impressions Matter
+                          Make a Strong First Impression
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          Arrive 10-15 minutes early, dress appropriately for
-                          the company culture, and greet everyone with a smile
-                          and firm handshake.
+                          Arrive 10-15 minutes early, dress appropriately, and
+                          greet everyone with a smile and firm handshake. First
+                          impressions matter significantly.
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
-                        <Lightbulb className="h-5 w-5 text-amber-500" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Active Listening</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Pay close attention to the interviewer&apos;s
-                          questions. Don&apos;t hesitate to ask for
-                          clarification if needed before answering.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <Lightbulb className="h-5 w-5 text-amber-500" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Structured Answers</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Use the STAR method for behavioral questions. Keep
-                          answers concise (1-2 minutes) and focused on relevant
-                          details.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <Lightbulb className="h-5 w-5 text-amber-500" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Show Enthusiasm</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Demonstrate genuine interest in the role and company.
-                          Energy and enthusiasm can set you apart from equally
-                          qualified candidates.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <Lightbulb className="h-5 w-5 text-amber-500" />
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                       </div>
                       <div>
                         <h3 className="font-medium">
-                          Ask Thoughtful Questions
+                          Use the STAR Method for Answers
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          When given the opportunity, ask your prepared
-                          questions about the role, team dynamics, and company
-                          culture.
+                          Structure your responses to behavioral questions using
+                          the STAR method: Situation, Task, Action, and Result.
+                          This provides a clear and compelling narrative.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">
+                          Show Interest and Enthusiasm
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Demonstrate your enthusiasm for the role and company.
+                          Ask thoughtful questions that show you&apos;ve done
+                          your research and are genuinely interested.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">
+                          Address Potential Concerns
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          If you anticipate concerns about your experience or
+                          background, proactively address them by highlighting
+                          transferable skills and your eagerness to learn.
                         </p>
                       </div>
                     </div>
@@ -317,7 +324,7 @@ export default function InterviewPrepPage() {
             <TabsContent value="after" className="mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Post-Interview Actions</CardTitle>
+                  <CardTitle>After the Interview</CardTitle>
                   <CardDescription>
                     Steps to take after your interview is complete
                   </CardDescription>
@@ -326,72 +333,62 @@ export default function InterviewPrepPage() {
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
-                        <Clock className="h-5 w-5 text-blue-500" />
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                       </div>
                       <div>
                         <h3 className="font-medium">Send a Thank You Note</h3>
                         <p className="text-sm text-muted-foreground">
-                          Within 24 hours, send a personalized thank you email
-                          to your interviewer(s). Reference specific points from
-                          your conversation to show your attentiveness.
+                          Send a personalized thank you email within 24 hours.
+                          Express your appreciation for the opportunity,
+                          reiterate your interest, and briefly mention a key
+                          point from your conversation.
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
-                        <Clock className="h-5 w-5 text-blue-500" />
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                       </div>
                       <div>
-                        <h3 className="font-medium">Self-Evaluation</h3>
+                        <h3 className="font-medium">
+                          Reflect on Your Performance
+                        </h3>
                         <p className="text-sm text-muted-foreground">
-                          Reflect on your performance. Note questions you
-                          handled well and those you could improve on for future
-                          interviews.
+                          Take notes on what went well and what could be
+                          improved. This reflection will help you refine your
+                          approach for future interviews.
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
-                        <Clock className="h-5 w-5 text-blue-500" />
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                       </div>
                       <div>
                         <h3 className="font-medium">Follow Up Appropriately</h3>
                         <p className="text-sm text-muted-foreground">
-                          If you don&apos;t hear back within the timeframe
-                          mentioned, send a polite follow-up email expressing
-                          your continued interest in the position.
+                          If you haven&apos;t heard back within the timeframe
+                          mentioned, send a polite follow-up email. Express your
+                          continued interest and ask about the next steps in the
+                          process.
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
-                        <Clock className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Continue Preparing</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Don&apos;t stop your preparation. Continue practicing
-                          with our Mock Interview tool and reviewing questions
-                          in case you advance to the next round.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <Clock className="h-5 w-5 text-blue-500" />
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                       </div>
                       <div>
                         <h3 className="font-medium">
-                          Update Your Application Status
+                          Continue Your Job Search
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          Keep track of your application status and any
-                          follow-up actions required. Stay organized with
-                          multiple applications.
+                          Don&apos;t pause your job search while waiting for a
+                          response. Continue applying and interviewing for other
+                          positions to maximize your opportunities.
                         </p>
                       </div>
                     </div>

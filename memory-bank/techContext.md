@@ -1,175 +1,122 @@
-# Technical Context - Updated on June 12, 2024
+# Technical Context - Updated on March 14, 2025
 
 ## Technologies Used
 
 ### Frontend
 
 - **Next.js 15.2.1**: React framework with App Router
-- **React 18**: UI library
-- **TypeScript**: Type-safe JavaScript
-- **Tailwind CSS**: Utility-first CSS framework
-- **shadcn/ui**: Reusable UI components
-- **Lucide React**: Icon library
-- **Zod**: Schema validation
+- **React 18.2.0**: UI library
+- **TypeScript 5.8.2**: Type-safe JavaScript
+- **Tailwind CSS 3.4.1**: Utility-first CSS framework
+- **shadcn/ui 2.4.0**: Component library based on Radix UI
+- **Lucide React 0.475.0**: Icon library
+- **React Hook Form 7.54.2**: Form handling
+- **Zod 3.24.2**: Schema validation
+- **Sonner 2.0.1**: Toast notifications
+- **@react-pdf/renderer 4.3.0**: PDF generation
+- **file-saver 2.0.5**: File download utility
 
 ### Backend
 
 - **Next.js API Routes**: Serverless API endpoints
-- **Prisma ORM**: Database ORM
-- **PostgreSQL**: Relational database
-- **NextAuth.js**: Authentication
-- **Zod**: Request validation
+- **Prisma 6.4.1**: ORM for database access
+- **PostgreSQL**: Database
+- **NextAuth.js 4.24.11**: Authentication
+- **Google Generative AI SDK 0.22.0**: Gemini API integration
+- **Groq SDK 0.15.0**: Groq API integration
+- **OpenAI SDK 4.86.1**: OpenAI API integration
 
 ### Development Tools
 
-- **ESLint**: Code linting
-- **Prettier**: Code formatting
+- **ESLint 9**: Code linting
+- **Jest 29.7.0**: Testing framework
+- **Prisma Studio**: Database management
 - **Git**: Version control
-- **npm**: Package management
 
-## Interview Prep Feature Technologies
+## Interview Prep Feature Technical Implementation
 
-### Frontend Components
+### PDF Generation
 
-- **React Hooks**: useState, useEffect, useRouter, useSearchParams, useParams
-- **Form Components**: Input, Textarea, Select, Button
-- **Layout Components**: Card, Alert, Badge, Tabs
-- **Feedback Components**: Toast notifications
-- **Icons**: Lucide React icons for visual cues
+The Interview Prep Plan feature includes PDF export functionality implemented with:
 
-### API Integration
+- **@react-pdf/renderer**: For creating PDF documents with React components
+- **file-saver**: For downloading the generated PDFs
+- **crypto-polyfill.js**: Custom polyfill for crypto functionality needed by the PDF library
+- **pdf-utils.js**: Utility functions for PDF generation and download
 
-- **Fetch API**: For making HTTP requests to the backend
-- **JSON**: For data serialization
-- **localStorage**: For client-side session persistence
+### Premium Feature Testing
 
-### State Management
+For testing purposes, all authenticated users are treated as premium users:
 
-- **React State**: For component-level state
-- **URL Query Parameters**: For filtering and pagination
-- **localStorage**: For persisting session IDs between page refreshes
+```typescript
+// In nextjs-app/src/app/interview-prep/plan/page.tsx
+const checkPremiumStatus = () => {
+  if (status === "authenticated" && session?.user) {
+    // For testing purposes, all authenticated users are treated as premium
+    return true;
+  }
+  return false;
+};
+```
 
-### Error Handling
+This allows for comprehensive testing of premium features before implementing actual subscription checks.
 
-- **Try-Catch Blocks**: For handling API request errors
-- **Toast Notifications**: For user feedback
-- **Error States**: For displaying error messages in the UI
+### User Flow Implementation
 
-## Development Setup
+The Interview Prep feature is designed with a logical user flow, placing the Interview Prep Plan as the first activity:
 
-### Prerequisites
+```tsx
+// In nextjs-app/src/app/interview-prep/page.tsx
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  {/* Interview Prep Plan Card (First) */}
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center">
+        <FileText className="h-5 w-5 mr-2 text-primary" />
+        Interview Prep Plan
+      </CardTitle>
+      {/* ... */}
+    </CardHeader>
+    {/* ... */}
+  </Card>
 
-- Node.js 18+
-- npm 9+
-- PostgreSQL 14+
+  {/* Mock Interview Card (Second) */}
+  <Card className="relative overflow-hidden">{/* ... */}</Card>
 
-### Environment Variables
+  {/* Question Library Card (Third) */}
+  <Card>{/* ... */}</Card>
+</div>
+```
 
-- `DATABASE_URL`: PostgreSQL connection string
-- `NEXTAUTH_SECRET`: Secret for NextAuth.js
-- `NEXTAUTH_URL`: URL for NextAuth.js
-
-### Development Workflow
-
-1. Clone the repository
-2. Install dependencies with `npm install`
-3. Set up environment variables
-4. Run the development server with `npm run dev`
-5. Access the application at `http://localhost:3001`
+This ordering establishes a clear progression: Plan → Mock Interview → Question Library.
 
 ## Technical Constraints
 
-### Performance
-
-- Optimize API calls to minimize loading times
-- Implement pagination for large data sets
-- Use client-side caching where appropriate
-
-### Security
-
-- Validate all user inputs with Zod
-- Implement proper authentication checks for protected routes
-- Sanitize data before displaying it to users
-
-### Accessibility
-
-- Ensure all components are keyboard accessible
-- Provide proper ARIA attributes for screen readers
-- Maintain sufficient color contrast for readability
-
-### Mobile Responsiveness
-
-- Design with a mobile-first approach
-- Use responsive grid layouts
-- Test on various screen sizes
+- **Mobile Responsiveness**: All components must be fully responsive
+- **Accessibility**: Must meet WCAG 2.1 AA standards
+- **Performance**: Initial load time under 3 seconds
+- **Browser Compatibility**: Support for latest versions of Chrome, Firefox, Safari, and Edge
 
 ## Dependencies
 
-### Core Dependencies
+### Critical Dependencies
 
-- `next`: 15.2.1
-- `react`: 18.2.0
-- `react-dom`: 18.2.0
-- `typescript`: 5.3.3
-- `tailwindcss`: 3.4.1
-- `prisma`: 5.10.2
-- `@prisma/client`: 5.10.2
-- `next-auth`: 4.24.5
+- **@react-pdf/renderer**: For PDF generation
+- **file-saver**: For downloading files
+- **next-auth**: For authentication
+- **prisma**: For database access
+- **@google/generative-ai**: For Gemini API integration
 
-### UI Dependencies
+### Development Dependencies
 
-- `@radix-ui/react-*`: Various UI primitives
-- `class-variance-authority`: For component variants
-- `clsx`: For conditional class names
-- `lucide-react`: For icons
-- `tailwind-merge`: For merging Tailwind classes
+- **typescript**: For type checking
+- **eslint**: For code linting
+- **jest**: For testing
+- **@types/file-saver**: TypeScript definitions for file-saver
 
-### Utility Dependencies
+## Environment Setup
 
-- `zod`: For schema validation
-- `date-fns`: For date formatting
-- `react-hook-form`: For form handling
-
-## API Integrations
-
-### Authentication
-
-- Google OAuth for social login
-- Email/password for traditional login
-- JWT for session management
-
-### External Services
-
-- SendGrid for email
-- Upstash for Redis
-- Vercel Analytics for usage tracking
-
-## Technical Decisions
-
-### Next.js App Router
-
-- Server Components for improved performance
-- Built-in API routes for backend functionality
-- File-based routing for simplified navigation
-- Metadata API for dynamic SEO optimization
-
-### TypeScript
-
-- Type safety for improved developer experience
-- Interface definitions for API contracts
-- Type checking for component props
-- Reduced runtime errors
-
-### Tailwind CSS
-
-- Utility-first approach for rapid development
-- Consistent design system
-- Reduced CSS bundle size
-- Improved maintainability
-
-### Prisma
-
-- Type-safe database access
-- Simplified database migrations
-- Improved developer experience
-- Support for multiple databases
+- **Development Server**: localhost:3001
+- **Database**: PostgreSQL (local for development, managed service for production)
+- **API Keys**: Required for Gemini, OpenAI, and other services
+- **Environment Variables**: Stored in .env.local (development) and Vercel (production)
