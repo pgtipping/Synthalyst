@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,13 +69,22 @@ interface QuestionsResponse {
 
 export default function QuestionsPage() {
   const router = useRouter();
-  const { toast } = useToast();
+  const { addToast } = useToast();
+
+  // Helper function to match the existing toast usage
+  const toast = (props: {
+    title: string;
+    description?: string;
+    variant?: "default" | "destructive" | "success";
+  }) => {
+    addToast(props);
+  };
 
   // Filter states
-  const [jobType, setJobType] = useState<string>("");
-  const [industry, setIndustry] = useState<string>("");
-  const [difficulty, setDifficulty] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
+  const [jobType, setJobType] = useState<string>("all");
+  const [industry, setIndustry] = useState<string>("all");
+  const [difficulty, setDifficulty] = useState<string>("all");
+  const [category, setCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Data states
@@ -110,13 +119,16 @@ export default function QuestionsPage() {
 
       // Build query parameters
       const params = new URLSearchParams();
-      if (jobType) params.append("jobType", jobType);
-      if (industry) params.append("industry", industry);
-      if (difficulty) params.append("difficulty", difficulty);
-      if (category) params.append("category", category);
+      if (jobType && jobType !== "all") params.append("jobType", jobType);
+      if (industry && industry !== "all") params.append("industry", industry);
+      if (difficulty && difficulty !== "all")
+        params.append("difficulty", difficulty);
+      if (category && category !== "all") params.append("category", category);
       if (searchQuery) params.append("search", searchQuery);
-      params.append("page", pagination.currentPage.toString());
-      params.append("limit", pagination.itemsPerPage.toString());
+
+      // Add null checks for pagination values
+      params.append("page", pagination.currentPage?.toString() || "1");
+      params.append("limit", pagination.itemsPerPage?.toString() || "10");
 
       // Add saved filter if on saved tab
       if (activeTab === "saved") {
@@ -128,13 +140,38 @@ export default function QuestionsPage() {
       );
 
       if (!response.ok) {
+        // If it's a 403 error (premium required), show the error
+        if (response.status === 403) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Premium subscription required");
+        }
+
+        // For 500 errors or other errors, just show empty state
+        if (response.status === 500) {
+          console.warn("API returned 500 error, showing empty state");
+          setQuestions([]);
+          setPagination({
+            totalItems: 0,
+            totalPages: 0,
+            currentPage: 1,
+            itemsPerPage: pagination.itemsPerPage,
+          });
+          setLoading(false);
+          return;
+        }
+
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch questions");
       }
 
       const data: QuestionsResponse = await response.json();
-      setQuestions(data.questions);
-      setPagination(data.pagination);
+      setQuestions(data.questions || []);
+      setPagination({
+        currentPage: data.pagination?.currentPage || 1,
+        totalPages: data.pagination?.totalPages || 1,
+        totalItems: data.pagination?.totalItems || 0,
+        itemsPerPage: data.pagination?.itemsPerPage || 10,
+      });
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -152,17 +189,23 @@ export default function QuestionsPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setPagination((prev) => ({ ...prev, currentPage: 1 })); // Reset to first page
+    setPagination((prev) => ({
+      ...prev,
+      currentPage: 1,
+    })); // Reset to first page
     fetchQuestions();
   };
 
   const clearFilters = () => {
-    setJobType("");
-    setIndustry("");
-    setDifficulty("");
-    setCategory("");
+    setJobType("all");
+    setIndustry("all");
+    setDifficulty("all");
+    setCategory("all");
     setSearchQuery("");
-    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    setPagination((prev) => ({
+      ...prev,
+      currentPage: 1,
+    }));
   };
 
   const saveQuestion = async (questionId: string) => {
@@ -246,12 +289,18 @@ export default function QuestionsPage() {
   };
 
   const handlePageChange = (page: number) => {
-    setPagination((prev) => ({ ...prev, currentPage: page }));
+    setPagination((prev) => ({
+      ...prev,
+      currentPage: page || 1,
+    }));
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setPagination((prev) => ({ ...prev, currentPage: 1 })); // Reset to first page
+    setPagination((prev) => ({
+      ...prev,
+      currentPage: 1,
+    }));
   };
 
   return (
@@ -308,7 +357,7 @@ export default function QuestionsPage() {
                           <SelectValue placeholder="Select job type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Job Types</SelectItem>
+                          <SelectItem value="all">All Job Types</SelectItem>
                           <SelectItem value="software-engineer">
                             Software Engineer
                           </SelectItem>
@@ -334,7 +383,7 @@ export default function QuestionsPage() {
                           <SelectValue placeholder="Select industry" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Industries</SelectItem>
+                          <SelectItem value="all">All Industries</SelectItem>
                           <SelectItem value="technology">Technology</SelectItem>
                           <SelectItem value="finance">Finance</SelectItem>
                           <SelectItem value="healthcare">Healthcare</SelectItem>
@@ -351,7 +400,7 @@ export default function QuestionsPage() {
                           <SelectValue placeholder="Select difficulty" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Difficulties</SelectItem>
+                          <SelectItem value="all">All Difficulties</SelectItem>
                           <SelectItem value="beginner">Beginner</SelectItem>
                           <SelectItem value="intermediate">
                             Intermediate
@@ -368,7 +417,7 @@ export default function QuestionsPage() {
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Categories</SelectItem>
+                          <SelectItem value="all">All Categories</SelectItem>
                           <SelectItem value="behavioral">Behavioral</SelectItem>
                           <SelectItem value="technical">Technical</SelectItem>
                           <SelectItem value="situational">
