@@ -7,8 +7,40 @@ The current focus is on implementing the Interview Preparation feature, which in
 1. Mock Interview functionality
 2. Question Library
 3. Interview summary and feedback
+4. User statistics dashboard
 
 ## Recent Changes
+
+### Toast Notification Fix in Mock Interview - March 14, 2025
+
+We have fixed an issue with toast notifications in the Mock Interview page:
+
+1. **Toast Context Usage**:
+   - Fixed the toast error by properly using the useToast hook's addToast method instead of the direct toast function
+   - Updated all toast calls in the Mock Interview page to use the correct pattern
+   - Removed unused imports to clean up the code
+
+### Interview Prep Statistics Implementation - March 14, 2025
+
+We have implemented a statistics section for the Interview Prep feature:
+
+1. **API Route for Statistics**:
+
+   - Created a new API route at `/api/interview-prep/statistics` to fetch user statistics
+   - The route retrieves mock interview count, questions practiced, saved questions, and average score
+   - Implemented proper authentication checks and error handling
+
+2. **Dynamic Statistics Display**:
+
+   - Updated the Interview Prep page to fetch and display real-time statistics
+   - Added loading states with skeleton UI for better user experience
+   - Implemented conditional rendering based on authentication status
+   - Added a dynamic call-to-action button that changes based on user activity
+
+3. **User Experience Improvements**:
+   - Added a sign-in prompt for unauthenticated users
+   - Implemented proper error handling for API requests
+   - Enhanced the UI with responsive design for all screen sizes
 
 ### Interview Prep Feature Refinements - March 14, 2025
 
@@ -75,7 +107,7 @@ Fixed issues with CommonJS module compatibility:
    - Conduct thorough testing of the Mock Interview functionality
    - Test the Question Library with various filters and pagination
    - Verify the summary page displays correct feedback and statistics
-   - Test premium features with authenticated users
+   - Test the statistics API and UI with authenticated and unauthenticated users
 
 2. **Integration with User Dashboard**:
 
@@ -84,7 +116,7 @@ Fixed issues with CommonJS module compatibility:
 
 3. **Performance Optimization**:
    - Optimize API routes for better performance
-   - Implement caching for frequently accessed questions
+   - Implement caching for frequently accessed questions and statistics
 
 ## Active Decisions
 
@@ -107,5 +139,11 @@ Fixed issues with CommonJS module compatibility:
    - Testing on various screen sizes to ensure proper display
 
 4. **Premium Feature Testing**:
+
    - Temporarily treating all authenticated users as premium users for testing
    - Will implement actual subscription checks after testing is complete
+
+5. **Statistics Implementation**:
+   - Using Prisma aggregations for efficient database queries
+   - Implementing conditional rendering based on authentication status
+   - Providing fallback values for users with no activity

@@ -21,9 +21,164 @@ import {
 } from "lucide-react";
 import FeedbackLayout from "@/components/FeedbackLayout";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Define the statistics interface
+interface InterviewStats {
+  mockInterviews: number;
+  questionsPracticed: number;
+  savedQuestions: number;
+  averageScore: number | null;
+}
 
 export default function InterviewPrepPage() {
   const router = useRouter();
+  const { status } = useSession();
+  const [stats, setStats] = useState<InterviewStats | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch statistics when the component mounts and the user is authenticated
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (status === "authenticated") {
+        setIsLoading(true);
+        try {
+          const response = await fetch("/api/interview-prep/statistics");
+          if (response.ok) {
+            const data = await response.json();
+            setStats(data);
+          } else {
+            console.error("Failed to fetch interview statistics");
+          }
+        } catch (error) {
+          console.error("Error fetching interview statistics:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchStats();
+  }, [status]);
+
+  // Function to render the statistics section
+  const renderStatsSection = () => {
+    if (status === "loading" || isLoading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, index) => (
+            <Card key={index}>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-3 w-20 mt-2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    if (status === "unauthenticated") {
+      return (
+        <div className="text-center py-6">
+          <p className="text-muted-foreground mb-4">
+            Sign in to track your interview preparation progress
+          </p>
+          <Button onClick={() => router.push("/auth/signin")}>Sign In</Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Mock Interviews
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.mockInterviews || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Completed sessions</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Questions Practiced
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.questionsPracticed || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Across all sessions</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Saved Questions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.savedQuestions || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">In your library</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Average Score</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.averageScore !== null ? stats.averageScore : "-"}
+            </div>
+            <p className="text-xs text-muted-foreground">From all interviews</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  // Function to render the call-to-action button
+  const renderCtaButton = () => {
+    if (status === "unauthenticated") {
+      return null;
+    }
+
+    if (stats && stats.mockInterviews > 0) {
+      return (
+        <Button
+          variant="outline"
+          onClick={() => router.push("/interview-prep/mock-interview")}
+        >
+          Start Another Mock Interview
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        variant="outline"
+        onClick={() => router.push("/interview-prep/mock-interview")}
+      >
+        Start Your First Mock Interview
+      </Button>
+    );
+  };
 
   return (
     <FeedbackLayout appName="Interview Prep">
@@ -405,70 +560,9 @@ export default function InterviewPrepPage() {
             <h2 className="text-2xl font-bold">Your Interview Stats</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Mock Interviews
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">
-                  Completed sessions
-                </p>
-              </CardContent>
-            </Card>
+          {renderStatsSection()}
 
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Questions Practiced
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">
-                  Across all sessions
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Saved Questions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">In your library</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Average Score
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">-</div>
-                <p className="text-xs text-muted-foreground">
-                  From all interviews
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-4 text-center">
-            <Button
-              variant="outline"
-              onClick={() => router.push("/interview-prep/mock-interview")}
-            >
-              Start Your First Mock Interview
-            </Button>
-          </div>
+          <div className="mt-4 text-center">{renderCtaButton()}</div>
         </div>
       </div>
     </FeedbackLayout>

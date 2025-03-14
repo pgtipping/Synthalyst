@@ -11,9 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2, AlertCircle } from "lucide-react";
 import FeedbackLayout from "@/components/FeedbackLayout";
@@ -61,7 +59,7 @@ interface SessionData {
 
 export default function MockInterviewPage() {
   const router = useRouter();
-  const { toast } = useToast();
+  const { addToast } = useToast();
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
   const [industry, setIndustry] = useState("");
@@ -123,7 +121,7 @@ export default function MockInterviewPage() {
       setError(
         error instanceof Error ? error.message : "An unknown error occurred"
       );
-      toast({
+      addToast({
         variant: "destructive",
         title: "Error",
         description:
@@ -166,7 +164,7 @@ export default function MockInterviewPage() {
       // Fetch the full session data
       await fetchSessionData(data.sessionId);
 
-      toast({
+      addToast({
         title: "Session Started",
         description:
           "Your mock interview session has been started successfully.",
@@ -176,7 +174,7 @@ export default function MockInterviewPage() {
       setError(
         error instanceof Error ? error.message : "An unknown error occurred"
       );
-      toast({
+      addToast({
         variant: "destructive",
         title: "Error",
         description:
@@ -230,7 +228,7 @@ export default function MockInterviewPage() {
       setSubmitting(false);
     } catch (error) {
       setSubmitting(false);
-      toast({
+      addToast({
         variant: "destructive",
         title: "Error",
         description:
@@ -266,7 +264,7 @@ export default function MockInterviewPage() {
       setSessionData(null);
 
       // Show summary
-      toast({
+      addToast({
         title: "Session Completed",
         description:
           "Your mock interview session has been completed. Check your summary.",
@@ -281,7 +279,7 @@ export default function MockInterviewPage() {
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      toast({
+      addToast({
         variant: "destructive",
         title: "Error",
         description:
@@ -332,7 +330,7 @@ export default function MockInterviewPage() {
             <CardHeader>
               <CardTitle>Start a New Mock Interview</CardTitle>
               <CardDescription>
-                Enter the details of the job you're interviewing for to get
+                Enter the details of the job you&apos;re interviewing for to get
                 tailored questions.
               </CardDescription>
             </CardHeader>
