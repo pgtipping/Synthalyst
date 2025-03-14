@@ -1,262 +1,86 @@
-# Active Context - Feature Enhancement and Optimization (March 14, 2025)
+# Active Context - Updated on June 12, 2024
 
-## Current Work Focus
+## Current Focus
 
-- Enhancing the Interview Prep feature with PDF export functionality and improved formatting
-- Planning and implementing missing Interview Prep functionalities (Mock Interview, Question Library)
-- Implementing and troubleshooting the feedback system for collecting user feedback across the application
-- Optimizing the Next.js application for SEO, accessibility, and performance
-- Implementing proper metadata, JSON-LD structured data, and dynamic sitemap generation
-- Fixing accessibility issues to ensure WCAG compliance
-- Improving performance through CSS and JavaScript optimizations
-- Resolving PDF generation issues related to crypto library initialization
-- Fixing TypeScript type errors throughout the codebase to improve type safety
-- Resolving styling issues in production environment
-- Addressing accessibility issues identified in the accessibility audit
-- Improving performance metrics based on performance audit results
-- Resolving CommonJS module compatibility issues after removing "type": "module" from package.json
+The current focus is on implementing the Interview Preparation feature, which includes:
 
-## Recent Changes (Updated March 14, 2025)
+1. Mock Interview functionality
+2. Question Library
+3. Interview summary and feedback
 
-- ✅ Created Comprehensive Interview Prep Implementation Plan (March 14, 2025):
+## Recent Changes
 
-  - Developed a detailed implementation plan for enhancing the Interview Prep feature
-  - Documented all missing functionalities identified in the project brief:
-    - Mock Interview functionality with voice interaction
-    - Question Library with job-specific questions
-    - Premium tier implementation
-    - Bundle integration with ApplyRight
-    - Mobile responsiveness enhancements
-    - Analytics and tracking
-  - Created detailed specifications for the scoring system:
-    - Job-specific scoring criteria based on position requirements
-    - Content analysis algorithms for evaluating responses
-    - Delivery analysis for voice responses
-    - Personalized feedback generation with LLM enhancement
-    - Mobile-optimized score visualization
-  - Established a 14-week phased implementation timeline
-  - Defined technical specifications and architecture
-  - Emphasized mobile-first implementation with specific requirements
-  - Documented in `nextjs-app/docs/interview-prep-implementation-plan.md`
+### Interview Prep Feature Implementation - June 12, 2024
 
-- ✅ Implemented Feedback System with File-based Fallback (March 14, 2025):
+We have successfully implemented the Interview Preparation feature with the following components:
 
-  - Created a feedback API route with dual storage strategy:
-    - Primary: Prisma database storage using the AppFeedback model
-    - Fallback: File-based storage using JSON in feedback-data.json
-  - Implemented feedback collection UI components:
-    - Added FeedbackLayout component to wrap pages that need feedback functionality
-    - Created FeedbackButton component for triggering the feedback modal
-    - Developed FeedbackForm component for collecting ratings and comments
-  - Added admin feedback management:
-    - Created feedback listing page for administrators
-    - Implemented feedback export functionality to CSV
-    - Added filtering by application name
-  - Resolved issues with file-based storage:
-    - Fixed file path resolution to ensure correct storage location
-    - Added comprehensive error handling and logging
-    - Created diagnostic scripts (check-feedback.mjs, check-cwd.js) for troubleshooting
-  - Successfully tested the feedback system with both storage mechanisms
+1. **Database Schema Updates**:
 
-- ✅ Fixed Markdown Formatting in Interview Prep Plan (March 14, 2025):
+   - Added new models to the Prisma schema: `InterviewSession`, `InterviewQuestion`, `InterviewResponse`, `QuestionLibrary`, and `UserSavedQuestion`
+   - Updated the User model with new relations for the Interview Prep feature
 
-  - Removed markdown syntax (double asterisks) from the interview prep plan output
-  - Updated the API route to explicitly instruct the LLM not to use markdown formatting
-  - Modified the SimpleMarkdown component to remove markdown syntax instead of rendering it
-  - Added markdown cleaning functions to the PDF component and practice questions display
-  - Updated the fallback plan and questions functions to avoid using markdown
-  - Improved overall readability and professional appearance of the interview prep plan
-  - Ensured consistent formatting between web view and PDF export
+2. **API Routes**:
 
-- ✅ Fixed Accessibility Issues in Training Plan Page (March 14, 2025):
+   - Created the Mock Interview API routes:
+     - `/api/interview-prep/mock-interview` - For starting sessions and submitting responses
+     - `/api/interview-prep/mock-interview/[sessionId]` - For retrieving and ending sessions
+     - `/api/interview-prep/mock-interview/evaluate` - For evaluating interview responses
+   - Created the Question Library API routes:
+     - `/api/interview-prep/questions` - For browsing and saving questions
+     - `/api/interview-prep/questions/[id]` - For managing individual saved questions
 
-  - Added aria-label attributes to buttons without accessible names:
-    - Added descriptive labels to the "X" buttons in the array input component
-    - Added "Select duration unit" label to the duration unit select trigger
-  - Improved color contrast for the "Read the comprehensive guide" link:
-    - Changed button variant from "outline" to "default" to improve contrast
-  - Removed unused imports and variables to fix linter errors
-  - Improved overall accessibility score from 90/100 to 100/100
-  - All accessibility issues have been resolved according to the latest audit
+3. **UI Components**:
+   - Created the main Interview Prep page as an entry point to all features
+   - Implemented the Mock Interview feature:
+     - Created the mock interview page with session management
+     - Added a summary page to display session results
+   - Implemented the Question Library feature:
+     - Created the questions browsing page with filtering and pagination
+     - Added a question detail page for editing notes
 
-- 🔍 Conducted Accessibility Audit (March 14, 2025):
+All components are designed with a mobile-first approach and follow the existing UI patterns of the application.
 
-  - Identified critical accessibility issues that need to be addressed:
-    - Buttons without accessible names in the Training Plan page
-    - Color contrast issues with links (3.67 ratio, below the required 4.5:1)
-  - Overall accessibility score: 90/100
-  - Prioritized recommendations:
-    - Add proper labels to all interactive elements
-    - Improve color contrast for better readability
-    - Fix low contrast text for better readability
+### CommonJS Module Fixes - June 11, 2024
 
-- 🔍 Conducted Performance Audit (March 14, 2025):
+Fixed issues with CommonJS module compatibility:
 
-  - Identified performance issues that need optimization:
-    - Slow Largest Contentful Paint (LCP): 3031ms (failing Core Web Vital)
-    - Slow First Contentful Paint (FCP): 1668ms
-    - High JavaScript execution time
-    - Total Time to Interactive (TTI): 37718ms
-  - Overall performance score: 52/100
-  - Prioritized recommendations:
-    - Improve Largest Contentful Paint (LCP)
-    - Reduce JavaScript execution time
-
-- ✅ Fixed All TypeScript Type Errors (March 14, 2025):
-
-  - Resolved all TypeScript type errors in the codebase (0 errors in 0 files)
-  - Fixed component prop types by updating component definitions:
-    - Added `className` prop to Breadcrumb component
-    - Added `summary` prop as an alias for description in ShareButtons
-    - Added missing props to AIAssistant component
-  - Fixed API route type issues:
-    - Added proper type handling in jd-developer/generate/route.ts
-    - Fixed newsletter analytics type issues
-    - Added @ts-expect-error comments with clear explanations where needed
-  - Fixed library compatibility issues:
-    - Added @ts-expect-error for Duration type in rate-limit.ts
-    - Fixed PDF generation getNumberOfPages type issue
-  - Updated TYPE_CHECKING_PLAN.md with current progress and next steps
-
-- ✅ Fixed SHA224 Crypto Error in PDF Generation (March 13, 2025):
-
-  - Created a crypto-polyfill.js utility to properly initialize the crypto library and handle the SHA224 property
-  - Updated the PDFRenderer component to initialize the crypto polyfill
-  - Created pdf-utils.js with safer PDF generation and download functions
-  - Modified webpack configuration to prevent mangling of crypto-related properties
-  - Ensured PDF generation works correctly in both development and production environments
-  - Implemented a comprehensive solution that addresses the issue at multiple levels (library, component, build, utility)
-
-- ✅ Fixed 404 error for logo.png file (March 13, 2025):
-
-  - Successfully resolved the 404 error by copying the logo.png file to the public directory
-  - Confirmed that the logo now loads correctly without any console errors
-  - Improved overall application stability and user experience by eliminating resource loading errors
-
-- ✅ Fixed TIMELINE and PHASE formatting in interview prep plan (March 13, 2025):
-
-  - Successfully implemented proper formatting for TIMELINE and PHASE sections
-  - Ensured these sections start on new lines with appropriate styling
-  - Improved readability and professional appearance of the interview prep plan
-  - Enhanced the PDF export to properly display these formatted sections
-  - Added additional regex patterns to handle sections at the beginning of lines
-
-- ✅ Added useIsomorphicLayoutEffect utility (March 13, 2025):
-
-  - Created a cross-platform version of useLayoutEffect that falls back to useEffect on the server
-  - Helps prevent useLayoutEffect warnings during server-side rendering
-  - Improves overall application stability and development experience
-  - Follows React best practices for isomorphic applications
-
-- ✅ Enhanced API debugging for interview prep plan generation (March 13, 2025):
-
-  - Added request body logging to help identify validation errors
-  - Improved error handling in the API route
-  - Added better handling of requiredSkills field in the form submission
-  - Fixed potential type issues in the JobDetailsForm component
-
-- Reduced OVERARCHING GOAL font size to match TIMELINE and PHASE sections:
-
-  - Changed font size class from text-lg to text-md for consistent visual hierarchy
-  - Ensured all special section headings have the same size and styling
-  - Improved overall visual consistency in the interview prep plan
-  - Enhanced the PDF export to properly display these formatted sections
-  - Added additional regex patterns to handle sections at the beginning of lines
-
-- Fixed OVERARCHING GOAL formatting and adjusted font sizes for section headings:
-
-  - Ensured OVERARCHING GOAL section starts on a new line with proper styling
-  - Reduced font sizes for TIMELINE, PHASE, and OVERARCHING GOAL sections from text-lg to text-md
-  - Adjusted PDF export component to maintain consistent styling with the web view
-  - Improved visual hierarchy by making section headings more proportional to the main subject
-
-- Fixed formatting of TIMELINE and PHASE sections in interview prep plan:
-  - Added specific regex patterns to handle TIMELINE, PHASE, OVERARCHING GOAL, and Objective sections
-  - Ensured these sections start on new lines with proper styling
-  - Updated the PDF export component to properly handle these special sections
-  - Added support for additional section types like Website Deep Dive, About Us/Mission/Values, etc.
-- Improved interview prep plan formatting for better readability and professional appearance:
-  - Enhanced the SimpleMarkdown component with comprehensive regex replacements for consistent formatting
-  - Added proper styling for different section types (headers, lists, STAR format, etc.)
-  - Implemented visual hierarchy with borders, background colors, and proper spacing
-  - Improved the PDF export formatting with better styling and layout
-  - Fixed issues with markdown formatting showing through in the rendered output
-  - Added proper container styling with rounded corners and subtle shadows
-- Added PDF export functionality to the Interview Prep feature:
-  - Created a new InterviewPrepPDF component for rendering the interview prep plan as a PDF
-  - Implemented text processing to properly format Markdown content in the PDF
-  - Added an "Export PDF" button to the interview prep plan section
-  - Fixed formatting issues with asterisks in the STAR format template
-  - Enhanced the visual presentation of the interview prep plan with better styling
-- Fixed 404 error by removing preload link for non-existent font file
-- Added resource hints (preconnect, dns-prefetch) for external domains to improve resource loading
-- Optimized JavaScript loading:
-  - Added conditional execution for deferred JavaScript loading
-  - Added preloading for critical images
-  - Implemented Intersection Observer for lazy loading below-the-fold content
-- Enhanced webpack configuration:
-  - Improved code splitting with additional cache groups
-  - Added better minification settings for production
-  - Added server actions optimization
-- Added structured data for specific pages:
-  - Added JSON-LD structured data for the Interview Prep page
-  - Added JSON-LD structured data for the ApplyRight page
-  - Added JSON-LD structured data for the Career Bundle page
-- Enhanced metadata for better SEO:
-  - Added detailed metadata for each page
-  - Added OpenGraph and Twitter card metadata
-  - Added canonical URLs
-  - Added keywords
-- Fixed accessibility issues:
-  - Improved focus management
-  - Enhanced keyboard navigation
-  - Ensured all interactive elements are keyboard accessible
-- Removed experimental PPR feature that was causing server startup issues
-- Fixed unused imports in the Interview Prep page
-- ✅ Fixed Radio Button Styling in Production (March 14, 2025):
-
-  - Identified and resolved an issue where radio buttons were displaying vertically in production despite horizontal layout in development
-  - Root cause: The `.flex-col` class in non-critical.css was overriding the intended horizontal layout
-  - Solution implemented:
-    - Added custom `.synthalyst-radio-layout` class with responsive behavior
-    - Updated CSS in globals.css to ensure proper responsive layout
-    - Modified PlanForm component to use responsive classes for proper stacking on mobile
-    - Ensured radio buttons stack vertically on small screens and align horizontally on larger screens
-  - Improved mobile experience while maintaining proper styling in production
-
-- ✅ Fixed CommonJS Module Compatibility Issues (March 14, 2025):
-
-  - Identified and resolved issues with ES module syntax after removing "type": "module" from package.json
-  - Renamed .mjs files to .cjs to ensure they are treated as CommonJS modules:
-    - Renamed scripts/delete-post.mjs to scripts/delete-post.cjs
-    - Renamed scripts/apply-prod-migrations.mjs to scripts/apply-prod-migrations.cjs
-  - Updated package.json scripts to reference the renamed .cjs files:
-    - Updated "apply-migrations" script to use apply-prod-migrations.cjs
-  - Modified configuration files to use CommonJS module.exports syntax:
-    - Updated tailwind.config.ts to use module.exports instead of export default
-    - Updated postcss.config.ts to use module.exports instead of export default
-  - Successfully built the application with the new CommonJS-compatible configuration
-  - Resolved ChunkLoadError issues related to module format incompatibilities
+- Removed `"type": "module"` from package.json
+- Renamed `.mjs` files to `.cjs`
+- Updated import/export syntax to align with CommonJS standards
+- Modified package.json scripts to use the correct file extensions
 
 ## Next Steps
 
-- Continue monitoring SEO performance
-- Implement additional performance optimizations
-- Ensure all pages have proper metadata and structured data
-- Conduct regular accessibility audits
-- Optimize images and other media assets
-- Implement server-side rendering for critical pages
-- Add more comprehensive structured data for different page types
-- Verify that all required assets are properly included in the project to prevent 404 errors
+1. **Testing the Interview Prep Feature**:
 
-## Active Decisions and Considerations
+   - Conduct thorough testing of the Mock Interview functionality
+   - Test the Question Library with various filters and pagination
+   - Verify the summary page displays correct feedback and statistics
 
-- Using Next.js App Router for better SEO capabilities
-- Implementing dynamic metadata generation for blog posts
-- Using JSON-LD for structured data instead of Microdata or RDFa
-- Prioritizing accessibility compliance from the start
-- Balancing performance with feature richness
-- Ensuring mobile responsiveness across all pages
-- Using CSS optimization techniques to prevent render blocking
-- Implementing JavaScript optimization to reduce main thread blocking
-- Using modern image optimization techniques for faster loading
+2. **Integration with User Dashboard**:
+
+   - Add Interview Prep statistics to the user dashboard
+   - Create shortcuts to recently used Interview Prep features
+
+3. **Performance Optimization**:
+   - Optimize API routes for better performance
+   - Implement caching for frequently accessed questions
+
+## Active Decisions
+
+1. **Mock Interview Implementation**:
+
+   - Using client-side state management for the interview session
+   - Storing active session ID in localStorage for session persistence
+   - Implementing a summary page for comprehensive feedback
+
+2. **Question Library Design**:
+
+   - Using a card-based layout for questions
+   - Implementing filters for job type, industry, difficulty, and category
+   - Adding pagination for better performance with large question sets
+
+3. **Mobile Responsiveness**:
+   - All pages are designed with a mobile-first approach
+   - Using responsive grid layouts and flexible components
+   - Testing on various screen sizes to ensure proper display

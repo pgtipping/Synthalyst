@@ -1,4 +1,116 @@
-# System Patterns - Synthalyst Web Application
+# System Patterns - Updated on June 12, 2024
+
+## System Architecture
+
+The application follows a modern Next.js architecture with the following key components:
+
+- **Frontend**: Next.js App Router with React components
+- **Backend**: Next.js API routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
+- **Styling**: Tailwind CSS with shadcn/ui components
+
+## Interview Prep Feature Architecture
+
+The Interview Prep feature follows a modular architecture with clear separation of concerns:
+
+### Data Models
+
+1. **InterviewSession**:
+
+   - Represents a mock interview session
+   - Contains metadata about the job, company, and industry
+   - Tracks session status and timing
+   - Links to questions and responses
+
+2. **InterviewQuestion**:
+
+   - Represents a question in a mock interview
+   - Contains question text, type, and order
+   - Links to the session and response
+
+3. **InterviewResponse**:
+
+   - Represents a user's response to a question
+   - Contains response text, feedback, and scoring
+   - Links to the question and session
+
+4. **QuestionLibrary**:
+
+   - Represents a question in the library
+   - Contains question text, job type, industry, difficulty, and category
+   - Can be saved by users
+
+5. **UserSavedQuestion**:
+   - Represents a question saved by a user
+   - Contains user notes
+   - Links to the user and question
+
+### API Structure
+
+1. **Mock Interview API**:
+
+   - `/api/interview-prep/mock-interview` (POST, PUT):
+     - POST: Start a new session
+     - PUT: Submit a response
+   - `/api/interview-prep/mock-interview/[sessionId]` (GET, DELETE):
+     - GET: Retrieve session details
+     - DELETE: End a session and generate summary
+   - `/api/interview-prep/mock-interview/evaluate` (POST):
+     - Evaluate a response with detailed feedback
+
+2. **Question Library API**:
+   - `/api/interview-prep/questions` (GET, POST):
+     - GET: Browse questions with filters
+     - POST: Save a question
+   - `/api/interview-prep/questions/[id]` (GET, PUT, DELETE):
+     - GET: Get question details
+     - PUT: Update notes
+     - DELETE: Remove from saved questions
+
+### UI Components
+
+1. **Mock Interview**:
+
+   - `interview-prep/mock-interview/page.tsx`: Main mock interview page
+   - `interview-prep/mock-interview/summary/page.tsx`: Interview summary page
+
+2. **Question Library**:
+
+   - `interview-prep/questions/page.tsx`: Question browsing page
+   - `interview-prep/questions/[id]/page.tsx`: Question detail page
+
+3. **Main Entry Point**:
+   - `interview-prep/page.tsx`: Main Interview Prep landing page
+
+## Key Design Patterns
+
+### State Management
+
+- **Client-side State**: React useState and useEffect hooks for component-level state
+- **Server State**: API routes with Prisma for database interactions
+- **Persistence**: localStorage for session persistence between page refreshes
+
+### Component Patterns
+
+- **Layout Components**: FeedbackLayout for consistent page structure
+- **Card-based UI**: Card components for displaying questions, feedback, and statistics
+- **Responsive Design**: Mobile-first approach with responsive grid layouts
+
+### API Patterns
+
+- **RESTful API**: Standard HTTP methods (GET, POST, PUT, DELETE) for resource operations
+- **Request Validation**: Zod schema validation for API request bodies
+- **Error Handling**: Consistent error response format with appropriate status codes
+- **Authentication Check**: Server-side session validation for protected routes
+
+## Other Key Technical Patterns
+
+- **Form Handling**: Controlled components with React state
+- **Loading States**: Visual indicators for asynchronous operations
+- **Error Handling**: Try-catch blocks with toast notifications for user feedback
+- **Pagination**: Offset-based pagination for large data sets
+- **Filtering**: Query parameter-based filtering for data retrieval
 
 ## System Architecture
 
@@ -32,44 +144,6 @@ The application is built using Next.js with the App Router architecture, which p
 - Client Components handle user interactions
 - API routes provide backend functionality
 - Database interactions are handled through Prisma
-
-### Interview Prep Feature Architecture
-
-- **Core Components**:
-
-  - JobDetailsForm: Collects information about the target position
-  - InterviewPrepPDF: Renders the interview plan as a PDF
-  - MockInterviewSession: Manages interactive mock interviews
-  - QuestionLibrary: Displays job-specific interview questions
-  - ScoreCard: Visualizes interview performance scores
-
-- **API Structure**:
-
-  - /api/interview-prep/generate-plan: Generates interview preparation plans
-  - /api/interview-prep/mock-interview: Manages mock interview sessions
-  - /api/interview-prep/mock-interview/evaluate: Evaluates interview responses
-  - /api/interview-prep/questions: Manages the question library
-
-- **Database Models**:
-
-  - InterviewSession: Tracks mock interview sessions
-  - InterviewQuestion: Stores questions for mock interviews
-  - InterviewResponse: Records user responses with feedback
-  - QuestionLibrary: Stores the comprehensive question library
-  - UserSavedQuestion: Tracks user-saved questions
-
-- **Utility Layers**:
-
-  - Audio Processing: Handles voice recording and analysis
-  - Scoring System: Evaluates interview responses
-  - Feedback Generation: Creates personalized feedback
-  - Content Analysis: Analyzes response quality and relevance
-
-- **Mobile Optimization**:
-  - Progressive Web App capabilities
-  - Touch-optimized UI components
-  - Battery-efficient processing
-  - Offline access to saved plans
 
 ### Feedback System Architecture
 

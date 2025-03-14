@@ -1,145 +1,134 @@
-# Technical Context - Synthalyst Web Application
+# Technical Context - Updated on June 12, 2024
 
 ## Technologies Used
 
 ### Frontend
 
-- **Next.js**: Version 15.2.1 with App Router for server components and improved routing
-- **React**: Version 19 for UI components and state management
-- **TypeScript**: Version 5.7.3 for type safety and improved developer experience
-- **Tailwind CSS**: Version 3.4.1 for utility-first styling
-- **Shadcn UI**: Component library built on Radix UI for accessible components
-- **Lucide React**: Icon library for consistent iconography
+- **Next.js 15.2.1**: React framework with App Router
+- **React 18**: UI library
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **shadcn/ui**: Reusable UI components
+- **Lucide React**: Icon library
+- **Zod**: Schema validation
 
 ### Backend
 
-- **Next.js API Routes**: For backend functionality
-- **Prisma**: Version 6.4.1 as ORM for database interactions
-- **NextAuth.js**: For authentication and session management
-- **LLM Integrations**:
-  - Gemini SDK for AI-powered features
-  - OpenAI for content generation
-  - Botpress for conversational interfaces
+- **Next.js API Routes**: Serverless API endpoints
+- **Prisma ORM**: Database ORM
+- **PostgreSQL**: Relational database
+- **NextAuth.js**: Authentication
+- **Zod**: Request validation
 
-### Module System
+### Development Tools
 
-- **CommonJS**: Using CommonJS module format (require/module.exports) for compatibility
-- **Configuration Files**: All configuration files use module.exports syntax
-- **Script Extensions**: Utility scripts use .cjs extension to ensure proper module format recognition
-- **Build Configuration**: Next.js configured to handle CommonJS modules correctly
+- **ESLint**: Code linting
+- **Prettier**: Code formatting
+- **Git**: Version control
+- **npm**: Package management
 
-### Database
+## Interview Prep Feature Technologies
 
-- **PostgreSQL**: Primary database for data storage
-- **Redis**: For caching and rate limiting
+### Frontend Components
+
+- **React Hooks**: useState, useEffect, useRouter, useSearchParams, useParams
+- **Form Components**: Input, Textarea, Select, Button
+- **Layout Components**: Card, Alert, Badge, Tabs
+- **Feedback Components**: Toast notifications
+- **Icons**: Lucide React icons for visual cues
+
+### API Integration
+
+- **Fetch API**: For making HTTP requests to the backend
+- **JSON**: For data serialization
+- **localStorage**: For client-side session persistence
+
+### State Management
+
+- **React State**: For component-level state
+- **URL Query Parameters**: For filtering and pagination
+- **localStorage**: For persisting session IDs between page refreshes
+
+### Error Handling
+
+- **Try-Catch Blocks**: For handling API request errors
+- **Toast Notifications**: For user feedback
+- **Error States**: For displaying error messages in the UI
 
 ## Development Setup
 
-### Local Development
+### Prerequisites
 
-- Development server runs on port 3001
-- Environment variables configured in `.env.local`
-- Database connection configured through Prisma
-- Authentication configured through NextAuth.js
+- Node.js 18+
+- npm 9+
+- PostgreSQL 14+
 
-### Project Structure
+### Environment Variables
 
-```
-nextjs-app/
-├── src/
-│   ├── app/                 # Next.js App Router pages
-│   │   ├── page.tsx        # Home page
-│   │   ├── layout.tsx      # Root layout
-│   │   ├── api/            # API routes
-│   │   └── [feature]/      # Feature-specific directories
-│   ├── components/         # Shared components
-│   │   ├── ui/            # Basic UI components
-│   │   ├── layout/        # Layout components
-│   │   └── shared/        # Other shared components
-│   ├── lib/               # Utility functions and services
-│   ├── types/             # TypeScript type definitions
-│   └── hooks/             # Custom React hooks
-├── public/                # Static assets
-├── prisma/                # Prisma schema and migrations
-└── package.json          # Dependencies and scripts
-```
+- `DATABASE_URL`: PostgreSQL connection string
+- `NEXTAUTH_SECRET`: Secret for NextAuth.js
+- `NEXTAUTH_URL`: URL for NextAuth.js
 
-### Scripts
+### Development Workflow
 
-- `npm run dev`: Start development server
-- `npm run build`: Build for production
-- `npm run start`: Start production server
-- `npm run lint`: Run linting
-- `npm run test`: Run tests
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Set up environment variables
+4. Run the development server with `npm run dev`
+5. Access the application at `http://localhost:3001`
 
 ## Technical Constraints
 
-### Performance Requirements
+### Performance
 
-- Core Web Vitals compliance:
-  - Largest Contentful Paint (LCP): < 2.5s
-  - First Input Delay (FID): < 100ms
-  - Cumulative Layout Shift (CLS): < 0.1
-- SEO score of 90+ on Lighthouse
-- Accessibility score of 90+ on Lighthouse
-
-### Browser Support
-
-- Modern browsers (Chrome, Firefox, Safari, Edge)
-- Mobile browsers (iOS Safari, Android Chrome)
-- No IE11 support required
-
-### Deployment
-
-- Deployed on Vercel
-- CI/CD pipeline for automated testing and deployment
-- Environment variables configured in Vercel dashboard
+- Optimize API calls to minimize loading times
+- Implement pagination for large data sets
+- Use client-side caching where appropriate
 
 ### Security
 
-- Authentication through NextAuth.js
-- CSRF protection
-- Input validation with Zod
-- Content Security Policy (CSP)
-- Rate limiting for API routes
+- Validate all user inputs with Zod
+- Implement proper authentication checks for protected routes
+- Sanitize data before displaying it to users
+
+### Accessibility
+
+- Ensure all components are keyboard accessible
+- Provide proper ARIA attributes for screen readers
+- Maintain sufficient color contrast for readability
+
+### Mobile Responsiveness
+
+- Design with a mobile-first approach
+- Use responsive grid layouts
+- Test on various screen sizes
 
 ## Dependencies
 
 ### Core Dependencies
 
-- `next`: Next.js framework
-- `react`: React library
-- `react-dom`: React DOM
-- `typescript`: TypeScript language
+- `next`: 15.2.1
+- `react`: 18.2.0
+- `react-dom`: 18.2.0
+- `typescript`: 5.3.3
+- `tailwindcss`: 3.4.1
+- `prisma`: 5.10.2
+- `@prisma/client`: 5.10.2
+- `next-auth`: 4.24.5
 
 ### UI Dependencies
 
-- `tailwindcss`: Utility-first CSS framework
-- `@radix-ui/*`: UI primitives
-- `lucide-react`: Icon library
+- `@radix-ui/react-*`: Various UI primitives
 - `class-variance-authority`: For component variants
 - `clsx`: For conditional class names
+- `lucide-react`: For icons
 - `tailwind-merge`: For merging Tailwind classes
 
-### Data Management
+### Utility Dependencies
 
-- `@prisma/client`: Prisma client for database access
-- `next-auth`: Authentication library
-- `zod`: Schema validation
-
-### AI/LLM Dependencies
-
-- `@google/generative-ai`: Gemini SDK
-- `openai`: OpenAI SDK
-- `@botpress/sdk`: Botpress SDK
-
-### Development Dependencies
-
-- `eslint`: Linting
-- `prettier`: Code formatting
-- `jest`: Testing
-- `@testing-library/react`: React testing utilities
-- `prisma`: Prisma CLI
+- `zod`: For schema validation
+- `date-fns`: For date formatting
+- `react-hook-form`: For form handling
 
 ## API Integrations
 

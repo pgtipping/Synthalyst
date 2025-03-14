@@ -1,0 +1,582 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2, AlertCircle } from "lucide-react";
+import FeedbackLayout from "@/components/FeedbackLayout";
+import Link from "next/link";
+
+// Mock Interview Session Types
+interface InterviewSession {
+  id: string;
+  jobTitle: string;
+  company: string | null;
+  industry: string | null;
+  status: string;
+  startedAt: string;
+  endedAt: string | null;
+}
+
+interface InterviewQuestion {
+  id: string;
+  questionText: string;
+  questionOrder: number;
+  questionType: string;
+  response: InterviewResponse | null;
+}
+
+interface InterviewResponse {
+  id: string;
+  responseText: string;
+  feedback: string;
+  score: number | null;
+  strengths: string[];
+  improvements: string[];
+  submittedAt: string;
+}
+
+interface SessionProgress {
+  totalQuestions: number;
+  answeredQuestions: number;
+}
+
+interface SessionData {
+  session: InterviewSession;
+  questions: InterviewQuestion[];
+  progress: SessionProgress;
+}
+
+export default function MockInterviewPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [jobTitle, setJobTitle] = useState("");
+  const [company, setCompany] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [questionCount, setQuestionCount] = useState(5);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionData, setSessionData] = useState<SessionData | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [responseText, setResponseText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<InterviewResponse | null>(null);
+
+  // Check if user has an active session
+  useEffect(() => {
+    const checkActiveSession = async () => {
+      try {
+        // This would typically check localStorage or make an API call
+        // to see if the user has an active session
+        const storedSessionId = localStorage.getItem(
+          "activeInterviewSessionId"
+        );
+        if (storedSessionId) {
+          setSessionId(storedSessionId);
+          await fetchSessionData(storedSessionId);
+        }
+      } catch (error) {
+        console.error("Error checking active session:", error);
+      }
+    };
+
+    checkActiveSession();
+  }, []);
+
+  const fetchSessionData = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/interview-prep/mock-interview/${id}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch session data");
+      }
+
+      const data = await response.json();
+      setSessionData(data);
+
+      // Find the first unanswered question
+      const firstUnansweredIndex = data.questions.findIndex(
+        (q: InterviewQuestion) => q.response === null
+      );
+      setCurrentQuestionIndex(
+        firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0
+      );
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch session data",
+      });
+    }
+  };
+
+  const startNewSession = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/interview-prep/mock-interview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jobTitle,
+          company: company || undefined,
+          industry: industry || undefined,
+          questionCount,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to start mock interview session"
+        );
+      }
+
+      const data = await response.json();
+      setSessionId(data.sessionId);
+      localStorage.setItem("activeInterviewSessionId", data.sessionId);
+
+      // Fetch the full session data
+      await fetchSessionData(data.sessionId);
+
+      toast({
+        title: "Session Started",
+        description:
+          "Your mock interview session has been started successfully.",
+      });
+    } catch (error) {
+      setLoading(false);
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to start mock interview session",
+      });
+    }
+  };
+
+  const submitResponse = async () => {
+    if (!sessionId || !sessionData || responseText.trim() === "") return;
+
+    const currentQuestion = sessionData.questions[currentQuestionIndex];
+
+    try {
+      setSubmitting(true);
+
+      const response = await fetch("/api/interview-prep/mock-interview", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId,
+          questionId: currentQuestion.id,
+          responseText,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit response");
+      }
+
+      const data = await response.json();
+      setFeedback(data.feedback);
+
+      // If there's a next question, prepare to move to it
+      if (!data.isLastQuestion) {
+        setTimeout(() => {
+          setFeedback(null);
+          setResponseText("");
+          setCurrentQuestionIndex(currentQuestionIndex + 1);
+        }, 5000); // Show feedback for 5 seconds before moving to next question
+      }
+
+      // Refresh session data to get updated progress
+      await fetchSessionData(sessionId);
+
+      setSubmitting(false);
+    } catch (error) {
+      setSubmitting(false);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to submit response",
+      });
+    }
+  };
+
+  const endSession = async () => {
+    if (!sessionId) return;
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        `/api/interview-prep/mock-interview/${sessionId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to end session");
+      }
+
+      // Get the data from the response
+      await response.json();
+
+      // Clear the active session
+      localStorage.removeItem("activeInterviewSessionId");
+      setSessionId(null);
+      setSessionData(null);
+
+      // Show summary
+      toast({
+        title: "Session Completed",
+        description:
+          "Your mock interview session has been completed. Check your summary.",
+      });
+
+      // Redirect to summary page or show summary modal
+      // For now, we'll just reload the page
+      router.push(
+        `/interview-prep/mock-interview/summary?sessionId=${sessionId}`
+      );
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to end session",
+      });
+    }
+  };
+
+  return (
+    <FeedbackLayout appName="Mock Interview">
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex items-center space-x-1 text-sm">
+          <Link
+            href="/"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Home
+          </Link>
+          <span className="text-muted-foreground">/</span>
+          <Link
+            href="/interview-prep"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Interview Prep
+          </Link>
+          <span className="text-muted-foreground">/</span>
+          <span>Mock Interview</span>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <h1 className="text-3xl font-bold">Mock Interview</h1>
+          <p className="text-muted-foreground">
+            Practice your interview skills with our AI-powered mock interview
+            system. Get real-time feedback and improve your performance.
+          </p>
+        </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {!sessionId ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Start a New Mock Interview</CardTitle>
+              <CardDescription>
+                Enter the details of the job you're interviewing for to get
+                tailored questions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid gap-2">
+                  <label htmlFor="jobTitle" className="text-sm font-medium">
+                    Job Title *
+                  </label>
+                  <input
+                    id="jobTitle"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="e.g. Software Engineer"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="company" className="text-sm font-medium">
+                    Company (Optional)
+                  </label>
+                  <input
+                    id="company"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="e.g. Acme Inc."
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="industry" className="text-sm font-medium">
+                    Industry (Optional)
+                  </label>
+                  <input
+                    id="industry"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="e.g. Technology"
+                    value={industry}
+                    onChange={(e) => setIndustry(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label
+                    htmlFor="questionCount"
+                    className="text-sm font-medium"
+                  >
+                    Number of Questions
+                  </label>
+                  <select
+                    id="questionCount"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={questionCount}
+                    onChange={(e) => setQuestionCount(parseInt(e.target.value))}
+                  >
+                    <option value="3">3 Questions</option>
+                    <option value="5">5 Questions</option>
+                    <option value="7">7 Questions</option>
+                    <option value="10">10 Questions</option>
+                  </select>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={startNewSession}
+                disabled={loading || !jobTitle.trim()}
+                className="w-full"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Starting Session...
+                  </>
+                ) : (
+                  "Start Mock Interview"
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {sessionData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Mock Interview: {sessionData.session.jobTitle}
+                    {sessionData.session.company &&
+                      ` at ${sessionData.session.company}`}
+                  </CardTitle>
+                  <CardDescription>
+                    Progress: {sessionData.progress.answeredQuestions} of{" "}
+                    {sessionData.progress.totalQuestions} questions completed
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {sessionData.questions.length > 0 && (
+                        <div className="space-y-4">
+                          <div className="p-4 bg-muted rounded-lg">
+                            <h3 className="font-medium mb-2">
+                              Question {currentQuestionIndex + 1} of{" "}
+                              {sessionData.questions.length}
+                            </h3>
+                            <p className="text-lg">
+                              {
+                                sessionData.questions[currentQuestionIndex]
+                                  .questionText
+                              }
+                            </p>
+                            <div className="mt-2 text-sm text-muted-foreground">
+                              Type:{" "}
+                              {
+                                sessionData.questions[currentQuestionIndex]
+                                  .questionType
+                              }
+                            </div>
+                          </div>
+
+                          {feedback ? (
+                            <div className="space-y-4">
+                              <div className="p-4 bg-primary/10 rounded-lg">
+                                <h3 className="font-medium mb-2">
+                                  Your Response
+                                </h3>
+                                <p>{responseText}</p>
+                              </div>
+
+                              <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                                <h3 className="font-medium mb-2">Feedback</h3>
+                                <p>{feedback.feedback}</p>
+
+                                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <h4 className="font-medium text-sm mb-2">
+                                      Strengths
+                                    </h4>
+                                    <ul className="list-disc list-inside">
+                                      {feedback.strengths.map(
+                                        (strength, index) => (
+                                          <li key={index}>{strength}</li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium text-sm mb-2">
+                                      Areas for Improvement
+                                    </h4>
+                                    <ul className="list-disc list-inside">
+                                      {feedback.improvements.map(
+                                        (improvement, index) => (
+                                          <li key={index}>{improvement}</li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                </div>
+
+                                {feedback.score !== null && (
+                                  <div className="mt-4">
+                                    <h4 className="font-medium text-sm mb-2">
+                                      Score
+                                    </h4>
+                                    <div className="flex items-center">
+                                      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                        <div
+                                          className="bg-primary h-2.5 rounded-full"
+                                          style={{
+                                            width: `${
+                                              (feedback.score / 10) * 100
+                                            }%`,
+                                          }}
+                                        ></div>
+                                      </div>
+                                      <span className="ml-2 text-sm font-medium">
+                                        {feedback.score}/10
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              <textarea
+                                className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                placeholder="Type your response here..."
+                                value={responseText}
+                                onChange={(e) =>
+                                  setResponseText(e.target.value)
+                                }
+                                disabled={submitting}
+                              />
+
+                              <div className="flex justify-end">
+                                <Button
+                                  onClick={submitResponse}
+                                  disabled={
+                                    submitting || responseText.trim() === ""
+                                  }
+                                >
+                                  {submitting ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      Submitting...
+                                    </>
+                                  ) : (
+                                    "Submit Response"
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push("/interview-prep")}
+                  >
+                    Back to Interview Prep
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={endSession}
+                    disabled={loading}
+                  >
+                    End Session
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
+          </div>
+        )}
+      </div>
+    </FeedbackLayout>
+  );
+}

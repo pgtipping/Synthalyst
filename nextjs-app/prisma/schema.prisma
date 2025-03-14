@@ -60,6 +60,8 @@ model User {
   appFeedback         AppFeedback[]                 @relation("UserToAppFeedback")
   competencyMatrices  CompetencyMatrix[]
   documents           Document[]
+  interviewSessions   InterviewSession[]
+  savedQuestions      UserSavedQuestion[]
   jobDescriptions     JobDescription[]
   learningContent     LearningContent[]
   newsletterTemplates NewsletterTemplate[]
@@ -728,4 +730,76 @@ model AppFeedback {
 
   @@index([appName])
   @@index([userId])
+}
+
+model InterviewSession {
+  id            String              @id @default(cuid())
+  userId        String
+  jobTitle      String
+  company       String?
+  industry      String?
+  startedAt     DateTime            @default(now())
+  endedAt       DateTime?
+  status        String              @default("in_progress") // in_progress, completed, abandoned
+  questions     InterviewQuestion[]
+  responses     InterviewResponse[]
+  summary       Json?
+  user          User                @relation(fields: [userId], references: [id])
+}
+
+model InterviewQuestion {
+  id            String             @id @default(cuid())
+  sessionId     String
+  questionText  String
+  questionOrder Int
+  questionType  String             // behavioral, technical, situational
+  session       InterviewSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  response      InterviewResponse?
+}
+
+model InterviewResponse {
+  id              String            @id @default(cuid())
+  questionId      String            @unique
+  sessionId       String
+  responseText    String
+  audioUrl        String?
+  feedback        String
+  score           Int?              // 1-10 rating
+  strengths       String[]
+  improvements    String[]
+  submittedAt     DateTime          @default(now())
+  overallScore    Int?
+  criteriaScores  Json?             // Serialized array of criteria scores
+  contentScore    Int?
+  deliveryScore   Int?
+  detailedFeedback Json?            // Serialized feedback by criteria
+  audioMetrics    Json?             // Serialized audio analysis metrics
+  question        InterviewQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  session         InterviewSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model QuestionLibrary {
+  id          String               @id @default(cuid())
+  question    String
+  answer      String?
+  jobType     String
+  industry    String
+  difficulty  String               @default("medium") // easy, medium, hard
+  category    String               // behavioral, technical, situational
+  tags        String[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  userSaves   UserSavedQuestion[]
+}
+
+model UserSavedQuestion {
+  id          String           @id @default(cuid())
+  userId      String
+  questionId  String
+  notes       String?
+  createdAt   DateTime         @default(now())
+  user        User             @relation(fields: [userId], references: [id])
+  question    QuestionLibrary  @relation(fields: [questionId], references: [id])
+
+  @@unique([userId, questionId])
 }
