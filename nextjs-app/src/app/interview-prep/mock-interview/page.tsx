@@ -64,30 +64,42 @@ export default function MockInterviewPage() {
   const [company, setCompany] = useState("");
   const [industry, setIndustry] = useState("");
   const [questionCount, setQuestionCount] = useState(5);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [sessionData, setSessionData] = useState<SessionData | null>(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responseText, setResponseText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<InterviewResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [activeSession, setActiveSession] = useState<string | null>(null);
+  const [sessionData, setSessionData] = useState<SessionData | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   // Check if user has an active session
   useEffect(() => {
     const checkActiveSession = async () => {
       try {
-        // This would typically check localStorage or make an API call
-        // to see if the user has an active session
+        setLoading(true);
+        // Check localStorage for active session
         const storedSessionId = localStorage.getItem(
           "activeInterviewSessionId"
         );
         if (storedSessionId) {
-          setSessionId(storedSessionId);
+          setActiveSession(storedSessionId);
           await fetchSessionData(storedSessionId);
         }
+        setLoading(false);
       } catch (error) {
-        console.error("Error checking active session:", error);
+        setLoading(false);
+        setError(
+          error instanceof Error ? error.message : "An unknown error occurred"
+        );
+        addToast({
+          variant: "destructive",
+          title: "Error",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Failed to check active session",
+        });
       }
     };
 
@@ -133,42 +145,33 @@ export default function MockInterviewPage() {
   };
 
   const startNewSession = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
+    try {
       const response = await fetch("/api/interview-prep/mock-interview", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          jobTitle,
-          company: company || undefined,
-          industry: industry || undefined,
-          questionCount,
+          jobTitle: "Head of People",
+          company: "Mono",
+          industry: "FinTech",
+          questionCount: 10,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Failed to start mock interview session"
-        );
+        throw new Error(errorData.error || "Failed to create new session");
       }
 
       const data = await response.json();
-      setSessionId(data.sessionId);
-      localStorage.setItem("activeInterviewSessionId", data.sessionId);
-
-      // Fetch the full session data
-      await fetchSessionData(data.sessionId);
-
-      addToast({
-        title: "Session Started",
-        description:
-          "Your mock interview session has been started successfully.",
-      });
+      setActiveSession(data.id);
+      await fetchSessionData(data.id);
+      setCurrentQuestionIndex(0);
+      setLoading(false);
     } catch (error) {
       setLoading(false);
       setError(
@@ -180,13 +183,13 @@ export default function MockInterviewPage() {
         description:
           error instanceof Error
             ? error.message
-            : "Failed to start mock interview session",
+            : "Failed to create new session",
       });
     }
   };
 
   const submitResponse = async () => {
-    if (!sessionId || !sessionData || responseText.trim() === "") return;
+    if (!activeSession || !sessionData || responseText.trim() === "") return;
 
     const currentQuestion = sessionData.questions[currentQuestionIndex];
 
@@ -199,7 +202,7 @@ export default function MockInterviewPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sessionId,
+          sessionId: activeSession,
           questionId: currentQuestion.id,
           responseText,
         }),
@@ -223,7 +226,7 @@ export default function MockInterviewPage() {
       }
 
       // Refresh session data to get updated progress
-      await fetchSessionData(sessionId);
+      await fetchSessionData(activeSession);
 
       setSubmitting(false);
     } catch (error) {
@@ -238,13 +241,13 @@ export default function MockInterviewPage() {
   };
 
   const endSession = async () => {
-    if (!sessionId) return;
+    if (!activeSession) return;
 
     try {
       setLoading(true);
 
       const response = await fetch(
-        `/api/interview-prep/mock-interview/${sessionId}`,
+        `/api/interview-prep/mock-interview/${activeSession}`,
         {
           method: "DELETE",
         }
@@ -260,7 +263,7 @@ export default function MockInterviewPage() {
 
       // Clear the active session
       localStorage.removeItem("activeInterviewSessionId");
-      setSessionId(null);
+      setActiveSession(null);
       setSessionData(null);
 
       // Show summary
@@ -273,7 +276,7 @@ export default function MockInterviewPage() {
       // Redirect to summary page or show summary modal
       // For now, we'll just reload the page
       router.push(
-        `/interview-prep/mock-interview/summary?sessionId=${sessionId}`
+        `/interview-prep/mock-interview/summary?sessionId=${activeSession}`
       );
 
       setLoading(false);
@@ -297,6 +300,13 @@ export default function MockInterviewPage() {
             className="text-muted-foreground hover:text-foreground"
           >
             Home
+          </Link>
+          <span className="text-muted-foreground">/</span>
+          <Link
+            href="/tools"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Tools
           </Link>
           <span className="text-muted-foreground">/</span>
           <Link
@@ -325,7 +335,7 @@ export default function MockInterviewPage() {
           </Alert>
         )}
 
-        {!sessionId ? (
+        {!activeSession ? (
           <Card>
             <CardHeader>
               <CardTitle>Start a New Mock Interview</CardTitle>

@@ -94,8 +94,19 @@ export default function InterviewPrepPage() {
       );
     }
 
+    // Default values for stats if they're not available
+    const defaultStats = {
+      mockInterviews: 0,
+      questionsPracticed: 0,
+      savedQuestions: 0,
+      averageScore: null,
+    };
+
+    // Use default stats if stats is null
+    const displayStats = stats || defaultStats;
+
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
@@ -104,9 +115,9 @@ export default function InterviewPrepPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.mockInterviews || 0}
+              {displayStats.mockInterviews}
             </div>
-            <p className="text-xs text-muted-foreground">Completed sessions</p>
+            <p className="text-xs text-muted-foreground">Total completed</p>
           </CardContent>
         </Card>
 
@@ -118,9 +129,11 @@ export default function InterviewPrepPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.questionsPracticed || 0}
+              {displayStats.questionsPracticed}
             </div>
-            <p className="text-xs text-muted-foreground">Across all sessions</p>
+            <p className="text-xs text-muted-foreground">
+              Across all interviews
+            </p>
           </CardContent>
         </Card>
 
@@ -132,9 +145,11 @@ export default function InterviewPrepPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.savedQuestions || 0}
+              {displayStats.savedQuestions}
             </div>
-            <p className="text-xs text-muted-foreground">In your library</p>
+            <p className="text-xs text-muted-foreground">
+              For future reference
+            </p>
           </CardContent>
         </Card>
 
@@ -144,7 +159,9 @@ export default function InterviewPrepPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.averageScore !== null ? stats.averageScore : "-"}
+              {displayStats.averageScore !== null
+                ? displayStats.averageScore
+                : "-"}
             </div>
             <p className="text-xs text-muted-foreground">From all interviews</p>
           </CardContent>
@@ -189,6 +206,13 @@ export default function InterviewPrepPage() {
             className="text-muted-foreground hover:text-foreground"
           >
             Home
+          </Link>
+          <span className="text-muted-foreground">/</span>
+          <Link
+            href="/tools"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Tools
           </Link>
           <span className="text-muted-foreground">/</span>
           <span>Interview Prep</span>
