@@ -248,18 +248,9 @@ export default function RootLayout({
           name="facebook-domain-verification"
           content="facebook-domain-verification-code"
         />
+
         {/* Load non-critical CSS asynchronously */}
         <link rel="preload" href="/styles/non-critical.css" as="style" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              const link = document.createElement('link');
-              link.rel = 'stylesheet';
-              link.href = '/styles/non-critical.css';
-              document.head.appendChild(link);
-            `,
-          }}
-        />
         <noscript>
           <link rel="stylesheet" href="/styles/non-critical.css" />
         </noscript>
@@ -269,95 +260,6 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationJsonLd),
-          }}
-        />
-
-        <link
-          rel="preload"
-          href="/_next/static/css/app/layout.css"
-          as="style"
-        />
-        <link rel="stylesheet" href="/_next/static/css/app/layout.css" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Defer non-critical JavaScript
-              const deferJsLoad = () => {
-                const nonCriticalScripts = document.querySelectorAll('script[data-defer]');
-                nonCriticalScripts.forEach(script => {
-                  const newScript = document.createElement('script');
-                  Array.from(script.attributes).forEach(attr => {
-                    if (attr.name !== 'data-defer') {
-                      newScript.setAttribute(attr.name, attr.value);
-                    }
-                  });
-                  newScript.innerHTML = script.innerHTML;
-                  script.parentNode.replaceChild(newScript, script);
-                });
-              };
-              
-              // Execute after page load
-              if (document.readyState === 'complete') {
-                deferJsLoad();
-              } else {
-                window.addEventListener('load', deferJsLoad);
-              }
-              
-              // Optimize CSS loading
-              const optimizeCssLoading = () => {
-                // Add layout.css with media="print" and then switch to "all" once loaded
-                const layoutCss = document.querySelector('link[href*="layout.css"]');
-                if (layoutCss) {
-                  layoutCss.setAttribute('media', 'print');
-                  layoutCss.onload = () => layoutCss.setAttribute('media', 'all');
-                }
-                
-                // Preload critical images
-                const preloadImages = () => {
-                  const images = [
-                    '/icons/logo.png',
-                    '/icons/og-image.png'
-                  ];
-                  
-                  images.forEach(src => {
-                    const link = document.createElement('link');
-                    link.rel = 'preload';
-                    link.as = 'image';
-                    link.href = src;
-                    document.head.appendChild(link);
-                  });
-                };
-                
-                // Execute image preloading after a short delay
-                setTimeout(preloadImages, 100);
-              };
-              
-              // Execute immediately
-              optimizeCssLoading();
-              
-              // Use Intersection Observer to lazy load below-the-fold content
-              if ('IntersectionObserver' in window) {
-                const lazyLoadObserver = new IntersectionObserver((entries) => {
-                  entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                      const target = entry.target;
-                      if (target.dataset.src) {
-                        target.src = target.dataset.src;
-                        target.removeAttribute('data-src');
-                      }
-                      lazyLoadObserver.unobserve(target);
-                    }
-                  });
-                });
-                
-                // Observe all elements with data-src attribute
-                document.addEventListener('DOMContentLoaded', () => {
-                  document.querySelectorAll('[data-src]').forEach(el => {
-                    lazyLoadObserver.observe(el);
-                  });
-                });
-              }
-            `,
           }}
         />
       </head>

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { MessageSquare, AlertCircle, Users, Mail } from "lucide-react";
+import { MessageSquare, AlertCircle, Users, Mail, Star } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | Synthalyst",
@@ -44,27 +44,78 @@ export default async function AdminPage() {
 
   try {
     // Use type assertion to work around the type error
-    const prismaAny = prisma as any;
+    const prismaAny = prisma as unknown;
+    const prismaWithNewsletter = prismaAny as {
+      newsletter: {
+        findMany: () => Promise<
+          Array<{ confirmed: boolean; active: boolean; unsubscribed: boolean }>
+        >;
+      };
+    };
 
-    if (prismaAny.newsletter) {
-      const subscribers = await prismaAny.newsletter.findMany();
+    if (prismaWithNewsletter.newsletter) {
+      const subscribers = await prismaWithNewsletter.newsletter.findMany();
 
       subscriberStats = {
         total: subscribers.length,
-        confirmed: subscribers.filter((s: any) => s.confirmed).length,
-        active: subscribers.filter((s: any) => s.active).length,
-        unsubscribed: subscribers.filter((s: any) => s.unsubscribed).length,
+        confirmed: subscribers.filter(
+          (s: { confirmed: boolean }) => s.confirmed
+        ).length,
+        active: subscribers.filter((s: { active: boolean }) => s.active).length,
+        unsubscribed: subscribers.filter(
+          (s: { unsubscribed: boolean }) => s.unsubscribed
+        ).length,
       };
     }
   } catch (error) {
     console.error("Error fetching newsletter stats:", error);
   }
 
+  // Get app feedback stats
+  let feedbackStats = {
+    totalApps: 0,
+    totalFeedback: 0,
+    averageRating: 0,
+  };
+
+  try {
+    // Use type assertion to work around the type error
+    const prismaAny = prisma as unknown;
+    const prismaWithFeedback = prismaAny as {
+      appFeedback: {
+        count: () => Promise<number>;
+        groupBy: (args: { by: string[] }) => Promise<{ appName: string }[]>;
+        aggregate: (args: {
+          _avg: { rating: boolean };
+        }) => Promise<{ _avg: { rating: number | null } }>;
+      };
+    };
+
+    const feedbackCount = await prismaWithFeedback.appFeedback.count();
+    const appsWithFeedback = await prismaWithFeedback.appFeedback.groupBy({
+      by: ["appName"],
+    });
+
+    const averageRatingResult = await prismaWithFeedback.appFeedback.aggregate({
+      _avg: {
+        rating: true,
+      },
+    });
+
+    feedbackStats = {
+      totalApps: appsWithFeedback.length,
+      totalFeedback: feedbackCount,
+      averageRating: averageRatingResult._avg.rating || 0,
+    };
+  } catch (error) {
+    console.error("Error fetching feedback stats:", error);
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Admin Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Contact Submissions Card */}
         <div className="bg-card rounded-lg shadow-sm p-6 border">
           <div className="flex justify-between items-start mb-4">
@@ -178,6 +229,49 @@ export default async function AdminPage() {
             className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
             Manage Newsletter
+          </Link>
+        </div>
+
+        {/* App Feedback Card */}
+        <div className="bg-card rounded-lg shadow-sm p-6 border">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-xl font-semibold">App Feedback</h2>
+            <Star className="h-5 w-5 text-primary" />
+          </div>
+
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Apps with Feedback
+              </span>
+              <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                {feedbackStats.totalApps}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Total Feedback
+              </span>
+              <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                {feedbackStats.totalFeedback}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Average Rating
+              </span>
+              <div className="flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                {feedbackStats.averageRating.toFixed(1)}
+                <Star className="h-3 w-3 ml-1 fill-yellow-800" />
+              </div>
+            </div>
+          </div>
+
+          <Link
+            href="/admin/feedback"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            View Feedback
           </Link>
         </div>
       </div>

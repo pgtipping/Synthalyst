@@ -13,6 +13,7 @@ const nextConfig = {
   // Enable source maps in production
   productionBrowserSourceMaps: true,
   webpack: (config, { isServer, webpack }) => {
+    // Add externals to prevent server-side only modules from causing issues
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
 
     // Add fallbacks for node modules that aren't available in the browser
@@ -36,13 +37,8 @@ const nextConfig = {
         ...(config.plugins || []),
         new webpack.ProvidePlugin({
           Buffer: ["buffer", "Buffer"],
-        }),
-        new webpack.ProvidePlugin({
           process: "process/browser",
-        }),
-        // Add explicit crypto polyfill
-        new webpack.ProvidePlugin({
-          crypto: "crypto-browserify",
+          crypto: ["crypto-browserify", "default"],
         }),
       ];
 
@@ -67,69 +63,41 @@ const nextConfig = {
             }
           });
         }
-
-        config.optimization.minimizer = [
-          new webpack.optimize.ModuleConcatenationPlugin(),
-          ...config.optimization.minimizer,
-        ];
       } else {
         // Disable minification for development to fix SHA224 error with react-pdf
         config.optimization.minimize = false;
       }
-    }
 
-    // Only apply chunk optimization for client-side bundles
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        minimize: process.env.NODE_ENV === "production", // Enable minification for production
-        splitChunks: {
-          chunks: "all",
-          maxInitialRequests: 25,
-          minSize: 20000,
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk for third-party libraries
-            vendor: {
-              name: "vendor",
-              chunks: "all",
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Common chunk for code shared between pages
-            common: {
-              name: "common",
-              minChunks: 2,
-              chunks: "all",
-              priority: 10,
-              reuseExistingChunk: true,
-              enforce: true,
-            },
-            // Separate React and related packages
-            react: {
-              name: "react",
-              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
-              chunks: "all",
-              priority: 30,
-            },
-            // Separate UI components
-            ui: {
-              name: "ui",
-              test: /[\\/]components[\\/]ui[\\/]/,
-              chunks: "all",
-              priority: 15,
-              reuseExistingChunk: true,
-            },
-            // Separate large libraries
-            largeLibs: {
-              name: "large-libs",
-              test: /[\\/]node_modules[\\/](@radix-ui|@react-pdf|chart\.js|recharts)[\\/]/,
-              chunks: "all",
-              priority: 25,
-            },
+      // Optimize chunk loading to prevent ChunkLoadError
+      config.optimization.splitChunks = {
+        chunks: "all",
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          // Vendor chunk for third-party modules
+          vendor: {
+            name: "vendor",
+            chunks: "all",
+            test: /node_modules/,
+            priority: 20,
+          },
+          // Common chunk for shared code
+          common: {
+            name: "common",
+            minChunks: 2,
+            chunks: "all",
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true,
           },
         },
+      };
+
+      // Increase chunk size limit to prevent excessive code splitting
+      config.performance = {
+        ...config.performance,
+        maxAssetSize: 500000, // 500KB
+        maxEntrypointSize: 500000, // 500KB
       };
     }
 
@@ -189,4 +157,4 @@ const nextConfig = {
   output: "standalone",
 };
 
-export default nextConfig;
+module.exports = nextConfig;

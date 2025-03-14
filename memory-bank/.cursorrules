@@ -1635,3 +1635,76 @@ This approach has successfully eliminated all TypeScript errors in the codebase,
     </Link>
   </Button>
   ```
+
+## Feedback System Implementation [2025-03-14 23:45:00]
+
+### Dual Storage Strategy
+
+- The feedback system uses a dual storage strategy:
+  - Primary: Prisma database with AppFeedback model
+  - Fallback: File-based JSON storage in feedback-data.json
+- The system attempts to use Prisma first, and if it fails (e.g., due to missing model or permissions), it falls back to file storage
+- The fallback mechanism is transparent to users, who receive a success message in both cases
+
+### File Path Resolution
+
+- The feedback-data.json file must be stored in the nextjs-app directory
+- Path resolution uses process.cwd() which can vary depending on where the server is started
+- Always use path.resolve() with conditional logic to ensure the file is stored in the correct location:
+
+```typescript
+const feedbackFilePath = path.resolve(
+  process.cwd().includes("nextjs-app")
+    ? process.cwd()
+    : path.join(process.cwd(), "nextjs-app"),
+  "feedback-data.json"
+);
+```
+
+### Prisma Type Extensions
+
+- The AppFeedback model may not be recognized by TypeScript in the Prisma client
+- Use type assertions to extend the Prisma client type:
+
+```typescript
+type PrismaWithAppFeedback = typeof prisma & {
+  appFeedback: {
+    // Define methods and their types here
+    findMany: (args?: {
+      where?: { appName?: string };
+      orderBy?: { createdAt: "asc" | "desc" };
+    }) => Promise<
+      Array<{
+        // Define return type here
+        id: string;
+        appName: string;
+        // Other fields...
+      }>
+    >;
+    // Other methods...
+  };
+};
+```
+
+### Debugging Techniques
+
+- Add comprehensive logging throughout the feedback system
+- Log file paths, existence checks, and data read/write operations
+- Create diagnostic scripts (check-feedback.mjs, check-cwd.js) for troubleshooting
+- Use try-catch blocks with detailed error logging including stack traces
+
+### Server Startup Location
+
+- Always start the development server from the nextjs-app directory
+- Use `cd nextjs-app && npm run dev` to ensure correct working directory
+- Check the current directory with `pwd` before starting the server
+- Verify the presence of package.json with `ls -la package.json`
+
+## Module System Configuration [2025-03-14 23:50:00]
+
+- The application uses CommonJS module format (require/module.exports) instead of ES modules
+- Configuration files (tailwind.config.ts, postcss.config.ts) must use module.exports syntax
+- Utility scripts use .cjs extension to ensure they are treated as CommonJS modules
+- When creating new configuration files, always use module.exports syntax
+- When creating new utility scripts, use .cjs extension if they need to be executed directly
+- The package.json does NOT have "type": "module" to ensure CommonJS compatibility

@@ -11,6 +11,17 @@ export default function ClientLayout({
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    // Load non-critical CSS
+    const loadNonCriticalCSS = () => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/styles/non-critical.css";
+      document.head.appendChild(link);
+    };
+
+    // Load CSS
+    loadNonCriticalCSS();
+
     // Add event listener for unhandled errors
     const handleError = (event: ErrorEvent) => {
       // Check if it's a chunk loading error

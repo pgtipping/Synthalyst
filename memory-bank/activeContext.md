@@ -3,6 +3,7 @@
 ## Current Work Focus
 
 - Enhancing the Interview Prep feature with PDF export functionality and improved formatting
+- Implementing and troubleshooting the feedback system for collecting user feedback across the application
 - Optimizing the Next.js application for SEO, accessibility, and performance
 - Implementing proper metadata, JSON-LD structured data, and dynamic sitemap generation
 - Fixing accessibility issues to ensure WCAG compliance
@@ -12,8 +13,38 @@
 - Resolving styling issues in production environment
 - Addressing accessibility issues identified in the accessibility audit
 - Improving performance metrics based on performance audit results
+- Resolving CommonJS module compatibility issues after removing "type": "module" from package.json
 
 ## Recent Changes (Updated March 14, 2025)
+
+- ✅ Implemented Feedback System with File-based Fallback (March 14, 2025):
+
+  - Created a feedback API route with dual storage strategy:
+    - Primary: Prisma database storage using the AppFeedback model
+    - Fallback: File-based storage using JSON in feedback-data.json
+  - Implemented feedback collection UI components:
+    - Added FeedbackLayout component to wrap pages that need feedback functionality
+    - Created FeedbackButton component for triggering the feedback modal
+    - Developed FeedbackForm component for collecting ratings and comments
+  - Added admin feedback management:
+    - Created feedback listing page for administrators
+    - Implemented feedback export functionality to CSV
+    - Added filtering by application name
+  - Resolved issues with file-based storage:
+    - Fixed file path resolution to ensure correct storage location
+    - Added comprehensive error handling and logging
+    - Created diagnostic scripts (check-feedback.mjs, check-cwd.js) for troubleshooting
+  - Successfully tested the feedback system with both storage mechanisms
+
+- ✅ Fixed Markdown Formatting in Interview Prep Plan (March 14, 2025):
+
+  - Removed markdown syntax (double asterisks) from the interview prep plan output
+  - Updated the API route to explicitly instruct the LLM not to use markdown formatting
+  - Modified the SimpleMarkdown component to remove markdown syntax instead of rendering it
+  - Added markdown cleaning functions to the PDF component and practice questions display
+  - Updated the fallback plan and questions functions to avoid using markdown
+  - Improved overall readability and professional appearance of the interview prep plan
+  - Ensured consistent formatting between web view and PDF export
 
 - ✅ Fixed Accessibility Issues in Training Plan Page (March 14, 2025):
 
@@ -170,6 +201,20 @@
     - Modified PlanForm component to use responsive classes for proper stacking on mobile
     - Ensured radio buttons stack vertically on small screens and align horizontally on larger screens
   - Improved mobile experience while maintaining proper styling in production
+
+- ✅ Fixed CommonJS Module Compatibility Issues (March 14, 2025):
+
+  - Identified and resolved issues with ES module syntax after removing "type": "module" from package.json
+  - Renamed .mjs files to .cjs to ensure they are treated as CommonJS modules:
+    - Renamed scripts/delete-post.mjs to scripts/delete-post.cjs
+    - Renamed scripts/apply-prod-migrations.mjs to scripts/apply-prod-migrations.cjs
+  - Updated package.json scripts to reference the renamed .cjs files:
+    - Updated "apply-migrations" script to use apply-prod-migrations.cjs
+  - Modified configuration files to use CommonJS module.exports syntax:
+    - Updated tailwind.config.ts to use module.exports instead of export default
+    - Updated postcss.config.ts to use module.exports instead of export default
+  - Successfully built the application with the new CommonJS-compatible configuration
+  - Resolved ChunkLoadError issues related to module format incompatibilities
 
 ## Next Steps
 

@@ -12,6 +12,13 @@ The application is built using Next.js with the App Router architecture, which p
 - Metadata API for dynamic SEO optimization
 - Server-side rendering capabilities for improved initial load times
 
+### Module System
+
+- **CommonJS Modules**: The application uses CommonJS module format (require/module.exports) for compatibility
+- **Configuration Files**: All configuration files (tailwind.config.ts, postcss.config.ts) use module.exports syntax
+- **Script Files**: Utility scripts use .cjs extension to ensure they are treated as CommonJS modules
+- **Module Resolution**: Next.js is configured to handle CommonJS modules correctly
+
 ### Component Structure
 
 - **Layout Components**: Define the overall structure of pages (header, footer, etc.)
@@ -25,6 +32,24 @@ The application is built using Next.js with the App Router architecture, which p
 - Client Components handle user interactions
 - API routes provide backend functionality
 - Database interactions are handled through Prisma
+
+### Feedback System Architecture
+
+- **Dual Storage Strategy**:
+  - Primary: Prisma database with AppFeedback model
+  - Fallback: File-based JSON storage in feedback-data.json
+- **Component Structure**:
+  - FeedbackLayout: Wrapper component for pages with feedback functionality
+  - FeedbackButton: Trigger for feedback modal
+  - FeedbackForm: Form for collecting ratings and comments
+- **API Routes**:
+  - /api/feedback: For submitting feedback
+  - /api/admin/feedback: For retrieving feedback (admin only)
+  - /api/admin/feedback/export: For exporting feedback to CSV (admin only)
+- **Error Handling**:
+  - Graceful degradation from database to file storage
+  - Comprehensive logging for troubleshooting
+  - User-friendly error messages
 
 ## Key Technical Decisions
 

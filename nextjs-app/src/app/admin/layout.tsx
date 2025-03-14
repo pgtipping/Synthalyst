@@ -9,6 +9,7 @@ import {
   FileText,
   BarChart,
   Settings,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -54,6 +55,11 @@ const adminNavItems = [
     title: "Users",
     href: "/admin/users",
     icon: Users,
+  },
+  {
+    title: "Feedback",
+    href: "/admin/feedback",
+    icon: Star,
   },
   {
     title: "Monitoring",

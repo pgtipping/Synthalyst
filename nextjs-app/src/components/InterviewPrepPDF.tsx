@@ -79,6 +79,18 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 5,
   },
+  questionNumber: {
+    fontSize: 12,
+    fontWeight: "bold",
+    marginRight: 5,
+  },
+  questionText: {
+    fontSize: 12,
+  },
+  noQuestionsText: {
+    fontSize: 12,
+    fontStyle: "italic",
+  },
 });
 
 interface Section {
@@ -98,18 +110,30 @@ interface InterviewPrepPDFProps {
   questions: string[];
 }
 
+// Function to clean any markdown syntax that might be present
+const cleanMarkdown = (text: string): string => {
+  if (!text) return "";
+
+  // Remove markdown formatting
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1") // Remove bold markdown
+    .replace(/\*([^*]+?)\*/g, "$1"); // Remove italic markdown
+};
+
 const renderSection = (section: Section): React.ReactNode => {
   const sectionStyle = styles[section.type] || styles.section;
 
   return (
     <View style={sectionStyle}>
       <Text style={styles.sectionTitle}>{section.title}</Text>
-      {section.content && <Text style={styles.text}>{section.content}</Text>}
+      {section.content && (
+        <Text style={styles.text}>{cleanMarkdown(section.content)}</Text>
+      )}
       {section.items && (
         <View style={styles.list}>
           {section.items.map((item, index) => (
             <Text key={index} style={styles.listItem}>
-              • {item}
+              • {cleanMarkdown(item)}
             </Text>
           ))}
         </View>
@@ -138,21 +162,32 @@ const InterviewPrepPDF: React.FC<InterviewPrepPDFProps> = ({
         </View>
 
         <View style={styles.section}>
-          {prepPlan.sections.map((section, index) => (
-            <React.Fragment key={index}>
-              {renderSection(section)}
-            </React.Fragment>
-          ))}
+          {prepPlan &&
+            prepPlan.sections &&
+            prepPlan.sections.map((section, index) => (
+              <React.Fragment key={index}>
+                {renderSection(section)}
+              </React.Fragment>
+            ))}
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Practice Questions</Text>
           <View style={styles.list}>
-            {questions.map((question, index) => (
-              <Text key={index} style={styles.listItem}>
-                {index + 1}. {question}
+            {questions && questions.length > 0 ? (
+              questions.map((question, index) => (
+                <View key={index} style={styles.listItem}>
+                  <Text style={styles.questionNumber}>{index + 1}.</Text>
+                  <Text style={styles.questionText}>
+                    {cleanMarkdown(question)}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.noQuestionsText}>
+                No practice questions generated.
               </Text>
-            ))}
+            )}
           </View>
         </View>
       </Page>

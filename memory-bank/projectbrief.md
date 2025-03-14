@@ -379,7 +379,7 @@ Learn any language for free!
 
 Need to communicate in a foreign language? Download the mobile app and use as two-way voice translation service!
 
-### New Hire Induction Program Creator
+### Induction Program Builder
 
 System takes company information and directions on how to present the company information
 

@@ -29,6 +29,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { CompetencyFramework, IndustryCompetencySuggestion } from "./types";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 // Import the new components
 import ExportOptions from "./components/ExportOptions";
@@ -1420,6 +1421,19 @@ export default function CompetencyManager() {
   return (
     <TooltipProvider>
       <div className="container mx-auto px-4 py-8">
+        <Breadcrumb
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Tools", href: "/tools" },
+            {
+              label: "Competency Manager",
+              href: "/competency-manager",
+              active: true,
+            },
+          ]}
+          className="mb-6"
+        />
+
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
             Competency Manager

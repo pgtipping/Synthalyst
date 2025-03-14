@@ -14,8 +14,6 @@ import {
   Brain,
   Target,
   FileText,
-  Code,
-  Sparkles,
   Users,
   Mail,
   FileCheck,
@@ -30,6 +28,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SynthalystLogoAnimated from "./SynthalystLogoAnimated";
+
+// Define the Tool interface
+interface Tool {
+  icon: React.ReactNode;
+  title: string;
+  href: string;
+  external?: boolean;
+}
 
 // Extend the Session type to include role
 interface ExtendedSession extends Session {
@@ -75,37 +81,7 @@ export default function Header() {
     }
   };
 
-  const tools = [
-    {
-      icon: <Brain className="w-4 h-4 mr-2" />,
-      title: "JD Developer",
-      href: "/jd-developer",
-    },
-    {
-      icon: <Target className="w-4 h-4 mr-2" />,
-      title: "2Do Task Manager",
-      href: "/2do",
-    },
-    {
-      icon: <FileText className="w-4 h-4 mr-2" />,
-      title: "Training Plan Creator",
-      href: "/training-plan",
-    },
-    {
-      icon: <Code className="w-4 h-4 mr-2" />,
-      title: "Learning Content Creator",
-      href: "/learning-content",
-    },
-    {
-      icon: <Sparkles className="w-4 h-4 mr-2" />,
-      title: "Knowledge GPT",
-      href: "/knowledge-gpt",
-    },
-    {
-      icon: <Users className="w-4 h-4 mr-2" />,
-      title: "Competency Manager",
-      href: "/competency-manager",
-    },
+  const tools: Tool[] = [
     {
       icon: <FileCheck className="w-4 h-4 mr-2" />,
       title: "ApplyRight",
@@ -120,6 +96,37 @@ export default function Header() {
       icon: <Package className="w-4 h-4 mr-2" />,
       title: "Career Bundle",
       href: "/career-bundle",
+    },
+    {
+      icon: <FileText className="w-4 h-4 mr-2" />,
+      title: "Interview Questions Generator",
+      href: "/interview-questions",
+    },
+    {
+      icon: <Brain className="w-4 h-4 mr-2" />,
+      title: "JD Developer",
+      href: "/jd-developer",
+    },
+    {
+      icon: <FileText className="w-4 h-4 mr-2" />,
+      title: "Training Plan Creator",
+      href: "/training-plan",
+    },
+    {
+      icon: <Users className="w-4 h-4 mr-2" />,
+      title: "Competency Manager",
+      href: "/competency-manager",
+    },
+    {
+      icon: <Target className="w-4 h-4 mr-2" />,
+      title: "Turnover Calculator",
+      href: "/coming-soon?tool=Turnover%20Calculator",
+    },
+    {
+      icon: <FileText className="w-4 h-4 mr-2" />,
+      title: "InQDoc",
+      href: "https://inqdoc.synthalyst.com/",
+      external: true,
     },
   ];
 
@@ -305,13 +312,25 @@ export default function Header() {
               <DropdownMenuContent align="start" className="w-56">
                 {tools.map((tool, index) => (
                   <DropdownMenuItem key={index} asChild>
-                    <Link
-                      href={tool.href}
-                      className="flex items-center text-gray-900"
-                    >
-                      {tool.icon}
-                      <span>{tool.title}</span>
-                    </Link>
+                    {tool.external ? (
+                      <a
+                        href={tool.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center text-gray-900"
+                      >
+                        {tool.icon}
+                        <span>{tool.title}</span>
+                      </a>
+                    ) : (
+                      <Link
+                        href={tool.href}
+                        className="flex items-center text-gray-900"
+                      >
+                        {tool.icon}
+                        <span>{tool.title}</span>
+                      </Link>
+                    )}
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuItem asChild>
@@ -368,17 +387,31 @@ export default function Header() {
               {/* Mobile Tools Submenu */}
               <div className="pl-4 space-y-2">
                 <div className="font-medium">Tools</div>
-                {tools.map((tool, index) => (
-                  <Link
-                    key={index}
-                    href={tool.href}
-                    className="flex items-center text-sm text-gray-900 hover:text-gray-900/80 transition-colors py-1"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {tool.icon}
-                    <span>{tool.title}</span>
-                  </Link>
-                ))}
+                {tools.map((tool, index) =>
+                  tool.external ? (
+                    <a
+                      key={index}
+                      href={tool.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-gray-900 hover:text-gray-900/80 transition-colors py-1"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {tool.icon}
+                      <span>{tool.title}</span>
+                    </a>
+                  ) : (
+                    <Link
+                      key={index}
+                      href={tool.href}
+                      className="flex items-center text-sm text-gray-900 hover:text-gray-900/80 transition-colors py-1"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {tool.icon}
+                      <span>{tool.title}</span>
+                    </Link>
+                  )
+                )}
                 <Link
                   href="/tools"
                   className="flex items-center text-sm font-medium text-gray-900 py-1"

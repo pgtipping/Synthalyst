@@ -138,6 +138,7 @@ function JDDeveloperContent() {
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
+          { label: "Tools", href: "/tools" },
           { label: "JD Developer", href: "/jd-developer", active: true },
         ]}
       />

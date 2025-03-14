@@ -57,6 +57,7 @@ model User {
   comments            Comment[]
   competencies        CompetencyFramework[]
   frameworkFeedback   CompetencyFrameworkFeedback[] @relation("UserToFrameworkFeedback")
+  appFeedback         AppFeedback[]                 @relation("UserToAppFeedback")
   competencyMatrices  CompetencyMatrix[]
   documents           Document[]
   jobDescriptions     JobDescription[]
@@ -714,4 +715,17 @@ model InboundEmail {
   
   @@index([fromEmail])
   @@index([processed])
+}
+
+model AppFeedback {
+  id          String    @id @default(cuid())
+  appName     String    // Name of the app being rated
+  rating      Int       // Rating from 1-5
+  feedback    String?   // Optional feedback text
+  userId      String?   // Optional user ID if the user is logged in
+  createdAt   DateTime  @default(now())
+  user        User?     @relation("UserToAppFeedback", fields: [userId], references: [id])
+
+  @@index([appName])
+  @@index([userId])
 }

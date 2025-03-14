@@ -50,7 +50,7 @@ This document outlines the architecture and module-specific implementations for 
   - List of learning topics.
   - User learning goals and interests (e.g., desired pace, proficiency level).
 - **Prompt Strategy:**  
-  Use a prompt template that instructs the LLM to “design a curriculum” with sections, milestones, recommended resources, and time estimates.
+  Use a prompt template that instructs the LLM to “design a curriculum” with sections, learning objectives, prerequisites, intended audience level, expected outcomes (preferably measurable outcomes), milestones, recommended resources, and days and time estimates.
 - **Flow:**
   1. **API Endpoint:** Receives a JSON payload from the frontend.
   2. **Prompt Builder:** Dynamically inserts user data into a well-crafted prompt template.
@@ -68,12 +68,12 @@ This document outlines the architecture and module-specific implementations for 
   - Audience level (beginner, intermediate, advanced).
   - Tone/style preferences.
 - **Prompt Strategy:**  
-  Generate a prompt instructing the LLM to “write a detailed, engaging lesson on [topic]” with cues for tone, style, and length.
+  Generate a prompt instructing the LLM to “write a detailed, engaging lesson on [topic]” with cues for tone, style, and length. Related exercises should be included (preferably practical exercises wherever possible to promote active learning). The lesson should be written in a way that is easy to understand and follow with a logical flow to aid comprehension. the lesson should be broken down into sections, with examples, practical exercises, short quizzes at the end of each section, and references to further reading.
 - **Flow:**
   1. **API Endpoint:** Accepts content requests.
   2. **Dynamic Prompting:** Constructs a customized prompt including style guidelines.
   3. **LLM Interaction:** Calls the Groq API for text generation.
-  4. **Formatting:** Optionally applies markdown or HTML formatting for presentation.
+  4. **Formatting:** Optionally applies HTML formatting for presentation.
   5. **Delivery:** Returns the tailored content for display.
 
 ---

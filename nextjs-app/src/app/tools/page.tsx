@@ -7,7 +7,6 @@ import {
   Code,
   Sparkles,
   Users,
-  Phone,
   BookOpen,
   Grid3X3,
   FileQuestion,
@@ -16,8 +15,8 @@ import {
   Calculator,
   Languages,
   UserPlus,
-  Home,
   FileCheck,
+  Briefcase,
 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -36,7 +35,54 @@ interface ToolLinkProps {
 }
 
 export default function ToolsPage() {
+  // List of tools that have actual routes in the app
+  const existingRoutes = [
+    "/apply-right",
+    "/interview-prep",
+    "/career-bundle",
+    "/interview-questions",
+    "/jd-developer",
+    "/training-plan",
+    "/competency-manager",
+    "/2do",
+    "/knowledge-gpt",
+    "/learning-content",
+    "/blog",
+  ];
+
   const tools: Tool[] = [
+    {
+      icon: <FileCheck className="w-8 h-8" />,
+      title: "ApplyRight",
+      description:
+        "Transform your resume with AI-powered enhancements and optimizations for job applications.",
+      link: "/apply-right",
+      status: "available",
+    },
+    {
+      icon: <BookOpen className="w-8 h-8" />,
+      title: "Interview Prep",
+      description:
+        "Prepare for interviews with AI-generated practice questions and personalized preparation plans.",
+      link: "/interview-prep",
+      status: "available",
+    },
+    {
+      icon: <Briefcase className="w-8 h-8" />,
+      title: "Career Bundle",
+      description:
+        "Complete career solution combining ApplyRight and Interview Prep for end-to-end job application support.",
+      link: "/career-bundle",
+      status: "available",
+    },
+    {
+      icon: <FileQuestion className="w-8 h-8" />,
+      title: "Interview Questions Generator",
+      description:
+        "Generate tailored interview questions based on job descriptions.",
+      link: "/interview-questions",
+      status: "available",
+    },
     {
       icon: <Brain className="w-8 h-8" />,
       title: "JD Developer",
@@ -46,32 +92,10 @@ export default function ToolsPage() {
       status: "available",
     },
     {
-      icon: <Target className="w-8 h-8" />,
-      title: "2Do Task Manager",
-      description:
-        "Smart task management with voice input and calendar integration.",
-      link: "/2do",
-      status: "available",
-    },
-    {
       icon: <FileText className="w-8 h-8" />,
       title: "Training Plan Creator",
       description: "Generate comprehensive training plans and curricula.",
       link: "/training-plan",
-      status: "available",
-    },
-    {
-      icon: <Code className="w-8 h-8" />,
-      title: "Learning Content Creator",
-      description: "Create tailored learning content for any topic.",
-      link: "/learning-content",
-      status: "available",
-    },
-    {
-      icon: <Sparkles className="w-8 h-8" />,
-      title: "Knowledge GPT",
-      description: "Expert teaching and knowledge curation at your fingertips.",
-      link: "/knowledge-gpt",
       status: "available",
     },
     {
@@ -83,27 +107,15 @@ export default function ToolsPage() {
       status: "available",
     },
     {
-      icon: <FileCheck className="w-8 h-8" />,
-      title: "ApplyRight",
-      description:
-        "Transform your resume with AI-powered enhancements and optimizations for job applications.",
-      link: "/apply-right",
-      status: "available",
-    },
-    {
-      icon: <Grid3X3 className="w-8 h-8" />,
-      title: "Competency Matrix Creator",
-      description: "Create competency matrices for any skill or industry.",
-      link: "/competency-matrix",
-      status: "coming-soon",
-    },
-    {
-      icon: <Phone className="w-8 h-8" />,
-      title: "Calling Assistant",
-      description:
-        "Makes calls on your behalf and generates call transcripts (US Only).",
-      link: "/calling-assistant",
-      status: "coming-soon",
+      icon: <Calculator className="w-8 h-8" />,
+      title: "Turnover Calculator",
+      description: "Calculate employee turnover rates based on exit data.",
+      link: existingRoutes.includes("/turnover-calculator")
+        ? "/turnover-calculator"
+        : "/coming-soon",
+      status: existingRoutes.includes("/turnover-calculator")
+        ? "available"
+        : "coming-soon",
     },
     {
       icon: <FileQuestion className="w-8 h-8" />,
@@ -114,41 +126,60 @@ export default function ToolsPage() {
       status: "available",
     },
     {
-      icon: <Layers className="w-8 h-8" />,
-      title: "Form Builder",
-      description: "Create forms with a drag and drop interface.",
-      link: "/form-builder",
+      icon: <Target className="w-8 h-8" />,
+      title: "2Do Task Manager",
+      description:
+        "Smart task management with voice input and calendar integration.",
+      link: "/coming-soon",
+      status: "coming-soon",
+    },
+    {
+      icon: <Sparkles className="w-8 h-8" />,
+      title: "Knowledge GPT",
+      description: "Expert teaching and knowledge curation at your fingertips.",
+      link: "/coming-soon",
+      status: "coming-soon",
+    },
+    {
+      icon: <Code className="w-8 h-8" />,
+      title: "Learning Content Creator",
+      description: "Create tailored learning content for any topic.",
+      link: "/coming-soon",
       status: "coming-soon",
     },
     {
       icon: <Newspaper className="w-8 h-8" />,
-      title: "The Synth Blog",
-      description:
-        "Blog app powered by two LLMs, an agent provider and agent creator.",
-      link: "/blog",
-      status: "available",
-    },
-    {
-      icon: <Calculator className="w-8 h-8" />,
-      title: "Employee Turnover Calculator",
-      description: "Calculate employee turnover rates based on exit data.",
-      link: "/turnover-calculator",
+      title: "Cozy Corner",
+      description: "Bloggers' haven. Write blogs with AI assisted resources.",
+      link: "/coming-soon",
       status: "coming-soon",
     },
     {
-      icon: <BookOpen className="w-8 h-8" />,
-      title: "Interview Questions Generator",
-      description:
-        "Generate tailored interview questions based on job descriptions.",
-      link: "/interview-questions",
-      status: "available",
+      icon: <Grid3X3 className="w-8 h-8" />,
+      title: "Competency Matrix Creator",
+      description: "Create competency matrices for any skill or industry.",
+      link: existingRoutes.includes("/competency-matrix")
+        ? "/competency-matrix"
+        : "/coming-soon",
+      status: "coming-soon",
+    },
+    {
+      icon: <Layers className="w-8 h-8" />,
+      title: "Form Builder",
+      description: "Create forms with a drag and drop interface.",
+      link: existingRoutes.includes("/form-builder")
+        ? "/form-builder"
+        : "/coming-soon",
+      status: "coming-soon",
     },
     {
       icon: <FileText className="w-8 h-8" />,
       title: "Meeting Sec",
       description:
         "Transcribe audio into notes and create meeting minutes, calendar events, and to-dos.",
-      link: "/meeting-sec",
+      link: existingRoutes.includes("/meeting-sec")
+        ? "/meeting-sec"
+        : "/coming-soon",
       status: "coming-soon",
     },
     {
@@ -156,22 +187,18 @@ export default function ToolsPage() {
       title: "Language Tutor",
       description:
         "Learn any language with voice translation and pronunciation feedback.",
-      link: "/language-tutor",
+      link: existingRoutes.includes("/language-tutor")
+        ? "/language-tutor"
+        : "/coming-soon",
       status: "coming-soon",
     },
     {
       icon: <UserPlus className="w-8 h-8" />,
-      title: "New Hire Induction Creator",
+      title: "Induction Program Builder",
       description: "Create comprehensive induction programs for new employees.",
-      link: "/induction-creator",
-      status: "coming-soon",
-    },
-    {
-      icon: <Home className="w-8 h-8" />,
-      title: "Apartment Affordability Calculator",
-      description:
-        "Calculate the affordability of an apartment based on your income and expenses.",
-      link: "/apartment-calculator",
+      link: existingRoutes.includes("/induction-creator")
+        ? "/induction-creator"
+        : "/coming-soon",
       status: "coming-soon",
     },
   ];

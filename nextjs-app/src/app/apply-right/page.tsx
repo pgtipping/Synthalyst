@@ -35,6 +35,7 @@ import {
 import { useSession } from "next-auth/react";
 import { jsPDF } from "jspdf";
 import Link from "next/link";
+import FeedbackLayout from "@/components/FeedbackLayout";
 
 export default function ApplyRight() {
   const { data: session, status } = useSession();
@@ -697,400 +698,406 @@ export default function ApplyRight() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Toaster position="top-right" />
+    <FeedbackLayout appName="ApplyRight">
+      <div className="container mx-auto px-4 py-8">
+        <Toaster position="top-right" />
 
-      <div className="max-w-7xl mx-auto space-y-8">
-        <Breadcrumb
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Tools", href: "/tools" },
-            { label: "ApplyRight", href: "/apply-right", active: true },
-          ]}
-        />
+        <div className="max-w-7xl mx-auto space-y-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Tools", href: "/tools" },
+              { label: "ApplyRight", href: "/apply-right", active: true },
+            ]}
+          />
 
-        <div className="text-center space-y-4 mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">ApplyRight</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Transform your resume with professional enhancements and targeted
-            optimizations for your dream job.
-          </p>
-          <div>
-            {status === "authenticated" ? (
-              <Badge
-                variant="outline"
-                className="bg-green-50 text-green-700 border-green-200"
-              >
-                Premium Features Available
-              </Badge>
-            ) : (
-              <Button variant="outline" onClick={handleSignIn} className="mt-2">
-                Sign in for Premium Features
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="space-y-6"
-        >
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="upload" disabled={isProcessing}>
-              <Upload className="h-4 w-4 mr-2" />
-              Upload
-            </TabsTrigger>
-            <TabsTrigger
-              value="job-description"
-              disabled={!resumeFile || isProcessing}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Job Description
-            </TabsTrigger>
-            <TabsTrigger
-              value="transform"
-              disabled={!resumeFile || isProcessing}
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Transform
-            </TabsTrigger>
-            <TabsTrigger
-              value="results"
-              disabled={!transformedResume || isProcessing}
-            >
-              <FileCheck className="h-4 w-4 mr-2" />
-              Results
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="upload" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Upload Your Resume</CardTitle>
-                <CardDescription>
-                  Upload your current resume in PDF, DOC, DOCX, or TXT format
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <FileUpload onFileUpload={handleResumeUpload} />
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Max file size: 5MB
-                </p>
-                <Button
-                  onClick={() => setActiveTab("job-description")}
-                  disabled={!resumeFile}
+          <div className="text-center space-y-4 mb-8">
+            <h1 className="text-4xl font-bold tracking-tight">ApplyRight</h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Transform your resume with professional enhancements and targeted
+              optimizations for your dream job.
+            </p>
+            <div>
+              {status === "authenticated" ? (
+                <Badge
+                  variant="outline"
+                  className="bg-green-50 text-green-700 border-green-200"
                 >
-                  Next
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="job-description" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Add Job Description</CardTitle>
-                <CardDescription>
-                  Paste the job description to tailor your resume (optional)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <JobDescription
-                  value={jobDescription}
-                  jobTitle={jobTitle}
-                  company={company}
-                  onJobTitleChange={setJobTitle}
-                  onCompanyChange={setCompany}
-                  onChange={setJobDescription}
-                  onSubmit={handleJobDescriptionSubmit}
-                />
-              </CardContent>
-              <CardFooter className="flex justify-between">
+                  Premium Features Available
+                </Badge>
+              ) : (
                 <Button
                   variant="outline"
-                  onClick={() => setActiveTab("upload")}
+                  onClick={handleSignIn}
+                  className="mt-2"
                 >
-                  Back
+                  Sign in for Premium Features
                 </Button>
-                <Button
-                  onClick={() =>
-                    handleJobDescriptionSubmit(
-                      jobDescription,
-                      jobTitle,
-                      company
-                    )
-                  }
-                >
-                  Next
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="transform" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Transform Your Resume</CardTitle>
-                <CardDescription>
-                  Enhance your resume with professional improvements
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-muted p-4 rounded-md">
-                  <h3 className="font-medium mb-2">Ready to transform:</h3>
-                  <div className="text-sm flex items-center">
-                    {resumeFile?.name}{" "}
-                    <Badge variant="outline" className="ml-2">
-                      {resumeFile?.type.split("/")[1].toUpperCase()}
-                    </Badge>
-                  </div>
-                  {jobDescription && (
-                    <div className="mt-2">
-                      <p className="text-sm font-medium">Job description:</p>
-                      <p className="text-xs text-muted-foreground">
-                        {jobDescription.substring(0, 100)}...
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col items-center justify-center py-4">
-                  <Button
-                    size="lg"
-                    onClick={handleTransformResume}
-                    disabled={isProcessing || !resumeFile}
-                    className="w-full max-w-xs"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Transform Resume
-                      </>
-                    )}
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    This may take a few moments
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => setActiveTab("job-description")}
-                  disabled={isProcessing}
-                >
-                  Back
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="results" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    Transformed Resume
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDownloadResume}
-                      disabled={!transformedResume}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Download PDF
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>
-                    Your professionally enhanced resume ready to download as a
-                    PDF
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResumePreview content={transformedResume || ""} />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    Cover Letter
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDownloadCoverLetter}
-                      disabled={!coverLetter}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Download PDF
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>
-                    Your tailored cover letter ready to download as a PDF
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CoverLetterPreview content={coverLetter || ""} />
-                </CardContent>
-              </Card>
+              )}
             </div>
+          </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Improvements Made</CardTitle>
-                <CardDescription>
-                  Key enhancements applied to your resume
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-medium mb-2">Changes Made:</h3>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {changesMade.map((change, index) => (
-                        <li key={index} className="text-sm">
-                          {change}
-                        </li>
-                      ))}
-                    </ul>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="upload" disabled={isProcessing}>
+                <Upload className="h-4 w-4 mr-2" />
+                Upload
+              </TabsTrigger>
+              <TabsTrigger
+                value="job-description"
+                disabled={!resumeFile || isProcessing}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Job Description
+              </TabsTrigger>
+              <TabsTrigger
+                value="transform"
+                disabled={!resumeFile || isProcessing}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Transform
+              </TabsTrigger>
+              <TabsTrigger
+                value="results"
+                disabled={!transformedResume || isProcessing}
+              >
+                <FileCheck className="h-4 w-4 mr-2" />
+                Results
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="upload" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upload Your Resume</CardTitle>
+                  <CardDescription>
+                    Upload your current resume in PDF, DOC, DOCX, or TXT format
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FileUpload onFileUpload={handleResumeUpload} />
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Max file size: 5MB
+                  </p>
+                  <Button
+                    onClick={() => setActiveTab("job-description")}
+                    disabled={!resumeFile}
+                  >
+                    Next
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="job-description" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Add Job Description</CardTitle>
+                  <CardDescription>
+                    Paste the job description to tailor your resume (optional)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <JobDescription
+                    value={jobDescription}
+                    jobTitle={jobTitle}
+                    company={company}
+                    onJobTitleChange={setJobTitle}
+                    onCompanyChange={setCompany}
+                    onChange={setJobDescription}
+                    onSubmit={handleJobDescriptionSubmit}
+                  />
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveTab("upload")}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      handleJobDescriptionSubmit(
+                        jobDescription,
+                        jobTitle,
+                        company
+                      )
+                    }
+                  >
+                    Next
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="transform" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Transform Your Resume</CardTitle>
+                  <CardDescription>
+                    Enhance your resume with professional improvements
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-muted p-4 rounded-md">
+                    <h3 className="font-medium mb-2">Ready to transform:</h3>
+                    <div className="text-sm flex items-center">
+                      {resumeFile?.name}{" "}
+                      <Badge variant="outline" className="ml-2">
+                        {resumeFile?.type.split("/")[1].toUpperCase()}
+                      </Badge>
+                    </div>
+                    {jobDescription && (
+                      <div className="mt-2">
+                        <p className="text-sm font-medium">Job description:</p>
+                        <p className="text-xs text-muted-foreground">
+                          {jobDescription.substring(0, 100)}...
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  {keywordsExtracted.length > 0 && (
+
+                  <div className="flex flex-col items-center justify-center py-4">
+                    <Button
+                      size="lg"
+                      onClick={handleTransformResume}
+                      disabled={isProcessing || !resumeFile}
+                      className="w-full max-w-xs"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Transform Resume
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      This may take a few moments
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveTab("job-description")}
+                    disabled={isProcessing}
+                  >
+                    Back
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="results" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      Transformed Resume
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownloadResume}
+                        disabled={!transformedResume}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Download PDF
+                      </Button>
+                    </CardTitle>
+                    <CardDescription>
+                      Your professionally enhanced resume ready to download as a
+                      PDF
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResumePreview content={transformedResume || ""} />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      Cover Letter
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownloadCoverLetter}
+                        disabled={!coverLetter}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Download PDF
+                      </Button>
+                    </CardTitle>
+                    <CardDescription>
+                      Your tailored cover letter ready to download as a PDF
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <CoverLetterPreview content={coverLetter || ""} />
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Improvements Made</CardTitle>
+                  <CardDescription>
+                    Key enhancements applied to your resume
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h3 className="font-medium mb-2">
-                        Keywords from Job Description:
-                      </h3>
-                      <div className="mb-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            Keyword Match Score:
-                          </span>
-                          <div className="flex items-center">
-                            <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
-                              <div
-                                className="h-full bg-green-500 rounded-full"
-                                style={{
-                                  width: `${calculateOverallMatchScore()}%`,
-                                }}
-                              />
-                            </div>
-                            <span className="text-sm font-medium">
-                              {calculateOverallMatchScore()}%
+                      <h3 className="font-medium mb-2">Changes Made:</h3>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {changesMade.map((change, index) => (
+                          <li key={index} className="text-sm">
+                            {change}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    {keywordsExtracted.length > 0 && (
+                      <div>
+                        <h3 className="font-medium mb-2">
+                          Keywords from Job Description:
+                        </h3>
+                        <div className="mb-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Keyword Match Score:
                             </span>
+                            <div className="flex items-center">
+                              <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
+                                <div
+                                  className="h-full bg-green-500 rounded-full"
+                                  style={{
+                                    width: `${calculateOverallMatchScore()}%`,
+                                  }}
+                                />
+                              </div>
+                              <span className="text-sm font-medium">
+                                {calculateOverallMatchScore()}%
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {keywordsExtracted.map((keyword, index) => {
-                          const matchScore = calculateKeywordMatch(keyword);
-                          return (
-                            <div key={index} className="relative group">
-                              <Badge
-                                variant="secondary"
-                                className={`${
-                                  matchScore > 0
-                                    ? "bg-green-100 text-green-800 hover:bg-green-200"
-                                    : ""
-                                }`}
-                              >
-                                {keyword}
-                                {matchScore > 0 && (
-                                  <span className="ml-1 text-xs font-normal text-green-600">
-                                    ✓
-                                  </span>
-                                )}
-                              </Badge>
-                              <div className="absolute bottom-full mb-2 left-0 transform -translate-x-1/4 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                                Match: {matchScore}%
+                        <div className="flex flex-wrap gap-2">
+                          {keywordsExtracted.map((keyword, index) => {
+                            const matchScore = calculateKeywordMatch(keyword);
+                            return (
+                              <div key={index} className="relative group">
+                                <Badge
+                                  variant="secondary"
+                                  className={`${
+                                    matchScore > 0
+                                      ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                      : ""
+                                  }`}
+                                >
+                                  {keyword}
+                                  {matchScore > 0 && (
+                                    <span className="ml-1 text-xs font-normal text-green-600">
+                                      ✓
+                                    </span>
+                                  )}
+                                </Badge>
+                                <div className="absolute bottom-full mb-2 left-0 transform -translate-x-1/4 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                  Match: {matchScore}%
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setActiveTab("transform")}
-                >
-                  Back
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {transformedResume && (
-          <div className="bg-muted p-6 rounded-lg mt-8">
-            <h2 className="text-xl font-bold mb-4">Next Steps</h2>
-            <div className="flex flex-col md:flex-row gap-4">
-              <Card className="flex-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
-                    Prepare for Interviews
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Now that your resume is optimized, prepare for interviews
-                    with our AI-powered Interview Prep tool.
-                  </p>
+                    )}
+                  </div>
                 </CardContent>
                 <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link href="/interview-prep?from=applyright">
-                      Go to Interview Prep
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveTab("transform")}
+                  >
+                    Back
                   </Button>
                 </CardFooter>
               </Card>
+            </TabsContent>
+          </Tabs>
 
-              <Card className="flex-1">
-                <CardHeader>
-                  <CardTitle>Save on Bundle</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Get ApplyRight and Interview Prep together at a discounted
-                    price with our Career Success Bundle.
-                  </p>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/career-bundle">
-                      View Bundle Options
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+          {transformedResume && (
+            <div className="bg-muted p-6 rounded-lg mt-8">
+              <h2 className="text-xl font-bold mb-4">Next Steps</h2>
+              <div className="flex flex-col md:flex-row gap-4">
+                <Card className="flex-1">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Briefcase className="h-5 w-5" />
+                      Prepare for Interviews
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Now that your resume is optimized, prepare for interviews
+                      with our AI-powered Interview Prep tool.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button asChild className="w-full">
+                      <Link href="/interview-prep?from=applyright">
+                        Go to Interview Prep
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                <Card className="flex-1">
+                  <CardHeader>
+                    <CardTitle>Save on Bundle</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Get ApplyRight and Interview Prep together at a discounted
+                      price with our Career Success Bundle.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href="/career-bundle">
+                        View Bundle Options
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <HowItWorks />
-        <FeaturesSection />
-        {!checkPremiumStatus() && (
-          <PricingSection
-            isPremium={checkPremiumStatus()}
-            onUpgrade={handleSignIn}
-          />
-        )}
+          <HowItWorks />
+          <FeaturesSection />
+          {!checkPremiumStatus() && (
+            <PricingSection
+              isPremium={checkPremiumStatus()}
+              onUpgrade={handleSignIn}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </FeedbackLayout>
   );
 }

@@ -1,12 +1,7 @@
 // Script to apply Prisma migrations to production database
-import { execSync } from "child_process";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-// Get the directory name of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 console.log("Applying Prisma migrations to production database...");
 

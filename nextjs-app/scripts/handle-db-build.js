@@ -1,15 +1,15 @@
 // This script is used to handle database connection issues during build time
 // It creates a mock database client that can be used during static generation
 
-import fs from "fs";
-import path from "path";
+const fs = require("fs");
+const path = require("path");
 
 // Create a mock Prisma client for build time
 const mockPrismaClient = `
 // This is a mock Prisma client for build time
 // It's used to prevent database connection errors during static generation
 
-export const PrismaClient = function() {
+const PrismaClient = function() {
   return {
     $connect: () => Promise.resolve(),
     $disconnect: () => Promise.resolve(),
@@ -39,7 +39,10 @@ export const PrismaClient = function() {
   };
 };
 
-export default new PrismaClient();
+module.exports = {
+  PrismaClient,
+  default: new PrismaClient()
+};
 `;
 
 // Check if we're in a build environment

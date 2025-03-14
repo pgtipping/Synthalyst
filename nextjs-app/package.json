@@ -2,7 +2,6 @@
   "name": "nextjs-app",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "node scripts/handle-db-build.js && next build",
@@ -27,7 +26,7 @@
     "deploy": "./scripts/deploy-with-logging.sh",
     "logs": "./scripts/check-vercel-logs.sh",
     "signup-logs": "./scripts/check-signup-errors.sh",
-    "apply-migrations": "node --experimental-modules scripts/apply-prod-migrations.mjs",
+    "apply-migrations": "node scripts/apply-prod-migrations.cjs",
     "process-mdx": "ts-node scripts/process-mdx-posts.ts",
     "create-variant": "node scripts/create-variant.js",
     "migrate-components": "node scripts/migrate-components.js",

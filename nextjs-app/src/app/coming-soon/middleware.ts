@@ -21,6 +21,7 @@ const ALL_TOOL_PATHS = [
   "/model-comparison",
   "/the-synth",
   "/blog",
+  "/turnover-calculator",
 ];
 
 // Non-tool paths that should always be accessible
@@ -101,6 +102,7 @@ export const config = {
     "/model-comparison/:path*",
     "/the-synth/:path*",
     "/blog/:path*",
+    "/turnover-calculator/:path*",
     // Also match the root paths
     "/2do",
     "/learning-content",
@@ -108,5 +110,6 @@ export const config = {
     "/model-comparison",
     "/the-synth",
     "/blog",
+    "/turnover-calculator",
   ],
 };

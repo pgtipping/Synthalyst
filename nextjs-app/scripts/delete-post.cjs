@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+const { PrismaClient } = require("@prisma/client");
 
 async function deletePost(databaseUrl) {
   // Create Prisma client with the provided database URL

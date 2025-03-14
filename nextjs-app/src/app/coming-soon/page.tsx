@@ -44,6 +44,9 @@ export default async function ComingSoonPage({
           </div>
 
           <div className="flex flex-col gap-4">
+            <Link href="/tools" className="w-full">
+              <Button className="w-full">Return to Tools</Button>
+            </Link>
             <Link href="/" className="w-full">
               <Button variant="outline" className="w-full">
                 Return to Home

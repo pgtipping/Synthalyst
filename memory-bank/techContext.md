@@ -21,6 +21,13 @@
   - OpenAI for content generation
   - Botpress for conversational interfaces
 
+### Module System
+
+- **CommonJS**: Using CommonJS module format (require/module.exports) for compatibility
+- **Configuration Files**: All configuration files use module.exports syntax
+- **Script Extensions**: Utility scripts use .cjs extension to ensure proper module format recognition
+- **Build Configuration**: Next.js configured to handle CommonJS modules correctly
+
 ### Database
 
 - **PostgreSQL**: Primary database for data storage
