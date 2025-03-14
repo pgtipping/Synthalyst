@@ -100,7 +100,9 @@ export class AudioRecorder {
    * @returns Promise resolving to whether permission was granted
    */
   async requestPermission(): Promise<boolean> {
+    console.log("Requesting microphone permission");
     if (!this.state.isSupported) {
+      console.error("Audio recording is not supported in this browser");
       this.state.error = "Audio recording is not supported in this browser";
       return false;
     }
@@ -114,11 +116,14 @@ export class AudioRecorder {
         },
       };
 
+      console.log("Requesting user media with constraints:", constraints);
       this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("Permission granted, stream obtained");
       this.state.hasPermission = true;
       this.setupAudioContext();
       return true;
     } catch (error) {
+      console.error("Error requesting microphone permission:", error);
       this.state.hasPermission = false;
       this.state.error = (error as Error).message;
       if (this.options.onError) {
@@ -151,25 +156,45 @@ export class AudioRecorder {
    * @returns Promise resolving to whether recording started successfully
    */
   async start(): Promise<boolean> {
-    if (this.state.isRecording) return true;
+    console.log("AudioRecorder.start called");
+    if (this.state.isRecording) {
+      console.log("Already recording, ignoring start call");
+      return true;
+    }
+
     if (!this.state.hasPermission) {
+      console.log("No permission, requesting...");
       const hasPermission = await this.requestPermission();
-      if (!hasPermission) return false;
+      if (!hasPermission) {
+        console.error("Permission denied");
+        return false;
+      }
     }
 
     try {
       if (!this.stream) {
+        console.error("No audio stream available");
         throw new Error("No audio stream available");
       }
 
       // Determine supported MIME type
       const mimeType = this.getSupportedMimeType();
+      console.log("Using MIME type:", mimeType);
 
       // Create MediaRecorder with options
-      this.mediaRecorder = new MediaRecorder(this.stream, {
-        mimeType,
-        audioBitsPerSecond: this.options.audioBitsPerSecond,
-      });
+      try {
+        this.mediaRecorder = new MediaRecorder(this.stream, {
+          mimeType,
+          audioBitsPerSecond: this.options.audioBitsPerSecond,
+        });
+        console.log("MediaRecorder created successfully");
+      } catch (error) {
+        console.error(
+          "Failed to create MediaRecorder with specified options, trying with defaults"
+        );
+        // Try again with default options
+        this.mediaRecorder = new MediaRecorder(this.stream);
+      }
 
       // Set up event handlers
       this.audioChunks = [];
@@ -177,6 +202,7 @@ export class AudioRecorder {
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           this.audioChunks.push(event.data);
+          console.log(`Data available: ${event.data.size} bytes`);
           if (this.options.onDataAvailable) {
             this.options.onDataAvailable(event.data);
           }
@@ -184,6 +210,7 @@ export class AudioRecorder {
       };
 
       this.mediaRecorder.onstart = () => {
+        console.log("MediaRecorder.onstart fired");
         this.state.isRecording = true;
         this.startTime = Date.now();
         this.startDurationTracking();
@@ -194,12 +221,22 @@ export class AudioRecorder {
       };
 
       this.mediaRecorder.onstop = () => {
+        console.log("MediaRecorder.onstop fired");
         this.state.isRecording = false;
         this.stopDurationTracking();
         this.stopVisualization();
 
         // Create final audio blob
+        if (this.audioChunks.length === 0) {
+          console.warn("No audio chunks recorded");
+          if (this.options.onError) {
+            this.options.onError(new Error("No audio data recorded"));
+          }
+          return;
+        }
+
         const audioBlob = new Blob(this.audioChunks, { type: mimeType });
+        console.log(`Recording complete: ${audioBlob.size} bytes`);
 
         if (this.options.onStop) {
           this.options.onStop(audioBlob);
@@ -207,6 +244,7 @@ export class AudioRecorder {
       };
 
       this.mediaRecorder.onerror = (event) => {
+        console.error("MediaRecorder error:", event.error);
         this.state.error = "Recording error occurred";
         if (this.options.onError) {
           this.options.onError(
@@ -216,12 +254,17 @@ export class AudioRecorder {
       };
 
       // Start recording
+      console.log("Starting MediaRecorder...");
       this.mediaRecorder.start(100); // Collect data every 100ms
+      console.log("MediaRecorder started");
 
       // Set up max duration timer if specified
       if (this.options.maxDuration) {
         setTimeout(() => {
           if (this.state.isRecording) {
+            console.log(
+              `Max duration (${this.options.maxDuration}ms) reached, stopping recording`
+            );
             this.stop();
           }
         }, this.options.maxDuration);
@@ -229,6 +272,7 @@ export class AudioRecorder {
 
       return true;
     } catch (error) {
+      console.error("Error starting recording:", error);
       this.state.error = (error as Error).message;
       if (this.options.onError) {
         this.options.onError(error as Error);

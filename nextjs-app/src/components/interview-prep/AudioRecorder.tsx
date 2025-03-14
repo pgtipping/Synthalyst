@@ -81,15 +81,27 @@ export function AudioRecorder({
 
   // Handle start recording
   const handleStartRecording = async () => {
+    console.log("Start recording button clicked");
     if (!state.hasPermission) {
+      console.log("No permission, requesting...");
       const hasPermission = await requestPermission();
       if (!hasPermission) {
+        console.error("Permission denied");
         setPermissionDenied(true);
         return;
       }
       setPermissionDenied(false);
     }
-    startRecording();
+
+    console.log("Starting recording...");
+    const success = await startRecording();
+    if (!success) {
+      console.error("Failed to start recording");
+      // Show an error message to the user
+      alert(
+        "Failed to start recording. Please check your browser settings and try again."
+      );
+    }
   };
 
   if (isInitializing) {

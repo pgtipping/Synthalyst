@@ -608,6 +608,13 @@ export default function InterviewPrepPage() {
             >
               Audio Components Demo
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/interview-prep/audio-test")}
+            >
+              Audio Recorder Test
+            </Button>
           </div>
         </div>
       </div>

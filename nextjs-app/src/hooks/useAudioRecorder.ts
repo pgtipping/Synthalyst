@@ -25,7 +25,14 @@ export function useAudioRecorder(options: RecorderOptions = {}) {
   const recorder = useCallback(() => {
     return createRecorder({
       ...options,
+      onError: (error: Error) => {
+        console.error("Audio recorder error:", error);
+        if (options.onError) {
+          options.onError(error);
+        }
+      },
       onStop: (blob: Blob) => {
+        console.log("Recording stopped, blob size:", blob.size);
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
@@ -38,36 +45,63 @@ export function useAudioRecorder(options: RecorderOptions = {}) {
 
   // Start recording
   const startRecording = useCallback(async () => {
+    console.log("Starting recording...");
     const rec = recorder();
-    const success = await rec.start();
-    if (success) {
-      // Clear previous recording
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-        setAudioUrl(null);
+    try {
+      const success = await rec.start();
+      console.log("Recording started:", success);
+      if (success) {
+        // Clear previous recording
+        if (audioUrl) {
+          URL.revokeObjectURL(audioUrl);
+          setAudioUrl(null);
+        }
+        setAudioBlob(null);
+      } else {
+        console.error("Failed to start recording");
       }
-      setAudioBlob(null);
+      return success;
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      return false;
     }
-    return success;
   }, [recorder, audioUrl]);
 
   // Stop recording
   const stopRecording = useCallback(() => {
-    const rec = recorder();
-    rec.stop();
+    console.log("Stopping recording...");
+    try {
+      const rec = recorder();
+      rec.stop();
+    } catch (error) {
+      console.error("Error stopping recording:", error);
+    }
   }, [recorder]);
 
   // Request microphone permission
   const requestPermission = useCallback(async () => {
-    const rec = recorder();
-    return await rec.requestPermission();
+    console.log("Requesting microphone permission...");
+    try {
+      const rec = recorder();
+      const result = await rec.requestPermission();
+      console.log("Permission request result:", result);
+      return result;
+    } catch (error) {
+      console.error("Error requesting permission:", error);
+      return false;
+    }
   }, [recorder]);
 
   // Update state
   useEffect(() => {
     const intervalId = setInterval(() => {
-      const rec = recorder();
-      setState(rec.getState());
+      try {
+        const rec = recorder();
+        const currentState = rec.getState();
+        setState(currentState);
+      } catch (error) {
+        console.error("Error updating recorder state:", error);
+      }
     }, 100);
 
     return () => {
