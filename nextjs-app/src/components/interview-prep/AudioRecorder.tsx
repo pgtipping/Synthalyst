@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Square, Loader2 } from "lucide-react";
+import { Mic, MicOff, Square, Loader2, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AudioRecorderProps {
   /** Callback when recording is completed */
@@ -36,6 +37,7 @@ export function AudioRecorder({
 }: AudioRecorderProps) {
   const [isInitializing, setIsInitializing] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [isButtonPressed, setIsButtonPressed] = useState(false);
   const { addToast } = useToast();
 
   // Initialize audio recorder
@@ -52,6 +54,7 @@ export function AudioRecorder({
           description: `Audio recorded successfully (${formatFileSize(
             blob.size
           )})`,
+          variant: "success",
         });
       },
     });
@@ -99,9 +102,14 @@ export function AudioRecorder({
     }
   }, [autoRequestPermission, requestPermission]);
 
-  // Handle start recording
+  // Handle start recording with button animation
   const handleStartRecording = async () => {
     console.log("Start recording button clicked");
+
+    // Button press animation
+    setIsButtonPressed(true);
+    setTimeout(() => setIsButtonPressed(false), 200);
+
     if (!state.hasPermission) {
       console.log("No permission, requesting...");
       const hasPermission = await requestPermission();
@@ -120,6 +128,7 @@ export function AudioRecorder({
       addToast({
         title: "Recording started",
         description: "Your microphone is now recording audio",
+        variant: "success",
       });
     } else {
       console.error("Failed to start recording");
@@ -130,6 +139,15 @@ export function AudioRecorder({
         description: "Please check your browser settings and try again.",
       });
     }
+  };
+
+  // Handle stop recording with button animation
+  const handleStopRecording = () => {
+    // Button press animation
+    setIsButtonPressed(true);
+    setTimeout(() => setIsButtonPressed(false), 200);
+
+    stopRecording();
   };
 
   if (isInitializing) {
@@ -190,33 +208,40 @@ export function AudioRecorder({
     <div className={cn("flex flex-col space-y-4", className)}>
       {/* Recording status banner - only shown when recording */}
       {state.isRecording && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3 flex items-center animate-pulse">
-          <div className="h-3 w-3 rounded-full bg-red-500 mr-3"></div>
-          <span className="text-red-700 dark:text-red-400 font-medium">
-            Recording in progress - {formatDuration(state.duration)}
-          </span>
-        </div>
+        <Alert variant="destructive" className="animate-pulse border-red-500">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center">
+            <div className="h-3 w-3 rounded-full bg-red-500 mr-3 animate-pulse"></div>
+            <span className="font-medium">
+              RECORDING IN PROGRESS - {formatDuration(state.duration)}
+            </span>
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Recording controls */}
       <div
         className={cn(
-          "flex items-center justify-between p-4 rounded-md",
+          "flex items-center justify-between p-4 rounded-md transition-all duration-300",
           state.isRecording
-            ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
-            : "bg-muted/50"
+            ? "bg-red-50 dark:bg-red-900/20 border-2 border-red-500 dark:border-red-800 shadow-lg"
+            : "bg-muted/50 border border-gray-200"
         )}
       >
-        <div className="flex items-center">
+        <div className="flex items-center w-full">
           {state.isRecording ? (
             <Button
               variant="destructive"
-              size="icon"
-              onClick={stopRecording}
+              size="lg"
+              onClick={handleStopRecording}
               aria-label="Stop recording"
-              className="relative"
+              className={cn(
+                "relative transition-transform duration-200 shadow-md hover:shadow-lg",
+                isButtonPressed ? "transform scale-95" : ""
+              )}
             >
-              <Square className="h-4 w-4" />
+              <Square className="h-5 w-5 mr-2" />
+              <span>Stop Recording</span>
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
@@ -225,28 +250,35 @@ export function AudioRecorder({
           ) : (
             <Button
               variant="default"
-              size="icon"
+              size="lg"
               onClick={handleStartRecording}
               aria-label="Start recording"
               disabled={state.isProcessing}
+              className={cn(
+                "transition-transform duration-200 shadow-md hover:shadow-lg",
+                isButtonPressed ? "transform scale-95" : ""
+              )}
             >
-              <Mic className="h-4 w-4" />
+              <Mic className="h-5 w-5 mr-2" />
+              <span>Start Recording</span>
             </Button>
           )}
 
-          <div className="ml-4">
+          <div className="ml-4 flex-1">
             {state.isRecording ? (
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-red-700 dark:text-red-400">
+                <span className="text-sm font-bold text-red-700 dark:text-red-400">
                   Recording in progress
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Click the stop button when finished
+                  Click the STOP RECORDING button when finished
                 </span>
               </div>
             ) : audioUrl ? (
               <div className="flex flex-col">
-                <span className="text-sm font-medium">Recording complete</span>
+                <span className="text-sm font-bold text-green-700">
+                  Recording complete
+                </span>
                 <span className="text-xs text-muted-foreground">
                   Listen to your recording below
                 </span>
@@ -255,7 +287,7 @@ export function AudioRecorder({
               <div className="flex flex-col">
                 <span className="text-sm font-medium">Ready to record</span>
                 <span className="text-xs text-muted-foreground">
-                  Click the microphone button to start
+                  Click the START RECORDING button to begin
                 </span>
               </div>
             )}
@@ -266,21 +298,28 @@ export function AudioRecorder({
       {/* Progress bar */}
       {showProgress && state.isRecording && (
         <div className="space-y-1">
-          <Progress value={progressPercentage} className="h-2" />
+          <Progress
+            value={progressPercentage}
+            className="h-3 bg-gray-200"
+            indicatorClassName="bg-red-500 transition-all duration-300"
+          />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{formatDuration(state.duration)}</span>
-            <span>{formatDuration(maxDuration)}</span>
+            <span className="font-medium">
+              {formatDuration(state.duration)}
+            </span>
+            <span>Maximum: {formatDuration(maxDuration)}</span>
           </div>
         </div>
       )}
 
       {/* Audio player */}
       {showPlayer && audioUrl && !state.isRecording && (
-        <div className="mt-2">
+        <div className="mt-2 p-3 border rounded-md bg-gray-50">
+          <div className="text-sm font-medium mb-2">Your Recording:</div>
           <audio
             src={audioUrl}
             controls
-            className="w-full h-10"
+            className="w-full h-12"
             controlsList="nodownload"
           />
         </div>
