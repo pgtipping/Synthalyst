@@ -1708,3 +1708,29 @@ type PrismaWithAppFeedback = typeof prisma & {
 - When creating new configuration files, always use module.exports syntax
 - When creating new utility scripts, use .cjs extension if they need to be executed directly
 - The package.json does NOT have "type": "module" to ensure CommonJS compatibility
+
+## Prisma Model Casing Pattern - March 14, 2025
+
+When working with Prisma models in code:
+
+1. Always use camelCase for model names when accessing them through the Prisma client:
+
+   - `prisma.questionLibrary` (correct)
+   - `prisma.QuestionLibrary` (incorrect)
+   - `prisma.userSavedQuestion` (correct)
+   - `prisma.UserSavedQuestion` (incorrect)
+
+2. Ensure interface definitions match the actual database schema:
+
+   - Make fields nullable in TypeScript interfaces if they can be null in the database
+   - Example: `answer: string | null` instead of just `answer: string`
+
+3. This pattern applies to all Prisma client operations:
+   - findMany
+   - findUnique
+   - findFirst
+   - create
+   - update
+   - delete
+   - count
+   - etc.

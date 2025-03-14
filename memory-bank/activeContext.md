@@ -11,6 +11,26 @@ The current focus is on implementing the Interview Preparation feature, which in
 
 ## Recent Changes
 
+### Prisma Model Casing Fix - March 14, 2025
+
+We have fixed issues with Prisma model casing in the Interview Prep Questions API:
+
+1. **Casing Consistency**:
+
+   - Updated all Prisma model references to use camelCase instead of PascalCase
+   - Changed `QuestionLibrary` to `questionLibrary` and `UserSavedQuestion` to `userSavedQuestion`
+   - This ensures consistency with Prisma's automatic casing conventions
+
+2. **Type Safety Improvements**:
+
+   - Updated the `QuestionLibraryItem` interface to make the `answer` property nullable
+   - This matches the actual structure in the database where answers can be null
+   - Fixed TypeScript errors in the question mapping function
+
+3. **Error Handling**:
+   - Maintained the existing robust error handling for database operations
+   - Ensured empty results are returned properly when the database is empty
+
 ### Breadcrumbs Navigation Update - March 14, 2025
 
 We have updated the breadcrumbs navigation in the Interview Prep pages:

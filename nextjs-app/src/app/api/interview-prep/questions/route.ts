@@ -14,7 +14,7 @@ const saveQuestionSchema = z.object({
 interface QuestionLibraryItem {
   id: string;
   question: string;
-  answer: string;
+  answer: string | null;
   jobType: string;
   industry: string;
   difficulty: string;
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
     try {
       // Fetch questions with filters
       const [questions, totalCount] = await Promise.all([
-        prisma.QuestionLibrary.findMany({
+        prisma.questionLibrary.findMany({
           where,
           skip,
           take: limit,
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
             },
           },
         }),
-        prisma.QuestionLibrary.count({ where }),
+        prisma.questionLibrary.count({ where }),
       ]);
 
       // Transform the results to include isSaved flag
@@ -210,7 +210,7 @@ export async function POST(request: Request) {
     const { questionId, notes } = validationResult.data;
 
     // Check if the question exists
-    const question = await prisma.QuestionLibrary.findUnique({
+    const question = await prisma.questionLibrary.findUnique({
       where: { id: questionId },
     });
 
@@ -222,7 +222,7 @@ export async function POST(request: Request) {
     }
 
     // Check if the question is already saved by the user
-    const existingSave = await prisma.UserSavedQuestion.findFirst({
+    const existingSave = await prisma.userSavedQuestion.findFirst({
       where: {
         userId: user.id,
         questionId,
@@ -231,7 +231,7 @@ export async function POST(request: Request) {
 
     if (existingSave) {
       // Update existing save with new notes
-      const updatedSave = await prisma.UserSavedQuestion.update({
+      const updatedSave = await prisma.userSavedQuestion.update({
         where: { id: existingSave.id },
         data: { notes },
       });
@@ -242,7 +242,7 @@ export async function POST(request: Request) {
       });
     } else {
       // Create new save
-      const savedQuestion = await prisma.UserSavedQuestion.create({
+      const savedQuestion = await prisma.userSavedQuestion.create({
         data: {
           userId: user.id,
           questionId,

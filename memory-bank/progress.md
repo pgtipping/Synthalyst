@@ -58,6 +58,8 @@
 - ✅ Fixed toast notification issues in the Mock Interview page by properly using the useToast hook
 - ✅ Implemented robust error handling in the statistics API
 - ✅ Updated navigation structure with consistent breadcrumbs
+- ✅ Fixed Prisma model casing issues in the Question Library API
+- ✅ Improved type safety for nullable fields in database models
 
 ## What's Left to Build
 
