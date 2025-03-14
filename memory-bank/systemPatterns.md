@@ -1,4 +1,214 @@
-# System Patterns - Updated on March 14, 2025
+# System Patterns
+
+_Last Updated: ${new Date().toISOString()}_
+
+## Audio Recording System (2023-07-10)
+
+### Architecture
+
+The audio recording system follows a layered architecture:
+
+1. **UI Layer**: `AudioRecorder` component in React
+2. **Hook Layer**: `useAudioRecorder` custom hook for state management
+3. **Service Layer**: `recorder.ts` for MediaRecorder API interactions
+4. **API Layer**: Server-side routes for file storage and retrieval
+
+### Data Flow
+
+```
+UI (AudioRecorder Component)
+  ↓ ↑
+Hook (useAudioRecorder)
+  ↓ ↑
+Service (recorder.ts)
+  ↓ ↑
+Browser MediaRecorder API
+  ↓
+API Routes
+  ↓
+Server File Storage
+```
+
+### Key Patterns
+
+1. **Custom Hook Pattern**: Separates state management from UI rendering
+2. **Service Layer Pattern**: Isolates browser API interactions
+3. **API Route Pattern**: Provides RESTful endpoints for file operations
+4. **Error Boundary Pattern**: Handles and displays errors gracefully
+
+### Testing Strategy
+
+1. **Component Tests**: Verify UI rendering and user interactions
+2. **Hook Tests**: Ensure state management works correctly
+3. **API Tests**: Validate server-side functionality
+4. **Mock Pattern**: Simulate browser APIs and file operations
+
+### Component Architecture
+
+```mermaid
+flowchart TD
+    AC[AudioRecorder Component] --> AH[useAudioRecorder Hook]
+    AH --> RC[Recorder Class]
+    RC --> MA[MediaRecorder API]
+    MA --> AS[Audio Stream]
+```
+
+### State Management Pattern
+
+```mermaid
+flowchart LR
+    CS[Component State] --> HS[Hook State]
+    HS --> RS[Recorder State]
+    RS --> MS[Media State]
+```
+
+### Error Handling Pattern
+
+```mermaid
+flowchart TD
+    E[Error Source] --> EH[Error Handler]
+    EH --> ES[Error State]
+    ES --> UI[UI Feedback]
+```
+
+### Resource Management Pattern
+
+```mermaid
+flowchart TD
+    R[Resource Creation] --> U[Resource Usage]
+    U --> C[Cleanup]
+    C --> D[Disposal]
+```
+
+## Design Patterns
+
+### Component Patterns
+
+1. Controlled Components:
+
+   - Props-driven behavior
+   - Clear state management
+   - Predictable updates
+
+2. Custom Hooks:
+
+   - Reusable logic
+   - Encapsulated state
+   - Clean interfaces
+
+3. Error Boundaries:
+   - Graceful error handling
+   - User feedback
+   - Recovery options
+
+### State Management Patterns
+
+1. State Initialization:
+
+   ```typescript
+   const [state, setState] = useState(() => ({
+     initialValue: computeInitialValue(),
+   }));
+   ```
+
+2. Effect Cleanup:
+
+   ```typescript
+   useEffect(() => {
+     // Setup
+     return () => {
+       // Cleanup
+     };
+   }, [dependencies]);
+   ```
+
+3. Ref Management:
+   ```typescript
+   const ref = useRef(null);
+   useEffect(() => {
+     if (ref.current) {
+       // Safe access
+     }
+   }, []);
+   ```
+
+### Mobile-First Patterns
+
+1. Responsive Design:
+
+   - Fluid layouts
+   - Breakpoint management
+   - Touch-friendly controls
+
+2. Performance:
+
+   - Resource optimization
+   - Efficient updates
+   - Memory management
+
+3. Accessibility:
+   - ARIA attributes
+   - Keyboard navigation
+   - Screen reader support
+
+## Implementation Guidelines
+
+### Code Organization
+
+1. Component Structure:
+
+   ```
+   /components
+     /interview-prep
+       AudioRecorder.tsx
+   /hooks
+     useAudioRecorder.ts
+   /lib
+     /audio
+       recorder.ts
+   ```
+
+2. Type Definitions:
+
+   ```typescript
+   interface Props {
+     // Component props
+   }
+
+   interface State {
+     // State interface
+   }
+
+   type Handler = (event: Event) => void;
+   ```
+
+3. Error Management:
+   ```typescript
+   try {
+     // Operation
+   } catch (error) {
+     // Type-safe error handling
+   }
+   ```
+
+### Testing Strategy
+
+1. Unit Tests:
+
+   - Component rendering
+   - Hook behavior
+   - Error cases
+
+2. Integration Tests:
+
+   - Browser compatibility
+   - Device testing
+   - Performance metrics
+
+3. User Testing:
+   - Mobile usability
+   - Error recovery
+   - Feature completeness
 
 ## System Architecture
 

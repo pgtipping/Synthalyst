@@ -1,29 +1,32 @@
 /** @type {import('jest').Config} */
 const config = {
-  preset: "ts-jest",
   testEnvironment: "jsdom",
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
-    "\\.(css|less|sass|scss)$": "identity-obj-proxy",
   },
-  setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup.ts"],
-  testMatch: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
+  transformIgnorePatterns: [
+    "node_modules/(?!(next|next/dist/lib|jose|@babel|uuid|@panva|openid-client)/)",
+  ],
   transform: {
-    "^.+\\.(t|j)sx?$": [
-      "ts-jest",
-      {
-        tsconfig: "tsconfig.test.json",
-        jsx: "react-jsx",
-      },
-    ],
+    "^.+\\.(js|jsx|ts|tsx|mjs)$": ["babel-jest", { presets: ["next/babel"] }],
   },
-  transformIgnorePatterns: ["node_modules/(?!next-auth|uuid)/"],
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  moduleFileExtensions: ["js", "jsx", "ts", "tsx", "json", "node"],
+  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
   globals: {
     "ts-jest": {
-      tsconfig: "tsconfig.test.json",
+      tsconfig: "tsconfig.json",
     },
   },
+  testPathIgnorePatterns: ["/node_modules/", "/.next/"],
+  collectCoverageFrom: [
+    "src/**/*.{js,jsx,ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/*.stories.{js,jsx,ts,tsx}",
+  ],
+  coveragePathIgnorePatterns: ["/node_modules/", "/.next/"],
+  coverageReporters: ["json", "lcov", "text", "clover"],
+  verbose: true,
 };
 
 module.exports = config;
