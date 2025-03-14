@@ -33,6 +33,44 @@ The application is built using Next.js with the App Router architecture, which p
 - API routes provide backend functionality
 - Database interactions are handled through Prisma
 
+### Interview Prep Feature Architecture
+
+- **Core Components**:
+
+  - JobDetailsForm: Collects information about the target position
+  - InterviewPrepPDF: Renders the interview plan as a PDF
+  - MockInterviewSession: Manages interactive mock interviews
+  - QuestionLibrary: Displays job-specific interview questions
+  - ScoreCard: Visualizes interview performance scores
+
+- **API Structure**:
+
+  - /api/interview-prep/generate-plan: Generates interview preparation plans
+  - /api/interview-prep/mock-interview: Manages mock interview sessions
+  - /api/interview-prep/mock-interview/evaluate: Evaluates interview responses
+  - /api/interview-prep/questions: Manages the question library
+
+- **Database Models**:
+
+  - InterviewSession: Tracks mock interview sessions
+  - InterviewQuestion: Stores questions for mock interviews
+  - InterviewResponse: Records user responses with feedback
+  - QuestionLibrary: Stores the comprehensive question library
+  - UserSavedQuestion: Tracks user-saved questions
+
+- **Utility Layers**:
+
+  - Audio Processing: Handles voice recording and analysis
+  - Scoring System: Evaluates interview responses
+  - Feedback Generation: Creates personalized feedback
+  - Content Analysis: Analyzes response quality and relevance
+
+- **Mobile Optimization**:
+  - Progressive Web App capabilities
+  - Touch-optimized UI components
+  - Battery-efficient processing
+  - Offline access to saved plans
+
 ### Feedback System Architecture
 
 - **Dual Storage Strategy**:
