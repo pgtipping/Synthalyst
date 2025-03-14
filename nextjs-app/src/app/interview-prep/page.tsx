@@ -588,6 +588,28 @@ export default function InterviewPrepPage() {
 
           <div className="mt-4 text-center">{renderCtaButton()}</div>
         </div>
+
+        {/* Developer Tools Section */}
+        <div className="mt-12 border border-dashed border-gray-300 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-xl font-bold">Developer Tools</h2>
+            <Badge variant="outline">Testing Only</Badge>
+          </div>
+
+          <p className="text-sm text-muted-foreground mb-4">
+            These tools are for development and testing purposes only.
+          </p>
+
+          <div className="flex flex-wrap gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/interview-prep/audio-demo")}
+            >
+              Audio Components Demo
+            </Button>
+          </div>
+        </div>
       </div>
     </FeedbackLayout>
   );

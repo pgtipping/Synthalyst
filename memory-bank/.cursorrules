@@ -1734,3 +1734,109 @@ When working with Prisma models in code:
    - delete
    - count
    - etc.
+
+## Audio Component Integration Pattern - March 14, 2025
+
+When working with audio components in the application:
+
+1. Import audio components from the components library:
+
+   ```typescript
+   import {
+     AudioRecorder,
+     TextToSpeechPlayer,
+   } from "@/components/interview-prep";
+   ```
+
+2. Add state for audio data:
+
+   ```typescript
+   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+   const [isAudioMode, setIsAudioMode] = useState(false);
+   ```
+
+3. Handle audio recording completion:
+
+   ```typescript
+   const handleRecordingComplete = (blob: Blob, url: string) => {
+     setAudioBlob(blob);
+     setAudioUrl(url);
+   };
+   ```
+
+4. Include audio URL in API requests:
+
+   ```typescript
+   interface RequestBody {
+     // Other fields
+     audioUrl?: string;
+   }
+
+   const requestBody: RequestBody = {
+     // Other fields
+     responseText: isAudioMode ? "Audio response submitted" : responseText,
+   };
+
+   if (isAudioMode && audioUrl) {
+     requestBody.audioUrl = audioUrl;
+   }
+   ```
+
+5. Add UI toggle for switching between text and audio modes:
+
+   ```tsx
+   <div className="flex items-center justify-end space-x-2 mb-2">
+     <Label
+       htmlFor="input-mode"
+       className={isAudioMode ? "text-primary" : "text-muted-foreground"}
+     >
+       {isAudioMode ? "Voice Response" : "Text Response"}
+     </Label>
+     <Switch
+       id="input-mode"
+       checked={isAudioMode}
+       onCheckedChange={toggleInputMode}
+     />
+   </div>
+   ```
+
+6. Conditionally render audio or text input based on mode:
+
+   ```tsx
+   {
+     isAudioMode ? (
+       <AudioRecorder
+         onRecordingComplete={handleRecordingComplete}
+         maxDuration={2 * 60 * 1000}
+         showPlayer={true}
+         showProgress={true}
+       />
+     ) : (
+       <textarea
+         value={responseText}
+         onChange={(e) => setResponseText(e.target.value)}
+       />
+     );
+   }
+   ```
+
+7. For text-to-speech, use the TextToSpeechPlayer component:
+
+   ```tsx
+   <TextToSpeechPlayer text={textToRead} showSettings={false} />
+   ```
+
+8. When displaying responses, handle both text and audio:
+   ```tsx
+   {
+     audioUrl ? (
+       <div>
+         <audio src={audioUrl} controls />
+         <p>Audio response submitted</p>
+       </div>
+     ) : (
+       <p>{responseText}</p>
+     );
+   }
+   ```

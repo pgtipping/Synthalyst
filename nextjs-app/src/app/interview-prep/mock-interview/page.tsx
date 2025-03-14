@@ -16,6 +16,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2, AlertCircle } from "lucide-react";
 import FeedbackLayout from "@/components/FeedbackLayout";
 import Link from "next/link";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
+// Import audio components
+import { AudioRecorder, TextToSpeechPlayer } from "@/components/interview-prep";
 
 // Mock Interview Session Types
 interface InterviewSession {
@@ -72,6 +77,11 @@ export default function MockInterviewPage() {
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  // Audio-related state
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isAudioMode, setIsAudioMode] = useState(false);
 
   // Check if user has an active session
   useEffect(() => {
@@ -189,23 +199,42 @@ export default function MockInterviewPage() {
   };
 
   const submitResponse = async () => {
-    if (!activeSession || !sessionData || responseText.trim() === "") return;
+    if (
+      !activeSession ||
+      !sessionData ||
+      (isAudioMode ? !audioBlob : responseText.trim() === "")
+    )
+      return;
 
     const currentQuestion = sessionData.questions[currentQuestionIndex];
 
     try {
       setSubmitting(true);
 
+      interface RequestBody {
+        sessionId: string;
+        questionId: string;
+        responseText: string;
+        audioUrl?: string;
+      }
+
+      const requestBody: RequestBody = {
+        sessionId: activeSession,
+        questionId: currentQuestion.id,
+        responseText: isAudioMode ? "Audio response submitted" : responseText,
+      };
+
+      // Add audioUrl if in audio mode
+      if (isAudioMode && audioUrl) {
+        requestBody.audioUrl = audioUrl;
+      }
+
       const response = await fetch("/api/interview-prep/mock-interview", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          sessionId: activeSession,
-          questionId: currentQuestion.id,
-          responseText,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -221,6 +250,8 @@ export default function MockInterviewPage() {
         setTimeout(() => {
           setFeedback(null);
           setResponseText("");
+          setAudioBlob(null);
+          setAudioUrl(null);
           setCurrentQuestionIndex(currentQuestionIndex + 1);
         }, 5000); // Show feedback for 5 seconds before moving to next question
       }
@@ -289,6 +320,21 @@ export default function MockInterviewPage() {
           error instanceof Error ? error.message : "Failed to end session",
       });
     }
+  };
+
+  // Handle audio recording completion
+  const handleRecordingComplete = (blob: Blob, url: string) => {
+    setAudioBlob(blob);
+    setAudioUrl(url);
+  };
+
+  // Toggle between text and audio mode
+  const toggleInputMode = () => {
+    setIsAudioMode(!isAudioMode);
+    // Reset inputs when switching modes
+    setResponseText("");
+    setAudioBlob(null);
+    setAudioUrl(null);
   };
 
   return (
@@ -446,10 +492,19 @@ export default function MockInterviewPage() {
                       {sessionData.questions.length > 0 && (
                         <div className="space-y-4">
                           <div className="p-4 bg-muted rounded-lg">
-                            <h3 className="font-medium mb-2">
-                              Question {currentQuestionIndex + 1} of{" "}
-                              {sessionData.questions.length}
-                            </h3>
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-medium">
+                                Question {currentQuestionIndex + 1} of{" "}
+                                {sessionData.questions.length}
+                              </h3>
+                              <TextToSpeechPlayer
+                                text={
+                                  sessionData.questions[currentQuestionIndex]
+                                    .questionText
+                                }
+                                showSettings={false}
+                              />
+                            </div>
                             <p className="text-lg">
                               {
                                 sessionData.questions[currentQuestionIndex]
@@ -471,7 +526,21 @@ export default function MockInterviewPage() {
                                 <h3 className="font-medium mb-2">
                                   Your Response
                                 </h3>
-                                <p>{responseText}</p>
+                                {audioUrl ? (
+                                  <div className="space-y-2">
+                                    <audio
+                                      src={audioUrl}
+                                      controls
+                                      className="w-full h-10"
+                                      controlsList="nodownload"
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                      Audio response submitted
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <p>{responseText}</p>
+                                )}
                               </div>
 
                               <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-lg">
@@ -531,21 +600,65 @@ export default function MockInterviewPage() {
                             </div>
                           ) : (
                             <div className="space-y-4">
-                              <textarea
-                                className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="Type your response here..."
-                                value={responseText}
-                                onChange={(e) =>
-                                  setResponseText(e.target.value)
-                                }
-                                disabled={submitting}
-                              />
+                              <div className="flex items-center justify-end space-x-2 mb-2">
+                                <Label
+                                  htmlFor="input-mode"
+                                  className={
+                                    isAudioMode
+                                      ? "text-primary"
+                                      : "text-muted-foreground"
+                                  }
+                                >
+                                  {isAudioMode
+                                    ? "Voice Response"
+                                    : "Text Response"}
+                                </Label>
+                                <Switch
+                                  id="input-mode"
+                                  checked={isAudioMode}
+                                  onCheckedChange={toggleInputMode}
+                                />
+                              </div>
+
+                              {isAudioMode ? (
+                                <div className="min-h-[200px] flex flex-col items-center justify-center border border-input rounded-md p-4">
+                                  <AudioRecorder
+                                    onRecordingComplete={
+                                      handleRecordingComplete
+                                    }
+                                    maxDuration={2 * 60 * 1000} // 2 minutes
+                                    showPlayer={true}
+                                    showProgress={true}
+                                    className="w-full"
+                                  />
+
+                                  {audioUrl && (
+                                    <div className="mt-4 text-sm text-green-600 dark:text-green-400">
+                                      Recording complete. You can re-record or
+                                      submit your response.
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <textarea
+                                  className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                  placeholder="Type your response here..."
+                                  value={responseText}
+                                  onChange={(e) =>
+                                    setResponseText(e.target.value)
+                                  }
+                                  disabled={submitting}
+                                />
+                              )}
 
                               <div className="flex justify-end">
                                 <Button
                                   onClick={submitResponse}
                                   disabled={
-                                    submitting || responseText.trim() === ""
+                                    submitting ||
+                                    (isAudioMode
+                                      ? !audioBlob
+                                      : responseText.trim() === "")
                                   }
                                 >
                                   {submitting ? (
