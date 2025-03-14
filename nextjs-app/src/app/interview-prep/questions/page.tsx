@@ -40,7 +40,6 @@ import {
   Bookmark,
   Filter,
 } from "lucide-react";
-import FeedbackLayout from "@/components/FeedbackLayout";
 import Link from "next/link";
 
 // Question Library Types
@@ -416,7 +415,7 @@ export default function QuestionsPage() {
   };
 
   return (
-    <FeedbackLayout appName="Question Library">
+    <div className="relative">
       <div className="container mx-auto py-6 space-y-6">
         <div className="flex items-center space-x-1 text-sm">
           <Link
@@ -440,17 +439,31 @@ export default function QuestionsPage() {
           <h1 className="text-3xl font-bold">Interview Question Library</h1>
           <p className="text-muted-foreground">
             Browse and save interview questions to practice for your upcoming
-            interviews. We&apos;ve curated questions across different job types, industries, and difficulty levels.
-            Use the filters below to find relevant questions for your specific needs.
+            interviews. We&apos;ve curated questions across different job types,
+            industries, and difficulty levels. Use the filters below to find
+            relevant questions for your specific needs.
           </p>
-          
+
           <div className="bg-muted p-4 rounded-lg">
-            <h2 className="text-lg font-medium mb-2">How to use this library:</h2>
+            <h2 className="text-lg font-medium mb-2">
+              How to use this library:
+            </h2>
             <ol className="list-decimal pl-5 space-y-2">
-              <li>Browse through the questions or use filters to find relevant ones for your job search</li>
-              <li>Save questions you want to practice by clicking the bookmark icon</li>
-              <li>Add your own notes and practice answers in the &quot;Saved Questions&quot; tab</li>
-              <li>Review your saved questions regularly to prepare for interviews</li>
+              <li>
+                Browse through the questions or use filters to find relevant
+                ones for your job search
+              </li>
+              <li>
+                Save questions you want to practice by clicking the bookmark
+                icon
+              </li>
+              <li>
+                Add your own notes and practice answers in the &quot;Saved
+                Questions&quot; tab
+              </li>
+              <li>
+                Review your saved questions regularly to prepare for interviews
+              </li>
             </ol>
           </div>
         </div>
@@ -735,14 +748,14 @@ export default function QuestionsPage() {
                     {activeTab === "all" ? (
                       <>
                         No questions match your current filters. Try adjusting
-                        your search criteria or
+                        your search criteria or{" "}
                         <Button
                           variant="link"
                           className="p-0 h-auto font-normal"
                           onClick={clearFilters}
                         >
                           clear all filters
-                        </Button>
+                        </Button>{" "}
                         to see all available questions.
                       </>
                     ) : (
@@ -830,3 +843,128 @@ export default function QuestionsPage() {
                             onClick={() =>
                               router.push(
                                 `/interview-prep/questions/${question.id}`
+                              )
+                            }
+                          >
+                            View Details
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {pagination.totalPages > 1 && (
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() =>
+                              handlePageChange(
+                                Math.max(1, pagination.currentPage - 1)
+                              )
+                            }
+                            className={
+                              pagination.currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+
+                        {Array.from(
+                          { length: pagination.totalPages },
+                          (_, i) => i + 1
+                        )
+                          .filter(
+                            (page) =>
+                              page === 1 ||
+                              page === pagination.totalPages ||
+                              Math.abs(page - pagination.currentPage) <= 1
+                          )
+                          .map((page, i, array) => {
+                            // Add ellipsis if there are gaps
+                            if (i > 0 && array[i - 1] !== page - 1) {
+                              return (
+                                <React.Fragment key={`ellipsis-${page}`}>
+                                  <PaginationItem>
+                                    <PaginationEllipsis />
+                                  </PaginationItem>
+                                  <PaginationItem>
+                                    <PaginationLink
+                                      isActive={page === pagination.currentPage}
+                                      onClick={() => handlePageChange(page)}
+                                    >
+                                      {page}
+                                    </PaginationLink>
+                                  </PaginationItem>
+                                </React.Fragment>
+                              );
+                            }
+
+                            return (
+                              <PaginationItem key={page}>
+                                <PaginationLink
+                                  isActive={page === pagination.currentPage}
+                                  onClick={() => handlePageChange(page)}
+                                >
+                                  {page}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() =>
+                              handlePageChange(
+                                Math.min(
+                                  pagination.totalPages,
+                                  pagination.currentPage + 1
+                                )
+                              )
+                            }
+                            className={
+                              pagination.currentPage === pagination.totalPages
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  )}
+                </>
+              ) : (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>No Questions Found</AlertTitle>
+                  <AlertDescription>
+                    {activeTab === "all" ? (
+                      <>
+                        No questions match your current filters. Try adjusting
+                        your search criteria or{" "}
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-normal"
+                          onClick={clearFilters}
+                        >
+                          clear all filters
+                        </Button>{" "}
+                        to see all available questions.
+                      </>
+                    ) : (
+                      <>
+                        You haven&apos;t saved any questions yet. Browse the
+                        question library and save questions to practice later.
+                      </>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

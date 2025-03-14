@@ -10,6 +10,21 @@ const saveQuestionSchema = z.object({
   notes: z.string().optional(),
 });
 
+// Define interfaces for our models
+interface QuestionLibraryItem {
+  id: string;
+  question: string;
+  answer: string;
+  jobType: string;
+  industry: string;
+  difficulty: string;
+  category: string;
+  tags: string[];
+  userSaves: Array<{ id: string; notes: string | null }>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // API route for fetching questions with filters
 export async function GET(request: Request) {
   try {
@@ -76,7 +91,7 @@ export async function GET(request: Request) {
     try {
       // Fetch questions with filters
       const [questions, totalCount] = await Promise.all([
-        prisma.questionLibrary.findMany({
+        prisma.QuestionLibrary.findMany({
           where,
           skip,
           take: limit,
@@ -88,23 +103,25 @@ export async function GET(request: Request) {
             },
           },
         }),
-        prisma.questionLibrary.count({ where }),
+        prisma.QuestionLibrary.count({ where }),
       ]);
 
       // Transform the results to include isSaved flag
-      const transformedQuestions = questions.map((question) => ({
-        id: question.id,
-        question: question.question,
-        answer: question.answer,
-        jobType: question.jobType,
-        industry: question.industry,
-        difficulty: question.difficulty,
-        category: question.category,
-        tags: question.tags,
-        isSaved: question.userSaves.length > 0,
-        savedNotes: question.userSaves[0]?.notes || null,
-        savedId: question.userSaves[0]?.id || null,
-      }));
+      const transformedQuestions = questions.map(
+        (question: QuestionLibraryItem) => ({
+          id: question.id,
+          question: question.question,
+          answer: question.answer,
+          jobType: question.jobType,
+          industry: question.industry,
+          difficulty: question.difficulty,
+          category: question.category,
+          tags: question.tags,
+          isSaved: question.userSaves.length > 0,
+          savedNotes: question.userSaves[0]?.notes || null,
+          savedId: question.userSaves[0]?.id || null,
+        })
+      );
 
       // Return the questions with pagination info
       return NextResponse.json({
@@ -193,7 +210,7 @@ export async function POST(request: Request) {
     const { questionId, notes } = validationResult.data;
 
     // Check if the question exists
-    const question = await prisma.questionLibrary.findUnique({
+    const question = await prisma.QuestionLibrary.findUnique({
       where: { id: questionId },
     });
 
@@ -205,7 +222,7 @@ export async function POST(request: Request) {
     }
 
     // Check if the question is already saved by the user
-    const existingSave = await prisma.userSavedQuestion.findFirst({
+    const existingSave = await prisma.UserSavedQuestion.findFirst({
       where: {
         userId: user.id,
         questionId,
@@ -214,7 +231,7 @@ export async function POST(request: Request) {
 
     if (existingSave) {
       // Update existing save with new notes
-      const updatedSave = await prisma.userSavedQuestion.update({
+      const updatedSave = await prisma.UserSavedQuestion.update({
         where: { id: existingSave.id },
         data: { notes },
       });
@@ -225,7 +242,7 @@ export async function POST(request: Request) {
       });
     } else {
       // Create new save
-      const savedQuestion = await prisma.userSavedQuestion.create({
+      const savedQuestion = await prisma.UserSavedQuestion.create({
         data: {
           userId: user.id,
           questionId,
