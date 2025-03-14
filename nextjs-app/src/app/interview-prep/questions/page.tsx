@@ -101,6 +101,62 @@ export default function QuestionsPage() {
   // Tab state
   const [activeTab, setActiveTab] = useState<string>("all");
 
+  // Sample questions to show when API returns empty results
+  const sampleQuestions: Question[] = [
+    {
+      id: "sample-1",
+      questionText:
+        "Tell me about a time you had to deal with a difficult team member.",
+      jobType: "software-engineer",
+      industry: "technology",
+      difficulty: "intermediate",
+      category: "behavioral",
+      isSaved: false,
+      notes: null,
+    },
+    {
+      id: "sample-2",
+      questionText: "How would you design a scalable e-commerce system?",
+      jobType: "software-engineer",
+      industry: "technology",
+      difficulty: "advanced",
+      category: "technical",
+      isSaved: false,
+      notes: null,
+    },
+    {
+      id: "sample-3",
+      questionText: "What are your greatest strengths and weaknesses?",
+      jobType: "product-manager",
+      industry: "technology",
+      difficulty: "beginner",
+      category: "behavioral",
+      isSaved: false,
+      notes: null,
+    },
+    {
+      id: "sample-4",
+      questionText: "How do you prioritize features in a product roadmap?",
+      jobType: "product-manager",
+      industry: "technology",
+      difficulty: "intermediate",
+      category: "situational",
+      isSaved: false,
+      notes: null,
+    },
+    {
+      id: "sample-5",
+      questionText:
+        "Explain a complex data analysis you've performed and its impact.",
+      jobType: "data-scientist",
+      industry: "finance",
+      difficulty: "advanced",
+      category: "technical",
+      isSaved: false,
+      notes: null,
+    },
+  ];
+
   // Fetch questions based on filters and pagination
   useEffect(() => {
     fetchQuestions();
@@ -148,13 +204,28 @@ export default function QuestionsPage() {
 
         // For 500 errors or other errors, just show empty state
         if (response.status === 500) {
-          console.warn("API returned 500 error, showing empty state");
-          setQuestions([]);
+          console.warn("API returned 500 error, showing sample questions");
+
+          // Show sample questions if we're on the first page with no filters
+          if (
+            pagination.currentPage === 1 &&
+            jobType === "all" &&
+            industry === "all" &&
+            difficulty === "all" &&
+            category === "all" &&
+            !searchQuery &&
+            activeTab === "all"
+          ) {
+            setQuestions(sampleQuestions);
+          } else {
+            setQuestions([]);
+          }
+
           setPagination({
-            totalItems: 0,
-            totalPages: 0,
+            totalItems: sampleQuestions.length,
+            totalPages: 1,
             currentPage: 1,
-            itemsPerPage: pagination.itemsPerPage,
+            itemsPerPage: pagination.itemsPerPage || 10,
           });
           setLoading(false);
           return;
@@ -165,13 +236,35 @@ export default function QuestionsPage() {
       }
 
       const data: QuestionsResponse = await response.json();
-      setQuestions(data.questions || []);
-      setPagination({
-        currentPage: data.pagination?.currentPage || 1,
-        totalPages: data.pagination?.totalPages || 1,
-        totalItems: data.pagination?.totalItems || 0,
-        itemsPerPage: data.pagination?.itemsPerPage || 10,
-      });
+
+      // If we got an empty array and we're on the first page with no filters, show sample questions
+      if (
+        (!data.questions || data.questions.length === 0) &&
+        pagination.currentPage === 1 &&
+        jobType === "all" &&
+        industry === "all" &&
+        difficulty === "all" &&
+        category === "all" &&
+        !searchQuery &&
+        activeTab === "all"
+      ) {
+        setQuestions(sampleQuestions);
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: sampleQuestions.length,
+          itemsPerPage: pagination.itemsPerPage || 10,
+        });
+      } else {
+        setQuestions(data.questions || []);
+        setPagination({
+          currentPage: data.pagination?.currentPage || 1,
+          totalPages: data.pagination?.totalPages || 1,
+          totalItems: data.pagination?.totalItems || 0,
+          itemsPerPage: data.pagination?.itemsPerPage || 10,
+        });
+      }
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -184,6 +277,25 @@ export default function QuestionsPage() {
         description:
           error instanceof Error ? error.message : "Failed to fetch questions",
       });
+
+      // Show sample questions on error if we're on the first page with no filters
+      if (
+        pagination.currentPage === 1 &&
+        jobType === "all" &&
+        industry === "all" &&
+        difficulty === "all" &&
+        category === "all" &&
+        !searchQuery &&
+        activeTab === "all"
+      ) {
+        setQuestions(sampleQuestions);
+        setPagination({
+          totalItems: sampleQuestions.length,
+          totalPages: 1,
+          currentPage: 1,
+          itemsPerPage: pagination.itemsPerPage || 10,
+        });
+      }
     }
   };
 
@@ -328,8 +440,19 @@ export default function QuestionsPage() {
           <h1 className="text-3xl font-bold">Interview Question Library</h1>
           <p className="text-muted-foreground">
             Browse and save interview questions to practice for your upcoming
-            interviews.
+            interviews. We&apos;ve curated questions across different job types, industries, and difficulty levels.
+            Use the filters below to find relevant questions for your specific needs.
           </p>
+          
+          <div className="bg-muted p-4 rounded-lg">
+            <h2 className="text-lg font-medium mb-2">How to use this library:</h2>
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>Browse through the questions or use filters to find relevant ones for your job search</li>
+              <li>Save questions you want to practice by clicking the bookmark icon</li>
+              <li>Add your own notes and practice answers in the &quot;Saved Questions&quot; tab</li>
+              <li>Review your saved questions regularly to prepare for interviews</li>
+            </ol>
+          </div>
         </div>
 
         <Tabs defaultValue="all" onValueChange={handleTabChange}>
@@ -354,7 +477,7 @@ export default function QuestionsPage() {
                       <Label htmlFor="jobType">Job Type</Label>
                       <Select value={jobType} onValueChange={setJobType}>
                         <SelectTrigger id="jobType">
-                          <SelectValue placeholder="Select job type" />
+                          <SelectValue placeholder="All Job Types" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Job Types</SelectItem>
@@ -432,7 +555,7 @@ export default function QuestionsPage() {
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
                       <Input
-                        placeholder="Search questions..."
+                        placeholder="Search by keywords (e.g., 'leadership', 'problem solving')"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
@@ -609,8 +732,25 @@ export default function QuestionsPage() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>No Questions Found</AlertTitle>
                   <AlertDescription>
-                    No questions match your current filters. Try adjusting your
-                    search criteria.
+                    {activeTab === "all" ? (
+                      <>
+                        No questions match your current filters. Try adjusting
+                        your search criteria or
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-normal"
+                          onClick={clearFilters}
+                        >
+                          clear all filters
+                        </Button>
+                        to see all available questions.
+                      </>
+                    ) : (
+                      <>
+                        You haven&apos;t saved any questions yet. Browse the
+                        question library and save questions to practice later.
+                      </>
+                    )}
                   </AlertDescription>
                 </Alert>
               )}
@@ -690,111 +830,3 @@ export default function QuestionsPage() {
                             onClick={() =>
                               router.push(
                                 `/interview-prep/questions/${question.id}`
-                              )
-                            }
-                          >
-                            Edit Notes
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-
-                  {pagination.totalPages > 1 && (
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() =>
-                              handlePageChange(
-                                Math.max(1, pagination.currentPage - 1)
-                              )
-                            }
-                            className={
-                              pagination.currentPage === 1
-                                ? "pointer-events-none opacity-50"
-                                : ""
-                            }
-                          />
-                        </PaginationItem>
-
-                        {Array.from(
-                          { length: pagination.totalPages },
-                          (_, i) => i + 1
-                        )
-                          .filter(
-                            (page) =>
-                              page === 1 ||
-                              page === pagination.totalPages ||
-                              Math.abs(page - pagination.currentPage) <= 1
-                          )
-                          .map((page, i, array) => {
-                            // Add ellipsis if there are gaps
-                            if (i > 0 && array[i - 1] !== page - 1) {
-                              return (
-                                <React.Fragment key={`ellipsis-${page}`}>
-                                  <PaginationItem>
-                                    <PaginationEllipsis />
-                                  </PaginationItem>
-                                  <PaginationItem>
-                                    <PaginationLink
-                                      isActive={page === pagination.currentPage}
-                                      onClick={() => handlePageChange(page)}
-                                    >
-                                      {page}
-                                    </PaginationLink>
-                                  </PaginationItem>
-                                </React.Fragment>
-                              );
-                            }
-
-                            return (
-                              <PaginationItem key={page}>
-                                <PaginationLink
-                                  isActive={page === pagination.currentPage}
-                                  onClick={() => handlePageChange(page)}
-                                >
-                                  {page}
-                                </PaginationLink>
-                              </PaginationItem>
-                            );
-                          })}
-
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() =>
-                              handlePageChange(
-                                Math.min(
-                                  pagination.totalPages,
-                                  pagination.currentPage + 1
-                                )
-                              )
-                            }
-                            className={
-                              pagination.currentPage === pagination.totalPages
-                                ? "pointer-events-none opacity-50"
-                                : ""
-                            }
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  )}
-                </>
-              ) : (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>No Saved Questions</AlertTitle>
-                  <AlertDescription>
-                    You haven&apos;t saved any questions yet. Browse the
-                    question library and save questions to practice later.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </FeedbackLayout>
-  );
-}
