@@ -203,29 +203,51 @@ export default function InterviewPrepPlan() {
                         {jobDetails.company ? ` at ${jobDetails.company}` : ""}
                       </CardDescription>
                     </div>
-                    <PDFRenderer
-                      document={
-                        <InterviewPrepPDF
-                          jobTitle={jobDetails.jobTitle}
-                          company={jobDetails.company}
-                          industry={jobDetails.industry}
-                          prepPlan={prepPlan || { sections: [] }}
-                          questions={generatedQuestions || []}
-                        />
-                      }
-                      fileName={`interview-prep-plan-${jobDetails.jobTitle
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}.pdf`}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-1"
+                    <div className="relative">
+                      {process.env.NODE_ENV === "development" && (
+                        <div className="absolute -top-10 right-0 text-xs text-muted-foreground">
+                          <span className="hidden">
+                            Debug:{" "}
+                            {JSON.stringify({
+                              hasPrepPlan: Boolean(prepPlan),
+                              sectionsCount: prepPlan?.sections?.length || 0,
+                              questionsCount: generatedQuestions?.length || 0,
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      <PDFRenderer
+                        document={
+                          <InterviewPrepPDF
+                            jobTitle={jobDetails.jobTitle}
+                            company={jobDetails.company}
+                            industry={jobDetails.industry}
+                            prepPlan={prepPlan || { sections: [] }}
+                            questions={generatedQuestions || []}
+                          />
+                        }
+                        fileName={`interview-prep-plan-${jobDetails.jobTitle
+                          .toLowerCase()
+                          .replace(/\s+/g, "-")}.pdf`}
                       >
-                        <Download className="h-4 w-4" />
-                        <span>Export PDF</span>
-                      </Button>
-                    </PDFRenderer>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-1"
+                          onClick={() => {
+                            console.log("Export PDF button clicked");
+                            console.log("PrepPlan data:", {
+                              hasPrepPlan: Boolean(prepPlan),
+                              sectionsCount: prepPlan?.sections?.length || 0,
+                              questionsCount: generatedQuestions?.length || 0,
+                            });
+                          }}
+                        >
+                          <Download className="h-4 w-4" />
+                          <span>Export PDF</span>
+                        </Button>
+                      </PDFRenderer>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
