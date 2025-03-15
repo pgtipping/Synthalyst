@@ -10,6 +10,9 @@ import {
 import { kv } from "@vercel/kv";
 import { createHash } from "crypto";
 
+// Configure the maximum duration for this function (60s for Hobby, 300s for Pro plan)
+export const maxDuration = 60;
+
 // Define the schema for the request body
 const transformSchema = z.object({
   resumeText: z.string().min(1, "Resume text is required"),
@@ -252,8 +255,60 @@ export async function POST(request: Request) {
       // Log the prompt length to help with debugging
       logger.info("Resume transformation prompt length:", resumePrompt.length);
 
-      // Set up streaming response
-      const streamingResponse = await model.generateContentStream(resumePrompt);
+      // Set up a timeout for the API call to prevent function timeout
+      const timeoutMs = 45000; // 45 seconds (to leave buffer for the function's max duration)
+
+      // Create a promise that rejects after the timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("API request timed out"));
+        }, timeoutMs);
+      });
+
+      // Set up streaming response with timeout handling
+      let streamingResponse: Awaited<
+        ReturnType<typeof model.generateContentStream>
+      >;
+      try {
+        // Race the API call against the timeout
+        streamingResponse = (await Promise.race([
+          model.generateContentStream(resumePrompt),
+          timeoutPromise,
+        ])) as Awaited<ReturnType<typeof model.generateContentStream>>;
+      } catch (timeoutError) {
+        logger.error("API request timed out:", timeoutError);
+
+        // Generate fallback response for timeout case
+        const timeoutFallbackResponse = {
+          success: true,
+          fallbackMode: true,
+          transformedResume: generateFallbackResume(
+            data.resumeText,
+            data.jobDescription,
+            data.isPremiumUser || false
+          ),
+          coverLetter: data.jobDescription
+            ? generateFallbackCoverLetter(data.resumeText, data.jobDescription)
+            : null,
+          changesMade: generateFallbackChanges(data.isPremiumUser || false),
+          keywordsExtracted: data.jobDescription
+            ? extractFallbackKeywords(data.jobDescription)
+            : [],
+          message: "Resume transformed with fallback system due to timeout",
+        };
+
+        // Cache the fallback response
+        try {
+          await kv.set(cacheKey, timeoutFallbackResponse, {
+            ex: CACHE_TTL / 2,
+          });
+        } catch (cacheError) {
+          logger.warn("Failed to cache timeout fallback response", cacheError);
+        }
+
+        return NextResponse.json(timeoutFallbackResponse, { status: 200 });
+      }
+
       const encoder = new TextEncoder();
 
       const stream = new ReadableStream({
@@ -262,8 +317,23 @@ export async function POST(request: Request) {
             let accumulatedText = "";
             let lastValidJson: ResumeTransformResponse | null = null;
             let chunkCount = 0;
+            const processingStartTime = Date.now();
+
+            // Set a timeout for stream processing
+            const streamTimeoutMs = 50000; // 50 seconds
+            let streamTimedOut = false;
+
+            const streamTimeout = setTimeout(() => {
+              streamTimedOut = true;
+              logger.warn("Stream processing timed out");
+            }, streamTimeoutMs);
 
             for await (const chunk of streamingResponse.stream) {
+              // Check if we've hit the stream timeout
+              if (streamTimedOut) {
+                break;
+              }
+
               const text = chunk.text();
               chunkCount++;
 
@@ -304,12 +374,16 @@ export async function POST(request: Request) {
                           cached: false,
                           generated: new Date().toISOString(),
                           chunkCount,
+                          processingTime: Date.now() - processingStartTime,
                         })
                       )
                     );
 
                     // Reset accumulated text after successful parse to avoid duplicate processing
                     accumulatedText = "";
+
+                    // Clear the timeout since we got a valid response
+                    clearTimeout(streamTimeout);
                   }
                 } catch {
                   // This is expected for partial JSON chunks
@@ -324,9 +398,16 @@ export async function POST(request: Request) {
               }
             }
 
-            // If we didn't get a valid JSON response, use fallback
-            if (!lastValidJson) {
-              logger.warn("No valid JSON response received, using fallback");
+            // Clear the timeout if it hasn't fired yet
+            clearTimeout(streamTimeout);
+
+            // If we didn't get a valid JSON response or hit the timeout, use fallback
+            if (!lastValidJson || streamTimedOut) {
+              logger.warn(
+                streamTimedOut
+                  ? "Stream processing timed out, using fallback"
+                  : "No valid JSON response received, using fallback"
+              );
 
               // Generate fallback response
               const fallbackResponse = {
@@ -349,8 +430,9 @@ export async function POST(request: Request) {
                 keywordsExtracted: data.jobDescription
                   ? extractFallbackKeywords(data.jobDescription)
                   : [],
-                message:
-                  "Resume transformed with fallback system due to processing issues",
+                message: streamTimedOut
+                  ? "Resume transformed with fallback system due to processing timeout"
+                  : "Resume transformed with fallback system due to processing issues",
               };
 
               // Cache the fallback response with a shorter TTL
@@ -368,6 +450,7 @@ export async function POST(request: Request) {
                     cached: false,
                     fallback: true,
                     chunkCount,
+                    processingTime: Date.now() - processingStartTime,
                   })
                 )
               );
@@ -432,7 +515,43 @@ export async function POST(request: Request) {
       return new Response(stream);
     } catch (error) {
       logger.error("Failed to transform resume", error);
-      return handleAPIError(error);
+
+      // Check if this is a timeout error
+      const isTimeoutError =
+        error instanceof Error &&
+        (error.message.includes("timeout") ||
+          error.message.includes("timed out"));
+
+      // Generate a more specific fallback response for timeout errors
+      const fallbackResponse = {
+        success: true,
+        fallbackMode: true,
+        transformedResume: generateFallbackResume(
+          data.resumeText,
+          data.jobDescription,
+          data.isPremiumUser || false
+        ),
+        coverLetter: data.jobDescription
+          ? generateFallbackCoverLetter(data.resumeText, data.jobDescription)
+          : null,
+        changesMade: generateFallbackChanges(data.isPremiumUser || false),
+        keywordsExtracted: data.jobDescription
+          ? extractFallbackKeywords(data.jobDescription)
+          : [],
+        message: isTimeoutError
+          ? "Resume transformed with fallback system due to timeout"
+          : "Resume transformed with fallback system due to an error",
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+
+      // Cache the fallback response
+      try {
+        await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL / 2 });
+      } catch (cacheError) {
+        logger.warn("Failed to cache error fallback response", cacheError);
+      }
+
+      return NextResponse.json(fallbackResponse, { status: 200 });
     }
   } catch (error) {
     logger.error("Failed to transform resume", error);

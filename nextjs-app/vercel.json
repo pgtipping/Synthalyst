@@ -15,5 +15,10 @@
       "NEXT_TELEMETRY_DISABLED": "1",
       "NODE_OPTIONS": "--max-old-space-size=4096"
     }
+  },
+  "functions": {
+    "src/app/api/apply-right/**/*": {
+      "maxDuration": 60
+    }
   }
 }
