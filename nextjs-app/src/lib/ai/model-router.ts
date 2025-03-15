@@ -1,12 +1,38 @@
 import { OpenAI } from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize clients
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Check if we're on the client side
+const isClient = typeof window !== "undefined";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
+// Initialize clients - only create actual clients on the server side
+// For client-side, create mock clients that will be replaced with API calls
+const openai = isClient
+  ? ({
+      chat: {
+        completions: {
+          create: async () => {
+            throw new Error(
+              "OpenAI client should not be called directly from the client side"
+            );
+          },
+        },
+      },
+    } as unknown as OpenAI)
+  : new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || "",
+    });
+
+const genAI = isClient
+  ? ({
+      getGenerativeModel: () => ({
+        generateContent: async () => {
+          throw new Error(
+            "Google AI client should not be called directly from the client side"
+          );
+        },
+      }),
+    } as unknown as GoogleGenerativeAI)
+  : new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 // Model aliases
 export const MODELS = {
@@ -208,39 +234,74 @@ export async function generateContent(
   systemPrompt: string,
   userPrompt: string,
   temperature: number = 0.7,
-  maxTokens: number = 1000
+  maxTokens: number = 1000,
+  language: string = "English"
 ): Promise<string> {
-  const provider = getModelProvider(model);
+  if (isClient) {
+    // Use the API route on the client side
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          systemPrompt,
+          userPrompt,
+          temperature,
+          maxTokens,
+          language,
+        }),
+      });
 
-  if (provider === "openai") {
-    const response = await openai.chat.completions.create({
-      model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature,
-      max_tokens: maxTokens,
-    });
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
 
-    return response.choices[0]?.message?.content?.trim() || "";
-  } else if (provider === "google") {
-    const geminiModel = genAI.getGenerativeModel({ model });
+      const data = await response.json();
+      return data.content || "";
+    } catch (error) {
+      console.error("Error calling generate API:", error);
+      throw error;
+    }
+  } else {
+    // Server-side generation
+    const provider = getModelProvider(model);
 
-    const result = await geminiModel.generateContent({
-      contents: [
-        { role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
-      ],
-      generationConfig: {
+    if (provider === "openai") {
+      const response = await openai.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
         temperature,
-        maxOutputTokens: maxTokens,
-      },
-    });
+        max_tokens: maxTokens,
+      });
 
-    return result.response.text().trim();
+      return response.choices[0]?.message?.content?.trim() || "";
+    } else if (provider === "google") {
+      const geminiModel = genAI.getGenerativeModel({ model });
+
+      const result = await geminiModel.generateContent({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
+          },
+        ],
+        generationConfig: {
+          temperature,
+          maxOutputTokens: maxTokens,
+        },
+      });
+
+      return result.response.text().trim();
+    }
+
+    throw new Error(`Unsupported provider: ${provider}`);
   }
-
-  throw new Error(`Unsupported provider: ${provider}`);
 }
 
 // Function to detect the complexity of a task based on the prompt
@@ -319,4 +380,95 @@ export function createMultilingualSystemPrompt(
   return `${basePrompt}
 
 Please respond in ${language}. Ensure that your response is culturally appropriate and uses natural expressions in ${language}.`;
+}
+
+// New version of generateContent function with updated signature
+export async function generateContentV2({
+  messages,
+  type = "knowledge",
+  language = "English",
+  temperature = 0.7,
+  maxTokens = 1000,
+}: {
+  messages: { role: "system" | "user" | "assistant"; content: string }[];
+  type?: string;
+  language?: string;
+  temperature?: number;
+  maxTokens?: number;
+}): Promise<string> {
+  if (isClient) {
+    // Use the API route on the client side
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: messages.find((m) => m.role === "user")?.content || "",
+          language,
+          type,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.content || "";
+    } catch (error) {
+      console.error("Error calling generate API:", error);
+      throw error;
+    }
+  } else {
+    // Server-side generation
+    // Map generic model type to actual model
+    let model = "";
+
+    if (type === "knowledge" || type === MODELS.KNOWLEDGE_MODEL) {
+      model = MODELS.GEMINI_1_5_FLASH_8B; // Use Gemini for knowledge queries
+    } else if (type === "learning" || type === MODELS.LEARNING_MODEL) {
+      model = MODELS.GPT_4O_MINI; // Use GPT for learning content
+    } else {
+      // If it's already a specific model, use it
+      model = type;
+    }
+
+    console.log(`Model Router - Using model: ${model} for type: ${type}`);
+    console.log(`Model Router - Language: ${language}`);
+
+    const provider = getModelProvider(model);
+
+    if (provider === "openai") {
+      const response = await openai.chat.completions.create({
+        model,
+        messages,
+        temperature,
+        max_tokens: maxTokens,
+      });
+
+      return response.choices[0]?.message?.content?.trim() || "";
+    } else if (provider === "google") {
+      const geminiModel = genAI.getGenerativeModel({ model });
+
+      // Convert messages to Google AI format
+      const formattedMessages = messages.map((msg) => ({
+        role: msg.role === "assistant" ? "model" : msg.role,
+        parts: [{ text: msg.content }],
+      }));
+
+      const result = await geminiModel.generateContent({
+        contents: formattedMessages,
+        generationConfig: {
+          temperature,
+          maxOutputTokens: maxTokens,
+        },
+      });
+
+      return result.response.text().trim();
+    }
+
+    throw new Error(`Unsupported provider: ${provider}`);
+  }
 }

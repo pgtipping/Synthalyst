@@ -24,16 +24,20 @@ export function LanguageSelector({
   defaultLanguage = "English",
   className = "",
 }: LanguageSelectorProps) {
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<string>(defaultLanguage);
-  const [browserLanguage, setBrowserLanguage] = useState<string>("English");
-
   // Get languages supported by the model
   const languages =
     SUPPORTED_LANGUAGES[modelType as keyof typeof SUPPORTED_LANGUAGES] || [];
 
-  // Detect browser language on component mount
+  // State for client-side rendering
+  const [mounted, setMounted] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage);
+  const [browserLanguage, setBrowserLanguage] = useState("English");
+
+  // Set mounted state on client side
   useEffect(() => {
+    setMounted(true);
+
+    // Detect browser language
     if (typeof window !== "undefined") {
       const browserLang = navigator.language.split("-")[0];
 
@@ -61,29 +65,41 @@ export function LanguageSelector({
       };
 
       const detectedLanguage = languageMap[browserLang] || "English";
-
-      // Only set if the detected language is supported by the model
-      if (languages.includes(detectedLanguage)) {
-        setBrowserLanguage(detectedLanguage);
-        setSelectedLanguage(detectedLanguage);
-        onLanguageChange(detectedLanguage);
-      }
+      setBrowserLanguage(detectedLanguage);
     }
-  }, [languages, onLanguageChange]);
+  }, []);
 
+  // Handle language change
   const handleLanguageChange = (value: string) => {
+    console.log("Language changed to:", value);
     setSelectedLanguage(value);
     onLanguageChange(value);
   };
 
+  // Don't render the component until mounted to prevent hydration issues
+  if (!mounted) {
+    return (
+      <div className={`flex items-center space-x-2 ${className}`}>
+        <Globe className="h-4 w-4 text-muted-foreground" />
+        <div className="w-[180px] h-9 border border-input rounded-md px-3 py-2 text-sm">
+          {selectedLanguage}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
       <Globe className="h-4 w-4 text-muted-foreground" />
-      <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
+      <Select
+        defaultValue={selectedLanguage}
+        value={selectedLanguage}
+        onValueChange={handleLanguageChange}
+      >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select Language" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" sideOffset={4} className="z-[100]">
           {languages.map((language) => (
             <SelectItem key={language} value={language}>
               {language} {language === browserLanguage && "(Browser Default)"}
