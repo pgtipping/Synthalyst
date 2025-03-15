@@ -20,6 +20,7 @@
 
 ### UI Improvements
 
+- ✅ Updated ApplyRight badge from "Most Popular" to "New" for consistent tool presentation
 - ✅ Newsletter signup component with consistent button and input field widths
 - ✅ Improved responsive behavior for form elements
 - ✅ Better visual consistency across the application

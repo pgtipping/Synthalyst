@@ -6,7 +6,9 @@ _Last Updated: ${new Date().toISOString()}_
 
 ### UI Improvements
 
-1. **Newsletter Signup Component**: Updated the NewsletterSignup component to ensure the subscribe button has the same width as the input field for better visual consistency.
+1. **Badge Updates**: Changed the ApplyRight tool badge from "Most Popular" to "New" to maintain consistency with other recently developed tools and create a more cohesive user experience.
+
+2. **Newsletter Signup Component**: Updated the NewsletterSignup component to ensure the subscribe button has the same width as the input field for better visual consistency.
    - Separated the layout logic for minimal and default variants
    - Added explicit width classes to ensure proper alignment
    - Improved responsive behavior with a cleaner implementation
