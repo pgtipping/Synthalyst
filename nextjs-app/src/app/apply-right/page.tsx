@@ -94,7 +94,7 @@ export default function ApplyRight() {
 
       // Set up a controller for the fetch request
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (increased from 30s)
 
       // Call the API to transform the resume
       const response = await fetch("/api/apply-right/transform", {
@@ -106,6 +106,7 @@ export default function ApplyRight() {
           resumeText,
           jobDescription,
           isPremiumUser: checkPremiumStatus(),
+          bypassCache: false, // Only bypass cache if explicitly requested
         }),
         signal: controller.signal,
       });
@@ -123,6 +124,7 @@ export default function ApplyRight() {
             "The request took too long to process. Please try again with a shorter resume or job description.",
             { duration: 6000 }
           );
+          setIsProcessing(false);
           return;
         }
 
@@ -153,11 +155,15 @@ export default function ApplyRight() {
 
       // Process the stream
       let lastUpdateTime = Date.now();
-      const updateInterval = 300;
+      const updateInterval = 300; // Update UI every 300ms at most
+      let chunkCount = 0;
+      let lastValidData = null;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+
+        chunkCount++;
 
         // Decode the chunk and append to the accumulated response
         const chunk = decoder.decode(value, { stream: true });
@@ -169,6 +175,7 @@ export default function ApplyRight() {
           try {
             // Parse the complete JSON response
             const parsedData = JSON.parse(responseText);
+            lastValidData = parsedData; // Store the last valid data
 
             // Update the UI with the data
             if (parsedData.transformedResume) {
@@ -176,7 +183,7 @@ export default function ApplyRight() {
 
               // Update the toast message to show progress
               toast.dismiss("streaming-resume");
-              toast.info("Receiving your transformed resume...", {
+              toast.info(`Processing your resume (chunk ${chunkCount})...`, {
                 duration: 5000,
                 id: "streaming-resume",
               });
@@ -217,9 +224,10 @@ export default function ApplyRight() {
         }
       }
 
-      // Final parsing of the complete response
+      // Final processing of the complete response
       try {
-        const data = JSON.parse(responseText);
+        // Use the last valid data if we have it, otherwise try to parse the final response
+        const data = lastValidData || JSON.parse(responseText);
         console.log("Complete API response data:", data);
 
         // Dismiss the streaming toast
@@ -249,46 +257,36 @@ export default function ApplyRight() {
             new Date().toLocaleString()
           );
 
+          // Show success message
+          toast.success("Resume transformed successfully!", {
+            duration: 5000,
+          });
+
           // Auto-advance to next tab
           setActiveTab("results");
-
-          // Show a different message if we're in fallback mode
-          if (data.fallbackMode) {
-            toast.warning(
-              "AI service is currently unavailable. Using basic transformation instead."
-            );
-          } else if (data.cached) {
-            toast.success("Resume transformation retrieved from cache!");
-          } else {
-            toast.success("Resume transformed successfully!");
-
-            // Show premium vs free user message
-            if (checkPremiumStatus()) {
-              toast.info(
-                "As a premium user, you have access to additional customization options and templates.",
-                { duration: 5000 }
-              );
-            } else {
-              toast.info(
-                "Upgrade to premium for additional customization options and templates.",
-                { duration: 5000 }
-              );
-            }
-          }
         } else {
-          throw new Error(data.message || "Failed to transform resume");
+          // Handle error in the response
+          toast.error(data.message || "Failed to transform resume", {
+            duration: 5000,
+          });
         }
-      } catch (parseError) {
-        console.error("Error parsing final JSON response:", parseError);
-        throw new Error("Failed to parse the response from the server");
+      } catch (error) {
+        console.error("Error processing final response:", error);
+        toast.error("Error processing the transformed resume", {
+          duration: 5000,
+        });
       }
     } catch (error) {
-      console.error("Error transforming resume:", error);
+      console.error("Error in resume transformation:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to transform resume"
+        error instanceof Error
+          ? error.message
+          : "Failed to transform resume. Please try again.",
+        { duration: 5000 }
       );
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   const handleDownloadResume = () => {
@@ -969,6 +967,7 @@ export default function ApplyRight() {
                         company
                       )
                     }
+                    disabled={!jobTitle.trim() || !company.trim()}
                   >
                     Next
                     <ArrowRight className="ml-2 h-4 w-4" />

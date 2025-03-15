@@ -2,10 +2,8 @@
 
 import React from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight } from "lucide-react";
 
 interface JobDescriptionProps {
   value: string;
@@ -65,13 +63,6 @@ export function JobDescription({
           onChange={(e) => onChange(e.target.value)}
           className="min-h-[200px]"
         />
-      </div>
-
-      <div className="flex justify-end">
-        <Button type="submit" disabled={!jobTitle.trim() || !company.trim()}>
-          Continue
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
       </div>
     </form>
   );

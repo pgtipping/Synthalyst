@@ -1,4 +1,4 @@
-# Active Development Context [2024-03-15 14:30 UTC]
+# Active Development Context [2024-03-15 ${new Date().toLocaleTimeString()} UTC]
 
 _Last Updated: ${new Date().toISOString()}_
 
@@ -8,8 +8,29 @@ _Last Updated: ${new Date().toISOString()}_
 - Optimized API response handling and error management
 - Enhanced streaming response implementation
 - Fixed ApplyRight resume transformation timeout issues in production
+- Improved document parsing for DOC files in ApplyRight
+- Enhanced UI for ApplyRight by removing redundant buttons
 
 ## Recent Changes
+
+### ApplyRight Document Parser Improvements [${new Date().toLocaleDateString()}]
+
+- Enhanced document parser to better handle DOC files
+- Added fallback methods for extracting text when mammoth.js fails
+- Implemented JSZip for extracting text from DOCX files as a fallback
+- Added better error messages for different document format issues
+- Improved file type detection using both MIME types and file extensions
+- Enhanced validation for empty files and corrupted documents
+- Added user guidance for DOC files with recommendations to convert to DOCX
+
+### ApplyRight UI Improvements [${new Date().toLocaleDateString()}]
+
+- Removed redundant "Continue" button from JobDescription component
+- Updated "Next" button to maintain the same validation logic
+- Enhanced FileUpload component with better guidance for DOC files
+- Added warning alerts for DOC files with conversion recommendations
+- Improved error messages for document parsing failures
+- Enhanced user feedback during file processing
 
 ### ApplyRight Resume Transformation Streaming [2024-03-15]
 

@@ -15,6 +15,7 @@ const transformSchema = z.object({
   resumeText: z.string().min(1, "Resume text is required"),
   jobDescription: z.string().optional(),
   isPremiumUser: z.boolean().default(false),
+  bypassCache: z.boolean().optional().default(false),
 });
 
 // Define the response type for type checking
@@ -28,17 +29,27 @@ interface ResumeTransformResponse {
   message?: string;
 }
 
-// Cache TTL in seconds (24 hours)
-const CACHE_TTL = 86400;
+// Cache configuration
+const CACHE_VERSION = "v2"; // Increment when making significant changes to the response format
+const CACHE_TTL = 86400; // 24 hours
 
-// Generate a cache key based on input parameters
+// Generate a cache key based on input parameters with versioning
 function generateCacheKey(
   resumeText: string,
   jobDescription?: string,
   isPremiumUser: boolean = false
 ): string {
-  const input = `${resumeText}|${jobDescription || ""}|${isPremiumUser}`;
-  return createHash("md5").update(input).digest("hex");
+  // Create a more structured cache key with versioning
+  const keyData = {
+    version: CACHE_VERSION,
+    isPremium: isPremiumUser,
+    // Use a hash of the content to avoid excessively long cache keys
+    contentHash: createHash("md5")
+      .update(`${resumeText}|${jobDescription || ""}`)
+      .digest("hex"),
+  };
+
+  return `apply-right:transform:${JSON.stringify(keyData)}`;
 }
 
 // Validate the response structure
@@ -59,9 +70,22 @@ function isValidResumeResponse(data: unknown): data is ResumeTransformResponse {
 
 export async function POST(request: Request) {
   try {
+    // Log the start of the request processing
+    logger.info("ApplyRight transform API endpoint called");
+
+    // Parse the request body
+    const requestBody = await request.json();
+
+    // Clone the request for validation (since request body can only be read once)
+    const clonedRequest = new Request(request.url, {
+      method: request.method,
+      headers: request.headers,
+      body: JSON.stringify(requestBody),
+    });
+
     // Validate the request body against our schema
     const data = await validateRequest(
-      request,
+      clonedRequest,
       transformSchema,
       false // Don't require authentication for now
     );
@@ -69,6 +93,8 @@ export async function POST(request: Request) {
     logger.info("Processing resume transformation request", {
       hasJobDescription: !!data.jobDescription,
       isPremiumUser: data.isPremiumUser,
+      resumeLength: data.resumeText.length,
+      jobDescriptionLength: data.jobDescription?.length || 0,
     });
 
     // Generate cache key
@@ -78,22 +104,30 @@ export async function POST(request: Request) {
       data.isPremiumUser
     );
 
-    // Try to get cached result first
-    try {
-      const cachedResult = await kv.get(cacheKey);
-      if (cachedResult) {
-        logger.info("Returning cached resume transformation result");
-        return NextResponse.json(
-          {
-            ...cachedResult,
-            cached: true,
-          },
-          { status: 200 }
-        );
+    // Check cache bypass conditions
+    const shouldBypassCache =
+      data.bypassCache === true || // Explicit bypass requested
+      (data.isPremiumUser && requestBody.bypassCache === true); // Premium users can bypass cache
+
+    // Try to get cached result first if not bypassing cache
+    if (!shouldBypassCache) {
+      try {
+        const cachedResult = await kv.get(cacheKey);
+        if (cachedResult) {
+          logger.info("Returning cached resume transformation result");
+          return NextResponse.json(
+            {
+              ...cachedResult,
+              cached: true,
+              cacheTime: new Date().toISOString(),
+            },
+            { status: 200 }
+          );
+        }
+      } catch (cacheError) {
+        // Log cache error but continue with normal processing
+        logger.warn("Failed to retrieve from cache", cacheError);
       }
-    } catch (cacheError) {
-      // Log cache error but continue with normal processing
-      logger.warn("Failed to retrieve from cache", cacheError);
     }
 
     // Check if API key is available
@@ -120,7 +154,7 @@ export async function POST(request: Request) {
 
       // Cache the fallback response
       try {
-        await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL });
+        await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL / 2 }); // Cache fallback for half the time
       } catch (cacheError) {
         logger.warn("Failed to cache fallback response", cacheError);
       }
@@ -134,7 +168,7 @@ export async function POST(request: Request) {
 
       // Get the Gemini model - use a faster model to reduce timeout risk
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.0-flash", // Use the fastest model available
         // Add safety settings to prevent timeouts due to content filtering
         safetySettings: [
           {
@@ -192,21 +226,31 @@ export async function POST(request: Request) {
             : ""
         }
         
-        Format your response as a JSON object with the following structure:
+        CRITICAL INSTRUCTIONS FOR RESPONSE FORMAT:
+        1. You MUST respond with ONLY a valid JSON object.
+        2. Do NOT include any explanatory text, markdown formatting, or code blocks.
+        3. Do NOT use \`\`\`json or \`\`\` markers.
+        4. The response must be parseable by JSON.parse().
+        5. Follow this exact structure:
+        
         {
           "success": true,
           "transformedResume": "The full transformed resume text",
+          "coverLetter": "A tailored cover letter based on the resume and job description, or null if no job description provided",
           "changesMade": ["Change 1", "Change 2", ...],
           "keywordsExtracted": ["Keyword 1", "Keyword 2", ...]
         }
 
-        IMPORTANT JSON FORMATTING RULES:
-        1. Ensure all property names are in double quotes
-        2. Ensure all string values are properly escaped with double quotes
-        3. Ensure arrays have proper syntax with square brackets and comma-separated values
+        VALIDATION RULES:
+        1. All property names must be in double quotes
+        2. All string values must be properly escaped with double quotes
+        3. Arrays must have proper syntax with square brackets and comma-separated values
         4. No trailing commas in arrays or objects
         5. All text must be properly escaped for JSON (quotes, newlines, etc.)
       `;
+
+      // Log the prompt length to help with debugging
+      logger.info("Resume transformation prompt length:", resumePrompt.length);
 
       // Set up streaming response
       const streamingResponse = await model.generateContentStream(resumePrompt);
@@ -217,11 +261,16 @@ export async function POST(request: Request) {
           try {
             let accumulatedText = "";
             let lastValidJson: ResumeTransformResponse | null = null;
+            let chunkCount = 0;
 
             for await (const chunk of streamingResponse.stream) {
               const text = chunk.text();
+              chunkCount++;
+
               if (text) {
                 accumulatedText += text;
+
+                // Clean the text to handle common JSON formatting issues
                 const cleanText = accumulatedText
                   .trim()
                   .replace(/```json\s*/g, "")
@@ -230,41 +279,56 @@ export async function POST(request: Request) {
                   .replace(/\}\s*$/, "}");
 
                 try {
+                  // Try to parse the accumulated text as JSON
                   const parsed = JSON.parse(cleanText);
+
+                  // Validate the parsed JSON against our expected structure
                   if (isValidResumeResponse(parsed)) {
                     lastValidJson = parsed;
 
                     // Cache the valid response
                     try {
                       await kv.set(cacheKey, parsed, { ex: CACHE_TTL });
+                      logger.info(
+                        "Cached valid resume transformation response"
+                      );
                     } catch (cacheError) {
                       logger.warn("Failed to cache response", cacheError);
                     }
 
+                    // Send the parsed response to the client
                     controller.enqueue(
                       encoder.encode(
                         JSON.stringify({
                           ...parsed,
                           cached: false,
                           generated: new Date().toISOString(),
+                          chunkCount,
                         })
                       )
                     );
 
-                    // Reset accumulated text after successful parse
+                    // Reset accumulated text after successful parse to avoid duplicate processing
                     accumulatedText = "";
                   }
                 } catch {
                   // This is expected for partial JSON chunks
-                  logger.debug(
-                    "Chunk parsing failed (expected for partial chunks)"
-                  );
+                  // Only log every 10th error to avoid flooding logs
+                  if (chunkCount % 10 === 0) {
+                    logger.debug(
+                      "Chunk parsing failed (expected for partial chunks)",
+                      { chunkCount }
+                    );
+                  }
                 }
               }
             }
 
+            // If we didn't get a valid JSON response, use fallback
             if (!lastValidJson) {
-              // Handle invalid or missing response
+              logger.warn("No valid JSON response received, using fallback");
+
+              // Generate fallback response
               const fallbackResponse = {
                 success: true,
                 fallbackMode: true,
@@ -285,31 +349,37 @@ export async function POST(request: Request) {
                 keywordsExtracted: data.jobDescription
                   ? extractFallbackKeywords(data.jobDescription)
                   : [],
-                message: "Resume transformed with fallback system",
+                message:
+                  "Resume transformed with fallback system due to processing issues",
               };
 
-              // Cache the fallback response
+              // Cache the fallback response with a shorter TTL
               try {
-                await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL / 2 }); // Cache fallback for less time
+                await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL / 2 });
               } catch (cacheError) {
                 logger.warn("Failed to cache fallback response", cacheError);
               }
 
+              // Send the fallback response to the client
               controller.enqueue(
                 encoder.encode(
                   JSON.stringify({
                     ...fallbackResponse,
                     cached: false,
                     fallback: true,
+                    chunkCount,
                   })
                 )
               );
             }
 
+            // Close the stream
             controller.close();
           } catch (error) {
+            // Log the error
             logger.error("Stream processing error:", error);
 
+            // Generate fallback response for error case
             const fallbackResponse = {
               success: true,
               fallbackMode: true,
@@ -328,31 +398,37 @@ export async function POST(request: Request) {
               keywordsExtracted: data.jobDescription
                 ? extractFallbackKeywords(data.jobDescription)
                 : [],
-              message: "Resume transformed with fallback system",
+              message:
+                "Resume transformed with fallback system due to an error",
               error: error instanceof Error ? error.message : "Unknown error",
             };
 
-            // Cache the fallback response
+            // Cache the fallback response with a shorter TTL
             try {
               await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL / 2 });
             } catch (cacheError) {
               logger.warn("Failed to cache fallback response", cacheError);
             }
 
+            // Send the fallback response to the client
             controller.enqueue(
               encoder.encode(
                 JSON.stringify({
                   ...fallbackResponse,
                   cached: false,
                   fallback: true,
+                  error: true,
                 })
               )
             );
+
+            // Close the stream
             controller.close();
           }
         },
       });
 
+      // Return the stream as the response
       return new Response(stream);
     } catch (error) {
       logger.error("Failed to transform resume", error);
