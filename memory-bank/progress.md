@@ -54,17 +54,27 @@
 - Implemented model optimization for Knowledge GPT and Learning Creator
 - Added multilingual support to both features
 - Created a model router service for dynamic model selection
-- Updated database schema to support language and model tracking
-- Enhanced UI with language selection and model information display
+- Updated database schema to support language and model tracking for internal analytics
+- Enhanced UI with language selection and improved content display
+- Removed all model-specific information from user-facing interfaces
 
 ### In Progress
 
 - Testing the model optimization implementation
 - Collecting user feedback on multilingual support
-- Implementing analytics for model usage tracking
+- Implementing analytics for internal model usage tracking
+- Ensuring consistent "AI-powered" branding without revealing specific models
 
 ### Known Issues
 
-- Need to add proper error handling for Google AI API
+- Need to add proper error handling for AI API integrations
 - Need to implement fallback mechanisms for API failures
-- Need to optimize prompts for each model's specific capabilities
+- Need to optimize prompts for different AI capabilities
+- Need to ensure no model-specific information is leaked to the UI
+
+### UI Guidelines
+
+- Present a unified "AI-powered" experience to users
+- Never display which specific models are being used
+- Focus on the quality of outputs rather than technical implementation details
+- Use generic terms like "AI model" instead of specific model names

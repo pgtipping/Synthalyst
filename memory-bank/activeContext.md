@@ -12,8 +12,8 @@ We have implemented a cost-optimized combination strategy for the Knowledge GPT 
 
 1. **Primary Models**:
 
-   - Knowledge GPT: Switched to Gemini 1.5 Flash-8B for better cost efficiency
-   - Learning Creator: Switched to GPT-4o-Mini for balanced cost and quality
+   - Knowledge GPT: Switched to a more cost-efficient model with good multilingual capabilities
+   - Learning Creator: Switched to a balanced model with strong content generation abilities
 
 2. **Tiered Approach**:
 
@@ -30,10 +30,12 @@ We have implemented a cost-optimized combination strategy for the Knowledge GPT 
 
    - Added language selector component
    - Improved error handling and display
-   - Enhanced content display with model information
+   - Enhanced content display with clear formatting
+   - Removed all model information from user-facing interfaces
 
 5. **Database Updates**:
    - Added language and modelUsed fields to KnowledgeEntry and LearningContentEntry models
+   - Model information is stored for internal analytics only
 
 ## Next Steps
 
@@ -48,24 +50,31 @@ We have implemented a cost-optimized combination strategy for the Knowledge GPT 
    - Adjust based on user preferences
 
 3. **Analytics**:
-   - Implement analytics to track model usage
+   - Implement analytics to track model usage internally
    - Use data to further optimize the selection algorithm
 
 ## Active Decisions
 
 1. **Model Selection Strategy**:
 
-   - Use Gemini 1.5 Flash-8B as the primary model for Knowledge GPT
-   - Use GPT-4o-Mini as the primary model for Learning Creator
+   - Use cost-efficient models as the primary option for Knowledge GPT
+   - Use balanced cost-quality models for Learning Creator
    - Dynamically select models based on task requirements
+   - Never expose model selection details to end users
 
 2. **Language Support**:
 
-   - Support all languages available in the selected models
+   - Support multiple languages based on available capabilities
    - Default to browser language when possible
    - Fall back to more capable models for unsupported languages
 
 3. **Cost Optimization**:
+
    - Prioritize cost efficiency for simple tasks
    - Use more capable models for complex tasks
    - Monitor usage and adjust thresholds as needed
+
+4. **User Experience**:
+   - Present a unified "AI-powered" experience
+   - Focus on quality of outputs rather than technical details
+   - Never display which specific models are being used

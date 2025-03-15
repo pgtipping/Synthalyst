@@ -1993,31 +1993,35 @@ When working with audio components in the application:
 
 ## Model Optimization Strategy - March 15, 2025
 
-- Knowledge GPT uses Gemini 1.5 Flash-8B as the primary model for cost efficiency
-- Learning Creator uses GPT-4o-Mini as the primary model for balanced cost and quality
+- Knowledge GPT and Learning Creator use optimized AI models for cost efficiency and quality
 - A tiered approach is implemented to select models based on task complexity, content length, language support, and cost priority
 - The model router service in `/lib/ai/model-router.ts` handles model selection and API calls
 - Both features support multilingual responses based on user language selection
+- **IMPORTANT**: Model information must NEVER be displayed to users in the UI
+- We present a unified AI-powered experience without revealing specific model details
 
 ## API Integration - March 15, 2025
 
 - Knowledge GPT API in `/api/knowledge-gpt/route.ts` uses the model router to select the appropriate model
 - Learning Content API in `/api/learning-content/route.ts` uses the model router to select the appropriate model
-- Both APIs support language selection and store the model used in the database
+- Both APIs support language selection and store the model used in the database for internal analytics only
 - System prompts are enhanced with multilingual support using the `createMultilingualSystemPrompt` function
+- Model information must be removed from any user-facing responses
 
 ## UI Components - March 15, 2025
 
 - Language selector component in `/components/ui/language-selector.tsx` allows users to select their preferred language
-- The component shows supported languages for each model and detects browser language as default
-- Both Knowledge GPT and Learning Creator pages display the model used for each response
+- The component shows supported languages and detects browser language as default
+- **CRITICAL**: Remove any UI elements that display model information to users
+- Present a unified "AI-powered" experience without revealing which specific models are used
 - Error handling is improved with proper error alerts and messages
 
 ## Database Schema - March 15, 2025
 
 - KnowledgeEntry and LearningContentEntry models include language and modelUsed fields
 - Language field defaults to "English" and is used for filtering and display
-- ModelUsed field stores the model used for each entry and is used for analytics and display
+- ModelUsed field stores the model used for each entry for internal analytics only
+- Model information must never be exposed in user-facing queries
 
 ## Environment Variables - March 15, 2025
 
