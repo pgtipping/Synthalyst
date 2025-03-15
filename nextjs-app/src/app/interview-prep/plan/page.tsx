@@ -98,6 +98,10 @@ export default function InterviewPrepPlan() {
     setIsProcessing(true);
 
     try {
+      console.log("Starting interview plan generation");
+      console.log("Job details:", JSON.stringify(details));
+      console.log("Is premium user:", checkPremiumStatus());
+
       // Call the API to generate interview prep plan
       const response = await fetch("/api/interview-prep/generate-plan", {
         method: "POST",
@@ -110,23 +114,47 @@ export default function InterviewPrepPlan() {
         }),
       });
 
+      console.log("API response status:", response.status);
+
       if (!response.ok) {
-        throw new Error("Failed to generate interview prep plan");
+        const errorText = await response.text();
+        console.error("API error response:", errorText);
+        throw new Error(
+          `Failed to generate interview prep plan: ${response.status} ${errorText}`
+        );
       }
 
       const data = await response.json();
+      console.log("API response data structure:", Object.keys(data));
 
       if (data.success) {
+        console.log("Plan generation successful");
+        console.log(
+          "Prep plan sections count:",
+          data.prepPlan?.sections?.length || 0
+        );
+        console.log("Questions count:", data.questions?.length || 0);
+
         setPrepPlan(data.prepPlan as PrepPlan);
         setGeneratedQuestions(data.questions || []);
         toast.success("Interview prep plan generated successfully!");
       } else {
+        console.error("API returned success: false", data.message);
         throw new Error(
           data.message || "Failed to generate interview prep plan"
         );
       }
     } catch (error) {
       console.error("Error generating interview prep plan:", error);
+      // Log additional details about the error
+      if (error instanceof Error) {
+        console.error("Error name:", error.name);
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      } else {
+        console.error("Unknown error type:", typeof error);
+      }
+
       toast.error(
         error instanceof Error
           ? error.message
