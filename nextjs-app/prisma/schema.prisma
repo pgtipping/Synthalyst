@@ -42,19 +42,19 @@ model VerificationToken {
 }
 
 model User {
-  id                  String                        @id @default(cuid())
-  name                String?
-  email               String                        @unique
-  emailVerified       DateTime?
-  image               String?
-  role                String                        @default("USER")
-  createdAt           DateTime                      @default(now())
-  updatedAt           DateTime                      @updatedAt
-  password            String?
-  bio                 String?
-  accounts            Account[]
-  appFeedback         AppFeedback[]                 @relation("UserToAppFeedback")
-  chatMessages        ChatMessage[]
+  id                    String                 @id @default(cuid())
+  name                  String?
+  email                 String?                @unique
+  emailVerified         DateTime?
+  image                 String?
+  role                  String                 @default("USER")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  password              String?
+  bio                   String?
+  accounts              Account[]
+  appFeedback           AppFeedback[]          @relation("UserToAppFeedback")
+  chatMessages          ChatMessage[]
   comments            Comment[]
   competencies        CompetencyFramework[]
   frameworkFeedback   CompetencyFrameworkFeedback[] @relation("UserToFrameworkFeedback")
@@ -62,12 +62,12 @@ model User {
   documents           Document[]
   interviewSessions   InterviewSession[]
   jobDescriptions     JobDescription[]
-  learningContent     LearningContent[]
+  learningContents      LearningContent[]
   newsletterTemplates NewsletterTemplate[]
   payments            Payment[]
   posts               Post[]
   profile             Profile?
-  sessions            Session[]
+  sessions              Session[]
   subscriptions       Subscription[]
   supportTickets      SupportTicket[]
   tasks               Task[]
@@ -75,6 +75,13 @@ model User {
   trainingPlans       TrainingPlan[]
   preferences         UserPreferences?
   savedQuestions      UserSavedQuestion[]
+  audioRecordings     AudioRecording[]
+  knowledgeEntries      KnowledgeEntry[]
+  learningContentEntries LearningContentEntry[]
+  stripeCustomerId      String?                @unique
+  stripeSubscriptionId  String?                @unique
+  stripePriceId         String?
+  stripeCurrentPeriodEnd DateTime?
 }
 
 model Profile {
@@ -666,7 +673,6 @@ model NewsletterClickEvent {
 
   @@index([newsletterId])
   @@index([subscriberId])
-  @@index([url])
 }
 
 model NewsletterBounceEvent {
@@ -801,12 +807,52 @@ model UserSavedQuestion {
 }
 
 model AudioRecording {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filename    String
+  duration    Int?     // Duration in seconds
+  transcription String? @db.Text
+  fileUrl     String?
+  fileSize    Int?     // Size in bytes
+  mimeType    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model KnowledgeEntry {
   id        String   @id @default(uuid())
-  filename  String
-  url       String
-  userId    String?
+  question  String
+  answer    String   @db.Text
+  topics    String[]
+  tags      String[]
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
 }
+
+model LearningContentEntry {
+  id                  String   @id @default(uuid())
+  title               String
+  topic               String
+  contentType         String
+  targetAudience      String
+  learningLevel       String
+  contentFormat       String
+  content             String   @db.Text
+  specificRequirements String?  @db.Text
+  tags                String[]
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([topic])
+  @@index([contentType])
+}
+
+// Knowledge GPT models

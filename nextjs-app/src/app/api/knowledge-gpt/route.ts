@@ -1,70 +1,235 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { validateRequest, handleAPIError } from "@/lib/middleware";
-import { logger } from "@/lib/logger";
-import { Groq } from "groq-sdk";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { v4 as uuidv4 } from "uuid";
+import { OpenAI } from "openai";
+import { prisma } from "@/lib/prisma";
 
-const requestSchema = z.object({
-  question: z.string().min(1, "Question is required"),
-  topics: z.array(z.string()).min(1, "At least one topic is required"),
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { question, topics } = await validateRequest(request, requestSchema);
+    const session = await getServerSession(authOptions);
 
-    logger.info("Processing knowledge request", { question, topics });
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "You must be logged in to use this feature" },
+        { status: 401 }
+      );
+    }
 
-    const prompt = `
-    You are an expert teacher and knowledge curator. Please provide a detailed, accurate, and educational answer to the following question. Focus on the specified topics and provide practical examples where relevant.
+    const { question } = await req.json();
 
-    Question: ${question}
-    Topics to focus on: ${topics.join(", ")}
+    if (!question || typeof question !== "string" || question.trim() === "") {
+      return NextResponse.json(
+        { error: "Question is required" },
+        { status: 400 }
+      );
+    }
 
-    Please structure your response with:
-    1. Direct answer to the question
-    2. Detailed explanation
-    3. Practical examples or applications
-    4. Common misconceptions (if any)
-    5. Additional resources or related topics to explore
-
-    Make your explanation clear, engaging, and suitable for someone learning about these topics.
-    Include code examples if the question is related to programming.
-    Cite reliable sources or best practices where applicable.
+    // Extract potential topics from the question
+    const topicExtractPrompt = `
+      Analyze the following educational question and extract the main topic or subject area it belongs to.
+      Return only a single word or short phrase (2-3 words maximum) that best categorizes this question.
+      
+      Question: ${question}
     `;
 
-    const groq = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
+    const topicResponse = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a topic classifier for educational questions.",
+        },
+        { role: "user", content: topicExtractPrompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 20,
     });
 
-    const response = await groq.chat.completions.create({
-      model: "mixtral-8x7b-32768",
+    const topic =
+      topicResponse.choices[0]?.message?.content?.trim() || "General";
+
+    // Generate tags for the question
+    const tagsPrompt = `
+      Generate 3-5 relevant tags for the following educational question.
+      Return only the tags as a comma-separated list, with no additional text.
+      
+      Question: ${question}
+    `;
+
+    const tagsResponse = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a tag generator for educational content.",
+        },
+        { role: "user", content: tagsPrompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 50,
+    });
+
+    const tagsText = tagsResponse.choices[0]?.message?.content?.trim() || "";
+    const tags = tagsText
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    // Main educational answer generation
+    const prompt = `
+      You are an expert educational tutor. Your task is to provide a detailed, accurate, and educational answer to the following question.
+      
+      Question: ${question}
+      
+      Instructions:
+      1. Start with a clear, direct answer to the question
+      2. Provide a detailed explanation with relevant examples
+      3. Include key concepts and definitions
+      4. Use a step-by-step approach when explaining processes or complex ideas
+      5. Conclude with a brief summary
+      
+      Important:
+      - Do NOT use markdown formatting
+      - Use plain text only
+      - Organize your answer with clear paragraph breaks
+      - Use simple formatting like numbered lists (1., 2., etc.) or bullet points (-, *) if needed
+      - Keep your answer educational, accurate, and helpful
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
           content:
-            "You are an expert teacher and knowledge curator, specializing in providing clear, accurate, and educational answers.",
+            "You are an expert educational tutor specializing in providing detailed, accurate answers to academic questions.",
         },
-        {
-          role: "user",
-          content: prompt,
-        },
+        { role: "user", content: prompt },
       ],
-      max_tokens: 2000,
       temperature: 0.7,
+      max_tokens: 1500,
     });
 
-    if (!response.choices?.[0]?.message?.content) {
-      throw new Error("Invalid response from LLM");
-    }
+    const answer =
+      response.choices[0]?.message?.content?.trim() ||
+      "I couldn't generate an answer. Please try again.";
 
-    logger.info("Successfully generated knowledge response");
+    // Save the question and answer to the database
+    const questionId = uuidv4();
+
+    await prisma.knowledgeEntry.create({
+      data: {
+        id: questionId,
+        question,
+        answer,
+        topics: [topic],
+        tags,
+        userId: session.user.id,
+      },
+    });
 
     return NextResponse.json({
-      answer: response.choices[0].message.content,
+      id: questionId,
+      answer,
+      topic,
+      tags,
     });
   } catch (error) {
-    logger.error("Failed to process knowledge request", error);
+    console.error("Error in Knowledge GPT API:", error);
+    return NextResponse.json(
+      { error: "Failed to generate answer" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const tag = searchParams.get("tag");
+    const topic = searchParams.get("topic");
+    const query = searchParams.get("query");
+
+    let entries;
+
+    if (tag) {
+      entries = await prisma.knowledgeEntry.findMany({
+        where: {
+          userId,
+          tags: {
+            has: tag,
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    } else if (topic) {
+      entries = await prisma.knowledgeEntry.findMany({
+        where: {
+          userId,
+          topics: {
+            has: topic,
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    } else if (query) {
+      entries = await prisma.knowledgeEntry.findMany({
+        where: {
+          userId,
+          OR: [
+            {
+              question: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+            {
+              answer: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    } else {
+      entries = await prisma.knowledgeEntry.findMany({
+        where: {
+          userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 20,
+      });
+    }
+
+    return NextResponse.json({ entries });
+  } catch (error) {
+    logger.error("Failed to retrieve knowledge entries", error);
     return handleAPIError(error);
   }
 }

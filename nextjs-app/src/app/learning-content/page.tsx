@@ -1,9 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import {
+  Loader2,
+  BookOpen,
+  PenTool,
+  Download,
+  Tag,
+  Clock,
+  History,
+  Sparkles,
+} from "lucide-react";
+import { format } from "date-fns";
 
 interface FormData {
+  title: string;
   topic: string;
   contentType: string;
   targetAudience: string;
@@ -12,21 +46,83 @@ interface FormData {
   specificRequirements: string;
 }
 
+interface LearningContent {
+  id: string;
+  title: string;
+  topic: string;
+  contentType: string;
+  targetAudience: string;
+  learningLevel: string;
+  contentFormat: string;
+  content: string;
+  specificRequirements: string | null;
+  tags: string[];
+  timestamp: string;
+}
+
 export default function LearningContent() {
+  const { data: session } = useSession();
   const [formData, setFormData] = useState<FormData>({
+    title: "",
     topic: "",
-    contentType: "",
+    contentType: "Lesson",
     targetAudience: "",
-    learningLevel: "",
-    contentFormat: "",
+    learningLevel: "Beginner",
+    contentFormat: "Markdown",
     specificRequirements: "",
   });
   const [content, setContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("create");
+  const [savedContents, setSavedContents] = useState<LearningContent[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchSavedContent = useCallback(async () => {
+    if (!session?.user) return;
+
+    setIsLoadingHistory(true);
+    try {
+      const response = await fetch("/api/learning-content");
+      if (!response.ok) {
+        throw new Error("Failed to fetch saved content");
+      }
+      const data = await response.json();
+      setSavedContents(data.entries || []);
+    } catch (error) {
+      console.error("Error fetching saved content:", error);
+      toast.error("Failed to load saved content");
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [session]);
+
+  // Fetch saved content when component mounts or when tab changes to history
+  useEffect(() => {
+    if (activeTab === "history" && session?.user) {
+      fetchSavedContent();
+    }
+  }, [activeTab, session, fetchSavedContent]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+
+    if (!formData.topic.trim()) {
+      toast.error("Please enter a topic");
+      return;
+    }
+
+    if (!formData.targetAudience.trim()) {
+      toast.error("Please enter a target audience");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -45,193 +141,399 @@ export default function LearningContent() {
 
       const data = await response.json();
       setContent(data.content);
+
+      // Add to saved contents if not already there
+      if (activeTab === "create" && data.id) {
+        setSavedContents((prev) => [data, ...prev]);
+      }
+
+      toast.success("Learning content generated successfully!");
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
+      toast.error("Failed to generate learning content. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Filter saved content based on search query
+    // This is a client-side search, but could be replaced with an API call
+    // if the dataset becomes large
+  };
+
+  const downloadContent = () => {
+    if (!content) return;
+
+    const element = document.createElement("a");
+    const file = new Blob([content], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = `${formData.title.replace(
+      /\s+/g,
+      "_"
+    )}_${formData.contentType.toLowerCase()}.md`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+
+    toast.success("Content downloaded successfully!");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <Breadcrumb
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Tools", href: "/tools" },
-            {
-              label: "Learning Content",
-              href: "/learning-content",
-              active: true,
-            },
-          ]}
-        />
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Tools", href: "/tools" },
+          {
+            label: "Learning Content Creator",
+            href: "/learning-content",
+            active: true,
+          },
+        ]}
+        className="mb-6"
+      />
 
-        <h1 className="text-4xl font-bold">Learning Content Creator</h1>
+      <div className="flex flex-col space-y-6">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold">Learning Content Creator</h1>
+          <p className="text-muted-foreground">
+            Create tailored educational content matching your style and level
+            preferences
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-          <div>
-            <label
-              htmlFor="topic"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Topic
-            </label>
-            <input
-              type="text"
-              id="topic"
-              name="topic"
-              value={formData.topic}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="e.g., Introduction to Machine Learning, Business Ethics"
-            />
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="create" className="flex items-center">
+              <PenTool className="w-4 h-4 mr-2" />
+              Create Content
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center">
+              <History className="w-4 h-4 mr-2" />
+              Saved Content
+            </TabsTrigger>
+          </TabsList>
 
-          <div>
-            <label
-              htmlFor="contentType"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Content Type
-            </label>
-            <select
-              id="contentType"
-              name="contentType"
-              value={formData.contentType}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Select content type</option>
-              <option value="lesson">Lesson</option>
-              <option value="tutorial">Tutorial</option>
-              <option value="exercise">Exercise</option>
-              <option value="case-study">Case Study</option>
-              <option value="quiz">Quiz</option>
-              <option value="assessment">Assessment</option>
-            </select>
-          </div>
+          <TabsContent value="create" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Sparkles className="w-5 h-5 mr-2 text-primary" />
+                  Create Learning Content
+                </CardTitle>
+                <CardDescription>
+                  Fill in the details below to generate tailored educational
+                  content
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label htmlFor="title" className="text-sm font-medium">
+                        Title
+                      </label>
+                      <Input
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Introduction to Machine Learning"
+                      />
+                    </div>
 
-          <div>
-            <label
-              htmlFor="targetAudience"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Target Audience
-            </label>
-            <input
-              type="text"
-              id="targetAudience"
-              name="targetAudience"
-              value={formData.targetAudience}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="e.g., College Students, Working Professionals, Beginners"
-            />
-          </div>
+                    <div className="space-y-2">
+                      <label htmlFor="topic" className="text-sm font-medium">
+                        Topic
+                      </label>
+                      <Input
+                        id="topic"
+                        name="topic"
+                        value={formData.topic}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Neural Networks, Business Ethics"
+                      />
+                    </div>
 
-          <div>
-            <label
-              htmlFor="learningLevel"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Learning Level
-            </label>
-            <select
-              id="learningLevel"
-              name="learningLevel"
-              value={formData.learningLevel}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Select level</option>
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-              <option value="expert">Expert</option>
-            </select>
-          </div>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="contentType"
+                        className="text-sm font-medium"
+                      >
+                        Content Type
+                      </label>
+                      <Select
+                        value={formData.contentType}
+                        onValueChange={(value) =>
+                          handleSelectChange("contentType", value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select content type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Lesson">Lesson</SelectItem>
+                          <SelectItem value="Tutorial">Tutorial</SelectItem>
+                          <SelectItem value="Exercise">Exercise</SelectItem>
+                          <SelectItem value="Case Study">Case Study</SelectItem>
+                          <SelectItem value="Quiz">Quiz</SelectItem>
+                          <SelectItem value="Assessment">Assessment</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-          <div>
-            <label
-              htmlFor="contentFormat"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Content Format
-            </label>
-            <select
-              id="contentFormat"
-              name="contentFormat"
-              value={formData.contentFormat}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Select format</option>
-              <option value="text">Text Only</option>
-              <option value="text-with-examples">Text with Examples</option>
-              <option value="step-by-step">Step-by-Step Guide</option>
-              <option value="interactive">Interactive Content</option>
-              <option value="presentation">Presentation Style</option>
-            </select>
-          </div>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="targetAudience"
+                        className="text-sm font-medium"
+                      >
+                        Target Audience
+                      </label>
+                      <Input
+                        id="targetAudience"
+                        name="targetAudience"
+                        value={formData.targetAudience}
+                        onChange={handleInputChange}
+                        placeholder="e.g., College Students, Working Professionals"
+                      />
+                    </div>
 
-          <div>
-            <label
-              htmlFor="specificRequirements"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Specific Requirements
-            </label>
-            <textarea
-              id="specificRequirements"
-              name="specificRequirements"
-              value={formData.specificRequirements}
-              onChange={handleInputChange}
-              rows={4}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Any specific requirements or focus areas for the content..."
-            />
-          </div>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="learningLevel"
+                        className="text-sm font-medium"
+                      >
+                        Learning Level
+                      </label>
+                      <Select
+                        value={formData.learningLevel}
+                        onValueChange={(value) =>
+                          handleSelectChange("learningLevel", value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select learning level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Beginner">Beginner</SelectItem>
+                          <SelectItem value="Intermediate">
+                            Intermediate
+                          </SelectItem>
+                          <SelectItem value="Advanced">Advanced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {isLoading ? "Generating Content..." : "Generate Learning Content"}
-          </button>
-        </form>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="contentFormat"
+                        className="text-sm font-medium"
+                      >
+                        Content Format
+                      </label>
+                      <Select
+                        value={formData.contentFormat}
+                        onValueChange={(value) =>
+                          handleSelectChange("contentFormat", value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Text">Text</SelectItem>
+                          <SelectItem value="Markdown">Markdown</SelectItem>
+                          <SelectItem value="HTML">HTML</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-        {error && (
-          <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-md">
-            {error}
-          </div>
-        )}
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="specificRequirements"
+                      className="text-sm font-medium"
+                    >
+                      Specific Requirements (Optional)
+                    </label>
+                    <Textarea
+                      id="specificRequirements"
+                      name="specificRequirements"
+                      value={formData.specificRequirements}
+                      onChange={handleInputChange}
+                      placeholder="Any specific requirements or focus areas for the content..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
 
-        {content && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Generated Content</h2>
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:p-6 prose max-w-none">
-                <pre className="whitespace-pre-wrap">{content}</pre>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating Content...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Generate Learning Content
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
+                {error}
               </div>
-            </div>
-          </div>
-        )}
+            )}
+
+            {content && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BookOpen className="w-5 h-5 mr-2 text-primary" />
+                    Generated Content
+                  </CardTitle>
+                  <CardDescription>
+                    {formData.title} - {formData.contentType} for{" "}
+                    {formData.targetAudience}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose max-w-none dark:prose-invert bg-muted p-4 rounded-md overflow-auto max-h-[500px]">
+                    {content.split("\n").map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={downloadContent}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <History className="w-5 h-5 mr-2 text-primary" />
+                  Saved Content
+                </CardTitle>
+                <CardDescription>
+                  Browse your previously generated learning content
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4">
+                  <form onSubmit={handleSearch} className="flex gap-2">
+                    <Input
+                      placeholder="Search saved content..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button type="submit">Search</Button>
+                  </form>
+                </div>
+
+                {isLoadingHistory ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : savedContents.length > 0 ? (
+                  <div className="space-y-4">
+                    {savedContents.map((item) => (
+                      <Card key={item.id} className="overflow-hidden">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">
+                            {item.title}
+                          </CardTitle>
+                          <CardDescription className="flex items-center justify-between">
+                            <span className="flex items-center">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {item.timestamp
+                                ? format(
+                                    new Date(item.timestamp),
+                                    "MMM d, yyyy 'at' h:mm a"
+                                  )
+                                : "Recent"}
+                            </span>
+                            <Badge>{item.contentType}</Badge>
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pb-2">
+                          <div className="flex flex-col space-y-2">
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <span className="font-medium mr-2">Topic:</span>
+                              {item.topic}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <span className="font-medium mr-2">
+                                Audience:
+                              </span>
+                              {item.targetAudience}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <span className="font-medium mr-2">Level:</span>
+                              {item.learningLevel}
+                            </div>
+                          </div>
+                          <div className="mt-2 prose max-w-none dark:prose-invert line-clamp-3 text-sm">
+                            {item.content
+                              .split("\n")
+                              .slice(0, 3)
+                              .map((paragraph, index) => (
+                                <p key={index}>{paragraph}</p>
+                              ))}
+                          </div>
+                        </CardContent>
+                        <CardFooter className="pt-2 flex flex-wrap gap-2">
+                          {item.tags &&
+                            item.tags.map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="outline"
+                                className="flex items-center"
+                              >
+                                <Tag className="w-3 h-3 mr-1" />
+                                {tag}
+                              </Badge>
+                            ))}
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>
+                      No saved content found. Start creating learning content to
+                      build your library.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

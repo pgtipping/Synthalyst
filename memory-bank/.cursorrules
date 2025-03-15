@@ -1898,3 +1898,93 @@ When working with audio components in the application:
   - Consider mobile users with appropriate button sizes
   - Test on different browsers (Chrome, Firefox, Safari)
   - Provide alternative text input for accessibility
+
+# Cursor Rules for Synthalyst Project
+
+## LLM Model Strategy - 2025-03-15
+
+### Model Selection Criteria
+
+- Cost efficiency is the primary consideration for model selection
+- Quality of output is secondary but still important
+- Latency should be minimized for interactive features
+- Multilingual support is required for educational content
+
+### Recommended Models by Feature
+
+- **Knowledge GPT**: GPT-4o-Mini ($0.15/input, $0.6/output)
+- **Learning Content Creator**: Gemini 1.5 Flash ($0.075/input, $0.3/output)
+
+### Tiered Approach Implementation
+
+1. **Tier 1 (Simple Queries)**: Llama 3.2 3B for basic questions and content
+2. **Tier 2 (Medium Complexity)**: GPT-4o-Mini or Gemini 1.5 Flash for more complex needs
+3. **Tier 3 (High Complexity)**: GPT-4o reserved for only the most complex educational queries
+
+### Implementation Guidelines
+
+- Implement a smart router to direct queries to the appropriate model based on complexity
+- Develop a caching system for common educational queries to reduce API costs
+- Create a fallback mechanism that starts with lower-cost models and escalates only when necessary
+- Implement cost controls including token counting, budgeting, and usage monitoring
+- Add user feedback mechanisms to continuously improve the quality of responses
+
+## Knowledge GPT Implementation - 2025-03-15
+
+### Prompt Strategy
+
+- Use chain-of-thought prompting to guide the model through a structured reasoning process
+- Include explicit instructions for output format (plain text, not markdown)
+- Provide context about the educational level and background of the user
+- Include examples of high-quality responses for different types of questions
+
+### API Implementation
+
+- Use streaming responses to improve user experience for longer answers
+- Implement proper error handling with fallback content generation
+- Add topic extraction for better organization and retrieval of past questions
+- Store questions and answers in the database for future reference and analysis
+
+## Learning Content Creator Implementation - 2025-03-15
+
+### Content Generation Process
+
+1. **Input Collection**: Gather user specifications including subject, educational level, content type, and learning objectives
+2. **Content Planning**: Generate a structured outline based on user inputs
+3. **Content Generation**: Create detailed content following the outline
+4. **Review and Refinement**: Ensure content meets educational standards and user requirements
+
+### API Implementation
+
+- Use a two-step process: first generate an outline, then expand it into full content
+- Implement proper error handling with fallback content generation
+- Add content validation to ensure educational quality and accuracy
+- Store generated content in the database for future reference and editing
+
+## UI Implementation Guidelines - 2025-03-15
+
+### Knowledge GPT UI
+
+- Use a chat-like interface for question input and answer display
+- Implement a tabbed interface for asking questions and viewing history
+- Add topic filtering for better organization of past questions
+- Include a loading state with progress indication for longer responses
+
+### Learning Content Creator UI
+
+- Use a form-based interface for content specifications
+- Implement a tabbed interface for content creation and viewing saved content
+- Add content preview with proper formatting
+- Include download options for different formats (PDF, DOCX, etc.)
+
+## Database Schema - 2025-03-15
+
+### Knowledge GPT Tables
+
+- `KnowledgeEntry`: Stores questions, answers, topics, and user information
+- `KnowledgeTopic`: Stores extracted topics for better organization and retrieval
+
+### Learning Content Creator Tables
+
+- `LearningContentEntry`: Stores content specifications, generated content, and user information
+- `LearningContentTemplate`: Stores reusable templates for different content types
