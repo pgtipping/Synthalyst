@@ -2028,3 +2028,16 @@ When working with audio components in the application:
 - OPENAI_API_KEY is required for OpenAI API calls
 - GOOGLE_AI_API_KEY is required for Google AI API calls
 - Both keys should be added to the .env file for local development
+
+### API Key Naming Conventions - [2025-03-15 21:45:23]
+
+- Always use `GEMINI_API_KEY` environment variable for Google AI/Gemini models
+- Never use alternative names like `GOOGLE_AI_API_KEY` for Gemini API access
+- When initializing the Google Generative AI client, always use:
+  ```typescript
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  ```
+- This applies to both server-side and client-side code that needs to access Gemini models
+- For OpenAI models, use `OPENAI_API_KEY` environment variable
+- For client-side access to OpenAI, use `NEXT_PUBLIC_OPENAI_API_KEY`
+- Always use the API route pattern for client-side model access to maintain security
