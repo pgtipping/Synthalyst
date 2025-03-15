@@ -13,20 +13,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
-  BookOpen,
   Loader2,
-  Send,
+  BookOpen,
   MessageSquare,
   History,
-  Sparkles,
   Clock,
-  Tag,
+  Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import { format } from "date-fns";
+import {
+  LanguageSelector,
+  LanguageInfo,
+} from "@/components/ui/language-selector";
+import { MODELS } from "@/lib/ai/model-router";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Question {
   id: string;
@@ -35,6 +40,8 @@ interface Question {
   topic: string;
   timestamp: string;
   tags?: string[];
+  language: string;
+  modelUsed: string;
 }
 
 export default function KnowledgeGPT() {
@@ -48,6 +55,10 @@ export default function KnowledgeGPT() {
   const [selectedTopic, setSelectedTopic] = useState<string>("all");
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [topics, setTopics] = useState<string[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
+  const [modelUsed, setModelUsed] = useState<string>(
+    MODELS.GEMINI_1_5_FLASH_8B
+  );
 
   const fetchQuestionHistory = useCallback(async () => {
     if (!session?.user) return;
@@ -106,7 +117,7 @@ export default function KnowledgeGPT() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, language: selectedLanguage }),
       });
 
       if (!response.ok) {
@@ -115,6 +126,7 @@ export default function KnowledgeGPT() {
 
       const data = await response.json();
       setAnswer(data.answer);
+      setModelUsed(data.modelUsed || MODELS.GEMINI_1_5_FLASH_8B);
 
       // Add to recent questions if not already there
       if (data.id) {
@@ -126,6 +138,8 @@ export default function KnowledgeGPT() {
             topic: data.topic || "General",
             timestamp: new Date().toISOString(),
             tags: data.tags || [],
+            language: selectedLanguage,
+            modelUsed: data.modelUsed || MODELS.GEMINI_1_5_FLASH_8B,
           },
           ...prev,
         ]);
@@ -142,6 +156,10 @@ export default function KnowledgeGPT() {
 
   const handleTopicChange = (topic: string) => {
     setSelectedTopic(topic);
+  };
+
+  const handleLanguageChange = (language: string) => {
+    setSelectedLanguage(language);
   };
 
   return (
@@ -183,12 +201,11 @@ export default function KnowledgeGPT() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Sparkles className="w-5 h-5 mr-2 text-primary" />
-                  Ask Your Question
+                  <MessageSquare className="w-5 h-5 mr-2 text-primary" />
+                  Ask a Question
                 </CardTitle>
                 <CardDescription>
-                  Ask any educational question and get a detailed, personalized
-                  answer
+                  Ask any educational question and get a detailed answer
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -201,32 +218,48 @@ export default function KnowledgeGPT() {
                       id="question"
                       value={question}
                       onChange={(e) => setQuestion(e.target.value)}
-                      placeholder="e.g., Explain the concept of photosynthesis in simple terms"
-                      className="min-h-[120px]"
+                      placeholder="e.g., What is the difference between mitosis and meiosis?"
+                      className="min-h-[100px]"
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating Answer...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        Get Answer
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <LanguageSelector
+                      modelType={MODELS.GEMINI_1_5_FLASH_8B}
+                      onLanguageChange={handleLanguageChange}
+                      defaultLanguage={selectedLanguage}
+                    />
+
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full sm:w-auto"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Get Answer
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  <LanguageInfo modelType={MODELS.GEMINI_1_5_FLASH_8B} />
                 </form>
               </CardContent>
             </Card>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             {answer && (
@@ -236,8 +269,9 @@ export default function KnowledgeGPT() {
                     <BookOpen className="w-5 h-5 mr-2 text-primary" />
                     Answer
                   </CardTitle>
-                  <CardDescription>
-                    Detailed explanation to your question
+                  <CardDescription className="flex justify-between items-center">
+                    <span>Detailed explanation to your question</span>
+                    <Badge variant="outline">{modelUsed}</Badge>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -256,96 +290,97 @@ export default function KnowledgeGPT() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <History className="w-5 h-5 mr-2 text-primary" />
-                  Question History
+                  Your Question History
                 </CardTitle>
                 <CardDescription>
-                  Browse your previously asked questions and answers
+                  Browse your previous questions and answers
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="mb-4">
+                <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
-                    <Button
+                    <Badge
                       variant={selectedTopic === "all" ? "default" : "outline"}
-                      size="sm"
+                      className="cursor-pointer"
                       onClick={() => handleTopicChange("all")}
                     >
                       All Topics
-                    </Button>
+                    </Badge>
                     {topics.map((topic) => (
-                      <Button
+                      <Badge
                         key={topic}
                         variant={
                           selectedTopic === topic ? "default" : "outline"
                         }
-                        size="sm"
+                        className="cursor-pointer"
                         onClick={() => handleTopicChange(topic)}
                       >
                         {topic}
-                      </Button>
+                      </Badge>
                     ))}
                   </div>
-                </div>
 
-                {isLoadingHistory ? (
-                  <div className="flex justify-center items-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                ) : recentQuestions.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentQuestions.map((item) => (
-                      <Card key={item.id} className="overflow-hidden">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg">
-                            {item.question}
-                          </CardTitle>
-                          <CardDescription className="flex items-center justify-between">
-                            <span className="flex items-center">
-                              <Clock className="w-3 h-3 mr-1" />
-                              {item.timestamp
-                                ? format(
-                                    new Date(item.timestamp),
-                                    "MMM d, yyyy 'at' h:mm a"
-                                  )
-                                : "Recent"}
-                            </span>
-                            <Badge>{item.topic}</Badge>
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="pb-2">
-                          <div className="prose max-w-none dark:prose-invert line-clamp-3 text-sm">
-                            {item.answer
-                              .split("\n")
-                              .slice(0, 3)
-                              .map((paragraph, index) => (
-                                <p key={index}>{paragraph}</p>
+                  {isLoadingHistory ? (
+                    <div className="flex justify-center items-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : recentQuestions.length > 0 ? (
+                    <div className="space-y-4">
+                      {recentQuestions.map((item) => (
+                        <Card key={item.id} className="overflow-hidden">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">
+                              {item.question}
+                            </CardTitle>
+                            <CardDescription className="flex items-center justify-between">
+                              <span className="flex items-center">
+                                <Clock className="w-3 h-3 mr-1" />
+                                {item.timestamp
+                                  ? format(
+                                      new Date(item.timestamp),
+                                      "MMM d, yyyy 'at' h:mm a"
+                                    )
+                                  : "Recent"}
+                              </span>
+                              <Badge>{item.topic}</Badge>
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="pb-2">
+                            <div className="prose max-w-none dark:prose-invert line-clamp-3 text-sm">
+                              {item.answer
+                                .split("\n")
+                                .slice(0, 3)
+                                .map((paragraph, index) => (
+                                  <p key={index}>{paragraph}</p>
+                                ))}
+                            </div>
+                          </CardContent>
+                          <CardFooter className="flex justify-between items-center pt-0">
+                            <div className="flex flex-wrap gap-1">
+                              {item.tags?.map((tag, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
+                                  {tag}
+                                </Badge>
                               ))}
-                          </div>
-                        </CardContent>
-                        <CardFooter className="pt-2 flex flex-wrap gap-2">
-                          {item.tags &&
-                            item.tags.map((tag) => (
-                              <Badge
-                                key={tag}
-                                variant="outline"
-                                className="flex items-center"
-                              >
-                                <Tag className="w-3 h-3 mr-1" />
-                                {tag}
-                              </Badge>
-                            ))}
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {item.language || "English"}
+                            </Badge>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
                       No questions found. Start asking questions to build your
                       history.
-                    </p>
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

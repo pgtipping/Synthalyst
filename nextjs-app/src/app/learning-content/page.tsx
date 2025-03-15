@@ -33,8 +33,15 @@ import {
   Clock,
   History,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import { format } from "date-fns";
+import {
+  LanguageSelector,
+  LanguageInfo,
+} from "@/components/ui/language-selector";
+import { MODELS } from "@/lib/ai/model-router";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface FormData {
   title: string;
@@ -78,6 +85,8 @@ export default function LearningContent() {
   const [savedContents, setSavedContents] = useState<LearningContent[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
+  const [modelUsed, setModelUsed] = useState<string>(MODELS.GPT_4O_MINI);
 
   const fetchSavedContent = useCallback(async () => {
     if (!session?.user) return;
@@ -132,7 +141,7 @@ export default function LearningContent() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, language: selectedLanguage }),
       });
 
       if (!response.ok) {
@@ -141,6 +150,7 @@ export default function LearningContent() {
 
       const data = await response.json();
       setContent(data.content);
+      setModelUsed(data.modelUsed || MODELS.GPT_4O_MINI);
 
       // Add to saved contents if not already there
       if (activeTab === "create" && data.id) {
@@ -189,6 +199,10 @@ export default function LearningContent() {
     document.body.removeChild(element);
 
     toast.success("Content downloaded successfully!");
+  };
+
+  const handleLanguageChange = (language: string) => {
+    setSelectedLanguage(language);
   };
 
   return (
@@ -379,6 +393,16 @@ export default function LearningContent() {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Language</label>
+                    <LanguageSelector
+                      modelType={MODELS.GPT_4O_MINI}
+                      onLanguageChange={handleLanguageChange}
+                      defaultLanguage={selectedLanguage}
+                    />
+                    <LanguageInfo modelType={MODELS.GPT_4O_MINI} />
+                  </div>
+
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
                       <>
@@ -388,7 +412,7 @@ export default function LearningContent() {
                     ) : (
                       <>
                         <Sparkles className="mr-2 h-4 w-4" />
-                        Generate Learning Content
+                        Generate Content
                       </>
                     )}
                   </Button>
@@ -397,9 +421,11 @@ export default function LearningContent() {
             </Card>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             {content && (
@@ -409,9 +435,11 @@ export default function LearningContent() {
                     <BookOpen className="w-5 h-5 mr-2 text-primary" />
                     Generated Content
                   </CardTitle>
-                  <CardDescription>
-                    {formData.title} - {formData.contentType} for{" "}
-                    {formData.targetAudience}
+                  <CardDescription className="flex justify-between items-center">
+                    <span>
+                      {formData.title} - {formData.contentType}
+                    </span>
+                    <Badge variant="outline">{modelUsed}</Badge>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -421,9 +449,13 @@ export default function LearningContent() {
                     ))}
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={downloadContent}>
-                    <Download className="w-4 h-4 mr-2" />
+                <CardFooter className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={downloadContent}
+                    disabled={!content}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
                 </CardFooter>

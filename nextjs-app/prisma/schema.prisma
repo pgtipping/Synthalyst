@@ -827,6 +827,8 @@ model KnowledgeEntry {
   topics    String[]
   tags      String[]
   userId    String
+  language  String   @default("English")
+  modelUsed String?
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -846,6 +848,8 @@ model LearningContentEntry {
   specificRequirements String?  @db.Text
   tags                String[]
   userId              String
+  language            String   @default("English")
+  modelUsed           String?
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt

@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
-import { OpenAI } from "openai";
 import { prisma } from "@/lib/prisma";
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import {
+  TaskType,
+  detectTaskComplexity,
+  selectModel,
+  generateContent,
+  createMultilingualSystemPrompt,
+} from "@/lib/ai/model-router";
 
 export async function GET() {
   try {
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.json();
+    const language = formData.language || "English";
 
     // Validate required fields
     if (!formData.title || !formData.topic || !formData.targetAudience) {
@@ -62,8 +64,39 @@ export async function POST(req: Request) {
       );
     }
 
+    // Detect task complexity
+    const complexity = detectTaskComplexity(
+      `${formData.title} ${formData.topic} ${
+        formData.specificRequirements || ""
+      }`
+    );
+
+    // Estimate content length based on content type and learning level
+    const contentLengthEstimate =
+      formData.contentType === "Comprehensive Course"
+        ? 2000
+        : formData.contentType === "Lesson"
+        ? 1500
+        : formData.contentType === "Tutorial"
+        ? 1200
+        : formData.contentType === "Exercise"
+        ? 800
+        : formData.contentType === "Quiz"
+        ? 600
+        : 1000;
+
+    // Select the appropriate model
+    const model = selectModel({
+      taskType: TaskType.LEARNING_CREATOR,
+      complexity,
+      contentLength: contentLengthEstimate,
+      language,
+      prioritizeCost: true,
+    });
+
     // Generate tags for the content
-    const tagsPrompt = `
+    const tagsSystemPrompt = "You are a tag generator for educational content.";
+    const tagsUserPrompt = `
       Generate 3-5 relevant tags for educational content with the following details:
       Title: ${formData.title}
       Topic: ${formData.topic}
@@ -74,27 +107,23 @@ export async function POST(req: Request) {
       Return only the tags as a comma-separated list, with no additional text.
     `;
 
-    const tagsResponse = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a tag generator for educational content.",
-        },
-        { role: "user", content: tagsPrompt },
-      ],
-      temperature: 0.3,
-      max_tokens: 50,
-    });
+    const tagsText = await generateContent(
+      model,
+      createMultilingualSystemPrompt(tagsSystemPrompt, language),
+      tagsUserPrompt,
+      0.3,
+      50
+    );
 
-    const tagsText = tagsResponse.choices[0]?.message?.content?.trim() || "";
     const tags = tagsText
       .split(",")
       .map((tag) => tag.trim())
       .filter(Boolean);
 
     // Main content generation prompt
-    const prompt = `
+    const contentSystemPrompt =
+      "You are an expert educational content creator specializing in developing high-quality learning materials.";
+    const contentUserPrompt = `
       You are an expert educational content creator. Your task is to create high-quality educational content based on the following specifications:
       
       Title: ${formData.title}
@@ -126,23 +155,13 @@ export async function POST(req: Request) {
       - Keep your content educational, accurate, and helpful
     `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert educational content creator specializing in developing high-quality learning materials.",
-        },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 2500,
-    });
-
-    const content =
-      response.choices[0]?.message?.content?.trim() ||
-      "I couldn't generate content. Please try again.";
+    const content = await generateContent(
+      model,
+      createMultilingualSystemPrompt(contentSystemPrompt, language),
+      contentUserPrompt,
+      0.7,
+      2500
+    );
 
     // Save the content to the database
     const contentId = uuidv4();
@@ -160,6 +179,8 @@ export async function POST(req: Request) {
         specificRequirements: formData.specificRequirements || null,
         tags: tags,
         userId: session.user.id,
+        language: language,
+        modelUsed: model,
       },
     });
 
