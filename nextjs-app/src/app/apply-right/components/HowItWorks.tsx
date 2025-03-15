@@ -16,7 +16,7 @@ export function HowItWorks() {
       icon: <Upload className="h-8 w-8 text-primary" />,
       title: "Upload Your Resume",
       description:
-        "Upload your current resume in PDF, DOC, DOCX, or TXT format. Our system will extract the text for processing.",
+        "Upload your current resume in PDF, DOCX, or TXT format. Our system will extract the text for processing.",
     },
     {
       icon: <FileText className="h-8 w-8 text-primary" />,
