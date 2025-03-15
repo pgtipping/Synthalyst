@@ -50,7 +50,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gray-900 text-gray-300 transition-all duration-300">
+    <footer className="bg-gray-900 text-gray-300 transition-all duration-300 relative">
       {/* Compact Footer - Always visible */}
       <div className="container mx-auto px-4 py-2 flex justify-between items-center">
         <div className="flex items-center space-x-4">
@@ -113,8 +113,10 @@ export default function Footer() {
 
       {/* Expandable Footer Content */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        className={`overflow-hidden transition-all duration-300 ease-in-out absolute bottom-full left-0 right-0 bg-gray-900 ${
+          isExpanded
+            ? "max-h-96 opacity-100 translate-y-full"
+            : "max-h-0 opacity-0"
         }`}
       >
         <div className="container mx-auto px-4 py-6 border-t border-gray-800">

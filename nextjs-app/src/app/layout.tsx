@@ -265,13 +265,13 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${fontVariables.geistSans} ${fontVariables.geistMono} ${fontVariables.moonDance} antialiased`}
+        className={`${fontVariables.geistSans} ${fontVariables.geistMono} ${fontVariables.moonDance} antialiased flex flex-col min-h-screen`}
         suppressHydrationWarning
       >
         <ToastProvider>
           <ClientLayout>
             <Header />
-            <main>{children}</main>
+            <main className="flex-grow flex flex-col">{children}</main>
             <Footer />
             <Toaster />
             <Analytics />
