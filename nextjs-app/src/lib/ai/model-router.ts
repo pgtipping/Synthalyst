@@ -17,6 +17,10 @@ export const MODELS = {
   // Google models
   GEMINI_1_5_FLASH_8B: "gemini-1.5-flash-8b",
   GEMINI_1_5_FLASH: "gemini-1.5-flash",
+
+  // Generic model types for UI (do not expose specific models to users)
+  KNOWLEDGE_MODEL: "KNOWLEDGE_MODEL",
+  LEARNING_MODEL: "LEARNING_MODEL",
 };
 
 // Task complexity levels
@@ -68,6 +72,42 @@ export const SUPPORTED_LANGUAGES = {
     "Italian",
     "Arabic",
     "Hindi",
+  ],
+  // Add generic model types with combined language support
+  [MODELS.KNOWLEDGE_MODEL]: [
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Chinese",
+    "Japanese",
+    "Korean",
+    "Russian",
+    "Portuguese",
+    "Italian",
+    "Arabic",
+    "Hindi",
+  ],
+  [MODELS.LEARNING_MODEL]: [
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Chinese",
+    "Japanese",
+    "Korean",
+    "Russian",
+    "Portuguese",
+    "Italian",
+    "Arabic",
+    "Hindi",
+    "Dutch",
+    "Turkish",
+    "Swedish",
+    "Polish",
+    "Danish",
+    "Norwegian",
+    "Finnish",
   ],
 };
 

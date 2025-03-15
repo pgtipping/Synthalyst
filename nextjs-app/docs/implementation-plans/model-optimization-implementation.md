@@ -79,12 +79,10 @@ We've created a model router service in `/lib/ai/model-router.ts` that:
 2. **Knowledge GPT Page** (`/app/knowledge-gpt/page.tsx`):
 
    - Adds language selection
-   - Shows the model used for each answer
    - Improves the UI for better user experience
 
 3. **Learning Creator Page** (`/app/learning-content/page.tsx`):
    - Adds language selection
-   - Shows the model used for each content
    - Improves the UI for better user experience
 
 ## Database Schema Updates
@@ -96,11 +94,6 @@ We've updated the database schema to include:
    - Added to KnowledgeEntry and LearningContentEntry models
    - Defaults to "English"
    - Used for filtering and display
-
-2. **Model Used Field**:
-   - Added to KnowledgeEntry and LearningContentEntry models
-   - Stores the model used for each entry
-   - Used for analytics and display
 
 ## Cost Optimization
 

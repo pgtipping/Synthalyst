@@ -40,7 +40,6 @@ import {
   LanguageSelector,
   LanguageInfo,
 } from "@/components/ui/language-selector";
-import { MODELS } from "@/lib/ai/model-router";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface FormData {
@@ -67,6 +66,10 @@ interface LearningContent {
   timestamp: string;
 }
 
+// Replace the specific model type with a generic "LEARNING_MODEL" constant
+// This will be used for the LanguageSelector and LanguageInfo components
+const LEARNING_MODEL = "LEARNING_MODEL";
+
 export default function LearningContent() {
   const { data: session } = useSession();
   const [formData, setFormData] = useState<FormData>({
@@ -86,7 +89,6 @@ export default function LearningContent() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
-  const [modelUsed, setModelUsed] = useState<string>(MODELS.GPT_4O_MINI);
 
   const fetchSavedContent = useCallback(async () => {
     if (!session?.user) return;
@@ -150,7 +152,6 @@ export default function LearningContent() {
 
       const data = await response.json();
       setContent(data.content);
-      setModelUsed(data.modelUsed || MODELS.GPT_4O_MINI);
 
       // Add to saved contents if not already there
       if (activeTab === "create" && data.id) {
@@ -396,11 +397,11 @@ export default function LearningContent() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Language</label>
                     <LanguageSelector
-                      modelType={MODELS.GPT_4O_MINI}
+                      modelType={LEARNING_MODEL}
                       onLanguageChange={handleLanguageChange}
                       defaultLanguage={selectedLanguage}
                     />
-                    <LanguageInfo modelType={MODELS.GPT_4O_MINI} />
+                    <LanguageInfo modelType={LEARNING_MODEL} />
                   </div>
 
                   <Button type="submit" className="w-full" disabled={isLoading}>
@@ -439,7 +440,6 @@ export default function LearningContent() {
                     <span>
                       {formData.title} - {formData.contentType}
                     </span>
-                    <Badge variant="outline">{modelUsed}</Badge>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -30,7 +30,6 @@ import {
   LanguageSelector,
   LanguageInfo,
 } from "@/components/ui/language-selector";
-import { MODELS } from "@/lib/ai/model-router";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Question {
@@ -44,21 +43,22 @@ interface Question {
   modelUsed: string;
 }
 
+// Replace the specific model type with a generic "KNOWLEDGE_MODEL" constant
+// This will be used for the LanguageSelector and LanguageInfo components
+const KNOWLEDGE_MODEL = "KNOWLEDGE_MODEL";
+
 export default function KnowledgeGPT() {
   const { data: session } = useSession();
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [recentQuestions, setRecentQuestions] = useState<Question[]>([]);
+  const [answer, setAnswer] = useState("");
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [activeTab, setActiveTab] = useState("ask");
   const [selectedTopic, setSelectedTopic] = useState<string>("all");
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [topics, setTopics] = useState<string[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
-  const [modelUsed, setModelUsed] = useState<string>(
-    MODELS.GEMINI_1_5_FLASH_8B
-  );
+  const [language, setLanguage] = useState<string>("English");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const fetchQuestionHistory = useCallback(async () => {
     if (!session?.user) return;
@@ -74,7 +74,7 @@ export default function KnowledgeGPT() {
         throw new Error("Failed to fetch question history");
       }
       const data = await response.json();
-      setRecentQuestions(data.questions || []);
+      setQuestions(data.questions || []);
     } catch (error) {
       console.error("Error fetching question history:", error);
       toast.error("Failed to load question history");
@@ -92,13 +92,13 @@ export default function KnowledgeGPT() {
 
   // Extract unique topics from questions
   useEffect(() => {
-    if (recentQuestions.length > 0) {
+    if (questions.length > 0) {
       const uniqueTopics = Array.from(
-        new Set(recentQuestions.map((q) => q.topic))
+        new Set(questions.map((q) => q.topic))
       ).filter(Boolean);
       setTopics(uniqueTopics);
     }
-  }, [recentQuestions]);
+  }, [questions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +117,7 @@ export default function KnowledgeGPT() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question, language: selectedLanguage }),
+        body: JSON.stringify({ question, language }),
       });
 
       if (!response.ok) {
@@ -126,11 +126,9 @@ export default function KnowledgeGPT() {
 
       const data = await response.json();
       setAnswer(data.answer);
-      setModelUsed(data.modelUsed || MODELS.GEMINI_1_5_FLASH_8B);
 
-      // Add to recent questions if not already there
       if (data.id) {
-        setRecentQuestions((prev) => [
+        setQuestions((prev) => [
           {
             id: data.id,
             question,
@@ -138,8 +136,8 @@ export default function KnowledgeGPT() {
             topic: data.topic || "General",
             timestamp: new Date().toISOString(),
             tags: data.tags || [],
-            language: selectedLanguage,
-            modelUsed: data.modelUsed || MODELS.GEMINI_1_5_FLASH_8B,
+            language,
+            modelUsed: data.modelUsed || "AI Model",
           },
           ...prev,
         ]);
@@ -159,7 +157,7 @@ export default function KnowledgeGPT() {
   };
 
   const handleLanguageChange = (language: string) => {
-    setSelectedLanguage(language);
+    setLanguage(language);
   };
 
   return (
@@ -225,9 +223,9 @@ export default function KnowledgeGPT() {
 
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <LanguageSelector
-                      modelType={MODELS.GEMINI_1_5_FLASH_8B}
+                      modelType={KNOWLEDGE_MODEL}
                       onLanguageChange={handleLanguageChange}
-                      defaultLanguage={selectedLanguage}
+                      defaultLanguage={language}
                     />
 
                     <Button
@@ -249,7 +247,7 @@ export default function KnowledgeGPT() {
                     </Button>
                   </div>
 
-                  <LanguageInfo modelType={MODELS.GEMINI_1_5_FLASH_8B} />
+                  <LanguageInfo modelType={KNOWLEDGE_MODEL} />
                 </form>
               </CardContent>
             </Card>
@@ -271,7 +269,6 @@ export default function KnowledgeGPT() {
                   </CardTitle>
                   <CardDescription className="flex justify-between items-center">
                     <span>Detailed explanation to your question</span>
-                    <Badge variant="outline">{modelUsed}</Badge>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -324,9 +321,9 @@ export default function KnowledgeGPT() {
                     <div className="flex justify-center items-center py-8">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
-                  ) : recentQuestions.length > 0 ? (
+                  ) : questions.length > 0 ? (
                     <div className="space-y-4">
-                      {recentQuestions.map((item) => (
+                      {questions.map((item) => (
                         <Card key={item.id} className="overflow-hidden">
                           <CardHeader className="pb-2">
                             <CardTitle className="text-lg">
