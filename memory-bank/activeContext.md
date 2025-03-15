@@ -2,7 +2,21 @@
 
 _Last Updated: ${new Date().toISOString()}_
 
-## Current Focus (2023-07-10)
+## Current Focus (2024-03-15)
+
+### Home Page Reorganization
+
+We've updated the home page to better showcase our more developed tools:
+
+1. **Featured Career Development Tools**: Added ApplyRight and Interview Prep as the primary featured tools in a new "Career Development Tools" category.
+
+2. **De-emphasized JD Developer**: Moved JD Developer from the most prominent position to a secondary position in the "Content Generation" category and removed its "Most Popular" badge.
+
+3. **Updated Value Proposition**: Changed the hero section to focus on a broader value proposition around career development rather than just job description generation.
+
+4. **Revised AI Showcase**: Updated the AI showcase section to demonstrate resume optimization rather than job description generation.
+
+5. **Reorganized Tool Categories**: Created a more logical organization of tools with Career Development, Content Generation, Intelligent Analysis, and Knowledge Processing categories.
 
 ### Audio Recording Functionality
 

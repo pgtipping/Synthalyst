@@ -114,6 +114,7 @@ export default function Home() {
           description:
             "AI-powered job description generator tailored to your needs.",
           link: "/jd-developer",
+          badge: "",
           preview:
             "Responsibilities include developing scalable web applications using React and Node.js, collaborating with cross-functional teams...",
           aiFeature: "Context Understanding",
@@ -123,6 +124,7 @@ export default function Home() {
           title: "Training Plan Creator",
           description: "Generate comprehensive training plans and curricula.",
           link: "/training-plan",
+          badge: "",
           preview:
             "Week 1: Introduction to React fundamentals, component lifecycle, and state management...",
           aiFeature: "Personalization",
@@ -140,6 +142,7 @@ export default function Home() {
           description:
             "Generate tailored interview questions based on job descriptions and competencies.",
           link: "/interview-questions",
+          badge: "",
           preview:
             "Q: Describe a situation where you had to optimize a React application for performance. What tools did you use?",
           aiFeature: "Reasoning",
@@ -150,6 +153,7 @@ export default function Home() {
           description:
             "Define and manage competency frameworks for your organization.",
           link: "/competency-manager",
+          badge: "",
           preview:
             "Technical Leadership: Ability to guide technical decisions, mentor junior developers, and establish best practices...",
           aiFeature: "Pattern Recognition",
@@ -166,6 +170,7 @@ export default function Home() {
           title: "Learning Content Creator",
           description: "Create tailored learning content for any topic.",
           link: "/learning-content",
+          badge: "",
           preview:
             "Module 3: Advanced State Management with Redux - This module covers actions, reducers, and the store...",
           aiFeature: "Content Structuring",
@@ -176,6 +181,7 @@ export default function Home() {
           description:
             "Expert teaching and knowledge curation at your fingertips.",
           link: "/knowledge-gpt",
+          badge: "",
           preview:
             "The key difference between useEffect and useLayoutEffect is the timing of execution. useLayoutEffect fires synchronously...",
           aiFeature: "Expert Knowledge",
