@@ -85,7 +85,7 @@ export default function Home() {
           description:
             "Transform your resume with AI-powered optimization for specific job applications.",
           link: "/apply-right",
-          badge: "Most Popular",
+          badge: "New",
           preview:
             "Optimized resume with 85% keyword match to job description, professional formatting, and accomplishment-focused content...",
           aiFeature: "Resume Optimization",
