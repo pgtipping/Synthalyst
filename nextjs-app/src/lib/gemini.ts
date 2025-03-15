@@ -1,4 +1,11 @@
-import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
+import {
+  GoogleGenerativeAI,
+  GenerativeModel,
+  GenerationConfig,
+  HarmCategory,
+  HarmBlockThreshold,
+  SafetySetting,
+} from "@google/generative-ai";
 import { z } from "zod";
 
 // Initialize the Google Generative AI with the API key
@@ -8,7 +15,38 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
  * Gets the Gemini model instance
  */
 export async function getGeminiModel(): Promise<GenerativeModel> {
-  return genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const generationConfig: GenerationConfig = {
+    temperature: 0.7,
+    topK: 40,
+    topP: 0.8,
+    maxOutputTokens: 2048,
+    stopSequences: [],
+  };
+
+  const safetySettings: SafetySetting[] = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+  ];
+
+  return genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    generationConfig,
+    safetySettings,
+  });
 }
 
 // Define the schema for a resource

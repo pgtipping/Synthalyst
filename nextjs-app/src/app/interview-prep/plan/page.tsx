@@ -182,7 +182,7 @@ export default function InterviewPrepPlan() {
 
       // Process the stream
       let lastUpdateTime = Date.now();
-      const updateInterval = 300; // Update UI every 300ms at most to avoid excessive re-renders
+      const updateInterval = 300;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -190,17 +190,17 @@ export default function InterviewPrepPlan() {
 
         // Decode the chunk and append to the accumulated response
         const chunk = decoder.decode(value, { stream: true });
-        responseText += chunk;
+        responseText = chunk; // Replace instead of append since we're getting complete JSON now
 
         // Only try to update the UI if we have a reasonable amount of new content
         // or if enough time has passed since the last update
         const currentTime = Date.now();
         if (currentTime - lastUpdateTime > updateInterval) {
           try {
-            // Try to parse the accumulated JSON as it comes in
+            // Parse the complete JSON response
             const parsedData = JSON.parse(responseText);
 
-            // Update the UI with the data we have so far
+            // Update the UI with the data
             if (parsedData.prepPlan && parsedData.prepPlan.sections) {
               setPrepPlan(parsedData.prepPlan);
 
@@ -227,11 +227,9 @@ export default function InterviewPrepPlan() {
 
             // Update the last update time
             lastUpdateTime = currentTime;
-          } catch (e) {
-            // If JSON parsing fails, it's likely because the stream is incomplete
-            // Just continue collecting more chunks
-            console.log("Partial JSON received, waiting for more chunks...");
-            console.error("JSON parsing error:", e);
+          } catch (error) {
+            // Log the error but don't throw - the stream might be incomplete
+            console.log("Error parsing JSON chunk:", error);
           }
         }
       }

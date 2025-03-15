@@ -135,7 +135,7 @@ export default function Header() {
       return (
         <Button variant="ghost" disabled className="flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
-          Loading...
+          <span className="sr-only">Loading...</span>
         </Button>
       );
     }
@@ -145,22 +145,24 @@ export default function Header() {
         session.user.role === "ADMIN" ||
         session.user.email === "pgtipping1@gmail.com";
 
-      // Debug session and role
-      console.log("Session:", session);
-      console.log("User role:", session.user.role);
-      console.log("User email:", session.user.email);
-      console.log("Is admin:", isAdmin);
-
       return (
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground hidden md:inline">
-            {session.user.email}
-          </span>
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 text-primary"
+          >
+            <User className="w-4 h-4" />
+            <span className="sr-only">User Account</span>
+          </Button>
           {isAdmin && (
             <Link href="/admin">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
                 <Users className="w-4 h-4" />
-                Admin
+                <span>Admin</span>
               </Button>
             </Link>
           )}
@@ -168,8 +170,8 @@ export default function Header() {
             variant="ghost"
             onClick={handleLogout}
             className="flex items-center gap-2"
+            size="sm"
           >
-            <User className="w-4 h-4" />
             Logout
           </Button>
         </div>
@@ -180,6 +182,7 @@ export default function Header() {
       <Link href="/login">
         <Button
           variant="outline"
+          size="sm"
           className="flex items-center gap-2 text-gray-900 border-gray-400"
         >
           <User className="w-4 h-4" />
@@ -198,7 +201,7 @@ export default function Header() {
           className="flex items-center gap-2 w-full"
         >
           <Loader2 className="w-4 h-4 animate-spin" />
-          Loading...
+          <span className="sr-only">Loading...</span>
         </Button>
       );
     }
@@ -208,16 +211,11 @@ export default function Header() {
         session.user.role === "ADMIN" ||
         session.user.email === "pgtipping1@gmail.com";
 
-      // Debug session and role (mobile)
-      console.log("Mobile Session:", session);
-      console.log("Mobile User role:", session.user.role);
-      console.log("Mobile User email:", session.user.email);
-      console.log("Mobile Is admin:", isAdmin);
-
       return (
         <>
-          <div className="text-sm text-muted-foreground mb-2">
-            {session.user.email}
+          <div className="flex items-center gap-2 text-primary mb-2">
+            <User className="w-4 h-4" />
+            <span className="text-sm">Logged in</span>
           </div>
           {isAdmin && (
             <>
@@ -246,7 +244,6 @@ export default function Header() {
             onClick={handleLogout}
             className="flex items-center gap-2 w-full"
           >
-            <User className="w-4 h-4" />
             Logout
           </Button>
         </>
@@ -278,34 +275,25 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="ml-auto md:hidden"
-          onClick={toggleMenu}
-          aria-label="Toggle Menu"
-        >
-          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-
         {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:justify-between md:flex-1">
-          <nav className="flex items-center space-x-8 ml-12">
+          <nav className="flex items-center space-x-4 lg:space-x-8 ml-6 lg:ml-12">
             <Link
               href="/about"
-              className="text-gray-900 hover:text-foreground transition-colors"
+              className="text-sm lg:text-base text-gray-900 hover:text-foreground transition-colors"
             >
               About
             </Link>
             <Link
               href="/services"
-              className="text-gray-900 hover:text-foreground transition-colors"
+              className="text-sm lg:text-base text-gray-900 hover:text-foreground transition-colors"
             >
               Services
             </Link>
 
             {/* Tools Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center text-gray-900 hover:text-foreground transition-colors dropdown-tools-trigger">
+              <DropdownMenuTrigger className="flex items-center text-sm lg:text-base text-gray-900 hover:text-foreground transition-colors dropdown-tools-trigger">
                 Tools
                 <ChevronDown className="ml-1 h-4 w-4" />
               </DropdownMenuTrigger>
@@ -320,7 +308,7 @@ export default function Header() {
                         className="flex items-center text-gray-900"
                       >
                         {tool.icon}
-                        <span>{tool.title}</span>
+                        <span className="text-sm">{tool.title}</span>
                       </a>
                     ) : (
                       <Link
@@ -328,7 +316,7 @@ export default function Header() {
                         className="flex items-center text-gray-900"
                       >
                         {tool.icon}
-                        <span>{tool.title}</span>
+                        <span className="text-sm">{tool.title}</span>
                       </Link>
                     )}
                   </DropdownMenuItem>
@@ -338,7 +326,7 @@ export default function Header() {
                     href="/tools"
                     className="flex items-center font-medium text-gray-900"
                   >
-                    View All Tools
+                    <span className="text-sm">View All Tools</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -346,26 +334,36 @@ export default function Header() {
 
             <Link
               href="/blog"
-              className="text-gray-900 hover:text-foreground transition-colors"
+              className="text-sm lg:text-base text-gray-900 hover:text-foreground transition-colors"
             >
               Blog
             </Link>
             <Link
               href="/contact"
-              className="text-gray-900 hover:text-foreground transition-colors"
+              className="text-sm lg:text-base text-gray-900 hover:text-foreground transition-colors"
             >
               Contact
             </Link>
           </nav>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 lg:space-x-4">
             {renderAuthButton()}
             <Link href="/get-started">
-              <Button>Get Started</Button>
+              <Button size="sm" className="lg:text-base">
+                Get Started
+              </Button>
             </Link>
           </div>
         </div>
 
         {/* Mobile Navigation */}
+        <button
+          className="ml-auto md:hidden p-2"
+          onClick={toggleMenu}
+          aria-label="Toggle Menu"
+        >
+          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+
         {menuOpen && (
           <div className="absolute top-24 left-0 right-0 bg-background border-b md:hidden">
             <nav className="container flex flex-col space-y-4 p-4">
