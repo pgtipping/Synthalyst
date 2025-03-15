@@ -86,6 +86,16 @@ export default function ApplyRight() {
     setIsProcessing(true);
 
     try {
+      // Show a toast notification to inform the user that transformation is in progress
+      toast.info("Transforming your resume. This may take a moment...", {
+        duration: 10000, // 10 seconds
+        id: "transforming-resume",
+      });
+
+      // Set up a controller for the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       // Call the API to transform the resume
       const response = await fetch("/api/apply-right/transform", {
         method: "POST",
@@ -97,59 +107,188 @@ export default function ApplyRight() {
           jobDescription,
           isPremiumUser: checkPremiumStatus(),
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId); // Clear the timeout if the request completes
+
       if (!response.ok) {
-        throw new Error("Failed to transform resume");
+        const errorText = await response.text();
+        console.error("Error transforming resume:", errorText);
+
+        // If it's a timeout error, show a more user-friendly message
+        if (response.status === 504) {
+          toast.dismiss("transforming-resume");
+          toast.error(
+            "The request took too long to process. Please try again with a shorter resume or job description.",
+            { duration: 6000 }
+          );
+          return;
+        }
+
+        throw new Error(errorText || "Failed to transform resume");
       }
 
-      const data = await response.json();
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Failed to get response reader");
+      }
 
-      if (data.success) {
-        setTransformedResume(data.transformedResume);
-        setCoverLetter(data.coverLetter);
-        setChangesMade(data.changesMade || []);
-        setKeywordsExtracted(data.keywordsExtracted || []);
+      // Create a decoder to convert the stream chunks to text
+      const decoder = new TextDecoder();
+      let responseText = "";
 
-        // Store job details for Interview Prep
-        const jobDetails = {
-          jobTitle,
-          company,
-          description: jobDescription,
-          requiredSkills: keywordsExtracted,
-        };
-        localStorage.setItem(
-          "applyRightJobDetails",
-          JSON.stringify(jobDetails)
-        );
-        localStorage.setItem("applyRightResumeText", resumeText);
-        localStorage.setItem(
-          "applyRightDataImportTime",
-          new Date().toLocaleString()
-        );
+      // Update UI with progress indicator
+      setTransformedResume("Transforming your resume...");
+      setChangesMade(["Analyzing your resume and job description..."]);
+      setKeywordsExtracted(["Identifying key skills and qualifications..."]);
 
-        // Auto-advance to next tab
-        setActiveTab("results");
+      // Show a progress toast
+      toast.dismiss("transforming-resume");
+      toast.info("Receiving your transformed resume...", {
+        duration: 10000,
+        id: "streaming-resume",
+      });
 
-        // Show a different message if we're in fallback mode
-        if (data.fallbackMode) {
-          toast.warning(
-            "AI service is currently unavailable. Using basic transformation instead."
-          );
-        } else {
-          toast.success("Resume transformed successfully!");
+      // Process the stream
+      let lastUpdateTime = Date.now();
+      const updateInterval = 300;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Decode the chunk and append to the accumulated response
+        const chunk = decoder.decode(value, { stream: true });
+        responseText = chunk; // Replace instead of append since we're getting complete JSON now
+
+        // Only try to update the UI if enough time has passed since the last update
+        const currentTime = Date.now();
+        if (currentTime - lastUpdateTime > updateInterval) {
+          try {
+            // Parse the complete JSON response
+            const parsedData = JSON.parse(responseText);
+
+            // Update the UI with the data
+            if (parsedData.transformedResume) {
+              setTransformedResume(parsedData.transformedResume);
+
+              // Update the toast message to show progress
+              toast.dismiss("streaming-resume");
+              toast.info("Receiving your transformed resume...", {
+                duration: 5000,
+                id: "streaming-resume",
+              });
+            }
+
+            if (
+              parsedData.changesMade &&
+              Array.isArray(parsedData.changesMade)
+            ) {
+              setChangesMade(parsedData.changesMade);
+            }
+
+            if (
+              parsedData.keywordsExtracted &&
+              Array.isArray(parsedData.keywordsExtracted)
+            ) {
+              setKeywordsExtracted(parsedData.keywordsExtracted);
+            }
+
+            if (parsedData.coverLetter) {
+              setCoverLetter(parsedData.coverLetter);
+            }
+
+            // Show fallback mode message if applicable
+            if (parsedData.fallbackMode) {
+              toast.dismiss("streaming-resume");
+              toast.info("Using simplified transformation due to complexity.", {
+                duration: 5000,
+              });
+            }
+
+            // Update the last update time
+            lastUpdateTime = currentTime;
+          } catch (error) {
+            // Log the error but don't throw - the stream might be incomplete
+            console.log("Error parsing JSON chunk:", error);
+          }
         }
-      } else {
-        throw new Error(data.message || "Failed to transform resume");
+      }
+
+      // Final parsing of the complete response
+      try {
+        const data = JSON.parse(responseText);
+        console.log("Complete API response data:", data);
+
+        // Dismiss the streaming toast
+        toast.dismiss("streaming-resume");
+        toast.dismiss("transforming-resume");
+
+        if (data.success) {
+          setTransformedResume(data.transformedResume);
+          setCoverLetter(data.coverLetter);
+          setChangesMade(data.changesMade || []);
+          setKeywordsExtracted(data.keywordsExtracted || []);
+
+          // Store job details for Interview Prep
+          const jobDetails = {
+            jobTitle,
+            company,
+            description: jobDescription,
+            requiredSkills: keywordsExtracted,
+          };
+          localStorage.setItem(
+            "applyRightJobDetails",
+            JSON.stringify(jobDetails)
+          );
+          localStorage.setItem("applyRightResumeText", resumeText);
+          localStorage.setItem(
+            "applyRightDataImportTime",
+            new Date().toLocaleString()
+          );
+
+          // Auto-advance to next tab
+          setActiveTab("results");
+
+          // Show a different message if we're in fallback mode
+          if (data.fallbackMode) {
+            toast.warning(
+              "AI service is currently unavailable. Using basic transformation instead."
+            );
+          } else if (data.cached) {
+            toast.success("Resume transformation retrieved from cache!");
+          } else {
+            toast.success("Resume transformed successfully!");
+
+            // Show premium vs free user message
+            if (checkPremiumStatus()) {
+              toast.info(
+                "As a premium user, you have access to additional customization options and templates.",
+                { duration: 5000 }
+              );
+            } else {
+              toast.info(
+                "Upgrade to premium for additional customization options and templates.",
+                { duration: 5000 }
+              );
+            }
+          }
+        } else {
+          throw new Error(data.message || "Failed to transform resume");
+        }
+      } catch (parseError) {
+        console.error("Error parsing final JSON response:", parseError);
+        throw new Error("Failed to parse the response from the server");
       }
     } catch (error) {
       console.error("Error transforming resume:", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to transform resume"
       );
-    } finally {
-      setIsProcessing(false);
     }
+    setIsProcessing(false);
   };
 
   const handleDownloadResume = () => {

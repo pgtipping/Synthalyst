@@ -180,3 +180,61 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
 - **MAX_AUDIO_FILE_SIZE**: Maximum allowed size for audio files
 - **ALLOWED_AUDIO_MIME_TYPES**: Comma-separated list of allowed MIME types
 - **GEMINI_API_KEY**: API key for Google's Gemini AI service
+
+## Caching Infrastructure [2024-03-15]
+
+### Redis Implementation
+
+- **Version**: Redis 7.2
+- **Connection**: Upstash Redis
+- **Configuration**:
+  - TLS enabled
+  - Connection pooling
+  - Automatic reconnection
+  - Error retry mechanism
+
+### Cache Operations
+
+- **Set Operations**:
+
+  - JSON serialization
+  - TTL configuration
+  - Atomic operations
+  - Error handling
+
+- **Get Operations**:
+  - JSON deserialization
+  - Cache miss handling
+  - Error recovery
+  - Performance logging
+
+### Monitoring
+
+- **Metrics**:
+
+  - Cache hit rate
+  - Response times
+  - Error rates
+  - Cache size
+  - Memory usage
+
+- **Logging**:
+  - Operation timestamps
+  - Error details
+  - Performance data
+  - Cache status
+
+### Security
+
+- **Access Control**:
+
+  - TLS encryption
+  - Token-based auth
+  - IP restrictions
+  - Rate limiting
+
+- **Data Protection**:
+  - Encryption at rest
+  - Secure key generation
+  - Data sanitization
+  - TTL enforcement

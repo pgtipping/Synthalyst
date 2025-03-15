@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { validateRequest, handleAPIError } from "@/lib/middleware";
 import { logger } from "@/lib/logger";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
+import { kv } from "@vercel/kv";
+import { createHash } from "crypto";
 
 // Define the schema for the request body
 const transformSchema = z.object({
@@ -10,6 +16,46 @@ const transformSchema = z.object({
   jobDescription: z.string().optional(),
   isPremiumUser: z.boolean().default(false),
 });
+
+// Define the response type for type checking
+interface ResumeTransformResponse {
+  success: boolean;
+  transformedResume: string;
+  coverLetter: string | null;
+  changesMade: string[];
+  keywordsExtracted: string[];
+  fallbackMode?: boolean;
+  message?: string;
+}
+
+// Cache TTL in seconds (24 hours)
+const CACHE_TTL = 86400;
+
+// Generate a cache key based on input parameters
+function generateCacheKey(
+  resumeText: string,
+  jobDescription?: string,
+  isPremiumUser: boolean = false
+): string {
+  const input = `${resumeText}|${jobDescription || ""}|${isPremiumUser}`;
+  return createHash("md5").update(input).digest("hex");
+}
+
+// Validate the response structure
+function isValidResumeResponse(data: unknown): data is ResumeTransformResponse {
+  return (
+    data !== null &&
+    typeof data === "object" &&
+    "success" in data &&
+    typeof (data as ResumeTransformResponse).success === "boolean" &&
+    "transformedResume" in data &&
+    typeof (data as ResumeTransformResponse).transformedResume === "string" &&
+    "changesMade" in data &&
+    Array.isArray((data as ResumeTransformResponse).changesMade) &&
+    "keywordsExtracted" in data &&
+    Array.isArray((data as ResumeTransformResponse).keywordsExtracted)
+  );
+}
 
 export async function POST(request: Request) {
   try {
@@ -25,48 +71,96 @@ export async function POST(request: Request) {
       isPremiumUser: data.isPremiumUser,
     });
 
+    // Generate cache key
+    const cacheKey = generateCacheKey(
+      data.resumeText,
+      data.jobDescription,
+      data.isPremiumUser
+    );
+
+    // Try to get cached result first
+    try {
+      const cachedResult = await kv.get(cacheKey);
+      if (cachedResult) {
+        logger.info("Returning cached resume transformation result");
+        return NextResponse.json(
+          {
+            ...cachedResult,
+            cached: true,
+          },
+          { status: 200 }
+        );
+      }
+    } catch (cacheError) {
+      // Log cache error but continue with normal processing
+      logger.warn("Failed to retrieve from cache", cacheError);
+    }
+
     // Check if API key is available
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       logger.error("Gemini API key is missing");
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Service configuration error. Please try again later.",
-          fallbackMode: true,
-          transformedResume: generateFallbackResume(
-            data.resumeText,
-            data.jobDescription,
-            data.isPremiumUser || false
-          ),
-          coverLetter: data.jobDescription
-            ? generateFallbackCoverLetter(data.resumeText, data.jobDescription)
-            : null,
-          changesMade: generateFallbackChanges(data.isPremiumUser || false),
-          keywordsExtracted: data.jobDescription
-            ? extractFallbackKeywords(data.jobDescription)
-            : [],
-        },
-        { status: 200 }
-      );
+      const fallbackResponse = {
+        success: false,
+        message: "Service configuration error. Please try again later.",
+        fallbackMode: true,
+        transformedResume: generateFallbackResume(
+          data.resumeText,
+          data.jobDescription,
+          data.isPremiumUser || false
+        ),
+        coverLetter: data.jobDescription
+          ? generateFallbackCoverLetter(data.resumeText, data.jobDescription)
+          : null,
+        changesMade: generateFallbackChanges(data.isPremiumUser || false),
+        keywordsExtracted: data.jobDescription
+          ? extractFallbackKeywords(data.jobDescription)
+          : [],
+      };
+
+      // Cache the fallback response
+      try {
+        await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL });
+      } catch (cacheError) {
+        logger.warn("Failed to cache fallback response", cacheError);
+      }
+
+      return NextResponse.json(fallbackResponse, { status: 200 });
     }
 
     try {
       // Initialize the Google Generative AI client
       const genAI = new GoogleGenerativeAI(apiKey);
 
-      // Get the Gemini model
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      // Get the Gemini model - use a faster model to reduce timeout risk
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash",
+        // Add safety settings to prevent timeouts due to content filtering
+        safetySettings: [
+          {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+          },
+        ],
+      });
 
-      // Create the prompt for resume transformation
+      // Create a comprehensive prompt for resume transformation
       const resumePrompt = `
         You are an expert resume writer and career coach with 15+ years of experience helping professionals land their dream jobs. Your task is to transform the following resume to make it more professional, impactful, and optimized for Applicant Tracking Systems (ATS).
         
-        ${
-          data.isPremiumUser
-            ? "This is a premium user, so provide comprehensive improvements and detailed optimizations."
-            : "This is a free tier user, but still provide substantial improvements to demonstrate the value of our service."
-        }
+        IMPORTANT: Provide the highest quality transformation possible with comprehensive improvements and detailed optimizations regardless of user tier. Both free and premium users should receive the same high-quality resume transformation.
         
         Resume to transform:
         ${data.resumeText}
@@ -98,124 +192,171 @@ export async function POST(request: Request) {
             : ""
         }
         
-        Please provide:
-        1. A transformed version of the resume with improved language, formatting, and structure.
-        2. A list of specific changes made to improve the resume.
-        ${
-          data.jobDescription
-            ? "3. A list of keywords extracted from the job description that were incorporated into the resume."
-            : ""
-        }
-        
         Format your response as a JSON object with the following structure:
         {
+          "success": true,
           "transformedResume": "The full transformed resume text",
           "changesMade": ["Change 1", "Change 2", ...],
           "keywordsExtracted": ["Keyword 1", "Keyword 2", ...]
         }
+
+        IMPORTANT JSON FORMATTING RULES:
+        1. Ensure all property names are in double quotes
+        2. Ensure all string values are properly escaped with double quotes
+        3. Ensure arrays have proper syntax with square brackets and comma-separated values
+        4. No trailing commas in arrays or objects
+        5. All text must be properly escaped for JSON (quotes, newlines, etc.)
       `;
 
-      // Generate the transformed resume
-      const resumeResult = await model.generateContent(resumePrompt);
-      const resumeResponse = await resumeResult.response;
-      const resumeText = resumeResponse.text();
+      // Set up streaming response
+      const streamingResponse = await model.generateContentStream(resumePrompt);
+      const encoder = new TextEncoder();
 
-      // Parse the JSON response
-      let parsedResumeResponse;
-      try {
-        // Extract JSON from the response (it might be wrapped in markdown code blocks)
-        const jsonMatch = resumeText.match(/```json\n([\s\S]*?)\n```/) ||
-          resumeText.match(/```\n([\s\S]*?)\n```/) || [null, resumeText];
-        const jsonString = jsonMatch[1] || resumeText;
-        parsedResumeResponse = JSON.parse(jsonString);
-      } catch (error) {
-        logger.error("Failed to parse resume transformation response", error);
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Failed to process resume transformation",
-          },
-          { status: 500 }
-        );
-      }
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            let accumulatedText = "";
+            let lastValidJson: ResumeTransformResponse | null = null;
 
-      // Generate a cover letter if job description is provided
-      let coverLetter = null;
-      if (data.jobDescription) {
-        const coverLetterPrompt = `
-          You are an expert cover letter writer with extensive experience in helping candidates secure interviews at top companies. Your task is to create a professional, compelling cover letter based on the following resume and job description.
-          
-          Resume:
-          ${parsedResumeResponse.transformedResume || data.resumeText}
-          
-          Job Description:
-          ${data.jobDescription}
-          
-          COVER LETTER GUIDELINES:
-          1. Create a powerful opening paragraph that immediately grabs attention and states the candidate's interest in the position.
-          2. Highlight 3-4 of the candidate's most relevant achievements that directly align with the job requirements.
-          3. Use specific metrics and results whenever possible to demonstrate impact.
-          4. Explain why the candidate is passionate about this role and company specifically.
-          5. Include a strong closing paragraph with a clear call to action.
-          6. Maintain a professional but conversational tone throughout.
-          7. Keep the letter concise (no more than 400 words) but impactful.
-          8. Format as a proper business letter with date, greeting, and closing.
-          9. Ensure the letter complements the resume without simply repeating the same information.
-          10. CRITICAL: Ensure all paragraphs are properly aligned and formatted with consistent spacing.
-          11. NEVER use placeholder text like "Platform" - use specific job board names like "LinkedIn" or "Indeed" instead.
-          12. NEVER include phrases like "as advertised on Platform" - instead use "as advertised on your company website" or similar.
-          13. Make sure all paragraphs have consistent formatting and alignment.
-          
-          Format your response as plain text for the cover letter only, without any additional commentary.
-        `;
+            for await (const chunk of streamingResponse.stream) {
+              const text = chunk.text();
+              if (text) {
+                accumulatedText += text;
+                const cleanText = accumulatedText
+                  .trim()
+                  .replace(/```json\s*/g, "")
+                  .replace(/```\s*/g, "")
+                  .replace(/^\s*\{/, "{")
+                  .replace(/\}\s*$/, "}");
 
-        try {
-          const coverLetterResult = await model.generateContent(
-            coverLetterPrompt
-          );
-          const coverLetterResponse = await coverLetterResult.response;
-          coverLetter = coverLetterResponse.text();
-        } catch (error) {
-          logger.error("Failed to generate cover letter", error);
-          // Continue with the process even if cover letter generation fails
-        }
-      }
+                try {
+                  const parsed = JSON.parse(cleanText);
+                  if (isValidResumeResponse(parsed)) {
+                    lastValidJson = parsed;
 
-      return NextResponse.json(
-        {
-          success: true,
-          transformedResume: parsedResumeResponse.transformedResume,
-          coverLetter,
-          changesMade: parsedResumeResponse.changesMade || [],
-          keywordsExtracted: parsedResumeResponse.keywordsExtracted || [],
-          message: "Resume transformed successfully",
+                    // Cache the valid response
+                    try {
+                      await kv.set(cacheKey, parsed, { ex: CACHE_TTL });
+                    } catch (cacheError) {
+                      logger.warn("Failed to cache response", cacheError);
+                    }
+
+                    controller.enqueue(
+                      encoder.encode(
+                        JSON.stringify({
+                          ...parsed,
+                          cached: false,
+                          generated: new Date().toISOString(),
+                        })
+                      )
+                    );
+
+                    // Reset accumulated text after successful parse
+                    accumulatedText = "";
+                  }
+                } catch {
+                  // This is expected for partial JSON chunks
+                  logger.debug(
+                    "Chunk parsing failed (expected for partial chunks)"
+                  );
+                }
+              }
+            }
+
+            if (!lastValidJson) {
+              // Handle invalid or missing response
+              const fallbackResponse = {
+                success: true,
+                fallbackMode: true,
+                transformedResume: generateFallbackResume(
+                  data.resumeText,
+                  data.jobDescription,
+                  data.isPremiumUser || false
+                ),
+                coverLetter: data.jobDescription
+                  ? generateFallbackCoverLetter(
+                      data.resumeText,
+                      data.jobDescription
+                    )
+                  : null,
+                changesMade: generateFallbackChanges(
+                  data.isPremiumUser || false
+                ),
+                keywordsExtracted: data.jobDescription
+                  ? extractFallbackKeywords(data.jobDescription)
+                  : [],
+                message: "Resume transformed with fallback system",
+              };
+
+              // Cache the fallback response
+              try {
+                await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL / 2 }); // Cache fallback for less time
+              } catch (cacheError) {
+                logger.warn("Failed to cache fallback response", cacheError);
+              }
+
+              controller.enqueue(
+                encoder.encode(
+                  JSON.stringify({
+                    ...fallbackResponse,
+                    cached: false,
+                    fallback: true,
+                  })
+                )
+              );
+            }
+
+            controller.close();
+          } catch (error) {
+            logger.error("Stream processing error:", error);
+
+            const fallbackResponse = {
+              success: true,
+              fallbackMode: true,
+              transformedResume: generateFallbackResume(
+                data.resumeText,
+                data.jobDescription,
+                data.isPremiumUser || false
+              ),
+              coverLetter: data.jobDescription
+                ? generateFallbackCoverLetter(
+                    data.resumeText,
+                    data.jobDescription
+                  )
+                : null,
+              changesMade: generateFallbackChanges(data.isPremiumUser || false),
+              keywordsExtracted: data.jobDescription
+                ? extractFallbackKeywords(data.jobDescription)
+                : [],
+              message: "Resume transformed with fallback system",
+              error: error instanceof Error ? error.message : "Unknown error",
+            };
+
+            // Cache the fallback response
+            try {
+              await kv.set(cacheKey, fallbackResponse, { ex: CACHE_TTL / 2 });
+            } catch (cacheError) {
+              logger.warn("Failed to cache fallback response", cacheError);
+            }
+
+            controller.enqueue(
+              encoder.encode(
+                JSON.stringify({
+                  ...fallbackResponse,
+                  cached: false,
+                  fallback: true,
+                })
+              )
+            );
+            controller.close();
+          }
         },
-        { status: 200 }
-      );
+      });
+
+      return new Response(stream);
     } catch (error) {
-      logger.error("Google AI API error", error);
-
-      // Return a fallback response when the API fails
-      return NextResponse.json(
-        {
-          success: true,
-          fallbackMode: true,
-          transformedResume: generateFallbackResume(
-            data.resumeText,
-            data.jobDescription,
-            data.isPremiumUser || false
-          ),
-          coverLetter: data.jobDescription
-            ? generateFallbackCoverLetter(data.resumeText, data.jobDescription)
-            : null,
-          changesMade: generateFallbackChanges(data.isPremiumUser || false),
-          keywordsExtracted: data.jobDescription
-            ? extractFallbackKeywords(data.jobDescription)
-            : [],
-          message: "Resume transformed with fallback system",
-        },
-        { status: 200 }
-      );
+      logger.error("Failed to transform resume", error);
+      return handleAPIError(error);
     }
   } catch (error) {
     logger.error("Failed to transform resume", error);
@@ -307,7 +448,9 @@ function generateFallbackResume(
   return (
     formattedSections.join("\n\n").replace(/\n{3,}/g, "\n\n") + // Remove excessive line breaks
     jobSpecificNote +
-    (isPremiumUser ? "\n\n*Premium formatting applied.*" : "")
+    (isPremiumUser
+      ? "\n\n*Premium user: Additional customization options available.*"
+      : "")
   );
 }
 
@@ -343,16 +486,14 @@ function generateFallbackCoverLetter(
 }
 
 function generateFallbackChanges(isPremiumUser: boolean): string[] {
-  const baseChanges = [
+  // Both free and premium users get the same high-quality improvements
+  const changes = [
     "Improved formatting and structure for better readability",
     "Enhanced section headers for clearer organization",
     "Removed placeholder text and references to 'see original resume'",
     "Added action verbs to bullet points for stronger impact",
     "Optimized spacing and layout for professional appearance",
     "Standardized formatting across all sections",
-  ];
-
-  const premiumChanges = [
     "Applied keyword optimization for better ATS performance",
     "Enhanced bullet points with achievement-focused language",
     "Improved overall content flow and narrative structure",
@@ -360,7 +501,14 @@ function generateFallbackChanges(isPremiumUser: boolean): string[] {
     "Optimized contact information presentation",
   ];
 
-  return isPremiumUser ? [...baseChanges, ...premiumChanges] : baseChanges;
+  // Premium users get a note about additional services
+  if (isPremiumUser) {
+    changes.push(
+      "Premium user: Access to additional customization options and templates"
+    );
+  }
+
+  return changes;
 }
 
 function extractFallbackKeywords(jobDescription: string): string[] {

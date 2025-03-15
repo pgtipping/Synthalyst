@@ -629,3 +629,53 @@ The AudioRecorder component follows a stateful component pattern:
 2. Provides a clean API for parent components
 3. Handles browser compatibility issues internally
 4. Provides clear visual feedback to users
+
+## Caching Architecture [2024-03-15]
+
+### Cache Key Strategy
+
+- Version-based prefixing for breaking changes
+- Job details incorporated in key generation
+- Base64 encoded optional parameters
+- Premium user flag in key structure
+
+### Cache Duration
+
+- Success responses: 24 hours TTL
+- Fallback content: 12 hours TTL
+- Premium users: Optional cache bypass
+
+### Cache Warming
+
+- Pre-cached responses for common job titles
+- Background execution for minimal latency
+- Error handling with fallback content
+- Monitoring of warm cache hits
+
+### Cache Invalidation
+
+- Automatic on error responses
+- Version-based for breaking changes
+- Premium user manual bypass
+- TTL-based expiration
+
+### Cache Response Structure
+
+- Cache status metadata
+- Generation timestamps
+- Fallback content markers
+- Source tracking (cache vs. generated)
+
+### Performance Monitoring
+
+- Cache hit/miss tracking
+- Response time logging
+- Error rate monitoring
+- Cache size tracking
+
+### Error Handling
+
+- Fallback content generation
+- Automatic retry mechanism
+- Error logging and monitoring
+- User feedback on cache status

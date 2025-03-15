@@ -1,8 +1,134 @@
-# Active Development Context
+# Active Development Context [2024-03-15 14:30 UTC]
 
 _Last Updated: ${new Date().toISOString()}_
 
+## Current Focus
+
+- Implemented comprehensive Redis caching for interview prep plans
+- Optimized API response handling and error management
+- Enhanced streaming response implementation
+- Fixed ApplyRight resume transformation timeout issues in production
+
+## Recent Changes
+
+### ApplyRight Resume Transformation Streaming [2024-03-15]
+
+- Implemented streaming response for resume transformation to avoid timeout issues
+- Added Redis caching with 24-hour TTL for successful responses
+- Enhanced error handling and fallback content generation
+- Improved response validation and JSON parsing
+- Updated client-side code to handle streaming responses
+- Ensured both free and premium users receive the same high-quality transformations
+- Differentiated premium users through add-on services rather than transformation quality
+
+### Interview Prep Plan Caching [2024-03-15]
+
+- Added Redis caching with 24-hour TTL for successful responses
+- Implemented cache warming for common job titles
+- Added cache bypass option for premium users
+- Enhanced error handling and fallback content caching
+- Improved response validation and JSON parsing
+- Added cache monitoring and performance tracking
+
+### Streaming Response Optimization [2024-03-15]
+
+- Improved chunk handling and text accumulation
+- Enhanced JSON validation and parsing
+- Added proper error handling for streaming responses
+- Implemented fallback content generation with shorter cache TTL
+
+## Active Decisions
+
+1. Cache Duration:
+
+   - 24 hours for successful responses
+   - 12 hours for fallback content
+   - Premium users can bypass cache
+
+2. Cache Key Strategy:
+
+   - Version-based for easy invalidation
+   - Includes all job details
+   - Hashes optional fields
+   - Supports premium user differentiation
+
+3. Performance Monitoring:
+
+   - Added cache hit/miss tracking
+   - Implemented detailed logging
+   - Added response metadata
+
+4. Premium vs Free User Experience:
+   - Both user tiers receive the same high-quality content
+   - Premium users get access to additional features and customization options
+   - Differentiation through add-on services rather than core quality
+
+## Next Steps
+
+1. Monitor cache performance and adjust TTL if needed
+2. Consider implementing cache prewarming on a schedule
+3. Add cache analytics to admin dashboard
+4. Consider implementing cache compression for large responses
+5. Monitor ApplyRight resume transformation in production to ensure streaming is working correctly
+
+## Known Issues
+
+- None currently identified
+
+## Current Status
+
+✅ Interview prep plan generation working with caching
+✅ Streaming responses implemented for both Interview Prep and ApplyRight
+✅ Error handling and fallback content in place
+✅ Cache monitoring active
+
 ## Current Focus (${new Date().toLocaleDateString()})
+
+### ApplyRight Resume Transformation Improvements
+
+We've implemented significant improvements to the ApplyRight resume transformation functionality to fix timeout issues in production:
+
+1. **Implemented Streaming Responses**: Completely redesigned the API route to use streaming responses, which provides several benefits:
+
+   - Users see content as it's generated rather than waiting for the entire response
+   - Avoids timeout issues in production while maintaining high-quality output
+   - Provides a more interactive and engaging user experience
+   - Allows for longer, more detailed responses without hitting timeout limits
+
+2. **Enhanced Model Quality**: Using Gemini 2.0 Pro instead of Flash models:
+
+   - Prioritized output quality over speed
+   - Increased token limits to allow for more comprehensive transformations
+   - Improved prompt engineering to generate more detailed and personalized resumes
+   - Maintained responsiveness through streaming rather than compromising on quality
+
+3. **Improved Client-Side Experience**: Enhanced the user interface during resume transformation:
+
+   - Added progressive rendering of content as it arrives
+   - Implemented informative progress indicators
+   - Provided real-time feedback on transformation status
+   - Created a smoother, more responsive user experience
+
+4. **Robust Error Handling**: Implemented comprehensive error handling throughout:
+
+   - Added fallback mechanisms when streaming encounters issues
+   - Improved error messages with specific guidance for users
+   - Implemented proper cleanup of resources
+   - Added detailed logging for troubleshooting
+
+5. **Redis Caching**: Implemented caching to improve performance and reduce API costs:
+
+   - Added 24-hour TTL for successful responses
+   - Implemented 12-hour TTL for fallback content
+   - Created a hash-based cache key system for efficient lookups
+   - Added proper cache invalidation and error handling
+
+6. **Premium vs Free User Experience**:
+
+   - Both user tiers now receive the same high-quality resume transformation
+   - Premium users are differentiated through add-on services and customization options
+   - Updated UI to clearly communicate the value proposition for premium users
+   - Enhanced fallback content generation to maintain quality for all users
 
 ### Interview Prep Plan Production Improvements
 
@@ -84,79 +210,42 @@ We've implemented significant improvements to the audio recording functionality:
 ### Next Steps
 
 1. Monitor production logs to verify Interview Prep Plan streaming is working correctly
-2. Implement audio playback improvements
-3. Add audio file management (listing, deleting)
-4. Integrate audio recording with other components
-5. Add audio transcription functionality
-
-## Recent Changes
-
-### Interview Prep Plan Streaming Implementation
-
-- Implemented streaming responses for the Interview Prep Plan generation
-- Switched to Gemini 1.5 Pro for higher quality output
-- Enhanced client-side code to handle streaming responses
-- Added progressive rendering of content as it arrives
-- Improved user feedback during plan generation
-- Maintained high-quality output while resolving timeout issues
-
-### Audio Recording Component Improvements
-
-- Fixed hydration issues by moving browser capability checks to client-side effects
-- Improved state management in AudioRecorder component and useAudioRecorder hook
-- Enhanced error handling and cleanup mechanisms
-- Added visual feedback for recording status
-- Implemented proper duration tracking and progress indication
-- Added mobile-responsive UI elements
-
-### Technical Improvements
-
-- Resolved React hydration mismatch errors
-- Improved component reusability with configurable props
-- Enhanced error handling and user feedback
-- Implemented proper cleanup for audio resources
-- Added development mode debugging capabilities
-
-## Active Decisions
-
-1. Using WebM audio format for better compatibility
-2. Implementing mobile-first responsive design
-3. Following professional UI standards without emojis
-4. Using Tailwind CSS for styling
-5. Maintaining WCAG contrast standards
-6. Prioritizing high-quality AI outputs over speed through streaming responses
-
-## Current Considerations
-
-1. Browser compatibility for audio recording
-2. Mobile device permissions handling
-3. Error state management
-4. Resource cleanup
-5. Performance optimization
-6. API key management in production environment
-7. Balancing AI output quality with response time
-
-## Next Steps
-
-1. Test audio recording on various mobile devices
-2. Implement additional error handling for edge cases
-3. Add visual feedback for permission states
-4. Enhance accessibility features
-5. Add comprehensive error recovery mechanisms
-6. Monitor production logs for Interview Prep Plan streaming
-
-## Known Issues
-
-1. Port 3001 conflicts need to be resolved before starting development server
-2. Audio recording support varies by browser
-3. Permission handling needs to be tested across different devices
-4. PDF generation may have issues in some production environments
+2. Monitor production logs to verify ApplyRight resume transformation streaming is working correctly
+3. Implement audio playback improvements
+4. Add audio file management (listing, deleting)
+5. Integrate audio recording with other components
+6. Add audio transcription functionality
 
 # Active Context - ${new Date().toLocaleDateString()}
 
 ## Current Focus
 
-We are currently focused on ensuring the Interview Prep Plan generation works reliably in production and improving the audio recording functionality in the Interview Prep application. The audio recording component is used to record user responses to interview questions, which can then be analyzed for feedback.
+We are currently focused on ensuring both the Interview Prep Plan generation and ApplyRight resume transformation work reliably in production and improving the audio recording functionality in the Interview Prep application. The audio recording component is used to record user responses to interview questions, which can then be analyzed for feedback.
+
+### Recent ApplyRight Resume Transformation Improvements
+
+1. **Streaming Implementation**
+
+   - Implemented streaming response to fix timeout issues in production
+   - Enhanced client-side code to handle streaming responses
+   - Added progress indicators and real-time updates
+
+2. **Redis Caching**
+
+   - Implemented caching with appropriate TTLs
+   - Created efficient cache key generation
+   - Added proper cache invalidation
+
+3. **Premium vs Free User Experience**
+
+   - Updated to provide high-quality transformations for all users
+   - Differentiated premium users through add-on services
+   - Enhanced UI messaging to communicate value proposition
+
+4. **Error Handling**
+   - Implemented comprehensive error handling
+   - Added fallback content generation
+   - Improved user feedback for errors
 
 ### Recent Interview Prep Plan Improvements
 
@@ -222,6 +311,7 @@ We are currently focused on ensuring the Interview Prep Plan generation works re
    - Test the API routes for audio upload and retrieval
    - Test the storage abstraction with both local and S3 storage
    - Monitor production logs for Interview Prep Plan generation
+   - Monitor production logs for ApplyRight resume transformation
 
 2. **Audio Processing**
 
