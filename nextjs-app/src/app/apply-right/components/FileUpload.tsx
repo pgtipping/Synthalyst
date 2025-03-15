@@ -28,7 +28,6 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
     // Check file type
     const validTypes = [
       "application/pdf",
-      "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "text/plain",
     ];
@@ -39,20 +38,18 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
       selectedFile.name.toLowerCase().endsWith(".doc");
 
     if (isDocFile) {
-      setWarning(
-        "You've uploaded a DOC file (older Word format). While we'll try to process it, DOCX files provide better results. Consider converting your file to DOCX for optimal performance."
-      );
-      toast.info(
-        "DOC files may have limited support. DOCX format is recommended for best results.",
-        { duration: 6000 }
-      );
+      const errorMsg =
+        "DOC files are not supported. Please convert to DOCX or PDF format and try again.";
+      setError(errorMsg);
+      toast.error(errorMsg);
+      return;
     }
 
     if (
       !validTypes.includes(selectedFile.type) &&
-      !selectedFile.name.toLowerCase().match(/\.(pdf|doc|docx|txt)$/)
+      !selectedFile.name.toLowerCase().match(/\.(pdf|docx|txt)$/)
     ) {
-      const errorMsg = "Please upload a PDF, DOC, DOCX, or TXT file";
+      const errorMsg = "Please upload a PDF, DOCX, or TXT file";
       setError(errorMsg);
       toast.error(errorMsg);
       return;
@@ -207,7 +204,7 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
           id="file-upload"
           type="file"
           className="hidden"
-          accept=".pdf,.doc,.docx,.txt"
+          accept=".pdf,.docx,.txt"
           onChange={handleFileChange}
         />
 
@@ -241,7 +238,7 @@ export function FileUpload({ onFileUpload }: FileUploadProps) {
             <div className="space-y-2">
               <p className="font-medium">Drag and drop your resume</p>
               <p className="text-sm text-muted-foreground">
-                Supports PDF, DOCX (recommended), DOC, and TXT files (max 5MB)
+                Supports PDF, DOCX (recommended), and TXT files (max 5MB)
               </p>
               <p className="text-xs text-muted-foreground">
                 For best results, use DOCX or PDF format

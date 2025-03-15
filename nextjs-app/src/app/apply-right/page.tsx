@@ -13,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { FileUpload } from "./components/FileUpload";
 import { JobDescription } from "./components/JobDescription";
@@ -837,8 +836,6 @@ export default function ApplyRight() {
   return (
     <FeedbackLayout appName="ApplyRight">
       <div className="container mx-auto px-4 py-8">
-        <Toaster position="top-right" />
-
         <div className="max-w-7xl mx-auto space-y-8">
           <Breadcrumb
             items={[
