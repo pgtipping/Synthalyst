@@ -452,11 +452,57 @@ export async function generateContentV2({
     } else if (provider === "google") {
       const geminiModel = genAI.getGenerativeModel({ model });
 
-      // Convert messages to Google AI format
-      const formattedMessages = messages.map((msg) => ({
-        role: msg.role === "assistant" ? "model" : msg.role,
-        parts: [{ text: msg.content }],
-      }));
+      // For Gemini, we need to handle system messages differently
+      // since Gemini doesn't support system role
+      const systemMessage =
+        messages.find((msg) => msg.role === "system")?.content || "";
+      const userMessages = messages.filter((msg) => msg.role === "user");
+      const assistantMessages = messages.filter(
+        (msg) => msg.role === "assistant"
+      );
+
+      // Combine system message with the first user message if it exists
+      const formattedMessages = [];
+
+      if (userMessages.length > 0) {
+        // Add system instructions to the first user message
+        const firstUserMessage = userMessages[0];
+        const enhancedUserContent = systemMessage
+          ? `${systemMessage}\n\n${firstUserMessage.content}`
+          : firstUserMessage.content;
+
+        formattedMessages.push({
+          role: "user",
+          parts: [{ text: enhancedUserContent }],
+        });
+
+        // Add remaining messages in alternating order
+        for (
+          let i = 0;
+          i < Math.max(userMessages.length - 1, assistantMessages.length);
+          i++
+        ) {
+          if (i < assistantMessages.length) {
+            formattedMessages.push({
+              role: "model",
+              parts: [{ text: assistantMessages[i].content }],
+            });
+          }
+
+          if (i + 1 < userMessages.length) {
+            formattedMessages.push({
+              role: "user",
+              parts: [{ text: userMessages[i + 1].content }],
+            });
+          }
+        }
+      } else if (systemMessage) {
+        // If there's only a system message, treat it as a user message
+        formattedMessages.push({
+          role: "user",
+          parts: [{ text: systemMessage }],
+        });
+      }
 
       const result = await geminiModel.generateContent({
         contents: formattedMessages,

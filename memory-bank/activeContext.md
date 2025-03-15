@@ -12,6 +12,7 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Added a new `generateContentV2` function with improved parameter handling
    - Updated the API route to use the new function
    - Standardized language support across models
+   - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 4. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
 
 ### Next Steps
@@ -40,3 +41,7 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Focus on functionality rather than exposing model details
    - Simplified UI with clear language options
    - Consistent experience across different tools
+5. **API Integration**:
+   - Adapted to model-specific requirements (e.g., Gemini's lack of system role support)
+   - Standardized API response format
+   - Improved error handling

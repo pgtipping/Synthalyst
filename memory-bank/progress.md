@@ -107,6 +107,7 @@
   - Tiered model selection based on task complexity
   - Language support standardization
   - Cost-efficient model routing
+  - Model-specific API adaptations (e.g., Gemini system message handling)
 
 ## What's Left to Build (March 15, 2025)
 
@@ -155,6 +156,8 @@ The platform is stable and functional with the following features:
    - Ready for future enhancements for task-based model selection
 
 The platform is functional with core features working well. Recent improvements to the language selector and model optimization have enhanced the user experience and backend efficiency. The focus is now on refining the existing features and implementing the remaining components.
+
+Fixed a critical issue with Gemini API integration where system messages were causing errors. Implemented a solution that combines system messages with user messages for Gemini models.
 
 ## Known Issues (March 15, 2025)
 
