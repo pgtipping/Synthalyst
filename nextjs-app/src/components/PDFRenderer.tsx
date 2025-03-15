@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 // Import the DocumentProps type for proper typing
@@ -12,29 +12,75 @@ const downloadPDF = async (
   fileName: string
 ) => {
   try {
-    // Dynamically import the PDF renderer
-    const { pdf } = await import("@react-pdf/renderer");
-    const blob = await pdf(documentElement).toBlob();
-    const url = URL.createObjectURL(blob);
+    console.log("Starting PDF download process");
+    console.log("Document prop:", documentElement ? "Exists" : "Undefined");
+    console.log("FileName:", fileName);
 
-    // Create a link and trigger download
-    const link = window.document.createElement("a");
+    // Dynamically import the PDF renderer
+    console.log("About to import @react-pdf/renderer");
+    const { pdf } = await import("@react-pdf/renderer");
+    console.log("pdf import successful:", pdf ? "Yes" : "No");
+
+    // Create a blob from the PDF
+    console.log("About to render to blob");
+    const blob = await pdf(documentElement).toBlob();
+    console.log("Blob created successfully:", blob ? "Yes" : "No");
+
+    // Create a URL for the blob
+    console.log("Creating URL for blob");
+    const url = URL.createObjectURL(blob);
+    console.log("URL created:", url ? "Yes" : "No");
+
+    // Create a link element
+    const link = document.createElement("a");
     link.href = url;
     link.download = fileName;
+
+    // Append the link to the body
+    document.body.appendChild(link);
+
+    // Click the link to download the PDF
     link.click();
 
-    // Clean up
+    // Remove the link from the body
+    document.body.removeChild(link);
+
+    // Revoke the URL
     URL.revokeObjectURL(url);
+    console.log("PDF download process completed successfully");
   } catch (error) {
     console.error("Error generating PDF:", error);
-    throw error;
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+
+    // Try to identify the specific issue
+    if (error instanceof TypeError && error.message.includes("undefined")) {
+      console.error(
+        "Undefined value detected. Check if all required props are provided."
+      );
+      console.log(
+        "Document structure:",
+        JSON.stringify(
+          documentElement,
+          (key, value) => {
+            if (React.isValidElement(value)) {
+              return `[React Element: ${value.type.name || "Unknown"}]`;
+            }
+            return value;
+          },
+          2
+        )
+      );
+    }
   }
 };
 
 interface PDFRendererProps {
   document: React.ReactElement<DocumentProps>;
   fileName: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function ErrorFallback({

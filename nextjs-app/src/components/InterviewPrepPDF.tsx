@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 
 // Dynamically import @react-pdf/renderer components
@@ -25,8 +25,9 @@ const View = dynamic(
 const styles = {
   page: {
     flexDirection: "column",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#ffffff",
     padding: 30,
+    fontFamily: "Roboto",
   },
   header: {
     marginBottom: 20,
@@ -115,50 +116,93 @@ const styles = {
 };
 
 interface Section {
-  type: "timeline" | "phase" | "goal" | "objective" | "star" | "category";
+  type: string;
   title: string;
   content?: string;
   items?: string[];
+}
+
+interface PrepPlan {
+  sections: Section[];
 }
 
 interface InterviewPrepPDFProps {
   jobTitle: string;
   company?: string;
   industry?: string;
-  prepPlan: {
-    sections: Section[];
-  };
+  prepPlan: PrepPlan;
   questions: string[];
 }
 
-// Function to clean any markdown syntax that might be present
-const cleanMarkdown = (text: string): string => {
-  if (!text) return "";
-
-  // Remove markdown formatting
-  return text
-    .replace(/\*\*(.+?)\*\*/g, "$1") // Remove bold markdown
-    .replace(/\*([^*]+?)\*/g, "$1"); // Remove italic markdown
-};
-
-// Create a PDF component that only renders on the client side
-const InterviewPrepPDF: React.FC<InterviewPrepPDFProps> = ({
+export function InterviewPrepPDF({
   jobTitle,
   company,
   industry,
   prepPlan,
   questions,
-}) => {
-  // Create a client-side only component
-  const [isClient, setIsClient] = React.useState(false);
+}: InterviewPrepPDFProps) {
+  useEffect(() => {
+    console.log("InterviewPrepPDF component mounted");
+    console.log("Props received:", {
+      jobTitle,
+      company,
+      industry,
+      prepPlanSections: prepPlan?.sections?.length || 0,
+      questionsCount: questions?.length || 0,
+    });
 
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
+    // Check for potential issues
+    if (!prepPlan) {
+      console.error("prepPlan is undefined or null");
+    } else if (!prepPlan.sections) {
+      console.error("prepPlan.sections is undefined or null");
+    } else if (!Array.isArray(prepPlan.sections)) {
+      console.error("prepPlan.sections is not an array");
+    }
 
-  if (!isClient) {
-    return null; // Return null on server-side
-  }
+    if (!questions) {
+      console.error("questions is undefined or null");
+    } else if (!Array.isArray(questions)) {
+      console.error("questions is not an array");
+    }
+
+    // Register fonts on client side
+    try {
+      const registerFonts = async () => {
+        const fontModule = await import("@react-pdf/renderer").then(
+          (mod) => mod.Font
+        );
+        fontModule.register({
+          family: "Roboto",
+          fonts: [
+            {
+              src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf",
+              fontWeight: "normal",
+            },
+            {
+              src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf",
+              fontWeight: "bold",
+            },
+          ],
+        });
+        console.log("Fonts registered successfully");
+      };
+
+      registerFonts();
+    } catch (error) {
+      console.error("Error registering fonts:", error);
+    }
+  }, [jobTitle, company, industry, prepPlan, questions]);
+
+  // Function to clean any markdown syntax that might be present
+  const cleanMarkdown = (text: string): string => {
+    if (!text) return "";
+
+    // Remove markdown formatting
+    return text
+      .replace(/\*\*(.+?)\*\*/g, "$1") // Remove bold markdown
+      .replace(/\*([^*]+?)\*/g, "$1"); // Remove italic markdown
+  };
 
   // Function to render a section
   const renderSection = (section: Section): React.ReactNode => {
@@ -227,6 +271,6 @@ const InterviewPrepPDF: React.FC<InterviewPrepPDFProps> = ({
       </Page>
     </Document>
   );
-};
+}
 
 export default InterviewPrepPDF;
