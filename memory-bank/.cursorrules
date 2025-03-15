@@ -1988,3 +1988,39 @@ When working with audio components in the application:
 
 - `LearningContentEntry`: Stores content specifications, generated content, and user information
 - `LearningContentTemplate`: Stores reusable templates for different content types
+
+# Cursor Rules - March 15, 2025
+
+## Model Optimization Strategy - March 15, 2025
+
+- Knowledge GPT uses Gemini 1.5 Flash-8B as the primary model for cost efficiency
+- Learning Creator uses GPT-4o-Mini as the primary model for balanced cost and quality
+- A tiered approach is implemented to select models based on task complexity, content length, language support, and cost priority
+- The model router service in `/lib/ai/model-router.ts` handles model selection and API calls
+- Both features support multilingual responses based on user language selection
+
+## API Integration - March 15, 2025
+
+- Knowledge GPT API in `/api/knowledge-gpt/route.ts` uses the model router to select the appropriate model
+- Learning Content API in `/api/learning-content/route.ts` uses the model router to select the appropriate model
+- Both APIs support language selection and store the model used in the database
+- System prompts are enhanced with multilingual support using the `createMultilingualSystemPrompt` function
+
+## UI Components - March 15, 2025
+
+- Language selector component in `/components/ui/language-selector.tsx` allows users to select their preferred language
+- The component shows supported languages for each model and detects browser language as default
+- Both Knowledge GPT and Learning Creator pages display the model used for each response
+- Error handling is improved with proper error alerts and messages
+
+## Database Schema - March 15, 2025
+
+- KnowledgeEntry and LearningContentEntry models include language and modelUsed fields
+- Language field defaults to "English" and is used for filtering and display
+- ModelUsed field stores the model used for each entry and is used for analytics and display
+
+## Environment Variables - March 15, 2025
+
+- OPENAI_API_KEY is required for OpenAI API calls
+- GOOGLE_AI_API_KEY is required for Google AI API calls
+- Both keys should be added to the .env file for local development
