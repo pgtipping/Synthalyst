@@ -1,4 +1,4 @@
-# Technical Context - Updated on March 14, 2025
+# Technical Context - Updated on ${new Date().toLocaleDateString()}
 
 ## Technologies Used
 
@@ -43,6 +43,26 @@ The Interview Prep Plan feature includes PDF export functionality implemented wi
 - **file-saver**: For downloading the generated PDFs
 - **crypto-polyfill.js**: Custom polyfill for crypto functionality needed by the PDF library
 - **pdf-utils.js**: Utility functions for PDF generation and download
+
+### Interview Prep Plan Generation
+
+The Interview Prep Plan generation system includes:
+
+- **API Route**: `/api/interview-prep/generate-plan` for handling plan generation requests
+- **Gemini API Integration**: Using the Google Generative AI SDK to generate personalized plans
+- **Fallback Mechanism**: Structured fallback content when the AI service fails
+- **Error Handling**: Comprehensive error handling and logging
+- **Environment Variable Management**: Verification of API keys and configuration
+
+### Error Handling and Logging
+
+The system includes robust error handling and logging:
+
+- **Client-Side Logging**: Detailed logs for API requests and responses
+- **Server-Side Logging**: Comprehensive logging in API endpoints
+- **Error Capturing**: Detailed error information for debugging
+- **Fallback Content**: Structured fallback plans and questions when services fail
+- **User Feedback**: Clear error messages for users
 
 ### Premium Feature Testing
 
@@ -159,3 +179,4 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
 - **AWS_S3_URL_EXPIRATION**: Expiration time in seconds for signed URLs
 - **MAX_AUDIO_FILE_SIZE**: Maximum allowed size for audio files
 - **ALLOWED_AUDIO_MIME_TYPES**: Comma-separated list of allowed MIME types
+- **GEMINI_API_KEY**: API key for Google's Gemini AI service
