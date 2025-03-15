@@ -81,35 +81,57 @@ export default function NewsletterSignup({
         </div>
       )}
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-        <div
-          className={`flex ${
-            variant === "minimal" ? "flex-row" : "flex-col sm:flex-row"
-          } space-x-0 sm:space-x-2 space-y-2 sm:space-y-0`}
-        >
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={placeholder}
-            required
-            className={`flex-grow ${variant === "minimal" ? "h-9" : ""}`}
-            disabled={status === "loading"}
-          />
-          <Button
-            type="submit"
-            disabled={status === "loading"}
-            size={variant === "minimal" ? "sm" : "default"}
-          >
-            {status === "loading" ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading
-              </>
-            ) : (
-              buttonText
-            )}
-          </Button>
-        </div>
+        {variant === "minimal" ? (
+          // Minimal variant (horizontal layout)
+          <div className="flex flex-row space-x-2">
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={placeholder}
+              required
+              className="flex-grow h-9"
+              disabled={status === "loading"}
+            />
+            <Button type="submit" disabled={status === "loading"} size="sm">
+              {status === "loading" ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading
+                </>
+              ) : (
+                buttonText
+              )}
+            </Button>
+          </div>
+        ) : (
+          // Default variant (stacked layout)
+          <div className="flex flex-col space-y-2 w-full">
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={placeholder}
+              required
+              className="w-full"
+              disabled={status === "loading"}
+            />
+            <Button
+              type="submit"
+              disabled={status === "loading"}
+              className="w-full"
+            >
+              {status === "loading" ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading
+                </>
+              ) : (
+                buttonText
+              )}
+            </Button>
+          </div>
+        )}
 
         {status === "success" && (
           <Alert
