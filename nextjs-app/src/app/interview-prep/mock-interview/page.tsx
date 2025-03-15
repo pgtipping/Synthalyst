@@ -12,12 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useToast, Toaster } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Loader2, AlertCircle } from "lucide-react";
 import FeedbackLayout from "@/components/FeedbackLayout";
 import Link from "next/link";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/toaster";
 
 // Import audio components
 import { AudioRecorder, TextToSpeechPlayer } from "@/components/interview-prep";
@@ -323,9 +324,9 @@ export default function MockInterviewPage() {
   };
 
   // Handle audio recording completion
-  const handleRecordingComplete = (blob: Blob, url: string) => {
+  const handleRecordingComplete = (blob: Blob) => {
     setAudioBlob(blob);
-    setAudioUrl(url);
+    setAudioUrl(URL.createObjectURL(blob));
   };
 
   // Toggle between text and audio mode

@@ -158,12 +158,22 @@ class S3AudioStorage implements AudioStorage {
 export function createAudioStorage(): AudioStorage {
   const storageType = process.env.AUDIO_STORAGE_TYPE || "local";
 
-  switch (storageType) {
-    case "s3":
-      return new S3AudioStorage();
-    case "local":
-    default:
-      return new LocalAudioStorage();
+  try {
+    switch (storageType) {
+      case "s3":
+        // Check if AWS SDK is loaded
+        if (!S3Client) {
+          console.warn("AWS SDK not loaded, falling back to local storage");
+          return new LocalAudioStorage();
+        }
+        return new S3AudioStorage();
+      case "local":
+      default:
+        return new LocalAudioStorage();
+    }
+  } catch (error) {
+    console.error("Error creating audio storage:", error);
+    return new LocalAudioStorage();
   }
 }
 
