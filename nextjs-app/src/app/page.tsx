@@ -27,6 +27,7 @@ import {
   RefreshCw,
   UserPlus,
   Mail,
+  Briefcase,
 } from "lucide-react";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import { Metadata } from "next";
@@ -74,7 +75,36 @@ export default function Home() {
   // Reorganize features by AI capability
   const aiCapabilities = [
     {
-      category: "Natural Language Generation",
+      category: "Career Development Tools",
+      description:
+        "Our AI-powered tools help you excel at every stage of your career journey",
+      tools: [
+        {
+          icon: <FileText className="w-6 h-6" />,
+          title: "ApplyRight",
+          description:
+            "Transform your resume with AI-powered optimization for specific job applications.",
+          link: "/apply-right",
+          badge: "Most Popular",
+          preview:
+            "Optimized resume with 85% keyword match to job description, professional formatting, and accomplishment-focused content...",
+          aiFeature: "Resume Optimization",
+        },
+        {
+          icon: <MessageSquare className="w-6 h-6" />,
+          title: "Interview Prep",
+          description:
+            "Prepare for interviews with personalized plans and AI-powered mock interviews.",
+          link: "/interview-prep",
+          badge: "New",
+          preview:
+            "Your personalized interview plan includes 15 practice questions tailored to the Senior Developer role at TechCorp...",
+          aiFeature: "Personalized Coaching",
+        },
+      ],
+    },
+    {
+      category: "Content Generation",
       description:
         "Our AI excels at generating human-quality text for various professional needs",
       tools: [
@@ -84,7 +114,6 @@ export default function Home() {
           description:
             "AI-powered job description generator tailored to your needs.",
           link: "/jd-developer",
-          badge: "Most Popular",
           preview:
             "Responsibilities include developing scalable web applications using React and Node.js, collaborating with cross-functional teams...",
           aiFeature: "Context Understanding",
@@ -199,15 +228,14 @@ export default function Home() {
           <div className="container mx-auto max-w-6xl">
             <div className="text-center text-white">
               <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                Experience Next-Generation AI
+                AI-Powered Tools for
                 <br />
-                That Thinks Like a Human Expert
+                Professional Excellence
               </h1>
               <p className="text-xl md:text-2xl mb-8 text-blue-50">
-                Our advanced AI tools deliver exceptional results in seconds,
-                not hours. From crafting perfect job descriptions to creating
-                comprehensive training plans, our AI understands your unique
-                needs.
+                From optimizing your resume to preparing for interviews, our
+                suite of AI tools helps you excel at every stage of your career
+                journey.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
                 <Link href="/tools">
@@ -258,8 +286,8 @@ export default function Home() {
                 See Our AI in Action
               </h2>
               <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-                Watch how our AI transforms a simple job title and requirements
-                into a comprehensive, professional job description in seconds.
+                Watch how our AI transforms your career preparation process,
+                from optimizing your resume to helping you ace your interviews.
               </p>
             </div>
 
@@ -275,9 +303,9 @@ export default function Home() {
                 <div className="space-y-4">
                   <div className="p-4 bg-white rounded border border-gray-200">
                     <p className="text-sm text-gray-500 mb-1">Input</p>
-                    <p className="font-medium">Senior Software Engineer</p>
+                    <p className="font-medium">Resume + Job Description</p>
                     <p className="text-sm mt-2">
-                      5+ years experience, React, Node.js, AWS
+                      Hours of manual editing and formatting
                     </p>
                   </div>
                   <div className="flex items-center text-gray-500 text-sm">
@@ -304,14 +332,14 @@ export default function Home() {
                 <div className="space-y-4">
                   <div className="p-4 bg-white rounded border border-gray-200">
                     <p className="text-sm text-primary mb-1">Same Input</p>
-                    <p className="font-medium">Senior Software Engineer</p>
+                    <p className="font-medium">Resume + Job Description</p>
                     <p className="text-sm mt-2">
-                      5+ years experience, React, Node.js, AWS
+                      Optimized in seconds with AI assistance
                     </p>
                   </div>
                   <div className="flex items-center text-primary text-sm">
                     <Zap className="w-4 h-4 mr-1" />
-                    <span>Complete job description in seconds</span>
+                    <span>Optimized resume in seconds</span>
                   </div>
                   <div className="flex items-center text-primary text-sm">
                     <CheckCircle2 className="w-4 h-4 mr-1" />
@@ -319,24 +347,24 @@ export default function Home() {
                   </div>
                   <div className="flex items-center text-primary text-sm">
                     <CheckCircle2 className="w-4 h-4 mr-1" />
-                    <span>Industry-specific requirements included</span>
+                    <span>Tailored to specific job requirements</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="mt-10 text-center">
-              <Link href="/jd-developer">
+              <Link href="/apply-right">
                 <Button
                   size="lg"
                   className="bg-primary text-white hover:bg-primary/90"
                 >
-                  Try JD Developer Now
+                  Try ApplyRight Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <p className="mt-4 text-sm text-gray-500">
-                No credit card required. Get your first 3 job descriptions free.
+                No credit card required. Transform your first resume for free.
               </p>
             </div>
 
@@ -347,13 +375,13 @@ export default function Home() {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm italic text-gray-700">
-                    &ldquo;The AI-generated job description was so accurate and
-                    professional that we posted it immediately. It saved us
-                    hours of work and helped us attract better
-                    candidates.&rdquo;
+                    &ldquo;The AI-optimized resume and interview preparation
+                    tools helped me land my dream job. The personalized feedback
+                    and guidance were invaluable throughout my job search
+                    process.&rdquo;
                   </p>
                   <p className="mt-2 text-sm font-medium">
-                    — HR Director, Fortune 500 Company
+                    — Software Engineer, Tech Startup
                   </p>
                   <p className="text-xs text-gray-500">
                     <Link
@@ -377,8 +405,8 @@ export default function Home() {
             </h2>
             <p className="text-lg text-center mb-16 max-w-3xl mx-auto">
               Discover how our advanced AI technologies can transform your
-              business processes with intelligent automation and expert-level
-              outputs.
+              career and business processes with intelligent automation and
+              expert-level outputs.
             </p>
 
             {aiCapabilities.map((category, categoryIndex) => (
@@ -386,12 +414,15 @@ export default function Home() {
                 <div className="mb-8">
                   <h3 className="text-2xl font-bold mb-2 flex items-center">
                     {categoryIndex === 0 && (
-                      <PenTool className="w-6 h-6 mr-2 text-primary" />
+                      <Briefcase className="w-6 h-6 mr-2 text-primary" />
                     )}
                     {categoryIndex === 1 && (
-                      <BarChart className="w-6 h-6 mr-2 text-primary" />
+                      <PenTool className="w-6 h-6 mr-2 text-primary" />
                     )}
                     {categoryIndex === 2 && (
+                      <BarChart className="w-6 h-6 mr-2 text-primary" />
+                    )}
+                    {categoryIndex === 3 && (
                       <Cpu className="w-6 h-6 mr-2 text-primary" />
                     )}
                     {category.category}
