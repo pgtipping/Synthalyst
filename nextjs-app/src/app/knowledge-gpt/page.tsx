@@ -52,23 +52,33 @@ export default function KnowledgeGPT() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-
       const data = await response.json();
-      setAnswer(data.content);
 
-      // Add to previous questions
-      setPreviousQuestions((prev) => [
-        { question, answer: data.content },
-        ...prev,
-      ]);
+      // Check if we have content in the response
+      if (data.content) {
+        setAnswer(data.content);
 
-      setQuestion("");
+        // Add to previous questions
+        setPreviousQuestions((prev) => [
+          { question, answer: data.content },
+          ...prev,
+        ]);
+
+        setQuestion("");
+      } else if (data.error) {
+        // Handle error message from API
+        console.error("API Error:", data.error);
+        setAnswer(`Error: ${data.error}`);
+      } else {
+        // Unexpected response format
+        console.error("Unexpected API response:", data);
+        setAnswer("Sorry, there was an error processing your request.");
+      }
     } catch (error) {
       console.error("Error:", error);
-      setAnswer("Sorry, there was an error processing your request.");
+      setAnswer(
+        "Sorry, there was an error processing your request. Please try again later."
+      );
     } finally {
       setIsLoading(false);
     }

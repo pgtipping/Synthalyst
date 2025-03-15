@@ -426,8 +426,18 @@ export async function generateContentV2({
     // Map generic model type to actual model
     let model = "";
 
+    // Check if the content is likely to trigger Gemini's content moderation
+    const userMessage = messages.find((m) => m.role === "user")?.content || "";
+    const isEducationalContent = detectEducationalContent(userMessage);
+
     if (type === "knowledge" || type === MODELS.KNOWLEDGE_MODEL) {
-      model = MODELS.GEMINI_1_5_FLASH_8B; // Use Gemini for knowledge queries
+      // Use OpenAI for educational content to avoid Gemini's content moderation
+      if (isEducationalContent) {
+        model = MODELS.GPT_4O_MINI;
+        console.log("Detected educational content, using OpenAI model");
+      } else {
+        model = MODELS.GEMINI_1_5_FLASH_8B; // Use Gemini for general knowledge queries
+      }
     } else if (type === "learning" || type === MODELS.LEARNING_MODEL) {
       model = MODELS.GPT_4O_MINI; // Use GPT for learning content
     } else {
@@ -438,83 +448,167 @@ export async function generateContentV2({
     console.log(`Model Router - Using model: ${model} for type: ${type}`);
     console.log(`Model Router - Language: ${language}`);
 
-    const provider = getModelProvider(model);
+    try {
+      const provider = getModelProvider(model);
 
-    if (provider === "openai") {
-      const response = await openai.chat.completions.create({
-        model,
-        messages,
-        temperature,
-        max_tokens: maxTokens,
-      });
-
-      return response.choices[0]?.message?.content?.trim() || "";
-    } else if (provider === "google") {
-      const geminiModel = genAI.getGenerativeModel({ model });
-
-      // For Gemini, we need to handle system messages differently
-      // since Gemini doesn't support system role
-      const systemMessage =
-        messages.find((msg) => msg.role === "system")?.content || "";
-      const userMessages = messages.filter((msg) => msg.role === "user");
-      const assistantMessages = messages.filter(
-        (msg) => msg.role === "assistant"
-      );
-
-      // Combine system message with the first user message if it exists
-      const formattedMessages = [];
-
-      if (userMessages.length > 0) {
-        // Add system instructions to the first user message
-        const firstUserMessage = userMessages[0];
-        const enhancedUserContent = systemMessage
-          ? `${systemMessage}\n\n${firstUserMessage.content}`
-          : firstUserMessage.content;
-
-        formattedMessages.push({
-          role: "user",
-          parts: [{ text: enhancedUserContent }],
-        });
-
-        // Add remaining messages in alternating order
-        for (
-          let i = 0;
-          i < Math.max(userMessages.length - 1, assistantMessages.length);
-          i++
-        ) {
-          if (i < assistantMessages.length) {
-            formattedMessages.push({
-              role: "model",
-              parts: [{ text: assistantMessages[i].content }],
-            });
-          }
-
-          if (i + 1 < userMessages.length) {
-            formattedMessages.push({
-              role: "user",
-              parts: [{ text: userMessages[i + 1].content }],
-            });
-          }
+      if (provider === "openai") {
+        return await generateWithOpenAI(
+          model,
+          messages,
+          temperature,
+          maxTokens
+        );
+      } else if (provider === "google") {
+        try {
+          return await generateWithGemini(
+            model,
+            messages,
+            temperature,
+            maxTokens
+          );
+        } catch (error) {
+          // If Gemini fails due to content moderation, fall back to OpenAI
+          console.warn(`Gemini API error: ${error}. Falling back to OpenAI.`);
+          return await generateWithOpenAI(
+            MODELS.GPT_4O_MINI,
+            messages,
+            temperature,
+            maxTokens
+          );
         }
-      } else if (systemMessage) {
-        // If there's only a system message, treat it as a user message
+      }
+
+      throw new Error(`Unsupported provider: ${provider}`);
+    } catch (error) {
+      console.error("Error generating content:", error);
+      throw error;
+    }
+  }
+}
+
+// Helper function to generate content with OpenAI
+async function generateWithOpenAI(
+  model: string,
+  messages: { role: "system" | "user" | "assistant"; content: string }[],
+  temperature: number,
+  maxTokens: number
+): Promise<string> {
+  const response = await openai.chat.completions.create({
+    model,
+    messages,
+    temperature,
+    max_tokens: maxTokens,
+  });
+
+  return response.choices[0]?.message?.content?.trim() || "";
+}
+
+// Helper function to generate content with Gemini
+async function generateWithGemini(
+  model: string,
+  messages: { role: "system" | "user" | "assistant"; content: string }[],
+  temperature: number,
+  maxTokens: number
+): Promise<string> {
+  const geminiModel = genAI.getGenerativeModel({ model });
+
+  // For Gemini, we need to handle system messages differently
+  // since Gemini doesn't support system role
+  const systemMessage =
+    messages.find((msg) => msg.role === "system")?.content || "";
+  const userMessages = messages.filter((msg) => msg.role === "user");
+  const assistantMessages = messages.filter((msg) => msg.role === "assistant");
+
+  // Combine system message with the first user message if it exists
+  const formattedMessages = [];
+
+  if (userMessages.length > 0) {
+    // Add system instructions to the first user message
+    const firstUserMessage = userMessages[0];
+    const enhancedUserContent = systemMessage
+      ? `${systemMessage}\n\n${firstUserMessage.content}`
+      : firstUserMessage.content;
+
+    formattedMessages.push({
+      role: "user",
+      parts: [{ text: enhancedUserContent }],
+    });
+
+    // Add remaining messages in alternating order
+    for (
+      let i = 0;
+      i < Math.max(userMessages.length - 1, assistantMessages.length);
+      i++
+    ) {
+      if (i < assistantMessages.length) {
         formattedMessages.push({
-          role: "user",
-          parts: [{ text: systemMessage }],
+          role: "model",
+          parts: [{ text: assistantMessages[i].content }],
         });
       }
 
-      const result = await geminiModel.generateContent({
-        contents: formattedMessages,
-        generationConfig: {
-          temperature,
-          maxOutputTokens: maxTokens,
-        },
-      });
-
-      return result.response.text().trim();
+      if (i + 1 < userMessages.length) {
+        formattedMessages.push({
+          role: "user",
+          parts: [{ text: userMessages[i + 1].content }],
+        });
+      }
     }
-
-    throw new Error(`Unsupported provider: ${provider}`);
+  } else if (systemMessage) {
+    // If there's only a system message, treat it as a user message
+    formattedMessages.push({
+      role: "user",
+      parts: [{ text: systemMessage }],
+    });
   }
+
+  try {
+    const result = await geminiModel.generateContent({
+      contents: formattedMessages,
+      generationConfig: {
+        temperature,
+        maxOutputTokens: maxTokens,
+      },
+    });
+
+    return result.response.text().trim();
+  } catch (error: unknown) {
+    // Check if it's a content moderation error
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof error.message === "string" &&
+      (error.message.includes("RECITATION") ||
+        error.message.includes("SAFETY") ||
+        error.message.includes("blocked"))
+    ) {
+      throw new Error(`Gemini content moderation triggered: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+// Helper function to detect if content is educational/mathematical
+function detectEducationalContent(text: string): boolean {
+  const educationalKeywords = [
+    "theorem",
+    "formula",
+    "equation",
+    "mathematics",
+    "physics",
+    "chemistry",
+    "biology",
+    "science",
+    "calculate",
+    "solve",
+    "pythagoras",
+    "algebra",
+    "geometry",
+    "calculus",
+    "trigonometry",
+  ];
+
+  const lowerText = text.toLowerCase();
+  return educationalKeywords.some((keyword) => lowerText.includes(keyword));
 }
