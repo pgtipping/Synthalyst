@@ -134,7 +134,7 @@ export default function KnowledgeGPT() {
   }, [question]);
 
   return (
-    <div className="container mx-auto py-8 max-w-5xl flex flex-col h-[calc(100vh-100px)]">
+    <div className="container mx-auto py-8 max-w-5xl flex flex-col h-[calc(100vh-80px)]">
       <h1 className="text-3xl font-bold mb-2">Knowledge GPT</h1>
       <p className="text-muted-foreground mb-6">
         Ask any question and get a detailed, accurate answer based on the latest

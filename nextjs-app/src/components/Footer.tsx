@@ -36,44 +36,44 @@ export default function Footer() {
 
   return (
     <footer className="bg-gray-900 text-gray-300">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+      <div className="container mx-auto px-4 py-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
           {/* Logo and Description */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2">
             <Link href="/" className="inline-block">
-              <h2 className="text-2xl font-bold text-white">Synthalyst</h2>
+              <h2 className="text-xl font-bold text-white">Synthalyst</h2>
             </Link>
-            <p className="mt-4 text-gray-400 max-w-md">
+            <p className="mt-2 text-gray-400 text-xs max-w-md">
               Empowering you with AI-driven tools for personal and business
               productivity. Work smarter, live better.
             </p>
-            <div className="mt-6 flex space-x-4">
+            <div className="mt-3 flex space-x-3">
               <a
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <Github className="h-5 w-5" />
+                <Github className="h-4 w-4" />
                 <span className="sr-only">GitHub</span>
               </a>
               <a
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <Twitter className="h-5 w-5" />
+                <Twitter className="h-4 w-4" />
                 <span className="sr-only">Twitter</span>
               </a>
               <a
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <Linkedin className="h-5 w-5" />
+                <Linkedin className="h-4 w-4" />
                 <span className="sr-only">LinkedIn</span>
               </a>
               <a
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <Instagram className="h-5 w-5" />
+                <Instagram className="h-4 w-4" />
                 <span className="sr-only">Instagram</span>
               </a>
             </div>
@@ -81,9 +81,11 @@ export default function Footer() {
 
           {/* Footer Links */}
           {footerLinks.map((section) => (
-            <div key={section.title}>
-              <h3 className="text-white font-semibold mb-4">{section.title}</h3>
-              <ul className="space-y-2">
+            <div key={section.title} className="col-span-1">
+              <h3 className="text-white text-xs font-semibold mb-2">
+                {section.title}
+              </h3>
+              <ul className="space-y-1 text-xs">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <Link
@@ -98,37 +100,37 @@ export default function Footer() {
             </div>
           ))}
 
-          {/* Newsletter Signup */}
-          <div className="lg:col-span-2 mt-8 lg:mt-0">
-            <h3 className="text-white font-semibold mb-4">
+          {/* Newsletter Signup - Hidden on mobile to save space */}
+          <div className="col-span-2 md:col-span-2 mt-4 md:mt-0 hidden md:block">
+            <h3 className="text-white text-xs font-semibold mb-2">
               Subscribe to our newsletter
             </h3>
             <NewsletterSignup variant="minimal" className="max-w-md" />
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-gray-300">
+        <div className="border-t border-gray-800 mt-4 pt-4 flex flex-col md:flex-row justify-between items-center text-xs">
+          <p className="text-gray-300">
             © {currentYear} Synthalyst. All rights reserved.
           </p>
-          <div className="mt-4 md:mt-0 flex space-x-6">
+          <div className="mt-2 md:mt-0 flex space-x-4">
             <Link
               href="/terms"
-              className="text-sm text-gray-300 hover:text-white transition-colors"
+              className="text-gray-300 hover:text-white transition-colors"
             >
-              Terms of Service
+              Terms
             </Link>
             <Link
               href="/privacy"
-              className="text-sm text-gray-300 hover:text-white transition-colors"
+              className="text-gray-300 hover:text-white transition-colors"
             >
-              Privacy Policy
+              Privacy
             </Link>
             <Link
               href="/cookies"
-              className="text-sm text-gray-300 hover:text-white transition-colors"
+              className="text-gray-300 hover:text-white transition-colors"
             >
-              Cookie Policy
+              Cookies
             </Link>
           </div>
         </div>
