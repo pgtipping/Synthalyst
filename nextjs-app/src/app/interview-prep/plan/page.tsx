@@ -102,6 +102,10 @@ export default function InterviewPrepPlan() {
       console.log("Job details:", JSON.stringify(details));
       console.log("Is premium user:", checkPremiumStatus());
 
+      // Set up a timeout for the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout (reduced from 60s)
+
       // Call the API to generate interview prep plan
       const response = await fetch("/api/interview-prep/generate-plan", {
         method: "POST",
@@ -112,13 +116,24 @@ export default function InterviewPrepPlan() {
           jobDetails: details,
           isPremiumUser: checkPremiumStatus(),
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId); // Clear the timeout if the request completes
       console.log("API response status:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error("API error response:", errorText);
+
+        // If it's a timeout error, show a more user-friendly message
+        if (response.status === 504) {
+          toast.error(
+            "The request took too long to process. Please try again with a simpler job description."
+          );
+          return;
+        }
+
         throw new Error(
           `Failed to generate interview prep plan: ${response.status} ${errorText}`
         );
@@ -151,6 +166,14 @@ export default function InterviewPrepPlan() {
         console.error("Error name:", error.name);
         console.error("Error message:", error.message);
         console.error("Error stack:", error.stack);
+
+        // Handle abort error specifically
+        if (error.name === "AbortError") {
+          toast.error(
+            "Request timed out. Please try again with a simpler job description."
+          );
+          return;
+        }
       } else {
         console.error("Unknown error type:", typeof error);
       }

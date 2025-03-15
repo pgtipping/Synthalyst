@@ -135,24 +135,26 @@ export async function POST(request: Request) {
     }
 
     try {
-      // Initialize the Google Generative AI client
+      // Initialize the Google Generative AI client with a timeout
       logger.info("Initializing Google Generative AI client");
       const genAI = new GoogleGenerativeAI(apiKey);
 
-      // Get the Gemini model
+      // Get the Gemini model with a faster model option
       logger.info("Getting Gemini model");
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash-lite", // Use a faster model
+        generationConfig: {
+          maxOutputTokens: 2048, // Reduced token limit for faster response
+          temperature: 0.4,
+          topP: 0.8,
+          topK: 40,
+        },
+      });
 
-      // Create the prompt for interview prep plan
+      // Create a more concise prompt for interview prep plan
       logger.info("Creating prompt for interview prep plan");
       const prepPlanPrompt = `
-        You are an expert career coach  helping job seekers prepare for interviews. Your task is to create a personalized interview preparation plan for a candidate applying for the following job:
-        
-        ${
-          data.isPremiumUser
-            ? "This is a premium user, so provide comprehensive guidance and detailed preparation steps."
-            : "This is a free tier user, but still provide substantial guidance to demonstrate the value of our service."
-        }
+        You are an expert career coach helping job seekers prepare for interviews. Create a personalized interview preparation plan for:
         
         Job Title: ${data.jobDetails.jobTitle}
         ${data.jobDetails.company ? `Company: ${data.jobDetails.company}` : ""}
@@ -168,7 +170,10 @@ export async function POST(request: Request) {
         }
         ${
           data.jobDetails.description
-            ? `Job Description: ${data.jobDetails.description}`
+            ? `Job Description: ${data.jobDetails.description.substring(
+                0,
+                500
+              )}...`
             : ""
         }
         
@@ -185,17 +190,8 @@ export async function POST(request: Request) {
         3. Suggest research topics about the company and industry.
         4. Recommend preparation strategies for common interview questions.
         5. Provide tips for demonstrating the required skills during the interview.
-        6. Include advice on how to present accomplishments effectively.
-        7. Suggest questions the candidate should ask the interviewer.
-        8. Include tips for follow-up after the interview.
         
-        IMPORTANT FORMATTING INSTRUCTIONS:
-        - DO NOT use markdown syntax like double asterisks (**) for bold text or single asterisks (*) for italic text
-        - DO NOT use any markdown formatting in your response
-        - Use plain text only for all content
-        - For emphasis, use section titles and clear organization instead of text formatting
-        
-        IMPORTANT: Format your response as a JSON object with the following structure:
+        Format your response as a JSON object with the following structure:
         {
           "sections": [
             {
@@ -210,11 +206,6 @@ export async function POST(request: Request) {
                 "Research point 1",
                 "Research point 2"
               ]
-            },
-            {
-              "type": "goal",
-              "title": "Overarching Goal",
-              "content": "Content here..."
             }
           ]
         }
@@ -223,19 +214,30 @@ export async function POST(request: Request) {
         Each section should have a title and either content (string) or items (array of strings)
       `;
 
-      // Generate the interview prep plan
-      const prepPlanResult = await model.generateContent(prepPlanPrompt);
-      const prepPlanResponse = await prepPlanResult.response;
+      // Set a timeout for the API call
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("API call timed out"));
+        }, 15000); // 15 seconds timeout (reduced from 25s)
+      });
 
-      // Create the prompt for practice questions
+      // Generate the interview prep plan with timeout
+      const prepPlanPromise = model.generateContent(prepPlanPrompt);
+      const prepPlanResult = (await Promise.race([
+        prepPlanPromise,
+        timeoutPromise,
+      ])) as unknown as Awaited<ReturnType<typeof model.generateContent>>;
+
+      if (!prepPlanResult) {
+        throw new Error("Failed to generate interview prep plan");
+      }
+
+      const prepPlanResponse = prepPlanResult;
+      const prepPlanText = prepPlanResponse.response.text();
+
+      // Create a more concise prompt for practice questions
       const questionsPrompt = `
-        You are an expert career coach with 15+ years of experience helping job seekers prepare for interviews. Your task is to create a list of interview questions that a candidate might be asked when applying for the following job:
-        
-        ${
-          data.isPremiumUser
-            ? "This is a premium user, so provide a comprehensive list of questions."
-            : "This is a free tier user, so provide a focused list of the most important questions."
-        }
+        You are an expert career coach. Create a list of 10 interview questions for:
         
         Job Title: ${data.jobDetails.jobTitle}
         ${data.jobDetails.company ? `Company: ${data.jobDetails.company}` : ""}
@@ -244,218 +246,65 @@ export async function POST(request: Request) {
             ? `Industry: ${data.jobDetails.industry}`
             : ""
         }
-        ${
-          data.jobDetails.jobLevel
-            ? `Job Level: ${data.jobDetails.jobLevel}`
-            : ""
-        }
-        ${
-          data.jobDetails.description
-            ? `Job Description: ${data.jobDetails.description}`
-            : ""
-        }
         
-        ${
-          data.jobDetails.requiredSkills &&
-          data.jobDetails.requiredSkills.length > 0
-            ? `Required Skills: ${data.jobDetails.requiredSkills.join(", ")}`
-            : ""
-        }
-        
-        INTERVIEW QUESTIONS GUIDELINES:
-        1. Create a mix of behavioral, situational, and technical questions.
-        2. Include questions specific to the job requirements and industry.
-        3. Focus on questions that assess the required skills.
-        4. Include questions about the candidate's experience and accomplishments.
-        5. Add questions about the candidate's knowledge of the company and industry.
-        
-        IMPORTANT FORMATTING INSTRUCTIONS:
-        - DO NOT use markdown syntax like double asterisks (**) for bold text or single asterisks (*) for italic text
-        - DO NOT use any markdown formatting in your response
-        - Use plain text only for all questions
-        
-        IMPORTANT: Format your response as a JSON array of strings, with each string being a question. For example:
-        [
-          "Tell me about your experience with...",
-          "How would you handle...",
-          "What do you know about our company?"
-        ]
-        
-        ${
-          data.isPremiumUser
-            ? "Provide 15-20 questions."
-            : "Provide 8-10 questions."
-        }
+        Format your response as a JSON array of strings, each containing one question.
       `;
 
-      // Generate the practice questions
-      const questionsResult = await model.generateContent(questionsPrompt);
-      const questionsResponse = await questionsResult.response;
-      const questionsText = questionsResponse.text();
+      // Generate the questions with timeout
+      const questionsPromise = model.generateContent(questionsPrompt);
+      const questionsResult = (await Promise.race([
+        questionsPromise,
+        timeoutPromise,
+      ])) as unknown as Awaited<ReturnType<typeof model.generateContent>>;
 
-      // Parse the questions JSON
-      let questions: string[] = [];
+      if (!questionsResult) {
+        throw new Error("Failed to generate interview questions");
+      }
+
+      const questionsResponse = questionsResult;
+      const questionsText = questionsResponse.response.text();
+
+      // Parse the responses
+      let prepPlanData;
+      let questionsData;
+
       try {
-        // Extract JSON from the response (it might be wrapped in markdown code blocks)
-        const jsonMatch = questionsText.match(/```json\n([\s\S]*?)\n```/) ||
-          questionsText.match(/```\n([\s\S]*?)\n```/) ||
-          questionsText.match(/\[([\s\S]*?)\]/) || [null, questionsText]; // Try to match a JSON array directly
-
-        let jsonString = jsonMatch[1] || questionsText;
-
-        // Clean up the string to ensure it's valid JSON
-        // If it's not already wrapped in brackets and looks like an array of strings, wrap it
-        if (
-          !jsonString.trim().startsWith("[") &&
-          !jsonString.trim().startsWith("{")
-        ) {
-          // Check if it looks like a list of questions (numbered or bulleted)
-          if (/^\d+\.|\*\s/.test(jsonString)) {
-            // Convert to array format
-            const lines = jsonString.split("\n").filter((line) => line.trim());
-            const extractedQuestions = lines.map((line) => {
-              // Remove numbers, bullets, etc.
-              return line.replace(/^\d+\.\s*|\*\s*/, "").trim();
-            });
-            jsonString = JSON.stringify(extractedQuestions);
-          } else {
-            // Wrap in brackets to make it a JSON array
-            jsonString = `[${jsonString}]`;
-          }
-        }
-
-        // Try to parse the JSON
-        try {
-          questions = JSON.parse(jsonString);
-
-          // Ensure questions is an array
-          if (!Array.isArray(questions)) {
-            if (typeof questions === "object" && questions !== null) {
-              // If it's an object with questions property
-              const questionsObj = questions as Record<string, unknown>;
-              if (
-                "questions" in questionsObj &&
-                Array.isArray(questionsObj.questions)
-              ) {
-                questions = questionsObj.questions;
-              } else {
-                questions = Object.values(questionsObj)
-                  .filter(
-                    (value) =>
-                      typeof value === "string" || typeof value === "number"
-                  )
-                  .map((value) => String(value));
-              }
-            } else {
-              // Fallback to string array with one item
-              questions = [String(questions)];
-            }
-          }
-        } catch (parseError) {
-          // If parsing fails, try to extract questions as an array of strings
-          logger.error(
-            "Failed to parse JSON directly, trying alternative extraction",
-            parseError
-          );
-
-          // Extract questions as an array by looking for numbered items
-          const questionRegex = /\d+\.\s*(.*?)(?=\d+\.|$)/g;
-          const matches = [...jsonString.matchAll(questionRegex)];
-
-          if (matches.length > 0) {
-            questions = matches.map((match) => match[1].trim());
-          } else {
-            // Split by newlines as a last resort
-            questions = jsonString
-              .split("\n")
-              .filter((line) => line.trim().length > 0)
-              .map((line) => line.trim());
-          }
-        }
+        prepPlanData = JSON.parse(prepPlanText);
       } catch (error) {
-        logger.error("Failed to parse questions response", error);
-        questions = generateFallbackQuestions(
+        logger.error("Error parsing prep plan JSON:", error);
+        console.error("Error parsing prep plan JSON:", error);
+        prepPlanData = {
+          sections: [
+            {
+              type: "timeline",
+              title: "Preparation Timeline",
+              content:
+                "Here's a structured timeline to prepare for your interview.",
+            },
+            // Add fallback sections
+          ],
+        };
+      }
+
+      try {
+        questionsData = JSON.parse(questionsText);
+      } catch (error) {
+        logger.error("Error parsing questions JSON:", error);
+        console.error("Error parsing questions JSON:", error);
+        questionsData = generateFallbackQuestions(
           data.jobDetails,
           data.isPremiumUser
         );
       }
 
-      // Parse the prep plan
-      let prepPlan;
-      try {
-        const prepPlanText = prepPlanResponse.text();
-        const jsonMatch = prepPlanText.match(/```json\n([\s\S]*?)\n```/) ||
-          prepPlanText.match(/```\n([\s\S]*?)\n```/) || [null, prepPlanText];
-
-        const prepPlanJsonString = jsonMatch[1] || prepPlanText;
-
-        // Try to parse the JSON
-        prepPlan = JSON.parse(prepPlanJsonString);
-
-        // Ensure prepPlan has a sections array
-        if (!prepPlan.sections) {
-          prepPlan = { sections: [] };
-        }
-      } catch (error) {
-        logger.error("Failed to parse prep plan response", error);
-        // Create a fallback prep plan
-        prepPlan = {
-          sections: [
-            {
-              type: "goal",
-              title: "Interview Preparation Plan",
-              content: generateFallbackPlan(
-                data.jobDetails,
-                data.isPremiumUser
-              ),
-            },
-          ],
-        };
-      }
-
-      // Final safety check to ensure we always return valid data
-      if (!prepPlan || typeof prepPlan !== "object") {
-        prepPlan = {
-          sections: [
-            {
-              type: "goal",
-              title: "Interview Preparation Plan",
-              content: generateFallbackPlan(
-                data.jobDetails,
-                data.isPremiumUser
-              ),
-            },
-          ],
-        };
-      }
-
-      if (!prepPlan.sections) {
-        prepPlan.sections = [];
-      }
-
-      if (!Array.isArray(questions)) {
-        questions = generateFallbackQuestions(
-          data.jobDetails,
-          data.isPremiumUser
-        );
-      }
-
-      // Add one more safety check to ensure we always return valid data
-      // This will catch any edge cases that might have been missed
-      const finalPrepPlan =
-        prepPlan && typeof prepPlan === "object" ? prepPlan : { sections: [] };
-      if (!finalPrepPlan.sections) {
-        finalPrepPlan.sections = [];
-      }
-
-      const finalQuestions = Array.isArray(questions) ? questions : [];
-
+      // Return the response
       return NextResponse.json(
         {
           success: true,
-          prepPlan: finalPrepPlan,
-          questions: finalQuestions,
-          message: "Interview prep plan generated successfully",
+          prepPlan: prepPlanData,
+          questions: Array.isArray(questionsData)
+            ? questionsData
+            : generateFallbackQuestions(data.jobDetails, data.isPremiumUser),
         },
         { status: 200 }
       );
@@ -552,52 +401,6 @@ export async function POST(request: Request) {
 }
 
 // Fallback functions for when the AI API is unavailable
-
-function generateFallbackPlan(
-  jobDetails: z.infer<typeof requestSchema>["jobDetails"],
-  isPremiumUser: boolean = false
-): string {
-  console.log("Generating fallback plan for:", jobDetails.jobTitle);
-  const jobTitle = jobDetails.jobTitle || "the position";
-  const company = jobDetails.company || "the company";
-
-  return `INTERVIEW PREPARATION PLAN for ${jobTitle}
-
-TIMELINE: Research Phase (3-5 days before)
-1. Research ${company} thoroughly - their products, services, mission, and recent news
-2. Study the job description and identify key skills and qualifications
-3. Prepare examples from your experience that demonstrate these skills
-4. Research common interview questions for ${jobTitle} positions
-
-PHASE 1: Practice Phase (1-2 days before)
-1. Practice answering common interview questions out loud
-2. Prepare your "tell me about yourself" response
-3. Prepare 3-5 questions to ask the interviewer
-4. Practice explaining your past experiences using the STAR method (Situation, Task, Action, Result)
-
-PHASE 2: Day Before Preparation
-1. Plan your outfit and prepare any materials you need to bring
-2. Review your resume and be ready to discuss any item on it
-3. Get a good night's sleep
-4. Plan your route to the interview location or test your video conferencing setup
-
-PHASE 3: Interview Day
-1. Arrive 10-15 minutes early or log in 5 minutes before a virtual interview
-2. Bring copies of your resume and a notepad
-3. Remember to maintain good eye contact and positive body language
-4. Listen carefully to questions before answering
-5. Thank the interviewer for their time at the end
-
-${
-  isPremiumUser
-    ? `PHASE 4: Follow-up
-1. Send a thank-you email within 24 hours
-2. Reference specific topics discussed during the interview
-3. Reiterate your interest in the position
-4. Provide any additional information requested during the interview`
-    : ""
-}`;
-}
 
 function generateFallbackQuestions(
   jobDetails: z.infer<typeof requestSchema>["jobDetails"],
