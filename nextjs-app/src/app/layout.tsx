@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { Viewport } from "next/types";
-import { Geist, Geist_Mono, Moon_Dance } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/react";
@@ -15,25 +14,12 @@ import Footer from "@/components/Footer";
 // Import critical CSS
 import "./critical.css";
 
-// Configure fonts with display: swap for better performance
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const moonDance = Moon_Dance({
-  variable: "--font-moon-dance",
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
+// Define font variables without using next/font directly
+const fontVariables = {
+  geistSans: "--font-geist-sans",
+  geistMono: "--font-geist-mono",
+  moonDance: "--font-moon-dance",
+};
 
 export const viewport: Viewport = {
   themeColor: "#4285F4",
@@ -235,6 +221,21 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+
+        {/* Add Google Fonts directly */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Moon+Dance&display=swap"
+          rel="stylesheet"
+        />
+
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
 
@@ -264,7 +265,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${moonDance.variable} antialiased`}
+        className={`${fontVariables.geistSans} ${fontVariables.geistMono} ${fontVariables.moonDance} antialiased`}
         suppressHydrationWarning
       >
         <ToastProvider>

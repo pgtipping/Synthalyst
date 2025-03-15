@@ -18,6 +18,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
+    /* Font family variables */
+    --font-geist-sans: "Geist", system-ui, sans-serif;
+    --font-geist-mono: "Geist Mono", monospace;
+    --font-moon-dance: "Moon Dance", cursive;
+
     /* Brand blue - updated to be darker for better contrast */
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;

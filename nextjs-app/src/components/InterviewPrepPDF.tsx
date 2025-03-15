@@ -1,7 +1,28 @@
-import React from "react";
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+"use client";
 
-const styles = StyleSheet.create({
+import React from "react";
+import dynamic from "next/dynamic";
+
+// Dynamically import @react-pdf/renderer components
+const Document = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.Document),
+  { ssr: false }
+);
+const Page = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.Page),
+  { ssr: false }
+);
+const Text = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.Text),
+  { ssr: false }
+);
+const View = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.View),
+  { ssr: false }
+);
+
+// Define styles outside the component to avoid re-creation on each render
+const styles = {
   page: {
     flexDirection: "column",
     backgroundColor: "#FFFFFF",
@@ -91,7 +112,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontStyle: "italic",
   },
-});
+};
 
 interface Section {
   type: "timeline" | "phase" | "goal" | "objective" | "star" | "category";
@@ -120,28 +141,7 @@ const cleanMarkdown = (text: string): string => {
     .replace(/\*([^*]+?)\*/g, "$1"); // Remove italic markdown
 };
 
-const renderSection = (section: Section): React.ReactNode => {
-  const sectionStyle = styles[section.type] || styles.section;
-
-  return (
-    <View style={sectionStyle}>
-      <Text style={styles.sectionTitle}>{section.title}</Text>
-      {section.content && (
-        <Text style={styles.text}>{cleanMarkdown(section.content)}</Text>
-      )}
-      {section.items && (
-        <View style={styles.list}>
-          {section.items.map((item, index) => (
-            <Text key={index} style={styles.listItem}>
-              • {cleanMarkdown(item)}
-            </Text>
-          ))}
-        </View>
-      )}
-    </View>
-  );
-};
-
+// Create a PDF component that only renders on the client side
 const InterviewPrepPDF: React.FC<InterviewPrepPDFProps> = ({
   jobTitle,
   company,
@@ -149,6 +149,40 @@ const InterviewPrepPDF: React.FC<InterviewPrepPDFProps> = ({
   prepPlan,
   questions,
 }) => {
+  // Create a client-side only component
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null; // Return null on server-side
+  }
+
+  // Function to render a section
+  const renderSection = (section: Section): React.ReactNode => {
+    const sectionStyle = styles[section.type] || styles.section;
+
+    return (
+      <View style={sectionStyle}>
+        <Text style={styles.sectionTitle}>{section.title}</Text>
+        {section.content && (
+          <Text style={styles.text}>{cleanMarkdown(section.content)}</Text>
+        )}
+        {section.items && (
+          <View style={styles.list}>
+            {section.items.map((item, index) => (
+              <Text key={index} style={styles.listItem}>
+                • {cleanMarkdown(item)}
+              </Text>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>

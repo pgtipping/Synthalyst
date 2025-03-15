@@ -1,13 +1,38 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Document, DocumentProps } from "@react-pdf/renderer";
 import { ErrorBoundary } from "react-error-boundary";
-import { downloadPDF } from "@/lib/pdf-utils";
-import { initCrypto } from "@/lib/crypto-polyfill";
+
+// Import the DocumentProps type for proper typing
+import type { DocumentProps } from "@react-pdf/renderer";
+
+// Create a simple PDF utility function
+const downloadPDF = async (
+  documentElement: React.ReactElement<DocumentProps>,
+  fileName: string
+) => {
+  try {
+    // Dynamically import the PDF renderer
+    const { pdf } = await import("@react-pdf/renderer");
+    const blob = await pdf(documentElement).toBlob();
+    const url = URL.createObjectURL(blob);
+
+    // Create a link and trigger download
+    const link = window.document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+
+    // Clean up
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    throw error;
+  }
+};
 
 interface PDFRendererProps {
-  document: React.ReactElement<DocumentProps, typeof Document>;
+  document: React.ReactElement<DocumentProps>;
   fileName: string;
   children: React.ReactNode;
 }
@@ -42,15 +67,11 @@ export default function PDFRenderer({
 
   useEffect(() => {
     setIsClient(true);
-    // Initialize crypto polyfills to prevent SHA224 errors
-    initCrypto();
   }, []);
 
   const handleGeneratePDF = async () => {
     try {
       if (!isClient) return;
-
-      // Use our utility function that includes crypto polyfill
       await downloadPDF(document, fileName);
     } catch (error) {
       console.error("Error generating PDF:", error);

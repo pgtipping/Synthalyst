@@ -12,6 +12,19 @@ const nextConfig = {
   },
   // Enable source maps in production
   productionBrowserSourceMaps: true,
+  // Transpile PDF-related packages
+  transpilePackages: [
+    "@react-pdf",
+    "@react-pdf/renderer",
+    "@react-pdf/font",
+    "@react-pdf/pdfkit",
+    "react-pdf",
+    "react-pdf-html",
+    "pdfjs-dist",
+    "fontkit",
+    "react-pdftotext",
+    "xlsx",
+  ],
   webpack: (config, { isServer, webpack }) => {
     // Add externals to prevent server-side only modules from causing issues
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
@@ -57,7 +70,13 @@ const nextConfig = {
                 keep_fnames: true,
                 mangle: {
                   ...minimizer.options.terserOptions?.mangle,
-                  reserved: ["SHA224", "crypto", "subtle"],
+                  reserved: [
+                    "SHA224",
+                    "crypto",
+                    "subtle",
+                    "PDFFont",
+                    "PDFDocument",
+                  ],
                 },
               };
             }
@@ -90,14 +109,22 @@ const nextConfig = {
             reuseExistingChunk: true,
             enforce: true,
           },
+          // Special handling for PDF-related modules
+          pdfModules: {
+            test: /[\\/]node_modules[\\/](@react-pdf|pdfjs-dist|react-pdf|fontkit)[\\/]/,
+            name: "pdf-modules",
+            chunks: "all",
+            priority: 30,
+          },
         },
       };
 
       // Increase chunk size limit to prevent excessive code splitting
       config.performance = {
         ...config.performance,
-        maxAssetSize: 500000, // 500KB
-        maxEntrypointSize: 500000, // 500KB
+        maxAssetSize: 1000000, // 1MB (increased from 500KB)
+        maxEntrypointSize: 1000000, // 1MB (increased from 500KB)
+        hints: false, // Disable performance hints
       };
     }
 
