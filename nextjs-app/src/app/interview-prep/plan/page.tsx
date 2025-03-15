@@ -102,11 +102,20 @@ export default function InterviewPrepPlan() {
       console.log("Job details:", JSON.stringify(details));
       console.log("Is premium user:", checkPremiumStatus());
 
-      // Set up a timeout for the fetch request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout (reduced from 60s)
+      // Show a toast notification to inform the user that generation is in progress
+      toast.info(
+        "Generating your interview prep plan. This may take a moment...",
+        {
+          duration: 10000, // 10 seconds
+          id: "generating-plan",
+        }
+      );
 
-      // Call the API to generate interview prep plan
+      // Set up a controller for the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      // Call the API to generate interview prep plan with streaming response
       const response = await fetch("/api/interview-prep/generate-plan", {
         method: "POST",
         headers: {
@@ -128,8 +137,10 @@ export default function InterviewPrepPlan() {
 
         // If it's a timeout error, show a more user-friendly message
         if (response.status === 504) {
+          toast.dismiss("generating-plan");
           toast.error(
-            "The request took too long to process. Please try again with a simpler job description."
+            "The request took too long to process. Please try again with a simpler job description or fewer skills.",
+            { duration: 6000 }
           );
           return;
         }
@@ -139,25 +150,125 @@ export default function InterviewPrepPlan() {
         );
       }
 
-      const data = await response.json();
-      console.log("API response data structure:", Object.keys(data));
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Failed to get response reader");
+      }
 
-      if (data.success) {
-        console.log("Plan generation successful");
-        console.log(
-          "Prep plan sections count:",
-          data.prepPlan?.sections?.length || 0
-        );
-        console.log("Questions count:", data.questions?.length || 0);
+      // Create a decoder to convert the stream chunks to text
+      const decoder = new TextDecoder();
+      let responseText = "";
 
-        setPrepPlan(data.prepPlan as PrepPlan);
-        setGeneratedQuestions(data.questions || []);
-        toast.success("Interview prep plan generated successfully!");
-      } else {
-        console.error("API returned success: false", data.message);
-        throw new Error(
-          data.message || "Failed to generate interview prep plan"
-        );
+      // Update UI with progress indicator
+      setPrepPlan({
+        sections: [
+          {
+            type: "timeline",
+            title: "Generating your personalized interview prep plan...",
+            content:
+              "We're creating a high-quality preparation plan tailored to your job application. This may take a moment as we ensure the highest quality content.",
+          },
+        ],
+      });
+      setGeneratedQuestions(["Preparing your practice questions..."]);
+
+      // Show a progress toast
+      toast.dismiss("generating-plan");
+      toast.info("Receiving your personalized interview prep plan...", {
+        duration: 10000,
+        id: "streaming-plan",
+      });
+
+      // Process the stream
+      let lastUpdateTime = Date.now();
+      const updateInterval = 300; // Update UI every 300ms at most to avoid excessive re-renders
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Decode the chunk and append to the accumulated response
+        const chunk = decoder.decode(value, { stream: true });
+        responseText += chunk;
+
+        // Only try to update the UI if we have a reasonable amount of new content
+        // or if enough time has passed since the last update
+        const currentTime = Date.now();
+        if (currentTime - lastUpdateTime > updateInterval) {
+          try {
+            // Try to parse the accumulated JSON as it comes in
+            const parsedData = JSON.parse(responseText);
+
+            // Update the UI with the data we have so far
+            if (parsedData.prepPlan && parsedData.prepPlan.sections) {
+              setPrepPlan(parsedData.prepPlan);
+
+              // Update the toast message to show progress
+              const sectionCount = parsedData.prepPlan.sections.length;
+              toast.dismiss("streaming-plan");
+              toast.info(`Received ${sectionCount} sections of your plan...`, {
+                duration: 5000,
+                id: "streaming-plan",
+              });
+            }
+
+            if (parsedData.questions && Array.isArray(parsedData.questions)) {
+              setGeneratedQuestions(parsedData.questions);
+            }
+
+            // Show fallback mode message if applicable
+            if (parsedData.fallbackMode) {
+              toast.dismiss("streaming-plan");
+              toast.info("Using simplified content due to complexity.", {
+                duration: 5000,
+              });
+            }
+
+            // Update the last update time
+            lastUpdateTime = currentTime;
+          } catch (e) {
+            // If JSON parsing fails, it's likely because the stream is incomplete
+            // Just continue collecting more chunks
+            console.log("Partial JSON received, waiting for more chunks...");
+            console.error("JSON parsing error:", e);
+          }
+        }
+      }
+
+      // Final parsing of the complete response
+      try {
+        const data = JSON.parse(responseText);
+        console.log("Complete API response data:", data);
+
+        // Dismiss the streaming toast
+        toast.dismiss("streaming-plan");
+        toast.dismiss("generating-plan");
+
+        if (data.success) {
+          console.log("Plan generation successful");
+          console.log(
+            "Prep plan sections count:",
+            data.prepPlan?.sections?.length || 0
+          );
+          console.log("Questions count:", data.questions?.length || 0);
+
+          setPrepPlan(data.prepPlan as PrepPlan);
+          setGeneratedQuestions(data.questions || []);
+
+          // Show a success message
+          toast.success("Your high-quality interview prep plan is ready!", {
+            duration: 5000,
+          });
+        } else {
+          console.error("API returned success: false", data.message);
+          throw new Error(
+            data.message || "Failed to generate interview prep plan"
+          );
+        }
+      } catch (parseError) {
+        console.error("Error parsing final JSON response:", parseError);
+        throw new Error("Failed to parse the response from the server");
       }
     } catch (error) {
       console.error("Error generating interview prep plan:", error);
@@ -169,8 +280,10 @@ export default function InterviewPrepPlan() {
 
         // Handle abort error specifically
         if (error.name === "AbortError") {
+          toast.dismiss("generating-plan");
           toast.error(
-            "Request timed out. Please try again with a simpler job description."
+            "Request timed out. Please try with a simpler job description or fewer skills.",
+            { duration: 6000 }
           );
           return;
         }
@@ -178,10 +291,12 @@ export default function InterviewPrepPlan() {
         console.error("Unknown error type:", typeof error);
       }
 
+      toast.dismiss("generating-plan");
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to generate interview prep plan"
+          : "Failed to generate interview prep plan. Please try again with simpler content.",
+        { duration: 5000 }
       );
     } finally {
       setIsProcessing(false);

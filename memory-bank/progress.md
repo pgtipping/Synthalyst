@@ -48,6 +48,9 @@
   - ✅ ApplyRight integration for importing job details
   - ✅ Robust fallback mechanism for plan generation when AI service fails
   - ✅ Comprehensive error logging for production debugging
+  - ✅ Fixed Gateway Timeout (504) errors with optimized API calls
+  - ✅ Improved timeout handling on both client and server sides
+  - ✅ User-friendly error messages for timeout scenarios
 - ✅ Mock Interview functionality:
   - ✅ Session creation with job details
   - ✅ Question generation based on job details
@@ -154,7 +157,7 @@ The application now has a fully functional Interview Preparation feature, which 
 
 Users can create personalized interview preparation plans based on job details, practice with AI-generated questions in mock interviews, receive feedback on their responses, and save questions for later review. The Mock Interview feature now supports both text and voice responses, with text-to-speech functionality for reading questions aloud. The statistics dashboard provides users with a clear overview of their progress, showing the number of mock interviews completed, questions practiced, questions saved, and their average score.
 
-We've recently enhanced the Interview Prep Plan generation with improved error handling, comprehensive logging, and robust fallback mechanisms to ensure it works reliably in production. The system now provides detailed logs for debugging and always delivers a useful plan to users, even if the AI service fails.
+We've recently fixed the Gateway Timeout (504) errors in the Interview Prep Plan generation by optimizing the Gemini API calls, implementing proper timeout handling, and adding user-friendly error messages. The system now uses a faster Gemini model with optimized parameters, reduced token limits, and shorter prompts to ensure faster response times. We've also improved the type handling for API responses and added proper cleanup of resources when requests are aborted.
 
 We've also integrated audio components into the Mock Interview feature, allowing users to record their responses and have questions read aloud. The audio recording component has been significantly improved with enhanced audio quality settings (disabled noise reduction, higher sample rate, optimized audio format) and better UI feedback (real-time status messages, color coding, button animations). We've also added an Audio Components Demo page for testing and showcasing the audio capabilities of the application.
 
@@ -198,6 +201,10 @@ _Last Updated: ${new Date().toISOString()}_
 - Environment variable verification for API keys
 - Improved API response parsing and validation
 - User-friendly error messages
+- Fixed Gateway Timeout (504) errors in production
+- Optimized Gemini API calls with faster model and reduced token limits
+- Implemented proper timeout handling on both client and server sides
+- Added cleanup of resources when requests are aborted
 
 ### Audio Recording Component
 

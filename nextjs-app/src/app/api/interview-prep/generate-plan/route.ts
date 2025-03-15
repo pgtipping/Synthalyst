@@ -135,26 +135,26 @@ export async function POST(request: Request) {
     }
 
     try {
-      // Initialize the Google Generative AI client with a timeout
+      // Initialize the Google Generative AI client
       logger.info("Initializing Google Generative AI client");
       const genAI = new GoogleGenerativeAI(apiKey);
 
       // Get the Gemini model with a faster model option
       logger.info("Getting Gemini model");
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash-lite", // Use a faster model
+        model: "gemini-2.0-flash", // Use a faster model
         generationConfig: {
-          maxOutputTokens: 2048, // Reduced token limit for faster response
+          maxOutputTokens: 2048, // Increased token limit for more comprehensive responses
           temperature: 0.4,
           topP: 0.8,
           topK: 40,
         },
       });
 
-      // Create a more concise prompt for interview prep plan
+      // Create a more comprehensive prompt for interview prep plan
       logger.info("Creating prompt for interview prep plan");
       const prepPlanPrompt = `
-        You are an expert career coach helping job seekers prepare for interviews. Create a personalized interview preparation plan for:
+        You are an expert career coach helping job seekers prepare for interviews. Create a comprehensive and personalized interview preparation plan for:
         
         Job Title: ${data.jobDetails.jobTitle}
         ${data.jobDetails.company ? `Company: ${data.jobDetails.company}` : ""}
@@ -193,121 +193,154 @@ export async function POST(request: Request) {
         
         Format your response as a JSON object with the following structure:
         {
-          "sections": [
-            {
-              "type": "timeline",
-              "title": "Timeline Overview",
-              "content": "Content here..."
-            },
-            {
-              "type": "phase",
-              "title": "Research Phase (3-5 days before)",
-              "items": [
-                "Research point 1",
-                "Research point 2"
-              ]
-            }
+          "success": true,
+          "prepPlan": {
+            "sections": [
+              {
+                "type": "timeline",
+                "title": "Timeline Overview",
+                "content": "Content here..."
+              },
+              {
+                "type": "phase",
+                "title": "Research Phase (3-5 days before)",
+                "items": [
+                  "Research point 1",
+                  "Research point 2"
+                ]
+              }
+            ]
+          },
+          "questions": [
+            "Question 1?",
+            "Question 2?",
+            "Question 3?",
+            "Question 4?",
+            "Question 5?",
+            "Question 6?",
+            "Question 7?",
+            "Question 8?",
+            "Question 9?",
+            "Question 10?"
           ]
         }
 
         Section types can be: timeline, phase, goal, objective, star, category
         Each section should have a title and either content (string) or items (array of strings)
+        Make the content detailed and tailored to the specific job.
+        ENSURE THE RESPONSE IS VALID JSON.
       `;
 
-      // Set a timeout for the API call
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error("API call timed out"));
-        }, 15000); // 15 seconds timeout (reduced from 25s)
+      // Set up streaming response
+      const streamingResponse = await model.generateContentStream(
+        prepPlanPrompt
+      );
+
+      // Create a TransformStream to process the chunks
+      const encoder = new TextEncoder();
+
+      // Create a ReadableStream from the streaming response
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            // Process each chunk as it arrives
+            for await (const chunk of streamingResponse.stream) {
+              const text = chunk.text();
+              if (text) {
+                controller.enqueue(encoder.encode(text));
+              }
+            }
+            controller.close();
+          } catch (error) {
+            logger.error("Error in streaming response:", error);
+            controller.error(error);
+
+            // Send fallback content in case of error
+            const fallbackContent = JSON.stringify({
+              success: true,
+              fallbackMode: true,
+              prepPlan: {
+                sections: [
+                  {
+                    type: "timeline",
+                    title: "Preparation Timeline",
+                    content:
+                      "Here's a structured timeline to prepare for your interview.",
+                  },
+                  {
+                    type: "phase",
+                    title: "Research Phase (3-5 days before)",
+                    items: [
+                      `Research ${
+                        data.jobDetails.company || "the company"
+                      } thoroughly - their products, services, mission, and recent news`,
+                      "Study the job description and identify key skills and qualifications",
+                      "Prepare examples from your experience that demonstrate these skills",
+                      `Research common interview questions for ${
+                        data.jobDetails.jobTitle || "the position"
+                      } positions`,
+                    ],
+                  },
+                  {
+                    type: "phase",
+                    title: "Practice Phase (1-2 days before)",
+                    items: [
+                      "Practice answering common interview questions out loud",
+                      'Prepare your "tell me about yourself" response',
+                      "Prepare 3-5 questions to ask the interviewer",
+                      "Practice explaining your past experiences using the STAR method (Situation, Task, Action, Result)",
+                    ],
+                  },
+                  {
+                    type: "phase",
+                    title: "Day Before Preparation",
+                    items: [
+                      "Plan your outfit and prepare any materials you need to bring",
+                      "Review your resume and be ready to discuss any item on it",
+                      "Get a good night's sleep",
+                      "Plan your route to the interview location or test your video conferencing setup",
+                    ],
+                  },
+                  {
+                    type: "phase",
+                    title: "Interview Day",
+                    items: [
+                      "Arrive 10-15 minutes early or log in 5 minutes before a virtual interview",
+                      "Bring copies of your resume and a notepad",
+                      "Remember to maintain good eye contact and positive body language",
+                      "Listen carefully to questions before answering",
+                      "Thank the interviewer for their time at the end",
+                    ],
+                  },
+                  ...(data.isPremiumUser
+                    ? [
+                        {
+                          type: "phase",
+                          title: "Follow-up",
+                          items: [
+                            "Send a thank-you email within 24 hours",
+                            "Reference specific topics discussed during the interview",
+                            "Reiterate your interest in the position",
+                            "Provide any additional information requested during the interview",
+                          ],
+                        },
+                      ]
+                    : []),
+                ],
+              },
+              questions: generateFallbackQuestions(
+                data.jobDetails,
+                data.isPremiumUser
+              ),
+            });
+            controller.enqueue(encoder.encode(fallbackContent));
+            controller.close();
+          }
+        },
       });
 
-      // Generate the interview prep plan with timeout
-      const prepPlanPromise = model.generateContent(prepPlanPrompt);
-      const prepPlanResult = (await Promise.race([
-        prepPlanPromise,
-        timeoutPromise,
-      ])) as unknown as Awaited<ReturnType<typeof model.generateContent>>;
-
-      if (!prepPlanResult) {
-        throw new Error("Failed to generate interview prep plan");
-      }
-
-      const prepPlanResponse = prepPlanResult;
-      const prepPlanText = prepPlanResponse.response.text();
-
-      // Create a more concise prompt for practice questions
-      const questionsPrompt = `
-        You are an expert career coach. Create a list of 10 interview questions for:
-        
-        Job Title: ${data.jobDetails.jobTitle}
-        ${data.jobDetails.company ? `Company: ${data.jobDetails.company}` : ""}
-        ${
-          data.jobDetails.industry
-            ? `Industry: ${data.jobDetails.industry}`
-            : ""
-        }
-        
-        Format your response as a JSON array of strings, each containing one question.
-      `;
-
-      // Generate the questions with timeout
-      const questionsPromise = model.generateContent(questionsPrompt);
-      const questionsResult = (await Promise.race([
-        questionsPromise,
-        timeoutPromise,
-      ])) as unknown as Awaited<ReturnType<typeof model.generateContent>>;
-
-      if (!questionsResult) {
-        throw new Error("Failed to generate interview questions");
-      }
-
-      const questionsResponse = questionsResult;
-      const questionsText = questionsResponse.response.text();
-
-      // Parse the responses
-      let prepPlanData;
-      let questionsData;
-
-      try {
-        prepPlanData = JSON.parse(prepPlanText);
-      } catch (error) {
-        logger.error("Error parsing prep plan JSON:", error);
-        console.error("Error parsing prep plan JSON:", error);
-        prepPlanData = {
-          sections: [
-            {
-              type: "timeline",
-              title: "Preparation Timeline",
-              content:
-                "Here's a structured timeline to prepare for your interview.",
-            },
-            // Add fallback sections
-          ],
-        };
-      }
-
-      try {
-        questionsData = JSON.parse(questionsText);
-      } catch (error) {
-        logger.error("Error parsing questions JSON:", error);
-        console.error("Error parsing questions JSON:", error);
-        questionsData = generateFallbackQuestions(
-          data.jobDetails,
-          data.isPremiumUser
-        );
-      }
-
-      // Return the response
-      return NextResponse.json(
-        {
-          success: true,
-          prepPlan: prepPlanData,
-          questions: Array.isArray(questionsData)
-            ? questionsData
-            : generateFallbackQuestions(data.jobDetails, data.isPremiumUser),
-        },
-        { status: 200 }
-      );
+      // Return the streaming response
+      return new Response(stream);
     } catch (error) {
       logger.error("Google AI API error", error);
 
@@ -401,7 +434,6 @@ export async function POST(request: Request) {
 }
 
 // Fallback functions for when the AI API is unavailable
-
 function generateFallbackQuestions(
   jobDetails: z.infer<typeof requestSchema>["jobDetails"],
   isPremiumUser: boolean = false
