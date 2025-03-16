@@ -120,6 +120,11 @@ p {
   @apply text-black;
 }
 
+/* Force tooltip text to be white */
+[data-radix-tooltip-content] p {
+  color: white !important;
+}
+
 a {
   @apply text-blue-500 no-underline hover:text-blue-700 transition-colors;
 }

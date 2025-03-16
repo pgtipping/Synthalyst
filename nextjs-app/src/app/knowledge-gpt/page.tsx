@@ -212,7 +212,9 @@ export default function KnowledgeGPT() {
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Login to use web search</p>
+                <p style={{ color: "white !important", margin: 0 }}>
+                  Login to use web search
+                </p>
               </TooltipContent>
             </Tooltip>
           )}
