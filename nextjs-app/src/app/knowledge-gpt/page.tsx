@@ -10,6 +10,13 @@ import {
   LanguageInfo,
 } from "@/components/ui/language-selector";
 import { LoadingDots } from "@/components/ui/loading-dots";
+import { useSession } from "next-auth/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Define the KNOWLEDGE_MODEL constant
 const KNOWLEDGE_MODEL = "KNOWLEDGE_MODEL";
@@ -32,6 +39,7 @@ function formatMessageContent(content: string): string {
 }
 
 export default function KnowledgeGPT() {
+  const { data: session } = useSession();
   const [question, setQuestion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
@@ -168,24 +176,45 @@ export default function KnowledgeGPT() {
           onLanguageChange={handleLanguageChange}
           defaultLanguage={selectedLanguage}
         />
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-        >
-          {webSearchEnabled ? (
-            <>
-              <Globe className="h-4 w-4" />
-              <span>Web Search: ON</span>
-            </>
-          ) : (
-            <>
-              <Globe2 className="h-4 w-4 text-muted-foreground" />
-              <span>Web Search: OFF</span>
-            </>
-          )}
-        </Button>
+        {session ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+          >
+            {webSearchEnabled ? (
+              <>
+                <Globe className="h-4 w-4" />
+                <span>Web Search: ON</span>
+              </>
+            ) : (
+              <>
+                <Globe2 className="h-4 w-4 text-muted-foreground" />
+                <span>Web Search: OFF</span>
+              </>
+            )}
+          </Button>
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                  disabled
+                >
+                  <Globe2 className="h-4 w-4 text-muted-foreground" />
+                  <span>Web Search: OFF</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Login to use web search</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
 
       <LanguageInfo modelType={KNOWLEDGE_MODEL} />

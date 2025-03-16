@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { generateContentV2 } from "@/lib/ai/model-router";
 
 // Interface for search results
@@ -33,7 +35,20 @@ export async function POST(req: NextRequest) {
     let searchResults: SearchResult[] = [];
     let searchError = null;
 
+    // Check if user is authenticated for web search
+    const session = await getServerSession(authOptions);
+    const isAuthenticated = !!session?.user;
+
     if (type === "knowledge" && useWebSearch) {
+      // Only allow web search for authenticated users
+      if (!isAuthenticated) {
+        console.log("Web search requested but user is not authenticated");
+        return NextResponse.json(
+          { error: "You must be logged in to use web search" },
+          { status: 401 }
+        );
+      }
+
       try {
         // Call the web search API
         const searchResponse = await fetch(
