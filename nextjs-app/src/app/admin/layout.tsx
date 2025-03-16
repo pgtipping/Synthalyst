@@ -90,16 +90,21 @@ interface AdminLayoutProps {
 }
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
-  const session = (await getServerSession(
-    authOptions
-  )) as ExtendedSession | null;
+  let session: ExtendedSession | null = null;
 
-  // Check if user is authenticated and has admin role
-  if (
-    !session ||
-    (session.user.role !== "ADMIN" &&
-      session.user.email !== "pgtipping1@gmail.com")
-  ) {
+  try {
+    session = (await getServerSession(authOptions)) as ExtendedSession | null;
+
+    // Check if user is authenticated and has admin role
+    if (
+      !session ||
+      (session.user?.role !== "ADMIN" &&
+        session.user?.email !== "pgtipping1@gmail.com")
+    ) {
+      redirect("/");
+    }
+  } catch (error) {
+    console.error("Error checking admin authentication:", error);
     redirect("/");
   }
 

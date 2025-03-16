@@ -9,104 +9,155 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPage() {
-  // Get counts of contact submissions by status
-  const submissionCounts = await prisma.$queryRaw<
-    { status: string; count: number }[]
-  >`
-    SELECT status, COUNT(*) as count
-    FROM "ContactSubmission"
-    GROUP BY status
-  `;
-
-  // Create a map of status to count
-  const countsByStatus = submissionCounts.reduce((acc, { status, count }) => {
-    acc[status] = Number(count);
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Calculate total unresolved (new + in-progress)
-  const unresolvedCount =
-    (countsByStatus["new"] || 0) + (countsByStatus["in-progress"] || 0);
-
-  // Get count of users
-  const userCount = await prisma.user.count();
-  const adminCount = await prisma.user.count({
-    where: { role: "ADMIN" },
-  });
-
-  // Get newsletter subscriber counts
+  // Initialize default values
+  let countsByStatus: Record<string, number> = {};
+  let unresolvedCount = 0;
+  let userCount = 0;
+  let adminCount = 0;
   let subscriberStats = {
     total: 0,
     confirmed: 0,
     active: 0,
     unsubscribed: 0,
   };
-
-  try {
-    // Use type assertion to work around the type error
-    const prismaAny = prisma as unknown;
-    const prismaWithNewsletter = prismaAny as {
-      newsletter: {
-        findMany: () => Promise<
-          Array<{ confirmed: boolean; active: boolean; unsubscribed: boolean }>
-        >;
-      };
-    };
-
-    if (prismaWithNewsletter.newsletter) {
-      const subscribers = await prismaWithNewsletter.newsletter.findMany();
-
-      subscriberStats = {
-        total: subscribers.length,
-        confirmed: subscribers.filter(
-          (s: { confirmed: boolean }) => s.confirmed
-        ).length,
-        active: subscribers.filter((s: { active: boolean }) => s.active).length,
-        unsubscribed: subscribers.filter(
-          (s: { unsubscribed: boolean }) => s.unsubscribed
-        ).length,
-      };
-    }
-  } catch (error) {
-    console.error("Error fetching newsletter stats:", error);
-  }
-
-  // Get app feedback stats
   let feedbackStats = {
     totalApps: 0,
     totalFeedback: 0,
     averageRating: 0,
   };
 
+  // Get counts of contact submissions by status
   try {
-    // Use type assertion to work around the type error
-    const prismaAny = prisma as unknown;
-    const prismaWithFeedback = prismaAny as {
-      appFeedback: {
-        count: () => Promise<number>;
-        groupBy: (args: { by: string[] }) => Promise<{ appName: string }[]>;
-        aggregate: (args: {
-          _avg: { rating: boolean };
-        }) => Promise<{ _avg: { rating: number | null } }>;
+    // Check if ContactSubmission table exists
+    const tableExists = await prisma.$queryRaw<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public'
+        AND table_name = 'ContactSubmission'
+      );
+    `;
+
+    if (tableExists[0]?.exists) {
+      const submissionCounts = await prisma.$queryRaw<
+        { status: string; count: number }[]
+      >`
+        SELECT status, COUNT(*) as count
+        FROM "ContactSubmission"
+        GROUP BY status
+      `;
+
+      // Create a map of status to count
+      countsByStatus = submissionCounts.reduce((acc, { status, count }) => {
+        acc[status] = Number(count);
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Calculate total unresolved (new + in-progress)
+      unresolvedCount =
+        (countsByStatus["new"] || 0) + (countsByStatus["in-progress"] || 0);
+    }
+  } catch (error) {
+    console.error("Error fetching contact submission stats:", error);
+  }
+
+  // Get count of users
+  try {
+    userCount = await prisma.user.count();
+    adminCount = await prisma.user.count({
+      where: { role: "ADMIN" },
+    });
+  } catch (error) {
+    console.error("Error fetching user counts:", error);
+  }
+
+  // Get newsletter subscriber counts
+  try {
+    // Check if newsletter table exists
+    const newsletterTableExists = await prisma.$queryRaw<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public'
+        AND table_name = 'Newsletter'
+      );
+    `;
+
+    if (newsletterTableExists[0]?.exists) {
+      // Use type assertion to work around the type error
+      const prismaAny = prisma as unknown;
+      const prismaWithNewsletter = prismaAny as {
+        newsletter: {
+          findMany: () => Promise<
+            Array<{
+              confirmed: boolean;
+              active: boolean;
+              unsubscribed: boolean;
+            }>
+          >;
+        };
       };
-    };
 
-    const feedbackCount = await prismaWithFeedback.appFeedback.count();
-    const appsWithFeedback = await prismaWithFeedback.appFeedback.groupBy({
-      by: ["appName"],
-    });
+      if (prismaWithNewsletter.newsletter) {
+        const subscribers = await prismaWithNewsletter.newsletter.findMany();
 
-    const averageRatingResult = await prismaWithFeedback.appFeedback.aggregate({
-      _avg: {
-        rating: true,
-      },
-    });
+        subscriberStats = {
+          total: subscribers.length,
+          confirmed: subscribers.filter(
+            (s: { confirmed: boolean }) => s.confirmed
+          ).length,
+          active: subscribers.filter((s: { active: boolean }) => s.active)
+            .length,
+          unsubscribed: subscribers.filter(
+            (s: { unsubscribed: boolean }) => s.unsubscribed
+          ).length,
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching newsletter stats:", error);
+  }
 
-    feedbackStats = {
-      totalApps: appsWithFeedback.length,
-      totalFeedback: feedbackCount,
-      averageRating: averageRatingResult._avg.rating || 0,
-    };
+  // Get app feedback stats
+  try {
+    // Check if appFeedback table exists
+    const feedbackTableExists = await prisma.$queryRaw<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public'
+        AND table_name = 'AppFeedback'
+      );
+    `;
+
+    if (feedbackTableExists[0]?.exists) {
+      // Use type assertion to work around the type error
+      const prismaAny = prisma as unknown;
+      const prismaWithFeedback = prismaAny as {
+        appFeedback: {
+          count: () => Promise<number>;
+          groupBy: (args: { by: string[] }) => Promise<{ appName: string }[]>;
+          aggregate: (args: {
+            _avg: { rating: boolean };
+          }) => Promise<{ _avg: { rating: number | null } }>;
+        };
+      };
+
+      const feedbackCount = await prismaWithFeedback.appFeedback.count();
+      const appsWithFeedback = await prismaWithFeedback.appFeedback.groupBy({
+        by: ["appName"],
+      });
+
+      const averageRatingResult =
+        await prismaWithFeedback.appFeedback.aggregate({
+          _avg: {
+            rating: true,
+          },
+        });
+
+      feedbackStats = {
+        totalApps: appsWithFeedback.length,
+        totalFeedback: feedbackCount,
+        averageRating: averageRatingResult._avg.rating || 0,
+      };
+    }
   } catch (error) {
     console.error("Error fetching feedback stats:", error);
   }
