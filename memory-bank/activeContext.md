@@ -25,6 +25,9 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Added client-side formatting to properly render bold text and lists
    - Implemented smart web search detection to only use search when necessary
    - Added logic to skip web search for simple math questions and basic definitions
+   - Added web search toggle button to let users control when web search is used
+   - Updated UI to clearly indicate when web search is enabled or disabled
+   - Modified API to respect user preference for web search
 
 ### Next Steps
 

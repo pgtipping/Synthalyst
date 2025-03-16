@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Send, Info } from "lucide-react";
+import { Send, Info, Globe, Globe2 } from "lucide-react";
 import {
   LanguageSelector,
   LanguageInfo,
@@ -39,6 +39,7 @@ export default function KnowledgeGPT() {
     { role: "user" | "assistant"; content: string }[]
   >([]);
   const [showTips, setShowTips] = useState(true);
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -83,6 +84,7 @@ export default function KnowledgeGPT() {
     if (showTips) setShowTips(false);
 
     console.log("Submitting question with language:", selectedLanguage);
+    console.log("Web search enabled:", webSearchEnabled);
 
     try {
       const response = await fetch("/api/generate", {
@@ -94,6 +96,7 @@ export default function KnowledgeGPT() {
           question: userQuestion,
           language: selectedLanguage,
           type: "knowledge",
+          useWebSearch: webSearchEnabled,
         }),
       });
 
@@ -155,9 +158,8 @@ export default function KnowledgeGPT() {
     <div className="container mx-auto py-8 max-w-5xl flex flex-col flex-grow">
       <h1 className="text-3xl font-bold mb-2">Knowledge GPT</h1>
       <p className="text-muted-foreground mb-6">
-        Ask any question and get a detailed, accurate answer based on the latest
-        available information. Knowledge GPT uses web search to provide
-        up-to-date answers.
+        Ask any question and get a detailed, accurate answer. Toggle web search
+        for up-to-date information on current events and facts.
       </p>
 
       <div className="flex justify-between items-center mb-4">
@@ -166,6 +168,24 @@ export default function KnowledgeGPT() {
           onLanguageChange={handleLanguageChange}
           defaultLanguage={selectedLanguage}
         />
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+        >
+          {webSearchEnabled ? (
+            <>
+              <Globe className="h-4 w-4" />
+              <span>Web Search: ON</span>
+            </>
+          ) : (
+            <>
+              <Globe2 className="h-4 w-4 text-muted-foreground" />
+              <span>Web Search: OFF</span>
+            </>
+          )}
+        </Button>
       </div>
 
       <LanguageInfo modelType={KNOWLEDGE_MODEL} />
@@ -187,7 +207,7 @@ export default function KnowledgeGPT() {
                     Try educational topics, current events, or general knowledge
                     questions
                   </li>
-                  <li>Web search is used to provide up-to-date information</li>
+                  <li>Toggle web search for up-to-date information</li>
                   <li>Press Enter to send your message quickly</li>
                 </ul>
               </div>

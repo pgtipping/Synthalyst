@@ -2100,3 +2100,32 @@ The Knowledge GPT feature has been enhanced with several improvements:
    - Used the LoadingDots component for consistent loading indicators
 
 These improvements enhance the user experience by providing better formatted responses and more efficient API usage.
+
+## Web Search Toggle Feature (March 16, 2025)
+
+The Knowledge GPT feature has been enhanced with a web search toggle button:
+
+1. **User Control**:
+
+   - Added a toggle button in the Knowledge GPT UI to enable/disable web search
+   - Button uses Globe/Globe2 icons to visually indicate the current state
+   - Default state is OFF to minimize API costs
+
+2. **API Integration**:
+
+   - Modified the generate API route to respect the useWebSearch parameter
+   - Updated system prompt to indicate when web search is being used
+   - Only performs web search when explicitly enabled by the user
+
+3. **Cost Optimization**:
+
+   - Reduces API costs by only using web search when requested
+   - Creates potential for a premium feature (web search could be limited to paid users)
+   - Still maintains smart filtering to avoid unnecessary searches even when enabled
+
+4. **UI Updates**:
+   - Updated page description to reflect the new toggle feature
+   - Modified tips section to mention the toggle feature
+   - Clear visual indication of whether web search is ON or OFF
+
+This feature gives users control over their experience while optimizing API costs and creating potential for monetization.

@@ -15,10 +15,11 @@ export async function POST(req: NextRequest) {
       question,
       language = "English",
       type = "knowledge",
+      useWebSearch = false,
     } = await req.json();
 
     console.log(
-      `API Request - Type: ${type}, Language: ${language}, Question: ${question}`
+      `API Request - Type: ${type}, Language: ${language}, Question: ${question}, Web Search: ${useWebSearch}`
     );
 
     if (!question) {
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     let searchResults: SearchResult[] = [];
     let searchError = null;
 
-    if (type === "knowledge") {
+    if (type === "knowledge" && useWebSearch) {
       // Check if the question likely needs web search
       const needsWebSearch = shouldUseWebSearch(question);
 
@@ -67,6 +68,8 @@ export async function POST(req: NextRequest) {
       } else {
         console.log("Skipping web search for this question type");
       }
+    } else if (type === "knowledge" && !useWebSearch) {
+      console.log("Web search disabled by user");
     }
 
     // Create a system prompt based on the type and language
@@ -78,12 +81,11 @@ export async function POST(req: NextRequest) {
       
 Important: Always provide the most current information available. For example, as of 2025, Donald Trump is the President of the United States (having won the 2024 election).
 
-Only use the web search results when:
-1. The question is about current events or recent information that might have changed since your training data
-2. The question requires very specific or factual information that you're uncertain about
-3. The question explicitly asks for the latest information on a topic
-
-For general knowledge questions, common facts, or conceptual explanations that don't require up-to-date information, rely on your built-in knowledge instead of web search results.
+${
+  useWebSearch
+    ? "The user has enabled web search for this question."
+    : "The user has disabled web search for this question. Use only your built-in knowledge to answer."
+}
 
 FORMATTING INSTRUCTIONS:
 - Do NOT use markdown formatting with asterisks (**) for bold text
@@ -94,7 +96,7 @@ FORMATTING INSTRUCTIONS:
 
       // Add search results to the prompt if available
       if (searchResults.length > 0) {
-        systemPrompt += `I've found some recent information that might help answer the question. Please use this information if relevant:
+        systemPrompt += `\nI've found some recent information that might help answer the question. Please use this information if relevant:
 
 ${searchResults
   .map(
@@ -106,7 +108,7 @@ URL: ${result.link}`
 
 Based on the above information and your knowledge, please provide accurate information about ${question}.`;
       } else {
-        systemPrompt += `Please provide accurate information about ${question}.`;
+        systemPrompt += `\nPlease provide accurate information about ${question}.`;
       }
 
       // Add language instruction if not English

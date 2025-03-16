@@ -66,6 +66,9 @@
 - Enhanced text formatting in Knowledge GPT responses to properly display bold text and lists
 - Updated loading animation to use three dots instead of spinning icon for better UX
 - Added client-side formatting to properly render content with HTML formatting
+- Added web search toggle button to Knowledge GPT to let users control when web search is used
+- Updated API to respect user preference for web search usage
+- Modified system prompt to indicate when web search is being used
 
 ### In Progress
 
