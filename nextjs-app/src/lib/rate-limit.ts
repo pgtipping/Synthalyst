@@ -122,7 +122,8 @@ type Options = {
  * @returns Rate limiter object
  */
 export function createRateLimiter(options: Options) {
-  const tokenCache = new LRUCache<string, number[]>({
+  // @ts-expect-error - LRUCache has typing issues with generic parameters
+  const tokenCache = new LRUCache({
     max: options.uniqueTokenPerInterval || 500,
     ttl: options.interval || 60000,
   });

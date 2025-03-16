@@ -8,11 +8,15 @@ const updateRoleSchema = z.object({
   role: z.enum(["user", "ADMIN"]),
 });
 
+// This is the correct pattern for App Router API routes with dynamic parameters in Next.js 15
 export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await the params object to get the id
+    const { id } = await params;
+
     // Check if user is authenticated and has admin role
     const session = await getServerSession(authOptions);
     if (
@@ -25,7 +29,7 @@ export async function PUT(
 
     // Get the user to update
     const userToUpdate = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { email: true },
     });
 
@@ -37,7 +41,7 @@ export async function PUT(
       );
     }
 
-    const body = await req.json();
+    const body = await request.json();
     const result = updateRoleSchema.safeParse(body);
 
     if (!result.success) {
@@ -50,7 +54,7 @@ export async function PUT(
     const { role } = result.data;
 
     const updatedUser = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: { role },
       select: {
         id: true,

@@ -19,6 +19,7 @@
 - Unified email service with comprehensive logging
 - Feedback system with rate limiting and database storage
 - Admin dashboard for email logs with filtering and statistics
+- Admin user management with role updates
 - Robust error handling for admin pages and API routes
 
 ### Technical Infrastructure
@@ -39,6 +40,7 @@
 - LRU cache for rate limiting
 - Responsive admin layout with mobile support
 - Try-catch blocks for all API calls with appropriate fallbacks
+- NextJS 15 compatibility with proper async params handling
 
 ## What's Left to Build
 
@@ -128,6 +130,16 @@
 - Fixed "Cannot read properties of undefined" errors in the admin page
 - Resolved chunk loading errors by properly handling database queries
 - Improved error logging for all database operations
+- Fixed NextJS dynamic route parameter issue in the user role update API
+- Updated the API route to properly await params object in Next.js 15
+- Changed params type to `Promise<{ id: string }>` to reflect Next.js 15 changes
+- Properly extracted and used the ID parameter after awaiting params
+- Ensured consistent error handling across all admin API routes
+- Fixed TypeScript errors in the admin user management components
+- Fixed rate limiting errors by using the correct string format for duration
+- Added better error handling for Redis connection issues
+- Made authorization optional for development environment
+- Improved error responses to return 200 status with error details instead of 500
 
 ### In Progress
 
@@ -154,7 +166,6 @@
 - Medical Knowledge Assistant treats conversational phrases as new medical queries
 - Some TypeScript errors still exist in test files that need to be addressed
 - Port 3001 sometimes remains in use after server shutdown, requiring manual termination
-- Redis monitoring page showing 500 errors that need to be resolved
 
 ### UI Guidelines
 
@@ -184,6 +195,7 @@
 - **Admin Dashboard**:
 
   - Email logs monitoring with filtering and statistics
+  - User management with role updates
   - Responsive layout with mobile support
   - Sidebar navigation for easy access to different sections
   - Pagination for large data sets
@@ -192,6 +204,7 @@
   - Database table existence checks to prevent errors
   - Default values for all data variables to prevent undefined errors
   - Comprehensive error handling for authentication and database operations
+  - NextJS 15 compatibility with proper async params handling
 
 - **Knowledge GPT**:
 
@@ -248,138 +261,7 @@
   - Tagging and categorization
 
 - **Collaboration Features**:
-
   - Shared workspaces
-  - Team collaboration
-  - Content sharing
-
-- **Medical Knowledge Enhancements**:
-
-  - Improved conversational context
-  - Additional medical data sources
-  - Enhanced evidence grading system
-
-- **Error Handling Enhancements**:
-  - Systematic approach to error detection
-  - Proactive error resolution
-  - Fix for Redis monitoring page 500 errors
-
-## Current Status (March 16, 2025)
-
-The platform is stable and functional with the following features:
-
-1. **Email Service**:
-
-   - Uses SendGrid as the primary provider with Nodemailer fallback
-   - Logs all email activities in the database
-   - Provides standardized approach for all email sending functionality
-   - Includes admin dashboard for monitoring email logs
-
-2. **Feedback System**:
-
-   - Uses database-only storage for feedback submissions
-   - Implements rate limiting to prevent abuse
-   - Provides enhanced error handling for better user experience
-
-3. **Admin Dashboard**:
-
-   - Includes email logs monitoring with filtering and statistics
-   - Features responsive layout with mobile support
-   - Provides sidebar navigation for easy access to different sections
-   - Implements robust error handling for API calls and missing data
-
-4. **Knowledge GPT**:
-
-   - Uses Gemini 1.5 Flash-8B as the primary model
-   - Integrates web search for up-to-date information
-   - Supports multiple languages
-   - No longer displays model information in the UI
-   - Includes domain selection for specialized knowledge areas
-   - Medical domain with PubMed integration for evidence-based information
-   - Properly aligned UI elements for better user experience
-
-5. **Learning Content Creator**:
-
-   - Uses GPT-4o-Mini as the primary model
-   - Supports multiple languages
-   - No longer displays model information in the UI
-
-6. **Model Router**:
-   - Implements generic model types (KNOWLEDGE_MODEL and LEARNING_MODEL)
-   - Supports language selection
-   - Ready for future enhancements for task-based model selection
-
-The platform is functional with core features working well. Recent improvements to the email service, feedback system, and admin dashboard have enhanced the platform's reliability and maintainability. The addition of the Medical Knowledge Assistant with PubMed integration provides specialized, evidence-based information for health-related queries. The focus is now on refining the existing features and implementing the remaining components.
-
-Fixed a critical issue with Gemini API integration where system messages were causing errors. Implemented a solution that combines system messages with user messages for Gemini models.
-
-Added web search capability to Knowledge GPT to provide up-to-date information, particularly for current events and facts. This ensures that users receive accurate information even when the model's training data is outdated.
-
-Integrated PubMed API to provide evidence-based medical information with proper citations and evidence grading, enhancing the value of the Knowledge GPT feature for health-related queries.
-
-Fixed UI alignment issues with language and domain selectors to ensure a consistent and professional appearance on both desktop and mobile devices.
-
-Added clear user guidance in the tips section to inform users about the limitations of the Medical Knowledge Assistant regarding conversational phrases.
-
-Created a unified email service with comprehensive logging to track all email activities, improving reliability and maintainability of the platform's communication features.
-
-Implemented a responsive admin dashboard for email logs with filtering, statistics, and pagination, enhancing the platform's monitoring capabilities.
-
-## Recent Fixes (March 16, 2025)
-
-1. **Redis Monitoring Fixes**:
-
-   - Fixed JSON parsing errors in the Redis monitor by adding type checking for data that is already an object
-   - Resolved rate limiting errors by using the correct string format for duration (e.g., "60 s") as per Upstash documentation
-   - Added better error handling for Redis connection issues
-   - Made authorization optional for development environment
-   - Improved error responses to return 200 status with error details instead of 500
-   - Enhanced the RedisMonitoring component to handle null values properly
-   - Added a reset metrics button to the monitoring UI
-   - Fixed TypeScript errors in the rate-limit library
-   - Added proper type definitions for LRU cache
-
-2. **Admin Page Error Handling**:
-
-   - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
-   - Changed empty values to "all" in SelectItem components to prevent errors
-   - Updated filter logic to handle the new "all" value correctly
-   - Fixed TypeScript errors in PostList component by making initialPosts optional
-   - Fixed blog analytics route by properly typing the \_count property
-   - Updated user queries in email-logs route to include the email field
-   - Enhanced error handling in API routes for more robust operation
-   - Improved type safety throughout the codebase
-   - Added error handling for cases where database models might not exist yet
-   - Implemented fallback to empty arrays when data is missing or undefined
-   - Added try-catch blocks for API calls to handle errors independently
-
-3. **Knowledge GPT Improvements**:
-
-   - Updated loading animation to use three dots instead of spinning icon
-   - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
-   - Added client-side formatting to properly render bold text and lists
-   - Added web search toggle button to let users control when web search is used
-   - Updated UI to clearly indicate when web search is enabled or disabled
-   - Modified API to respect user preference for web search
-   - Simplified web search logic by removing automatic detection in favor of explicit user control
-   - Moved loading animation to appear in chat window instead of on send button
-
-4. **Language Selector Enhancements**:
-
-   - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
-   - Included English in the dropdown list
-   - Made the dropdown scrollable with max height
-   - Sorted languages alphabetically for easier navigation
-   - Added local storage to remember user language preferences
-   - Improved browser language detection and handling
-
-5. **Medical Knowledge Integration**:
-   - Added PubMed API integration for evidence-based medical information
-   - Implemented evidence grading system based on study types
-   - Created domain selection in Knowledge GPT for specialized knowledge areas
-   - Added citation formatting and source attribution for medical responses
-   - Integrated medical knowledge as a domain within Knowledge GPT rather than a separate tool
-   - Enhanced UI to display evidence levels and citations for medical responses
-   - Fixed UI alignment issues with language and domain selectors
-   - Added PUBMED_API_KEY to environment variables
-   - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
+  - Team permissions
+  - Collaborative editing
+  - Activity tracking

@@ -2397,3 +2397,64 @@ The rate limiting implementation is in `nextjs-app/src/lib/rate-limit.ts`. Key i
    - Integrates with the monitoring system to provide rate limiting metrics
    - Supports reset functionality for rate limits
    - Configurable limits based on environment and endpoint
+
+## NextJS 15 Dynamic Route Parameters (March 16, 2025)
+
+In Next.js 15, dynamic route parameters are now asynchronous and must be awaited before use. This is a breaking change from previous versions.
+
+### Correct Pattern for API Routes
+
+```typescript
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Await the params object to get the id
+  const { id } = await params;
+
+  // Use the id parameter
+  // ...
+}
+```
+
+### Common Errors
+
+- Using `params.id` directly without awaiting params first
+- Not typing params as a Promise
+- Not destructuring the id after awaiting params
+
+### Best Practices
+
+- Always type params as `Promise<{ paramName: string }>`
+- Always await params before accessing its properties
+- Use destructuring to extract parameters after awaiting
+- Add proper error handling for asynchronous operations
+
+## Redis Rate Limiting (March 16, 2025)
+
+When using Upstash Redis for rate limiting, use the string format for duration:
+
+```typescript
+const limiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(limit, `${windowInSeconds} s`),
+  analytics: true,
+  prefix: `rate_limit_${endpoint}`,
+});
+```
+
+## Admin Dashboard Error Handling (March 16, 2025)
+
+- Always add try-catch blocks for all API calls
+- Provide fallback values when data is missing or undefined
+- Check for database table existence before querying
+- Initialize default values for all data variables
+- Use optional chaining for potentially null values
+- Return 200 status with error details instead of 500 errors
+
+## UI Component Rules (March 16, 2025)
+
+- Ensure all SelectItem components have non-empty values (use "all" instead of empty string)
+- Provide fallback UI states when data is missing or loading
+- Ensure consistent button heights and alignment
+- Use responsive design for all components, especially admin interfaces

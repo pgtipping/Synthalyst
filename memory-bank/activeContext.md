@@ -2,7 +2,7 @@
 
 ## Current Focus (March 16, 2025)
 
-The current focus is on optimizing the application's backend services, particularly email handling, feedback processing, and admin monitoring capabilities. We're enhancing the admin dashboard with robust monitoring features and fixing critical errors in the Redis monitoring functionality. These optimizations aim to improve performance, reliability, and maintainability of the platform.
+The current focus is on optimizing the application's backend services, particularly email handling, feedback processing, and admin monitoring capabilities. We're enhancing the admin dashboard with robust monitoring features and fixing critical errors in the Redis monitoring functionality and user role management. These optimizations aim to improve performance, reliability, and maintainability of the platform.
 
 ### Recent Changes
 
@@ -46,27 +46,36 @@ The current focus is on optimizing the application's backend services, particula
    - Fixed TypeScript errors in the rate-limit library
    - Added proper type definitions for LRU cache
 
-5. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+5. **Admin User Management Fixes** (March 16, 2025):
 
-6. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+   - Fixed NextJS dynamic route parameter issue in the user role update API
+   - Updated the API route to properly await params object in Next.js 15
+   - Changed params type to `Promise<{ id: string }>` to reflect Next.js 15 changes
+   - Properly extracted and used the ID parameter after awaiting params
+   - Ensured consistent error handling across all admin API routes
+   - Fixed TypeScript errors in the admin user management components
 
-7. **Model Router Updates**:
+6. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+
+7. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+
+8. **Model Router Updates**:
 
    - Added a new `generateContentV2` function with improved parameter handling
    - Updated the API route to use the new function
    - Standardized language support across models
    - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 
-8. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
+9. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
 
-9. **Knowledge GPT Web Search Integration**:
+10. **Knowledge GPT Web Search Integration**:
 
-   - Added web search capability to provide up-to-date information
-   - Implemented Google Custom Search API integration
-   - Updated system prompts to include current information
-   - Enhanced UI to inform users about web search capability
+    - Added web search capability to provide up-to-date information
+    - Implemented Google Custom Search API integration
+    - Updated system prompts to include current information
+    - Enhanced UI to inform users about web search capability
 
-10. **Knowledge GPT Improvements** (March 16, 2025):
+11. **Knowledge GPT Improvements** (March 16, 2025):
 
     - Updated loading animation to use three dots instead of spinning icon
     - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
@@ -77,7 +86,7 @@ The current focus is on optimizing the application's backend services, particula
     - Simplified web search logic by removing automatic detection in favor of explicit user control
     - Moved loading animation to appear in chat window instead of on send button
 
-11. **Language Selector Improvements** (March 16, 2025):
+12. **Language Selector Improvements** (March 16, 2025):
 
     - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
     - Included English in the dropdown list
@@ -86,7 +95,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added local storage to remember user language preferences
     - Improved browser language detection and handling
 
-12. **Medical Knowledge Integration** (March 16, 2025):
+13. **Medical Knowledge Integration** (March 16, 2025):
 
     - Added PubMed API integration for evidence-based medical information
     - Implemented evidence grading system based on study types
@@ -98,7 +107,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added PUBMED_API_KEY to environment variables
     - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
-13. **Admin Pages Error Handling Improvements** (March 16, 2025):
+14. **Admin Pages Error Handling Improvements** (March 16, 2025):
 
     - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
     - Changed empty values to "all" in SelectItem components to prevent errors
@@ -112,7 +121,7 @@ The current focus is on optimizing the application's backend services, particula
     - Implemented fallback to empty arrays when data is missing or undefined
     - Added try-catch blocks for API calls to handle errors independently
 
-14. **Admin Page Database Checks** (March 16, 2025):
+15. **Admin Page Database Checks** (March 16, 2025):
     - Added SQL queries to check if tables exist before attempting to query them
     - Used `information_schema.tables` to verify table existence in the database
     - Implemented default values for all data variables to prevent undefined errors
@@ -229,6 +238,7 @@ The current focus is on optimizing the application's backend services, particula
     - Initializing default values for all data variables to prevent undefined errors
 
 13. **Redis Monitoring Strategy**:
+
     - Checking data types before parsing JSON to prevent errors
     - Using string format for rate limiting duration as per Upstash documentation
     - Making authorization optional in development environment
@@ -236,3 +246,11 @@ The current focus is on optimizing the application's backend services, particula
     - Providing fallback UI when Redis is not configured
     - Adding reset functionality for metrics and cache
     - Implementing comprehensive error handling for Redis operations
+
+14. **NextJS 15 Compatibility Strategy**:
+    - Updating dynamic route parameters to use Promise type for params
+    - Properly awaiting params object before accessing its properties
+    - Using the correct pattern for App Router API routes with dynamic parameters
+    - Ensuring type safety with proper TypeScript definitions
+    - Adding appropriate error handling for asynchronous operations
+    - Following Next.js 15 best practices for API routes
