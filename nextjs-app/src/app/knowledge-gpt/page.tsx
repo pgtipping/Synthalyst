@@ -11,12 +11,7 @@ import {
 } from "@/components/ui/language-selector";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { useSession } from "next-auth/react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Define the KNOWLEDGE_MODEL constant
 const KNOWLEDGE_MODEL = "KNOWLEDGE_MODEL";
@@ -197,26 +192,20 @@ export default function KnowledgeGPT() {
               )}
             </Button>
           ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="inline-block">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                    disabled
-                  >
-                    <Globe2 className="h-4 w-4 text-muted-foreground" />
-                    <span>Web Search: OFF</span>
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p style={{ color: "white !important", margin: 0 }}>
-                  Login to use web search
-                </p>
-              </TooltipContent>
-            </Tooltip>
+            <div className="relative inline-block group">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                disabled
+              >
+                <Globe2 className="h-4 w-4 text-muted-foreground" />
+                <span>Web Search: OFF</span>
+              </Button>
+              <div className="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-1.5 bg-blue-600 rounded-md text-xs font-medium text-white whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity">
+                Login to use web search
+              </div>
+            </div>
           )}
         </div>
 
