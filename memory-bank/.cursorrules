@@ -2041,3 +2041,40 @@ When working with audio components in the application:
 - For OpenAI models, use `OPENAI_API_KEY` environment variable
 - For client-side access to OpenAI, use `NEXT_PUBLIC_OPENAI_API_KEY`
 - Always use the API route pattern for client-side model access to maintain security
+
+## Knowledge GPT Web Search Integration (March 16, 2025)
+
+The Knowledge GPT feature has been enhanced with web search capability to provide up-to-date information. This ensures that users receive accurate information even when the model's training data is outdated.
+
+### Implementation Details
+
+1. **Google Custom Search API Integration**:
+
+   - Created a new API route at `/api/web-search` that uses Google Custom Search API
+   - Added environment variables for Google Search API key and Search Engine ID
+   - Implemented error handling for API failures
+
+2. **System Prompt Updates**:
+
+   - Updated system prompts to include current information
+   - Added instructions to use web search results when available
+   - Ensured accurate information for current events and facts
+
+3. **UI Updates**:
+   - Added information about web search capability to the Knowledge GPT page
+   - Updated tips section to mention web search
+   - Maintained clean and simple UI while adding new functionality
+
+### Configuration Requirements
+
+To use the web search capability, the following environment variables must be set:
+
+- `GOOGLE_SEARCH_API_KEY`: API key for Google Custom Search API
+- `GOOGLE_SEARCH_ENGINE_ID`: Search Engine ID (cx) for Google Programmable Search Engine
+
+### Usage Notes
+
+- Web search is automatically triggered for all Knowledge GPT queries
+- Search results are included in the system prompt if available
+- The model combines web search results with its own knowledge to provide accurate answers
+- If web search fails or returns no results, the model falls back to its own knowledge

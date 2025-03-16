@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateContentV2 } from "@/lib/ai/model-router";
 
+// Interface for search results
+interface SearchResult {
+  title: string;
+  link: string;
+  snippet: string;
+  source: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const {
@@ -20,12 +28,67 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // For knowledge questions, try to get web search results first
+    let searchResults: SearchResult[] = [];
+    let searchError = null;
+
+    if (type === "knowledge") {
+      try {
+        // Call the web search API
+        const searchResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/web-search`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: question }),
+          }
+        );
+
+        const searchData = await searchResponse.json();
+
+        if (searchData.results && searchData.results.length > 0) {
+          searchResults = searchData.results;
+          console.log(
+            `Found ${searchResults.length} search results for question`
+          );
+        } else if (searchData.error) {
+          searchError = searchData.error;
+          console.warn(`Search error: ${searchError}`);
+        }
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+      }
+    }
+
     // Create a system prompt based on the type and language
     let systemPrompt = "";
 
     if (type === "knowledge") {
-      // Simple, clear prompt that's less likely to trigger content filters
-      systemPrompt = `You are a helpful assistant. Provide accurate information about ${question}.`;
+      // Updated prompt to ensure current information is provided
+      systemPrompt = `You are a helpful assistant providing accurate and up-to-date information. 
+      
+Important: Always provide the most current information available. For example, as of 2025, Donald Trump is the President of the United States (having won the 2024 election).
+
+`;
+
+      // Add search results to the prompt if available
+      if (searchResults.length > 0) {
+        systemPrompt += `I've found some recent information that might help answer the question. Please use this information if relevant:
+
+${searchResults
+  .map(
+    (result, index) => `[${index + 1}] "${result.title}" (${result.source})
+${result.snippet}
+URL: ${result.link}`
+  )
+  .join("\n\n")}
+
+Based on the above information and your knowledge, please provide accurate information about ${question}.`;
+      } else {
+        systemPrompt += `Please provide accurate information about ${question}.`;
+      }
 
       // Add language instruction if not English
       if (language !== "English") {

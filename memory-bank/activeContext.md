@@ -1,8 +1,8 @@
 # Active Context
 
-## Current Focus (March 15, 2025)
+## Current Focus (March 16, 2025)
 
-The current focus is on optimizing LLM model usage for the Synthalyst platform, particularly for the Knowledge GPT and Learning Creator features. The goal is to achieve cost efficiency while providing excellent multilingual experiences.
+The current focus is on optimizing LLM model usage for the Synthalyst platform, particularly for the Knowledge GPT and Learning Creator features. The goal is to achieve cost efficiency while providing excellent multilingual experiences and up-to-date information.
 
 ### Recent Changes
 
@@ -14,6 +14,11 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Standardized language support across models
    - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 4. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
+5. **Knowledge GPT Web Search Integration**:
+   - Added web search capability to provide up-to-date information
+   - Implemented Google Custom Search API integration
+   - Updated system prompts to include current information
+   - Enhanced UI to inform users about web search capability
 
 ### Next Steps
 
@@ -22,6 +27,7 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
 3. **Enhanced Error Handling**: Improve error handling for API calls and model responses.
 4. **User Preference Settings**: Implement user preference settings for language selection.
 5. **Analytics Implementation**: Add analytics to track model usage and performance.
+6. **Web Search Enhancements**: Improve web search integration with better result filtering and source attribution.
 
 ### Active Decisions
 
@@ -45,3 +51,7 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Adapted to model-specific requirements (e.g., Gemini's lack of system role support)
    - Standardized API response format
    - Improved error handling
+6. **Web Search Integration**:
+   - Using Google Custom Search API for up-to-date information
+   - Combining web search results with model knowledge
+   - Ensuring accurate information for current events and facts

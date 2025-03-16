@@ -138,7 +138,8 @@ export default function KnowledgeGPT() {
       <h1 className="text-3xl font-bold mb-2">Knowledge GPT</h1>
       <p className="text-muted-foreground mb-6">
         Ask any question and get a detailed, accurate answer based on the latest
-        available information.
+        available information. Knowledge GPT uses web search to provide
+        up-to-date answers.
       </p>
 
       <div className="flex justify-between items-center mb-4">
@@ -168,6 +169,7 @@ export default function KnowledgeGPT() {
                     Try educational topics, current events, or general knowledge
                     questions
                   </li>
+                  <li>Web search is used to provide up-to-date information</li>
                   <li>Press Enter to send your message quickly</li>
                 </ul>
               </div>
