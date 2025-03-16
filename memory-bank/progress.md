@@ -12,9 +12,10 @@
 - Template system for various document types
 - Task management system
 - Training plan creator
-- Knowledge GPT with multilingual support and web search capability
+- Knowledge GPT with multilingual support, web search capability, and specialized domains (medical)
 - Learning Content Creator with multilingual support
 - Model optimization with tiered approach for cost efficiency
+- Medical Knowledge Assistant with PubMed integration and evidence grading
 
 ### Technical Infrastructure
 
@@ -73,6 +74,10 @@
 - Made language dropdown scrollable for better user experience
 - Added local storage to remember user language preferences
 - Moved loading animation to appear in chat window instead of on send button for better UX
+- Integrated PubMed API for medical knowledge queries with evidence-based responses
+- Added evidence grading system for medical information based on study types
+- Implemented domain selection in Knowledge GPT for specialized knowledge areas
+- Created a unified interface for both general and medical knowledge
 
 ### In Progress
 
@@ -111,7 +116,15 @@
   - Question submission and answer generation
   - Language selection with proper API integration
   - Web search integration for up-to-date information
+  - Domain selection for specialized knowledge (general, medical)
   - Previous questions history
+  - Responsive design for all devices
+
+- **Medical Knowledge Assistant**:
+
+  - Integration with PubMed API for evidence-based medical information
+  - Evidence grading system based on study types
+  - Citation formatting and source attribution
   - Responsive design for all devices
 
 - **Learning Content Creator**:
@@ -163,6 +176,8 @@ The platform is stable and functional with the following features:
    - Integrates web search for up-to-date information
    - Supports multiple languages
    - No longer displays model information in the UI
+   - Includes domain selection for specialized knowledge areas
+   - Medical domain with PubMed integration for evidence-based information
 
 2. **Learning Content Creator**:
 
@@ -175,11 +190,13 @@ The platform is stable and functional with the following features:
    - Supports language selection
    - Ready for future enhancements for task-based model selection
 
-The platform is functional with core features working well. Recent improvements to the language selector, model optimization, and web search integration have enhanced the user experience and backend efficiency. The focus is now on refining the existing features and implementing the remaining components.
+The platform is functional with core features working well. Recent improvements to the language selector, model optimization, and web search integration have enhanced the user experience and backend efficiency. The addition of the Medical Knowledge Assistant with PubMed integration provides specialized, evidence-based information for health-related queries. The focus is now on refining the existing features and implementing the remaining components.
 
 Fixed a critical issue with Gemini API integration where system messages were causing errors. Implemented a solution that combines system messages with user messages for Gemini models.
 
 Added web search capability to Knowledge GPT to provide up-to-date information, particularly for current events and facts. This ensures that users receive accurate information even when the model's training data is outdated.
+
+Integrated PubMed API to provide evidence-based medical information with proper citations and evidence grading, enhancing the value of the Knowledge GPT feature for health-related queries.
 
 ## Known Issues (March 16, 2025)
 

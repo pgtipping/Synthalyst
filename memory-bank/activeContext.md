@@ -2,7 +2,7 @@
 
 ## Current Focus (March 16, 2025)
 
-The current focus is on optimizing LLM model usage for the Synthalyst platform, particularly for the Knowledge GPT and Learning Creator features. The goal is to achieve cost efficiency while providing excellent multilingual experiences and up-to-date information.
+The current focus is on optimizing LLM model usage for the Synthalyst platform, particularly for the Knowledge GPT and Learning Creator features. The goal is to achieve cost efficiency while providing excellent multilingual experiences and up-to-date information. We're also expanding Knowledge GPT with specialized domains, starting with medical knowledge.
 
 ### Recent Changes
 
@@ -35,6 +35,13 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Sorted languages alphabetically for easier navigation
    - Added local storage to remember user language preferences
    - Improved browser language detection and handling
+8. **Medical Knowledge Integration** (March 16, 2025):
+   - Added PubMed API integration for evidence-based medical information
+   - Implemented evidence grading system based on study types
+   - Created domain selection in Knowledge GPT for specialized knowledge areas
+   - Added citation formatting and source attribution for medical responses
+   - Integrated medical knowledge as a domain within Knowledge GPT rather than a separate tool
+   - Enhanced UI to display evidence levels and citations for medical responses
 
 ### Next Steps
 
@@ -44,6 +51,8 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
 4. **User Preference Settings**: Implement user preference settings for language selection.
 5. **Analytics Implementation**: Add analytics to track model usage and performance.
 6. **Web Search Enhancements**: Improve web search integration with better result filtering and source attribution.
+7. **Additional Specialized Domains**: Expand Knowledge GPT with more specialized domains (legal, financial, etc.).
+8. **Medical Knowledge Enhancements**: Add more medical data sources and improve evidence grading.
 
 ### Active Decisions
 
@@ -63,11 +72,18 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Focus on functionality rather than exposing model details
    - Simplified UI with clear language options
    - Consistent experience across different tools
+   - Domain selection for specialized knowledge
 5. **API Integration**:
    - Adapted to model-specific requirements (e.g., Gemini's lack of system role support)
    - Standardized API response format
    - Improved error handling
+   - Added PubMed API integration for medical knowledge
 6. **Web Search Integration**:
    - Using Google Custom Search API for up-to-date information
    - Combining web search results with model knowledge
    - Ensuring accurate information for current events and facts
+7. **Knowledge Domain Strategy**:
+   - Integrating specialized domains within Knowledge GPT rather than creating separate tools
+   - Starting with medical knowledge as the first specialized domain
+   - Using a unified interface with domain selection
+   - Adapting the UI based on the selected domain

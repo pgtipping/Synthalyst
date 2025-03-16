@@ -136,7 +136,8 @@ export default function ToolsPage() {
     {
       icon: <Sparkles className="w-8 h-8" />,
       title: "Knowledge GPT",
-      description: "Expert teaching and knowledge curation at your fingertips.",
+      description:
+        "Expert teaching and knowledge curation with specialized domains including medical research.",
       link: "/knowledge-gpt",
       status: "available",
     },
