@@ -2160,3 +2160,28 @@ The language selector component has been enhanced with several improvements:
    - Graceful fallback to English when the detected language is not supported
 
 These improvements enhance the user experience by providing more intuitive language selection and better persistence of user preferences.
+
+## Loading Animation Improvement (March 16, 2025)
+
+The loading animation in the Knowledge GPT feature has been improved:
+
+1. **Chat Window Integration**:
+
+   - Moved the loading animation from the send button to inside the chat window
+   - Added a new message bubble with the loading dots animation that appears only while waiting for a response
+   - Positioned the loading animation in the same style as assistant messages for consistency
+
+2. **User Experience Benefits**:
+
+   - Provides a more intuitive indication that the system is processing the question
+   - Shows the loading state where the response will appear
+   - Makes it clearer that the system is working on generating a response
+   - Maintains visual consistency with other chat bubbles
+
+3. **Implementation Details**:
+   - Used the existing LoadingDots component for the animation
+   - Added conditional rendering based on the isLoading state
+   - Styled the loading animation to match the assistant message bubbles
+   - Removed the loading animation from the send button
+
+This change completes the set of UI improvements for the Knowledge GPT feature, providing a more polished and intuitive user experience.

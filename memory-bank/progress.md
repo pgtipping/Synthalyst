@@ -72,6 +72,7 @@
 - Improved language selector with "Auto Detect" option and alphabetically sorted languages
 - Made language dropdown scrollable for better user experience
 - Added local storage to remember user language preferences
+- Moved loading animation to appear in chat window instead of on send button for better UX
 
 ### In Progress
 
