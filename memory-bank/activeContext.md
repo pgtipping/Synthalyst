@@ -27,6 +27,13 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Updated UI to clearly indicate when web search is enabled or disabled
    - Modified API to respect user preference for web search
    - Simplified web search logic by removing automatic detection in favor of explicit user control
+7. **Language Selector Improvements** (March 16, 2025):
+   - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
+   - Included English in the dropdown list
+   - Made the dropdown scrollable with max height
+   - Sorted languages alphabetically for easier navigation
+   - Added local storage to remember user language preferences
+   - Improved browser language detection and handling
 
 ### Next Steps
 

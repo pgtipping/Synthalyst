@@ -69,6 +69,9 @@
 - Updated API to respect user preference for web search usage
 - Modified system prompt to indicate when web search is being used
 - Simplified web search logic by removing automatic detection in favor of explicit user control
+- Improved language selector with "Auto Detect" option and alphabetically sorted languages
+- Made language dropdown scrollable for better user experience
+- Added local storage to remember user language preferences
 
 ### In Progress
 

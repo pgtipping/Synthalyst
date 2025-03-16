@@ -2130,3 +2130,33 @@ The Knowledge GPT feature has been enhanced with a web search toggle button:
    - Clear visual indication of whether web search is ON or OFF
 
 This feature gives users control over their experience while optimizing API costs and creating potential for monetization.
+
+## Language Selector Improvements (March 16, 2025)
+
+The language selector component has been enhanced with several improvements:
+
+1. **Auto Detect Option**:
+
+   - Added "Auto Detect" as the first option in the language dropdown
+   - Replaced the "(Browser Default)" label with a dedicated "Auto Detect" option
+   - When selected, automatically uses the browser's detected language
+
+2. **UI Improvements**:
+
+   - Made the dropdown scrollable with a maximum height to accommodate all languages
+   - Sorted languages alphabetically for easier navigation
+   - Included English in the dropdown list as a selectable option
+   - Improved visual consistency across the application
+
+3. **User Preference Persistence**:
+
+   - Added local storage to remember user language preferences
+   - Automatically restores the previously selected language on page reload
+   - Defaults to "Auto Detect" for new users
+
+4. **Browser Language Detection**:
+   - Enhanced browser language detection logic
+   - Improved mapping of browser language codes to full language names
+   - Graceful fallback to English when the detected language is not supported
+
+These improvements enhance the user experience by providing more intuitive language selection and better persistence of user preferences.

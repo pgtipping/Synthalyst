@@ -28,9 +28,12 @@ export function LanguageSelector({
   const languages =
     SUPPORTED_LANGUAGES[modelType as keyof typeof SUPPORTED_LANGUAGES] || [];
 
+  // Sort languages alphabetically
+  const sortedLanguages = [...languages].sort();
+
   // State for client-side rendering
   const [mounted, setMounted] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage);
+  const [selectedLanguage, setSelectedLanguage] = useState("Auto Detect");
   const [browserLanguage, setBrowserLanguage] = useState("English");
 
   // Set mounted state on client side
@@ -66,14 +69,33 @@ export function LanguageSelector({
 
       const detectedLanguage = languageMap[browserLang] || "English";
       setBrowserLanguage(detectedLanguage);
+
+      // If default language is not explicitly set, use browser language
+      if (
+        defaultLanguage === "English" &&
+        !window.localStorage.getItem("selectedLanguage")
+      ) {
+        setSelectedLanguage("Auto Detect");
+        onLanguageChange(detectedLanguage);
+      } else {
+        setSelectedLanguage(defaultLanguage);
+      }
     }
-  }, []);
+  }, [defaultLanguage, onLanguageChange]);
 
   // Handle language change
   const handleLanguageChange = (value: string) => {
     console.log("Language changed to:", value);
     setSelectedLanguage(value);
-    onLanguageChange(value);
+
+    // If Auto Detect is selected, use browser language
+    if (value === "Auto Detect") {
+      onLanguageChange(browserLanguage);
+      window.localStorage.removeItem("selectedLanguage");
+    } else {
+      onLanguageChange(value);
+      window.localStorage.setItem("selectedLanguage", value);
+    }
   };
 
   // Don't render the component until mounted to prevent hydration issues
@@ -99,10 +121,17 @@ export function LanguageSelector({
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select Language" />
         </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4} className="z-[100]">
-          {languages.map((language) => (
+        <SelectContent
+          position="popper"
+          sideOffset={4}
+          className="z-[100] max-h-[200px] overflow-y-auto"
+        >
+          <SelectItem key="auto-detect" value="Auto Detect">
+            Auto Detect
+          </SelectItem>
+          {sortedLanguages.map((language) => (
             <SelectItem key={language} value={language}>
-              {language} {language === browserLanguage && "(Browser Default)"}
+              {language}
             </SelectItem>
           ))}
         </SelectContent>
