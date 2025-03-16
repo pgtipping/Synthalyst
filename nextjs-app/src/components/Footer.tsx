@@ -50,7 +50,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gray-900 text-gray-300 transition-all duration-300 relative">
+    <footer className="bg-gray-900 text-gray-300 transition-all duration-300">
       {/* Compact Footer - Always visible */}
       <div className="container mx-auto px-4 py-2 flex justify-between items-center">
         <div className="flex items-center space-x-4">
@@ -99,7 +99,7 @@ export default function Footer() {
           <button
             onClick={toggleFooter}
             className="flex items-center justify-center p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
-            aria-expanded={isExpanded ? "true" : "false"}
+            aria-expanded="false"
             aria-label={isExpanded ? "Collapse footer" : "Expand footer"}
           >
             {isExpanded ? (
@@ -112,72 +112,101 @@ export default function Footer() {
       </div>
 
       {/* Expandable Footer Content */}
-      <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out absolute bottom-full left-0 right-0 bg-gray-900 ${
-          isExpanded
-            ? "max-h-96 opacity-100 translate-y-full"
-            : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="container mx-auto px-4 py-6 border-t border-gray-800">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            {/* Footer Links */}
-            {footerLinks.map((section) => (
-              <div key={section.title} className="col-span-1">
-                <h3 className="text-white font-semibold mb-3">
-                  {section.title}
-                </h3>
-                <ul className="space-y-2">
-                  {section.links.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-
-            {/* Newsletter Signup */}
-            <div className="col-span-2 mt-6 md:mt-0">
-              <h3 className="text-white font-semibold mb-3">
+      {isExpanded && (
+        <div className="border-t border-gray-800">
+          {/* Newsletter Signup - Centered at the top */}
+          <div className="container mx-auto px-4 py-6">
+            <div className="max-w-xl mx-auto mb-8">
+              <h3 className="text-white font-semibold mb-3 text-center">
                 Subscribe to our newsletter
               </h3>
-              <NewsletterSignup variant="minimal" className="max-w-md" />
+              <NewsletterSignup variant="minimal" className="w-full" />
             </div>
-          </div>
 
-          <div className="mt-6 pt-4 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-300 md:hidden">
-              © {currentYear} Synthalyst. All rights reserved.
-            </p>
-            <div className="mt-4 md:mt-0 flex space-x-6">
-              <Link
-                href="/terms"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                Terms of Service
-              </Link>
-              <Link
-                href="/privacy"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                href="/cookies"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                Cookie Policy
-              </Link>
+            {/* Footer Links */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {footerLinks.map((section) => (
+                <div key={section.title}>
+                  <h3 className="text-white font-semibold mb-3">
+                    {section.title}
+                  </h3>
+                  <ul className="space-y-2">
+                    {section.links.map((link) => (
+                      <li key={link.label}>
+                        <Link
+                          href={link.href}
+                          className="text-gray-400 hover:text-white transition-colors"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer Bottom */}
+            <div className="mt-8 pt-4 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+              <p className="text-gray-300 md:hidden">
+                © {currentYear} Synthalyst. All rights reserved.
+              </p>
+              <div className="mt-4 md:mt-0 flex space-x-6">
+                <Link
+                  href="/terms"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Terms of Service
+                </Link>
+                <Link
+                  href="/privacy"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+                <Link
+                  href="/cookies"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Cookie Policy
+                </Link>
+              </div>
+
+              {/* Social Icons - Also in expanded footer */}
+              <div className="mt-4 md:mt-0 flex space-x-4">
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Github className="h-5 w-5" />
+                  <span className="sr-only">GitHub</span>
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Twitter className="h-5 w-5" />
+                  <span className="sr-only">Twitter</span>
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Linkedin className="h-5 w-5" />
+                  <span className="sr-only">LinkedIn</span>
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Instagram className="h-5 w-5" />
+                  <span className="sr-only">Instagram</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </footer>
   );
 }
