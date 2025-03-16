@@ -248,6 +248,13 @@ export default function KnowledgeGPT() {
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%] p-3 rounded-lg bg-card border">
+                  <LoadingDots className="text-primary" />
+                </div>
+              </div>
+            )}
             <div ref={chatEndRef} />
           </div>
         )}
@@ -270,11 +277,7 @@ export default function KnowledgeGPT() {
             className="h-[60px]"
             disabled={!question.trim() || isLoading}
           >
-            {isLoading ? (
-              <LoadingDots className="text-primary-foreground" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
+            <Send className="h-5 w-5" />
           </Button>
         </div>
       </form>
