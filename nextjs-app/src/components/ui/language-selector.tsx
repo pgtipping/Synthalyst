@@ -101,10 +101,10 @@ export function LanguageSelector({
   // Don't render the component until mounted to prevent hydration issues
   if (!mounted) {
     return (
-      <div className={`flex items-center space-x-2 ${className}`}>
-        <Globe className="h-4 w-4 text-muted-foreground" />
-        <div className="w-[180px] h-9 border border-input rounded-md px-3 py-2 text-sm">
-          {selectedLanguage}
+      <div className={`flex items-center ${className}`}>
+        <div className="w-[180px] h-10 border border-input rounded-md px-3 py-2 text-sm flex items-center gap-2">
+          <Globe className="h-4 w-4 text-muted-foreground" />
+          <span>{selectedLanguage}</span>
         </div>
       </div>
     );
@@ -112,14 +112,16 @@ export function LanguageSelector({
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <Globe className="h-4 w-4 text-muted-foreground" />
       <Select
         defaultValue={selectedLanguage}
         value={selectedLanguage}
         onValueChange={handleLanguageChange}
       >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select Language" />
+        <SelectTrigger className="w-[180px] h-10">
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <SelectValue placeholder="Select Language" />
+          </div>
         </SelectTrigger>
         <SelectContent
           position="popper"

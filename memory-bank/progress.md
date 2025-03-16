@@ -30,6 +30,7 @@
 - Testing with Jest and React Testing Library
 - CI/CD with GitHub Actions
 - Web search integration with Google Custom Search API
+- PubMed API integration for medical knowledge
 
 ## What's Left to Build
 
@@ -49,6 +50,7 @@
 - API for third-party integrations
 - Advanced admin dashboard
 - Enhanced web search with better result filtering and source attribution
+- Improved conversational context for Medical Knowledge Assistant
 
 ## Current Status
 
@@ -78,6 +80,9 @@
 - Added evidence grading system for medical information based on study types
 - Implemented domain selection in Knowledge GPT for specialized knowledge areas
 - Created a unified interface for both general and medical knowledge
+- Fixed UI alignment issues with language and domain selectors on both desktop and mobile
+- Added PUBMED_API_KEY to environment variables for PubMed API integration
+- Updated tips section to inform users about limitations with conversational phrases
 
 ### In Progress
 
@@ -86,6 +91,7 @@
 - Implementing analytics for internal model usage tracking
 - Ensuring consistent "AI-powered" branding without revealing specific models
 - Refining web search integration for better results
+- Improving the Medical Knowledge Assistant's ability to maintain conversational context
 
 ### Known Issues
 
@@ -94,6 +100,7 @@
 - Need to optimize prompts for different AI capabilities
 - Need to ensure no model-specific information is leaked to the UI
 - Web search requires Google Custom Search API key and Search Engine ID configuration
+- Medical Knowledge Assistant treats conversational phrases as new medical queries
 
 ### UI Guidelines
 
@@ -101,6 +108,9 @@
 - Never display which specific models are being used
 - Focus on the quality of outputs rather than technical implementation details
 - Use generic terms like "AI model" instead of specific model names
+- Ensure consistent button heights and alignment for better mobile experience
+- Provide clear visual distinction between different knowledge domains
+- Include informative tips for users about how to interact with each domain
 
 ## What Works (March 16, 2025)
 
@@ -119,6 +129,7 @@
   - Domain selection for specialized knowledge (general, medical)
   - Previous questions history
   - Responsive design for all devices
+  - Properly aligned UI elements on both desktop and mobile
 
 - **Medical Knowledge Assistant**:
 
@@ -126,6 +137,7 @@
   - Evidence grading system based on study types
   - Citation formatting and source attribution
   - Responsive design for all devices
+  - Clear user guidance on interaction limitations
 
 - **Learning Content Creator**:
 
@@ -162,9 +174,15 @@
   - Tagging and categorization
 
 - **Collaboration Features**:
+
   - Shared workspaces
   - Team collaboration
   - Content sharing
+
+- **Medical Knowledge Enhancements**:
+  - Improved conversational context
+  - Additional medical data sources
+  - Enhanced evidence grading system
 
 ## Current Status (March 16, 2025)
 
@@ -178,6 +196,7 @@ The platform is stable and functional with the following features:
    - No longer displays model information in the UI
    - Includes domain selection for specialized knowledge areas
    - Medical domain with PubMed integration for evidence-based information
+   - Properly aligned UI elements for better user experience
 
 2. **Learning Content Creator**:
 
@@ -198,6 +217,10 @@ Added web search capability to Knowledge GPT to provide up-to-date information, 
 
 Integrated PubMed API to provide evidence-based medical information with proper citations and evidence grading, enhancing the value of the Knowledge GPT feature for health-related queries.
 
+Fixed UI alignment issues with language and domain selectors to ensure a consistent and professional appearance on both desktop and mobile devices.
+
+Added clear user guidance in the tips section to inform users about the limitations of the Medical Knowledge Assistant regarding conversational phrases.
+
 ## Known Issues (March 16, 2025)
 
 - Web search requires Google Custom Search API key and Search Engine ID configuration
@@ -207,3 +230,4 @@ Integrated PubMed API to provide evidence-based medical information with proper 
 - Performance optimization needed for large content generation
 - Mobile responsiveness needs improvement in some areas
 - Need to add more comprehensive testing
+- Medical Knowledge Assistant treats conversational phrases as new medical queries instead of maintaining context

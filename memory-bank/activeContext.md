@@ -42,6 +42,9 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Added citation formatting and source attribution for medical responses
    - Integrated medical knowledge as a domain within Knowledge GPT rather than a separate tool
    - Enhanced UI to display evidence levels and citations for medical responses
+   - Fixed UI alignment issues with language and domain selectors
+   - Added PUBMED_API_KEY to environment variables
+   - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
 ### Next Steps
 
@@ -53,6 +56,7 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
 6. **Web Search Enhancements**: Improve web search integration with better result filtering and source attribution.
 7. **Additional Specialized Domains**: Expand Knowledge GPT with more specialized domains (legal, financial, etc.).
 8. **Medical Knowledge Enhancements**: Add more medical data sources and improve evidence grading.
+9. **Conversational Context**: Improve the Medical Knowledge Assistant to maintain conversational context between queries.
 
 ### Active Decisions
 
@@ -87,3 +91,7 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Starting with medical knowledge as the first specialized domain
    - Using a unified interface with domain selection
    - Adapting the UI based on the selected domain
+8. **UI Improvements**:
+   - Consistent button heights and alignment for better mobile experience
+   - Clear visual distinction between different knowledge domains
+   - Informative tips for users about how to interact with each domain

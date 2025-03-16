@@ -17,7 +17,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 
 // Define the KNOWLEDGE_MODEL constant
@@ -249,11 +248,12 @@ export default function KnowledgeGPT() {
         </p>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             <LanguageSelector
               modelType={KNOWLEDGE_MODEL}
               onLanguageChange={handleLanguageChange}
               defaultLanguage={selectedLanguage}
+              className="h-10"
             />
 
             <Select
@@ -262,15 +262,21 @@ export default function KnowledgeGPT() {
                 handleDomainChange(value as KnowledgeDomain)
               }
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select domain" />
+              <SelectTrigger className="w-[180px] h-10">
+                <div className="flex items-center gap-2">
+                  {selectedDomain === "general" ? null : (
+                    <HeartPulse className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span>
+                    {selectedDomain === "general"
+                      ? "General Knowledge"
+                      : "Medical Knowledge"}
+                  </span>
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="general">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
-                    <span>General Knowledge</span>
-                  </div>
+                  <span>General Knowledge</span>
                 </SelectItem>
                 <SelectItem value="medical">
                   <div className="flex items-center gap-2">
@@ -287,7 +293,7 @@ export default function KnowledgeGPT() {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 h-10"
                 onClick={() => setWebSearchEnabled(!webSearchEnabled)}
               >
                 {webSearchEnabled ? (
@@ -307,7 +313,7 @@ export default function KnowledgeGPT() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 h-10"
                   disabled
                 >
                   <Globe2 className="h-4 w-4 text-muted-foreground" />
@@ -352,6 +358,11 @@ export default function KnowledgeGPT() {
                         Remember that this is not a substitute for professional
                         medical advice
                       </li>
+                      <li>
+                        Only ask direct questions - conversational phrases like
+                        &quot;hello&quot; or &quot;thank you&quot; will be
+                        treated as new queries
+                      </li>
                     </ul>
                   ) : (
                     <ul className="text-sm text-blue-600 mt-2 list-disc pl-5 space-y-1">
@@ -360,6 +371,11 @@ export default function KnowledgeGPT() {
                       <li>
                         Try educational topics, current events, or general
                         knowledge questions
+                      </li>
+                      <li>
+                        Only ask direct questions - conversational phrases like
+                        &quot;hello&quot; or &quot;thank you&quot; will be
+                        treated as new queries
                       </li>
                       <li>Toggle web search for up-to-date information</li>
                       <li>Press Enter to send your message quickly</li>
