@@ -2554,3 +2554,72 @@ const limiter = new Ratelimit({
 - Provide fallback UI states when data is missing or loading
 - Ensure consistent button heights and alignment
 - Use responsive design for all components, especially admin interfaces
+
+## React Error Handling Pattern for Asynchronously Loaded Data (March 16, 2025)
+
+When working with asynchronously loaded data in React components, it's important to implement proper error handling to prevent "Cannot read properties of undefined" errors. Here's the pattern we've established:
+
+1. **Conditional Rendering**: Always wrap UI elements that depend on asynchronously loaded data in conditional checks.
+
+```jsx
+{
+  historyPagination && (
+    <div className="pagination-controls">
+      {/* Pagination controls that use historyPagination */}
+    </div>
+  );
+}
+```
+
+2. **Default Values**: Initialize state variables with sensible default values that match the expected structure.
+
+```jsx
+const [historyPagination, setHistoryPagination] = useState({
+  page: 1,
+  limit: 10,
+  total: 0,
+  totalPages: 1,
+});
+```
+
+3. **Optional Chaining and Nullish Coalescing**: Use optional chaining and nullish coalescing operators to handle potentially undefined values.
+
+```jsx
+<span>{historyPagination?.totalPages || 1}</span>
+```
+
+4. **API Response Structure**: Ensure API response structures match frontend expectations. When modifying API responses, update all places where the data is used.
+
+```jsx
+// API response
+return NextResponse.json({
+  history: formattedHistory,
+  pagination: {
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  },
+});
+
+// Frontend usage
+setHistory(data.history);
+setHistoryPagination(data.pagination);
+```
+
+5. **Error Handling in API Calls**: Implement try-catch blocks for all API calls with appropriate fallbacks.
+
+```jsx
+try {
+  const response = await fetch("/api/endpoint");
+  const data = await response.json();
+  // Process data
+} catch (error) {
+  console.error("Error fetching data:", error);
+  // Set default values or show error message
+} finally {
+  // Clean up (e.g., set loading state to false)
+}
+```
+
+This pattern helps prevent runtime errors and provides a better user experience by gracefully handling cases where data might not be available yet.

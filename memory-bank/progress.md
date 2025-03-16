@@ -151,6 +151,9 @@
 - Fixed issue where mock subscribers weren't being stored in the database
 - Added proper error handling for database operations in newsletter subscription system
 - Enhanced logging for subscription and confirmation processes
+- Fixed "Cannot read properties of undefined (reading 'totalPages')" error in the newsletter admin page
+- Added conditional rendering for pagination controls to prevent errors when data is loading
+- Updated API response structure to match frontend expectations by wrapping pagination properties in a pagination object
 
 ### In Progress
 
@@ -191,6 +194,8 @@
 - Implement consistent styling across all admin pages
 - Ensure all SelectItem components have non-empty values to prevent errors
 - Provide fallback UI states when data is missing or loading
+- Use conditional rendering for UI elements that depend on asynchronously loaded data
+- Implement null checks and default values to prevent "Cannot read properties of undefined" errors
 
 ## What Works (March 16, 2025)
 
@@ -218,6 +223,8 @@
   - Default values for all data variables to prevent undefined errors
   - Comprehensive error handling for authentication and database operations
   - NextJS 15 compatibility with proper async params handling
+  - Conditional rendering for UI elements that depend on asynchronously loaded data
+  - Null checks and default values to prevent "Cannot read properties of undefined" errors
 
 - **Knowledge GPT**:
 

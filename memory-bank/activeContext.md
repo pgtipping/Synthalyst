@@ -66,6 +66,9 @@ The current focus is on optimizing the application's backend services, particula
    - Fixed issue where mock subscribers weren't being stored in the database
    - Added proper error handling for database operations
    - Enhanced logging for subscription and confirmation processes
+   - Fixed "Cannot read properties of undefined (reading 'totalPages')" error in the newsletter admin page
+   - Added conditional rendering for pagination controls to prevent errors when data is loading
+   - Updated API response structure to match frontend expectations by wrapping pagination properties in a pagination object
 
 7. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
 
@@ -178,6 +181,8 @@ The current focus is on optimizing the application's backend services, particula
    - Ensuring robust error handling for all API calls
    - Providing fallback UI states when data is missing or loading
    - Returning 200 status with error details instead of 500 errors for better client handling
+   - Adding conditional rendering for UI elements that depend on asynchronously loaded data
+   - Using null checks and default values to prevent "Cannot read properties of undefined" errors
 
 3. **Feedback System**:
 
@@ -217,6 +222,7 @@ The current focus is on optimizing the application's backend services, particula
    - Improved error handling with try-catch blocks for all API calls
    - Added PubMed API integration for medical knowledge
    - Implemented fallbacks for missing or undefined data
+   - Ensured API response structures match frontend expectations
 
 9. **Web Search Integration**:
 
@@ -237,6 +243,8 @@ The current focus is on optimizing the application's backend services, particula
     - Clear visual distinction between different knowledge domains
     - Informative tips for users about how to interact with each domain
     - Robust error handling in UI components to prevent crashes
+    - Conditional rendering for UI elements that depend on asynchronously loaded data
+    - Using null checks and default values to prevent "Cannot read properties of undefined" errors
 
 12. **Error Handling Strategy**:
 
@@ -248,21 +256,5 @@ The current focus is on optimizing the application's backend services, particula
     - Ensuring non-empty values for required component props
     - Verifying table existence before executing database queries
     - Initializing default values for all data variables to prevent undefined errors
-
-13. **Redis Monitoring Strategy**:
-
-    - Checking data types before parsing JSON to prevent errors
-    - Using string format for rate limiting duration as per Upstash documentation
-    - Making authorization optional in development environment
-    - Returning 200 status with error details instead of 500 errors
-    - Providing fallback UI when Redis is not configured
-    - Adding reset functionality for metrics and cache
-    - Implementing comprehensive error handling for Redis operations
-
-14. **NextJS 15 Compatibility Strategy**:
-    - Updating dynamic route parameters to use Promise type for params
-    - Properly awaiting params object before accessing its properties
-    - Using the correct pattern for App Router API routes with dynamic parameters
-    - Ensuring type safety with proper TypeScript definitions
-    - Adding appropriate error handling for asynchronous operations
-    - Following Next.js 15 best practices for API routes
+    - Adding conditional rendering for UI elements that depend on asynchronously loaded data
+    - Using optional chaining and nullish coalescing operators to handle potentially undefined values

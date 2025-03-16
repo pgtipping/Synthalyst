@@ -1180,36 +1180,42 @@ export default function NewsletterAdmin() {
                     </Table>
                   </div>
 
-                  <div className="flex justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
-                      disabled={historyPage === 1}
-                    >
-                      Previous
-                    </Button>
-                    <div className="flex items-center gap-1 text-sm">
-                      <span>Page</span>
-                      <span className="font-medium">{historyPage}</span>
-                      <span>of</span>
-                      <span className="font-medium">
-                        {historyPagination.totalPages}
-                      </span>
+                  {historyPagination && (
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setHistoryPage((p) => Math.max(1, p - 1))
+                        }
+                        disabled={historyPage === 1}
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex items-center gap-1 text-sm">
+                        <span>Page</span>
+                        <span className="font-medium">{historyPage}</span>
+                        <span>of</span>
+                        <span className="font-medium">
+                          {historyPagination.totalPages || 1}
+                        </span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setHistoryPage((p) =>
+                            Math.min(historyPagination.totalPages || 1, p + 1)
+                          )
+                        }
+                        disabled={
+                          historyPage === (historyPagination.totalPages || 1)
+                        }
+                      >
+                        Next
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setHistoryPage((p) =>
-                          Math.min(historyPagination.totalPages, p + 1)
-                        )
-                      }
-                      disabled={historyPage === historyPagination.totalPages}
-                    >
-                      Next
-                    </Button>
-                  </div>
+                  )}
                 </div>
               )}
             </CardContent>

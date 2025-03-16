@@ -58,10 +58,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       history: formattedHistory,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error("Error fetching newsletter history:", error);
