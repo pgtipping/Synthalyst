@@ -2317,3 +2317,83 @@ When working with audio components in the application:
    - Implement fallbacks for missing or undefined data
    - Use try-catch blocks for all operations that might fail
    - Provide default values for all variables
+
+# Cursor Rules
+
+## Redis Monitoring Implementation (March 16, 2025)
+
+### Redis Monitoring API Endpoint
+
+The Redis monitoring API endpoint is implemented in `nextjs-app/src/app/api/monitoring/redis/route.ts`. This endpoint provides metrics about Redis usage, including cache statistics and rate limiting information. Key implementation details:
+
+1. **Error Handling**:
+
+   - The endpoint checks if Redis is configured before attempting to access it
+   - Returns a 200 status with error details in the response body instead of a 500 error
+   - Uses try-catch blocks around Redis operations to prevent crashes
+   - Makes authorization optional in development environment
+
+2. **Data Type Handling**:
+
+   - Checks if data is already an object before attempting to parse it as JSON
+   - Uses type guards to prevent "not valid JSON" errors
+   - Handles both string and object data types appropriately
+
+3. **Rate Limiting**:
+
+   - Uses Upstash Ratelimit library with string format for duration (e.g., "60 s")
+   - Implements error handling for rate limiting failures
+   - Allows the application to continue functioning even if rate limiting fails
+
+4. **Metrics Collection**:
+
+   - Gathers metrics from redisMonitor, redisCache, and rateLimit services
+   - Calculates cache hit rates and other performance metrics
+   - Provides reset functionality for metrics, cache, and rate limits
+
+5. **Response Format**:
+   - Returns a standardized response format with success status and data
+   - Includes error details when operations fail
+   - Provides comprehensive monitoring data for the admin dashboard
+
+### Redis Monitoring Component
+
+The Redis monitoring component is implemented in `nextjs-app/src/components/admin/RedisMonitoring.tsx`. Key implementation details:
+
+1. **Error Handling**:
+
+   - Uses optional chaining to handle null or undefined values
+   - Provides fallback UI when Redis is not configured
+   - Displays error messages when operations fail
+
+2. **UI Features**:
+
+   - Displays cache hit rates and other performance metrics
+   - Provides buttons to reset metrics, cache, and rate limits
+   - Uses responsive design for mobile compatibility
+
+3. **Data Fetching**:
+   - Implements polling to update metrics at regular intervals
+   - Handles loading and error states appropriately
+   - Uses SWR for data fetching with automatic revalidation
+
+### Rate Limiting Implementation
+
+The rate limiting implementation is in `nextjs-app/src/lib/rate-limit.ts`. Key implementation details:
+
+1. **Configuration**:
+
+   - Uses Upstash Ratelimit library for Redis-based rate limiting
+   - Configures sliding window duration using string format (e.g., "60 s")
+   - Implements error tracking and monitoring
+
+2. **Error Handling**:
+
+   - Uses try-catch blocks to handle rate limiting failures
+   - Provides fallback behavior when rate limiting fails
+   - Logs errors for monitoring and debugging
+
+3. **Integration**:
+   - Integrates with the monitoring system to provide rate limiting metrics
+   - Supports reset functionality for rate limits
+   - Configurable limits based on environment and endpoint

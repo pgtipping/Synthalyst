@@ -2,7 +2,7 @@
 
 ## Current Focus (March 16, 2025)
 
-The current focus is on optimizing the application's backend services, particularly email handling and feedback processing. We're also enhancing the admin dashboard with new monitoring capabilities for email logs. These optimizations aim to improve performance, reliability, and maintainability of the platform.
+The current focus is on optimizing the application's backend services, particularly email handling, feedback processing, and admin monitoring capabilities. We're enhancing the admin dashboard with robust monitoring features and fixing critical errors in the Redis monitoring functionality. These optimizations aim to improve performance, reliability, and maintainability of the platform.
 
 ### Recent Changes
 
@@ -33,38 +33,51 @@ The current focus is on optimizing the application's backend services, particula
    - Updated admin navigation to include the Email Logs page
    - Created a responsive `AdminLayout` component with mobile support
 
-4. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+4. **Admin Monitoring Fixes** (March 16, 2025):
 
-5. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+   - Fixed Redis monitoring functionality in the admin dashboard
+   - Resolved JSON parsing errors in the Redis monitor by adding type checking
+   - Fixed rate limiting errors by using the correct string format for duration
+   - Added better error handling for Redis connection issues
+   - Made authorization optional for development environment
+   - Improved error responses to return 200 status with error details instead of 500
+   - Enhanced the RedisMonitoring component to handle null values properly
+   - Added a reset metrics button to the monitoring UI
+   - Fixed TypeScript errors in the rate-limit library
+   - Added proper type definitions for LRU cache
 
-6. **Model Router Updates**:
+5. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+
+6. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+
+7. **Model Router Updates**:
 
    - Added a new `generateContentV2` function with improved parameter handling
    - Updated the API route to use the new function
    - Standardized language support across models
    - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 
-7. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
+8. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
 
-8. **Knowledge GPT Web Search Integration**:
+9. **Knowledge GPT Web Search Integration**:
 
    - Added web search capability to provide up-to-date information
    - Implemented Google Custom Search API integration
    - Updated system prompts to include current information
    - Enhanced UI to inform users about web search capability
 
-9. **Knowledge GPT Improvements** (March 16, 2025):
+10. **Knowledge GPT Improvements** (March 16, 2025):
 
-   - Updated loading animation to use three dots instead of spinning icon
-   - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
-   - Added client-side formatting to properly render bold text and lists
-   - Added web search toggle button to let users control when web search is used
-   - Updated UI to clearly indicate when web search is enabled or disabled
-   - Modified API to respect user preference for web search
-   - Simplified web search logic by removing automatic detection in favor of explicit user control
-   - Moved loading animation to appear in chat window instead of on send button
+    - Updated loading animation to use three dots instead of spinning icon
+    - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
+    - Added client-side formatting to properly render bold text and lists
+    - Added web search toggle button to let users control when web search is used
+    - Updated UI to clearly indicate when web search is enabled or disabled
+    - Modified API to respect user preference for web search
+    - Simplified web search logic by removing automatic detection in favor of explicit user control
+    - Moved loading animation to appear in chat window instead of on send button
 
-10. **Language Selector Improvements** (March 16, 2025):
+11. **Language Selector Improvements** (March 16, 2025):
 
     - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
     - Included English in the dropdown list
@@ -73,7 +86,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added local storage to remember user language preferences
     - Improved browser language detection and handling
 
-11. **Medical Knowledge Integration** (March 16, 2025):
+12. **Medical Knowledge Integration** (March 16, 2025):
 
     - Added PubMed API integration for evidence-based medical information
     - Implemented evidence grading system based on study types
@@ -85,7 +98,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added PUBMED_API_KEY to environment variables
     - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
-12. **Admin Pages Error Handling Improvements** (March 16, 2025):
+13. **Admin Pages Error Handling Improvements** (March 16, 2025):
 
     - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
     - Changed empty values to "all" in SelectItem components to prevent errors
@@ -99,7 +112,7 @@ The current focus is on optimizing the application's backend services, particula
     - Implemented fallback to empty arrays when data is missing or undefined
     - Added try-catch blocks for API calls to handle errors independently
 
-13. **Admin Page Database Checks** (March 16, 2025):
+14. **Admin Page Database Checks** (March 16, 2025):
     - Added SQL queries to check if tables exist before attempting to query them
     - Used `information_schema.tables` to verify table existence in the database
     - Implemented default values for all data variables to prevent undefined errors
@@ -127,7 +140,6 @@ The current focus is on optimizing the application's backend services, particula
 12. **Medical Knowledge Enhancements**: Add more medical data sources and improve evidence grading.
 13. **Conversational Context**: Improve the Medical Knowledge Assistant to maintain conversational context between queries.
 14. **Systematic Error Handling**: Implement a more proactive approach to error detection and resolution across all admin pages.
-15. **Redis Monitoring Fix**: Resolve 500 errors in the Redis monitoring page.
 
 ### Active Decisions
 
@@ -143,6 +155,8 @@ The current focus is on optimizing the application's backend services, particula
    - Implementing a sidebar navigation for easy access to different admin sections
    - Using a card-based layout for statistics and data visualization
    - Ensuring robust error handling for all API calls
+   - Providing fallback UI states when data is missing or loading
+   - Returning 200 status with error details instead of 500 errors for better client handling
 
 3. **Feedback System**:
 
@@ -204,6 +218,7 @@ The current focus is on optimizing the application's backend services, particula
     - Robust error handling in UI components to prevent crashes
 
 12. **Error Handling Strategy**:
+
     - Implementing try-catch blocks for all API calls
     - Providing fallback values when data is missing or undefined
     - Adding specific error messages for different failure scenarios
@@ -212,3 +227,12 @@ The current focus is on optimizing the application's backend services, particula
     - Ensuring non-empty values for required component props
     - Verifying table existence before executing database queries
     - Initializing default values for all data variables to prevent undefined errors
+
+13. **Redis Monitoring Strategy**:
+    - Checking data types before parsing JSON to prevent errors
+    - Using string format for rate limiting duration as per Upstash documentation
+    - Making authorization optional in development environment
+    - Returning 200 status with error details instead of 500 errors
+    - Providing fallback UI when Redis is not configured
+    - Adding reset functionality for metrics and cache
+    - Implementing comprehensive error handling for Redis operations

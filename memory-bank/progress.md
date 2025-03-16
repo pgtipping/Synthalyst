@@ -324,3 +324,62 @@ Added clear user guidance in the tips section to inform users about the limitati
 Created a unified email service with comprehensive logging to track all email activities, improving reliability and maintainability of the platform's communication features.
 
 Implemented a responsive admin dashboard for email logs with filtering, statistics, and pagination, enhancing the platform's monitoring capabilities.
+
+## Recent Fixes (March 16, 2025)
+
+1. **Redis Monitoring Fixes**:
+
+   - Fixed JSON parsing errors in the Redis monitor by adding type checking for data that is already an object
+   - Resolved rate limiting errors by using the correct string format for duration (e.g., "60 s") as per Upstash documentation
+   - Added better error handling for Redis connection issues
+   - Made authorization optional for development environment
+   - Improved error responses to return 200 status with error details instead of 500
+   - Enhanced the RedisMonitoring component to handle null values properly
+   - Added a reset metrics button to the monitoring UI
+   - Fixed TypeScript errors in the rate-limit library
+   - Added proper type definitions for LRU cache
+
+2. **Admin Page Error Handling**:
+
+   - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
+   - Changed empty values to "all" in SelectItem components to prevent errors
+   - Updated filter logic to handle the new "all" value correctly
+   - Fixed TypeScript errors in PostList component by making initialPosts optional
+   - Fixed blog analytics route by properly typing the \_count property
+   - Updated user queries in email-logs route to include the email field
+   - Enhanced error handling in API routes for more robust operation
+   - Improved type safety throughout the codebase
+   - Added error handling for cases where database models might not exist yet
+   - Implemented fallback to empty arrays when data is missing or undefined
+   - Added try-catch blocks for API calls to handle errors independently
+
+3. **Knowledge GPT Improvements**:
+
+   - Updated loading animation to use three dots instead of spinning icon
+   - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
+   - Added client-side formatting to properly render bold text and lists
+   - Added web search toggle button to let users control when web search is used
+   - Updated UI to clearly indicate when web search is enabled or disabled
+   - Modified API to respect user preference for web search
+   - Simplified web search logic by removing automatic detection in favor of explicit user control
+   - Moved loading animation to appear in chat window instead of on send button
+
+4. **Language Selector Enhancements**:
+
+   - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
+   - Included English in the dropdown list
+   - Made the dropdown scrollable with max height
+   - Sorted languages alphabetically for easier navigation
+   - Added local storage to remember user language preferences
+   - Improved browser language detection and handling
+
+5. **Medical Knowledge Integration**:
+   - Added PubMed API integration for evidence-based medical information
+   - Implemented evidence grading system based on study types
+   - Created domain selection in Knowledge GPT for specialized knowledge areas
+   - Added citation formatting and source attribution for medical responses
+   - Integrated medical knowledge as a domain within Knowledge GPT rather than a separate tool
+   - Enhanced UI to display evidence levels and citations for medical responses
+   - Fixed UI alignment issues with language and domain selectors
+   - Added PUBMED_API_KEY to environment variables
+   - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
