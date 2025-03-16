@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { DeleteSubmissionButton } from "./DeleteSubmissionButton";
 import { formatDistanceToNow } from "date-fns";
+import React from "react";
 
 interface ContactSubmission {
   id: string;
@@ -171,8 +172,8 @@ export default function ContactSubmissionsList({
             </TableRow>
           ) : (
             submissions.map((submission) => (
-              <>
-                <TableRow key={submission.id} className="hover:bg-gray-50">
+              <React.Fragment key={submission.id}>
+                <TableRow className="hover:bg-gray-50">
                   <TableCell>
                     <div className="font-medium">{submission.name}</div>
                     <div className="text-sm text-gray-500">
@@ -282,7 +283,7 @@ export default function ContactSubmissionsList({
                     </TableCell>
                   </TableRow>
                 )}
-              </>
+              </React.Fragment>
             ))
           )}
         </TableBody>

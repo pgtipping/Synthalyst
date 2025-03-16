@@ -65,26 +65,46 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const skip = (page - 1) * limit;
 
-    // Only allow authenticated admin users to access email logs
+    // Check if user is authenticated and is admin
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session) {
       return NextResponse.json(
-        { error: "Authentication required" },
+        { error: "Unauthorized: Authentication required" },
         { status: 401 }
       );
     }
 
-    // Check if user is an admin
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { role: true },
+      where: { id: session.user.id },
+      select: { role: true, email: true },
     });
 
-    if (user?.role !== "ADMIN") {
+    if (user?.role !== "ADMIN" && user?.email !== "pgtipping1@gmail.com") {
       return NextResponse.json(
-        { error: "Unauthorized access" },
+        { error: "Unauthorized: Admin access required" },
         { status: 403 }
       );
+    }
+
+    // Check if EmailLog model exists in the database
+    try {
+      // Try to access the model to see if it exists
+      // This will throw an error if the model doesn't exist
+      await prisma.$queryRaw`SELECT 1 FROM "EmailLog" LIMIT 1`;
+    } catch (error) {
+      // If the model doesn't exist, return empty data
+      logger.warn("EmailLog table does not exist yet", error);
+      return NextResponse.json({
+        logs: [],
+        pagination: {
+          total: 0,
+          page,
+          limit,
+          pages: 0,
+        },
+        stats: [],
+        categoryStats: [],
+      });
     }
 
     // Build where clause based on filters
@@ -153,24 +173,35 @@ export async function DELETE(request: NextRequest) {
   try {
     // Only allow authenticated admin users to delete email logs
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session) {
       return NextResponse.json(
-        { error: "Authentication required" },
+        { error: "Unauthorized: Authentication required" },
         { status: 401 }
       );
     }
 
-    // Check if user is an admin
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { role: true },
+      where: { id: session.user.id },
+      select: { role: true, email: true },
     });
 
-    if (user?.role !== "ADMIN") {
+    if (user?.role !== "ADMIN" && user?.email !== "pgtipping1@gmail.com") {
       return NextResponse.json(
-        { error: "Unauthorized access" },
+        { error: "Unauthorized: Admin access required" },
         { status: 403 }
       );
+    }
+
+    // Check if EmailLog model exists in the database
+    try {
+      // Try to access the model to see if it exists
+      await prisma.$queryRaw`SELECT 1 FROM "EmailLog" LIMIT 1`;
+    } catch (error) {
+      // If the model doesn't exist, return a message
+      logger.warn("EmailLog table does not exist yet", error);
+      return NextResponse.json({
+        message: "No email logs to delete (table does not exist yet)",
+      });
     }
 
     // Get request body

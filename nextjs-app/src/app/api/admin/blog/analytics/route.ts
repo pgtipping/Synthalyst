@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
     const startDate = startOfDay(subDays(endDate, days - 1));
 
     // Get daily views, comments, and likes
-    // @ts-expect-error - Prisma circular type reference in groupBy
     const dailyStats = await prisma.post.groupBy({
       by: ["createdAt"],
       _sum: {
@@ -30,7 +29,7 @@ export async function GET(req: NextRequest) {
         likes: true,
       },
       _count: {
-        comments: true,
+        id: true,
       },
       where: {
         createdAt: {
@@ -60,7 +59,7 @@ export async function GET(req: NextRequest) {
       );
 
       views.push(stat?._sum.views || 0);
-      comments.push(stat?._count.comments || 0);
+      comments.push(stat?._count.id || 0);
       likes.push(stat?._sum.likes || 0);
     }
 

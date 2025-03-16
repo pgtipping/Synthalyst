@@ -59,7 +59,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    if (session.user.role !== "admin") {
+    if (
+      session.user.role !== "ADMIN" &&
+      session.user.email !== "pgtipping1@gmail.com"
+    ) {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }

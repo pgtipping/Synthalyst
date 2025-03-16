@@ -96,23 +96,65 @@ export default function UnifiedCommunicationsPage() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+
+      // Initialize arrays to store data from each API
+      let contactSubmissions: ContactSubmission[] = [];
+      let newsletterReplies: NewsletterReply[] = [];
+      let inboundEmails: InboundEmail[] = [];
+
       try {
         // Fetch contact submissions
-        const contactRes = await fetch("/api/admin/contact-submissions");
-        const contactData = await contactRes.json();
+        try {
+          const contactRes = await fetch("/api/admin/contact-submissions");
+          if (contactRes.ok) {
+            const contactData = await contactRes.json();
+            contactSubmissions = contactData.data || [];
+          } else {
+            console.error(
+              "Failed to fetch contact submissions:",
+              contactRes.statusText
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching contact submissions:", error);
+        }
 
         // Fetch newsletter replies
-        const newsletterRes = await fetch("/api/admin/newsletter/replies");
-        const newsletterData = await newsletterRes.json();
+        try {
+          const newsletterRes = await fetch("/api/admin/newsletter/replies");
+          if (newsletterRes.ok) {
+            const newsletterData = await newsletterRes.json();
+            newsletterReplies = newsletterData.data || [];
+          } else {
+            console.error(
+              "Failed to fetch newsletter replies:",
+              newsletterRes.statusText
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching newsletter replies:", error);
+        }
 
         // Fetch inbound emails
-        const emailRes = await fetch("/api/admin/inbound-emails");
-        const emailData = await emailRes.json();
+        try {
+          const emailRes = await fetch("/api/admin/inbound-emails");
+          if (emailRes.ok) {
+            const emailData = await emailRes.json();
+            inboundEmails = emailData.data || [];
+          } else {
+            console.error(
+              "Failed to fetch inbound emails:",
+              emailRes.statusText
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching inbound emails:", error);
+        }
 
         // Transform and combine the data
         const unified: UnifiedMessage[] = [
           // Map contact submissions
-          ...contactData.data.map((item: ContactSubmission) => ({
+          ...contactSubmissions.map((item: ContactSubmission) => ({
             id: `contact-${item.id}`,
             type: "contact" as const,
             subject: item.subject,
@@ -126,7 +168,7 @@ export default function UnifiedCommunicationsPage() {
           })),
 
           // Map newsletter replies
-          ...newsletterData.data.map((item: NewsletterReply) => ({
+          ...newsletterReplies.map((item: NewsletterReply) => ({
             id: `newsletter-${item.id}`,
             type: "newsletter" as const,
             subject: item.newsletterSubject || "Newsletter Reply",
@@ -140,7 +182,7 @@ export default function UnifiedCommunicationsPage() {
           })),
 
           // Map inbound emails
-          ...emailData.data.map((item: InboundEmail) => ({
+          ...inboundEmails.map((item: InboundEmail) => ({
             id: `email-${item.id}`,
             type: "email" as const,
             subject: item.subject,
@@ -157,7 +199,7 @@ export default function UnifiedCommunicationsPage() {
         setUnifiedMessages(unified);
         setFilteredMessages(unified);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error processing communications data:", error);
       } finally {
         setIsLoading(false);
       }

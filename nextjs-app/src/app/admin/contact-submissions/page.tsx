@@ -19,7 +19,10 @@ export default async function AdminContactSubmissionsPage() {
   }
 
   // Check if user has admin role
-  if (session.user.role !== "admin") {
+  if (
+    session.user.role !== "ADMIN" &&
+    session.user.email !== "pgtipping1@gmail.com"
+  ) {
     redirect("/");
   }
 

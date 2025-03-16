@@ -63,11 +63,19 @@ export default function AppFeedbackPage({ params }: AppFeedbackPageProps) {
       redirect("/login");
     }
 
-    if (status === "authenticated" && session?.user?.role !== "admin") {
+    if (
+      status === "authenticated" &&
+      session?.user?.role !== "ADMIN" &&
+      session?.user?.email !== "pgtipping1@gmail.com"
+    ) {
       redirect("/");
     }
 
-    if (status === "authenticated" && session?.user?.role === "admin") {
+    if (
+      status === "authenticated" &&
+      (session?.user?.role === "ADMIN" ||
+        session?.user?.email === "pgtipping1@gmail.com")
+    ) {
       fetchFeedback();
     }
   }, [status, session, decodedAppName]);

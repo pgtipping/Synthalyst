@@ -120,11 +120,11 @@ export default function EmailLogsPage() {
       queryParams.append("page", pagination.page.toString());
       queryParams.append("limit", pagination.limit.toString());
 
-      if (statusFilter) {
+      if (statusFilter && statusFilter !== "all") {
         queryParams.append("status", statusFilter);
       }
 
-      if (categoryFilter) {
+      if (categoryFilter && categoryFilter !== "all") {
         queryParams.append("category", categoryFilter);
       }
 
@@ -133,17 +133,36 @@ export default function EmailLogsPage() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch email logs");
+        console.error(
+          "API returned error status:",
+          response.status,
+          response.statusText
+        );
+        toast.error(
+          `Error: ${response.statusText || "Failed to fetch email logs"}`
+        );
+        setLogs([]);
+        setPagination({ ...pagination, total: 0, pages: 0 });
+        setStats([]);
+        setCategoryStats([]);
+        return;
       }
 
       const data = await response.json();
-      setLogs(data.logs);
-      setPagination(data.pagination);
-      setStats(data.stats);
-      setCategoryStats(data.categoryStats);
+
+      // Handle case where data might be missing
+      setLogs(data.logs || []);
+      setPagination(data.pagination || { ...pagination, total: 0, pages: 0 });
+      setStats(data.stats || []);
+      setCategoryStats(data.categoryStats || []);
     } catch (error) {
-      toast.error("Failed to load email logs");
       console.error("Error fetching email logs:", error);
+      toast.error("Failed to load email logs");
+      // Set default values on error
+      setLogs([]);
+      setPagination({ ...pagination, total: 0, pages: 0 });
+      setStats([]);
+      setCategoryStats([]);
     } finally {
       setLoading(false);
     }
@@ -347,7 +366,7 @@ export default function EmailLogsPage() {
                           <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Statuses</SelectItem>
+                          <SelectItem value="all">All Statuses</SelectItem>
                           <SelectItem value="sent">Sent</SelectItem>
                           <SelectItem value="failed">Failed</SelectItem>
                           <SelectItem value="pending">Pending</SelectItem>
@@ -365,7 +384,7 @@ export default function EmailLogsPage() {
                           <SelectValue placeholder="Filter by category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Categories</SelectItem>
+                          <SelectItem value="all">All Categories</SelectItem>
                           {categoryStats.map((stat) => (
                             <SelectItem
                               key={stat.category}

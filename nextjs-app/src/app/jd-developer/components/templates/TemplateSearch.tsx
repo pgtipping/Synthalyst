@@ -51,7 +51,13 @@ export function TemplateSearch({
     key: keyof TemplateFilters,
     value: string | boolean
   ) => {
-    const newFilters = { ...filters, [key]: value };
+    // Convert "all" values to undefined for industry and level filters
+    let processedValue: string | boolean | undefined = value;
+    if ((key === "industry" || key === "level") && value === "all") {
+      processedValue = undefined;
+    }
+
+    const newFilters = { ...filters, [key]: processedValue };
     setFilters(newFilters);
     onSearch(newFilters);
   };
@@ -73,7 +79,7 @@ export function TemplateSearch({
             <SelectValue placeholder="Industry" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Industries</SelectItem>
+            <SelectItem value="all">All Industries</SelectItem>
             {industries.map((industry) => (
               <SelectItem key={industry} value={industry}>
                 {industry}
@@ -89,7 +95,7 @@ export function TemplateSearch({
             <SelectValue placeholder="Level" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Levels</SelectItem>
+            <SelectItem value="all">All Levels</SelectItem>
             {levels.map((level) => (
               <SelectItem key={level} value={level}>
                 {level}

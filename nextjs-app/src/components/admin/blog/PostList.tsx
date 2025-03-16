@@ -32,11 +32,14 @@ interface ExtendedPost extends Post {
 }
 
 interface PostListProps {
-  initialPosts: ExtendedPost[];
+  initialPosts?: ExtendedPost[];
   totalPosts: number;
 }
 
-export default function PostList({ initialPosts, totalPosts }: PostListProps) {
+export default function PostList({
+  initialPosts = [],
+  totalPosts,
+}: PostListProps) {
   const [posts, setPosts] = useState<ExtendedPost[]>(initialPosts);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
