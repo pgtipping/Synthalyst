@@ -19,10 +19,10 @@ export const rateLimit = {
       const endpoint = new URL(request.url).pathname;
 
       // Create a new ratelimiter for this specific limit/window
+      // Use string format for duration as per Upstash documentation
       const customLimiter = new Ratelimit({
         redis,
-        // @ts-expect-error - Upstash types are incorrect, this works at runtime
-        limiter: Ratelimit.slidingWindow(limit, { seconds: windowInSeconds }),
+        limiter: Ratelimit.slidingWindow(limit, `${windowInSeconds} s`),
         analytics: true,
         prefix: `rate_limit_${endpoint}`,
       });

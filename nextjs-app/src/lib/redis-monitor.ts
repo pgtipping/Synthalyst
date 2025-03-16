@@ -80,6 +80,11 @@ class RedisMonitor {
       // Safely parse error JSON
       const parsedErrors = errors.map((e) => {
         try {
+          // Check if e is already an object
+          if (typeof e === "object" && e !== null) {
+            return e;
+          }
+          // Otherwise, parse it as JSON
           return JSON.parse(e);
         } catch (parseError) {
           console.error("Error parsing Redis error entry:", parseError);

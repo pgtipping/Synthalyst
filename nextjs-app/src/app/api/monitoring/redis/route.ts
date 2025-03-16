@@ -32,12 +32,7 @@ export async function GET(req: NextRequest) {
           },
           rateLimiting: {
             analytics: {},
-            currentLimits: {
-              success: true,
-              limit: 0,
-              remaining: 0,
-              reset: new Date().toISOString(),
-            },
+            currentLimits: null,
           },
           status: {
             healthy: false,
@@ -63,9 +58,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Apply rate limiting - 10 requests per minute
-    const limiter = await rateLimit.check(req, 10, 60); // 60 seconds = 1 minute
-    if (limiter) {
-      return limiter;
+    const rateLimitInfo = null;
+    try {
+      const limiterResponse = await rateLimit.check(req, 10, 60); // 60 seconds = 1 minute
+      if (limiterResponse) {
+        return limiterResponse;
+      }
+    } catch (rateLimitError) {
+      console.error("Rate limiting error:", rateLimitError);
+      // Continue even if rate limiting fails
     }
 
     // Get metrics from different sources
@@ -94,7 +95,7 @@ export async function GET(req: NextRequest) {
       },
       rateLimiting: {
         analytics: rateAnalytics,
-        currentLimits: limiter,
+        currentLimits: rateLimitInfo,
       },
       status: {
         healthy: true,
@@ -137,12 +138,7 @@ export async function GET(req: NextRequest) {
         },
         rateLimiting: {
           analytics: {},
-          currentLimits: {
-            success: true,
-            limit: 0,
-            remaining: 0,
-            reset: new Date().toISOString(),
-          },
+          currentLimits: null,
         },
         status: {
           healthy: false,
@@ -191,12 +187,12 @@ export async function POST(req: NextRequest) {
 
     // Apply strict rate limiting
     try {
-      const limiter = await rateLimit.check(req, 5, 3600); // 5 requests per hour
-      if (limiter) {
-        return limiter;
+      const limiterResponse = await rateLimit.check(req, 5, 3600); // 5 requests per hour
+      if (limiterResponse) {
+        return limiterResponse;
       }
-    } catch (error) {
-      console.error("Rate limiting error:", error);
+    } catch (rateLimitError) {
+      console.error("Rate limiting error:", rateLimitError);
       // Continue even if rate limiting fails
     }
 
@@ -204,8 +200,9 @@ export async function POST(req: NextRequest) {
     try {
       const body = await req.json();
       action = body.action || "reset_metrics";
-    } catch (error) {
+    } catch (parseError) {
       // Default to reset_metrics if JSON parsing fails
+      console.error("Error parsing request body:", parseError);
     }
 
     switch (action) {
