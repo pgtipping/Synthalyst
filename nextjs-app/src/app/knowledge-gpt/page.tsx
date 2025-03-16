@@ -163,40 +163,40 @@ export default function KnowledgeGPT() {
   }, [question]);
 
   return (
-    <div className="container mx-auto py-8 max-w-5xl flex flex-col flex-grow">
-      <h1 className="text-3xl font-bold mb-2">Knowledge GPT</h1>
-      <p className="text-muted-foreground mb-6">
-        Ask any question and get a detailed, accurate answer. Toggle web search
-        for up-to-date information on current events and facts.
-      </p>
+    <TooltipProvider delayDuration={300}>
+      <div className="container mx-auto py-8 max-w-5xl flex flex-col flex-grow">
+        <h1 className="text-3xl font-bold mb-2">Knowledge GPT</h1>
+        <p className="text-muted-foreground mb-6">
+          Ask any question and get a detailed, accurate answer. Toggle web
+          search for up-to-date information on current events and facts.
+        </p>
 
-      <div className="flex justify-between items-center mb-4">
-        <LanguageSelector
-          modelType={KNOWLEDGE_MODEL}
-          onLanguageChange={handleLanguageChange}
-          defaultLanguage={selectedLanguage}
-        />
-        {session ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-          >
-            {webSearchEnabled ? (
-              <>
-                <Globe className="h-4 w-4" />
-                <span>Web Search: ON</span>
-              </>
-            ) : (
-              <>
-                <Globe2 className="h-4 w-4 text-muted-foreground" />
-                <span>Web Search: OFF</span>
-              </>
-            )}
-          </Button>
-        ) : (
-          <TooltipProvider>
+        <div className="flex justify-between items-center mb-4">
+          <LanguageSelector
+            modelType={KNOWLEDGE_MODEL}
+            onLanguageChange={handleLanguageChange}
+            defaultLanguage={selectedLanguage}
+          />
+          {session ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+            >
+              {webSearchEnabled ? (
+                <>
+                  <Globe className="h-4 w-4" />
+                  <span>Web Search: ON</span>
+                </>
+              ) : (
+                <>
+                  <Globe2 className="h-4 w-4 text-muted-foreground" />
+                  <span>Web Search: OFF</span>
+                </>
+              )}
+            </Button>
+          ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -213,103 +213,105 @@ export default function KnowledgeGPT() {
                 <p>Login to use web search</p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
-        )}
-      </div>
+          )}
+        </div>
 
-      <LanguageInfo modelType={KNOWLEDGE_MODEL} />
+        <LanguageInfo modelType={KNOWLEDGE_MODEL} />
 
-      {/* Chat container */}
-      <div className="flex-grow overflow-y-auto mb-4 mt-4 bg-muted/30 rounded-lg p-4">
-        {showTips && (
-          <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
-            <div className="flex items-start">
-              <Info className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-blue-700">
-                  Tips for using Knowledge GPT
-                </h3>
-                <ul className="text-sm text-blue-600 mt-2 list-disc pl-5 space-y-1">
-                  <li>Ask specific questions for more accurate answers</li>
-                  <li>Change the language using the selector above</li>
-                  <li>
-                    Try educational topics, current events, or general knowledge
-                    questions
-                  </li>
-                  <li>Toggle web search for up-to-date information</li>
-                  <li>Press Enter to send your message quickly</li>
-                </ul>
+        {/* Chat container */}
+        <div className="flex-grow overflow-y-auto mb-4 mt-4 bg-muted/30 rounded-lg p-4">
+          {showTips && (
+            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
+              <div className="flex items-start">
+                <Info className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-blue-700">
+                    Tips for using Knowledge GPT
+                  </h3>
+                  <ul className="text-sm text-blue-600 mt-2 list-disc pl-5 space-y-1">
+                    <li>Ask specific questions for more accurate answers</li>
+                    <li>Change the language using the selector above</li>
+                    <li>
+                      Try educational topics, current events, or general
+                      knowledge questions
+                    </li>
+                    <li>Toggle web search for up-to-date information</li>
+                    <li>Press Enter to send your message quickly</li>
+                  </ul>
+                </div>
               </div>
-            </div>
-          </Card>
-        )}
+            </Card>
+          )}
 
-        {chatHistory.length === 0 ? (
-          <div className="text-center text-muted-foreground py-8">
-            Start a conversation by asking a question below
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {chatHistory.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+          {chatHistory.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              Start a conversation by asking a question below
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {chatHistory.map((message, index) => (
                 <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card border"
+                  key={index}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.role === "assistant" ? (
-                    <div
-                      className="whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{
-                        __html: formatMessageContent(message.content),
-                      }}
-                    />
-                  ) : (
-                    <div className="whitespace-pre-wrap">{message.content}</div>
-                  )}
+                  <div
+                    className={`max-w-[80%] p-3 rounded-lg ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-card border"
+                    }`}
+                  >
+                    {message.role === "assistant" ? (
+                      <div
+                        className="whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{
+                          __html: formatMessageContent(message.content),
+                        }}
+                      />
+                    ) : (
+                      <div className="whitespace-pre-wrap">
+                        {message.content}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="max-w-[80%] p-3 rounded-lg bg-card border">
-                  <LoadingDots className="text-primary" />
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="max-w-[80%] p-3 rounded-lg bg-card border">
+                    <LoadingDots className="text-primary" />
+                  </div>
                 </div>
-              </div>
-            )}
-            <div ref={chatEndRef} />
-          </div>
-        )}
-      </div>
-
-      {/* Input area */}
-      <form onSubmit={handleSubmit} className="mt-auto">
-        <div className="flex items-end gap-2">
-          <Textarea
-            ref={textareaRef}
-            placeholder="Ask a question..."
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="min-h-[60px] max-h-[120px] resize-none"
-            rows={1}
-          />
-          <Button
-            type="submit"
-            className="h-[60px]"
-            disabled={!question.trim() || isLoading}
-          >
-            <Send className="h-5 w-5" />
-          </Button>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+          )}
         </div>
-      </form>
-    </div>
+
+        {/* Input area */}
+        <form onSubmit={handleSubmit} className="mt-auto">
+          <div className="flex items-end gap-2">
+            <Textarea
+              ref={textareaRef}
+              placeholder="Ask a question..."
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="min-h-[60px] max-h-[120px] resize-none"
+              rows={1}
+            />
+            <Button
+              type="submit"
+              className="h-[60px]"
+              disabled={!question.trim() || isLoading}
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
+        </form>
+      </div>
+    </TooltipProvider>
   );
 }
