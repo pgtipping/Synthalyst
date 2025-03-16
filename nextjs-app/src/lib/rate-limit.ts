@@ -21,7 +21,7 @@ export const rateLimit = {
       // Create a new ratelimiter for this specific limit/window
       const customLimiter = new Ratelimit({
         redis,
-        // @ts-expect-error - { seconds: number } is not assignable to Duration but works at runtime
+        // @ts-expect-error - Upstash types are incorrect, this works at runtime
         limiter: Ratelimit.slidingWindow(limit, { seconds: windowInSeconds }),
         analytics: true,
         prefix: `rate_limit_${endpoint}`,
@@ -121,7 +121,7 @@ type Options = {
  * @param options Configuration options
  * @returns Rate limiter object
  */
-export function rateLimit(options: Options) {
+export function createRateLimiter(options: Options) {
   const tokenCache = new LRUCache<string, number[]>({
     max: options.uniqueTokenPerInterval || 500,
     ttl: options.interval || 60000,
@@ -137,7 +137,7 @@ export function rateLimit(options: Options) {
       const now = Date.now();
       const timestamps = tokenCache.get(token) || [];
       const newTimestamps = [
-        ...timestamps.filter((ts) => now - ts < options.interval),
+        ...timestamps.filter((ts: number) => now - ts < options.interval),
         now,
       ];
 

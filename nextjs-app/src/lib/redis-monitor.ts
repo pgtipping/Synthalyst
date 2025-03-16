@@ -77,11 +77,25 @@ class RedisMonitor {
         this.redis.lrange("redis_errors", 0, 99), // Get last 100 errors
       ]);
 
+      // Safely parse error JSON
+      const parsedErrors = errors.map((e) => {
+        try {
+          return JSON.parse(e);
+        } catch (parseError) {
+          console.error("Error parsing Redis error entry:", parseError);
+          return {
+            timestamp: new Date().toISOString(),
+            operation: "unknown",
+            error: "Error parsing error entry",
+          };
+        }
+      });
+
       return {
         rateLimitHits: calculateRateLimitHits(rateMetrics || {}),
         cacheHits: Number(cacheMetrics?.hits || 0),
         cacheMisses: Number(cacheMetrics?.misses || 0),
-        errors: errors.map((e) => JSON.parse(e)),
+        errors: parsedErrors,
       };
     } catch (error) {
       console.error("Error fetching Redis metrics:", error);

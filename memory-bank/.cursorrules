@@ -1901,328 +1901,419 @@ When working with audio components in the application:
 
 # Cursor Rules for Synthalyst Project
 
-## LLM Model Strategy - 2025-03-15
-
-### Model Selection Criteria
-
-- Cost efficiency is the primary consideration for model selection
-- Quality of output is secondary but still important
-- Latency should be minimized for interactive features
-- Multilingual support is required for educational content
-
-### Recommended Models by Feature
-
-- **Knowledge GPT**: GPT-4o-Mini ($0.15/input, $0.6/output)
-- **Learning Content Creator**: Gemini 1.5 Flash ($0.075/input, $0.3/output)
-
-### Tiered Approach Implementation
-
-1. **Tier 1 (Simple Queries)**: Llama 3.2 3B for basic questions and content
-2. **Tier 2 (Medium Complexity)**: GPT-4o-Mini or Gemini 1.5 Flash for more complex needs
-3. **Tier 3 (High Complexity)**: GPT-4o reserved for only the most complex educational queries
-
-### Implementation Guidelines
-
-- Implement a smart router to direct queries to the appropriate model based on complexity
-- Develop a caching system for common educational queries to reduce API costs
-- Create a fallback mechanism that starts with lower-cost models and escalates only when necessary
-- Implement cost controls including token counting, budgeting, and usage monitoring
-- Add user feedback mechanisms to continuously improve the quality of responses
-
-## Knowledge GPT Implementation - 2025-03-15
-
-### Prompt Strategy
-
-- Use chain-of-thought prompting to guide the model through a structured reasoning process
-- Include explicit instructions for output format (plain text, not markdown)
-- Provide context about the educational level and background of the user
-- Include examples of high-quality responses for different types of questions
-
-### API Implementation
-
-- Use streaming responses to improve user experience for longer answers
-- Implement proper error handling with fallback content generation
-- Add topic extraction for better organization and retrieval of past questions
-- Store questions and answers in the database for future reference and analysis
-
-## Learning Content Creator Implementation - 2025-03-15
-
-### Content Generation Process
-
-1. **Input Collection**: Gather user specifications including subject, educational level, content type, and learning objectives
-2. **Content Planning**: Generate a structured outline based on user inputs
-3. **Content Generation**: Create detailed content following the outline
-4. **Review and Refinement**: Ensure content meets educational standards and user requirements
-
-### API Implementation
-
-- Use a two-step process: first generate an outline, then expand it into full content
-- Implement proper error handling with fallback content generation
-- Add content validation to ensure educational quality and accuracy
-- Store generated content in the database for future reference and editing
-
-## UI Implementation Guidelines - 2025-03-15
-
-### Knowledge GPT UI
-
-- Use a chat-like interface for question input and answer display
-- Implement a tabbed interface for asking questions and viewing history
-- Add topic filtering for better organization of past questions
-- Include a loading state with progress indication for longer responses
-
-### Learning Content Creator UI
-
-- Use a form-based interface for content specifications
-- Implement a tabbed interface for content creation and viewing saved content
-- Add content preview with proper formatting
-- Include download options for different formats (PDF, DOCX, etc.)
-
-## Database Schema - 2025-03-15
-
-### Knowledge GPT Tables
-
-- `KnowledgeEntry`: Stores questions, answers, topics, and user information
-- `KnowledgeTopic`: Stores extracted topics for better organization and retrieval
-
-### Learning Content Creator Tables
-
-- `LearningContentEntry`: Stores content specifications, generated content, and user information
-- `LearningContentTemplate`: Stores reusable templates for different content types
-
-# Cursor Rules - March 15, 2025
-
-## Model Optimization Strategy - March 15, 2025
-
-- Knowledge GPT and Learning Creator use optimized AI models for cost efficiency and quality
-- A tiered approach is implemented to select models based on task complexity, content length, language support, and cost priority
-- The model router service in `/lib/ai/model-router.ts` handles model selection and API calls
-- Both features support multilingual responses based on user language selection
-- **IMPORTANT**: Model information must NEVER be displayed to users in the UI
-- We present a unified AI-powered experience without revealing specific model details
-
-## API Integration - March 15, 2025
-
-- Knowledge GPT API in `/api/knowledge-gpt/route.ts` uses the model router to select the appropriate model
-- Learning Content API in `/api/learning-content/route.ts` uses the model router to select the appropriate model
-- Both APIs support language selection and store the model used in the database for internal analytics only
-- System prompts are enhanced with multilingual support using the `createMultilingualSystemPrompt` function
-- Model information must be removed from any user-facing responses
-
-## UI Components - March 15, 2025
-
-- Language selector component in `/components/ui/language-selector.tsx` allows users to select their preferred language
-- The component shows supported languages and detects browser language as default
-- **CRITICAL**: Remove any UI elements that display model information to users
-- Present a unified "AI-powered" experience without revealing which specific models are used
-- Error handling is improved with proper error alerts and messages
-
-## Database Schema - March 15, 2025
-
-- KnowledgeEntry and LearningContentEntry models include language and modelUsed fields
-- Language field defaults to "English" and is used for filtering and display
-- ModelUsed field stores the model used for each entry for internal analytics only
-- Model information must never be exposed in user-facing queries
-
-## Environment Variables - March 15, 2025
-
-- OPENAI_API_KEY is required for OpenAI API calls
-- GOOGLE_AI_API_KEY is required for Google AI API calls
-- Both keys should be added to the .env file for local development
-
-### API Key Naming Conventions - [2025-03-15 21:45:23]
-
-- Always use `GEMINI_API_KEY` environment variable for Google AI/Gemini models
-- Never use alternative names like `GOOGLE_AI_API_KEY` for Gemini API access
-- When initializing the Google Generative AI client, always use:
-  ```typescript
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-  ```
-- This applies to both server-side and client-side code that needs to access Gemini models
-- For OpenAI models, use `OPENAI_API_KEY` environment variable
-- For client-side access to OpenAI, use `NEXT_PUBLIC_OPENAI_API_KEY`
-- Always use the API route pattern for client-side model access to maintain security
-
-## Knowledge GPT Web Search Integration (March 16, 2025)
-
-The Knowledge GPT feature has been enhanced with web search capability to provide up-to-date information. This ensures that users receive accurate information even when the model's training data is outdated.
-
-### Implementation Details
-
-1. **Google Custom Search API Integration**:
-
-   - Created a new API route at `/api/web-search` that uses Google Custom Search API
-   - Added environment variables for Google Search API key and Search Engine ID
-   - Implemented error handling for API failures
-
-2. **System Prompt Updates**:
-
-   - Updated system prompts to include current information
-   - Added instructions to use web search results when available
-   - Ensured accurate information for current events and facts
-
-3. **UI Updates**:
-   - Added information about web search capability to the Knowledge GPT page
-   - Updated tips section to mention web search
-   - Maintained clean and simple UI while adding new functionality
-
-### Configuration Requirements
-
-To use the web search capability, the following environment variables must be set:
-
-- `GOOGLE_SEARCH_API_KEY`: API key for Google Custom Search API
-- `GOOGLE_SEARCH_ENGINE_ID`: Search Engine ID (cx) for Google Programmable Search Engine
-
-### Usage Notes
-
-- Web search is automatically triggered for all Knowledge GPT queries
-- Search results are included in the system prompt if available
-- The model combines web search results with its own knowledge to provide accurate answers
-- If web search fails or returns no results, the model falls back to its own knowledge
-
-## Knowledge GPT Improvements (March 16, 2025)
-
-The Knowledge GPT feature has been enhanced with several improvements:
-
-1. **Smart Web Search Detection**: Added logic to only use web search when necessary, avoiding unnecessary API calls for:
-
-   - Simple math questions (e.g., "what is 20 + 15?")
-   - Basic definition questions (e.g., "what is a prime number?")
-   - Questions about the assistant itself (e.g., "who are you?")
-
-2. **Improved Text Formatting**:
-
-   - Updated system prompt to instruct the LLM to use proper formatting without asterisks
-   - Added client-side formatting to properly render bold text and lists
-   - Implemented HTML rendering for assistant messages using dangerouslySetInnerHTML
-
-3. **Enhanced Loading Animation**:
-   - Replaced the spinning icon with the three dots animation for better UX
-   - Used the LoadingDots component for consistent loading indicators
-
-These improvements enhance the user experience by providing better formatted responses and more efficient API usage.
-
-## Web Search Toggle Feature (March 16, 2025)
-
-The Knowledge GPT feature has been enhanced with a web search toggle button:
-
-1. **User Control**:
-
-   - Added a toggle button in the Knowledge GPT UI to enable/disable web search
-   - Button uses Globe/Globe2 icons to visually indicate the current state
-   - Default state is OFF to minimize API costs
-
-2. **API Integration**:
-
-   - Modified the generate API route to respect the useWebSearch parameter
-   - Updated system prompt to indicate when web search is being used
-   - Only performs web search when explicitly enabled by the user
-   - Removed automatic web search detection in favor of explicit user control
-
-3. **Cost Optimization**:
-
-   - Reduces API costs by only using web search when requested
-   - Creates potential for a premium feature (web search could be limited to paid users)
-   - Simplified logic ensures web search is only used when explicitly enabled
-
-4. **UI Updates**:
-   - Updated page description to reflect the new toggle feature
-   - Modified tips section to mention the toggle feature
-   - Clear visual indication of whether web search is ON or OFF
-
-This feature gives users control over their experience while optimizing API costs and creating potential for monetization.
-
-## Language Selector Improvements (March 16, 2025)
-
-The language selector component has been enhanced with several improvements:
-
-1. **Auto Detect Option**:
-
-   - Added "Auto Detect" as the first option in the language dropdown
-   - Replaced the "(Browser Default)" label with a dedicated "Auto Detect" option
-   - When selected, automatically uses the browser's detected language
-
-2. **UI Improvements**:
-
-   - Made the dropdown scrollable with a maximum height to accommodate all languages
-   - Sorted languages alphabetically for easier navigation
-   - Included English in the dropdown list as a selectable option
-   - Improved visual consistency across the application
-
-3. **User Preference Persistence**:
-
-   - Added local storage to remember user language preferences
-   - Automatically restores the previously selected language on page reload
-   - Defaults to "Auto Detect" for new users
-
-4. **Browser Language Detection**:
-   - Enhanced browser language detection logic
-   - Improved mapping of browser language codes to full language names
-   - Graceful fallback to English when the detected language is not supported
-
-These improvements enhance the user experience by providing more intuitive language selection and better persistence of user preferences.
-
-## Loading Animation Improvement (March 16, 2025)
-
-The loading animation in the Knowledge GPT feature has been improved:
-
-1. **Chat Window Integration**:
-
-   - Moved the loading animation from the send button to inside the chat window
-   - Added a new message bubble with the loading dots animation that appears only while waiting for a response
-   - Positioned the loading animation in the same style as assistant messages for consistency
-
-2. **User Experience Benefits**:
-
-   - Provides a more intuitive indication that the system is processing the question
-   - Shows the loading state where the response will appear
-   - Makes it clearer that the system is working on generating a response
-   - Maintains visual consistency with other chat bubbles
-
-3. **Implementation Details**:
-   - Used the existing LoadingDots component for the animation
-   - Added conditional rendering based on the isLoading state
-   - Styled the loading animation to match the assistant message bubbles
-   - Removed the loading animation from the send button
-
-This change completes the set of UI improvements for the Knowledge GPT feature, providing a more polished and intuitive user experience.
-
-## Email Service and Admin Dashboard Optimization - March 16, 2025
-
-### Email Service Architecture
-
-- The application uses a unified email service located in `nextjs-app/src/lib/email.ts`
-- Primary email provider is SendGrid with Nodemailer as a fallback
-- All email activities are logged in the database using the `EmailLog` model
-- Email logs include status tracking (pending, sent, failed)
-- Email categories are used to organize different types of emails (contact_form, feedback_alert, etc.)
-
-### Feedback API Implementation
-
-- Feedback submissions are stored directly in the database using the `AppFeedback` model
-- Rate limiting is implemented using LRU cache to prevent abuse
-- The rate limiter is configured to allow 5 submissions per minute per IP address
-- The `FeedbackButton` component handles the UI for collecting user feedback
-- Low ratings (1-2 stars) trigger admin notification emails
-
-### Admin Dashboard Structure
-
-- Admin pages use a responsive layout with a sidebar navigation
-- The `AdminLayout` component in `nextjs-app/src/components/admin/AdminLayout.tsx` provides the base structure
-- Mobile support includes a collapsible sidebar and adapted layout
-- The Email Logs page includes filtering, pagination, and statistics
-- Admin navigation is defined in both `nextjs-app/src/app/admin/layout.tsx` and `AdminLayout.tsx`
-
-### Email Logs Dashboard Features
-
-- Filtering by status (sent, failed, pending) and category
-- Statistics for email status distribution and top categories
-- Pagination for navigating through large sets of logs
-- Dedicated section for failed emails with error details
-- Functionality to delete logs older than a specified date
-- Responsive design that works well on both desktop and mobile
-
-### Database Schema Updates
-
-- Added `EmailLog` model to the Prisma schema
-- The model includes fields for tracking email status, provider, and error messages
-- Prisma migration is needed to apply the schema changes to the database
+## Project Structure (2025-03-16)
+
+- `nextjs-app/`: Main Next.js application
+  - `src/`: Source code
+    - `app/`: Next.js App Router
+      - `admin/`: Admin dashboard pages
+      - `api/`: API routes
+      - `auth/`: Authentication pages
+      - `blog/`: Blog pages
+      - `dashboard/`: User dashboard
+      - `tools/`: Tools pages
+    - `components/`: Reusable components
+    - `lib/`: Utility functions and libraries
+    - `styles/`: Global styles
+    - `types/`: TypeScript type definitions
+  - `public/`: Static assets
+  - `prisma/`: Prisma schema and migrations
+  - `tests/`: Test files
+- `memory-bank/`: Project documentation
+
+## Coding Patterns (2025-03-16)
+
+### Error Handling
+
+1. **API Routes**:
+
+   - Always use try-catch blocks for database operations
+   - Return appropriate HTTP status codes
+   - Include meaningful error messages
+   - Log errors to console in development
+   - Check for model/table existence before querying
+   - Use SQL queries to verify table existence in the database
+   - Initialize default values for all data variables to prevent undefined errors
+
+2. **Frontend Components**:
+
+   - Implement error boundaries for critical components
+   - Use loading states for async operations
+   - Provide fallback UI for error states
+   - Handle network errors gracefully
+   - Use optional chaining for potentially undefined properties
+   - Add null checking for user properties to prevent undefined errors
+
+3. **Authentication**:
+   - Verify user authentication before accessing protected routes
+   - Check user roles for admin-only features
+   - Handle session expiration gracefully
+   - Redirect unauthenticated users to login page
+   - Use try-catch blocks around authentication checks
+   - Implement fallbacks for authentication failures
+
+### Database Operations
+
+1. **Prisma Queries**:
+
+   - Use transactions for related operations
+   - Include error handling for all database operations
+   - Implement pagination for large data sets
+   - Use appropriate filters and sorting
+   - Check for table existence before querying
+   - Use raw SQL queries when necessary for complex operations
+   - Verify model existence before attempting CRUD operations
+
+2. **Data Validation**:
+   - Validate input data before database operations
+   - Use zod for schema validation
+   - Sanitize user input to prevent injection attacks
+   - Implement rate limiting for write operations
+   - Provide meaningful error messages for validation failures
+
+### Component Patterns
+
+1. **Form Components**:
+
+   - Use react-hook-form for form handling
+   - Implement client-side validation
+   - Show loading states during submission
+   - Disable submit button when form is invalid
+   - Provide clear error messages
+   - Use controlled components for form inputs
+
+2. **Layout Components**:
+
+   - Create responsive layouts using Tailwind CSS
+   - Implement mobile-first design
+   - Use CSS Grid and Flexbox for complex layouts
+   - Create reusable layout components
+   - Ensure consistent spacing and alignment
+
+3. **UI Components**:
+   - Use shadcn/ui components for consistent design
+   - Implement dark mode support
+   - Ensure accessibility compliance
+   - Create reusable UI components
+   - Use Tailwind CSS for styling
+   - Ensure all SelectItem components have non-empty values
+
+### API Integration
+
+1. **External APIs**:
+
+   - Implement retry logic for failed requests
+   - Use environment variables for API keys
+   - Create service classes for API integration
+   - Handle rate limiting and quotas
+   - Implement caching for frequently used data
+   - Use try-catch blocks for all API calls
+
+2. **Authentication**:
+   - Use NextAuth.js for authentication
+   - Implement role-based access control
+   - Secure API routes with authentication middleware
+   - Handle token refresh automatically
+   - Store tokens securely
+
+### State Management
+
+1. **React State**:
+
+   - Use React hooks for local state
+   - Implement context for shared state
+   - Use reducers for complex state logic
+   - Avoid prop drilling
+   - Initialize state with default values to prevent undefined errors
+
+2. **Server State**:
+   - Use SWR for data fetching
+   - Implement optimistic updates
+   - Handle loading and error states
+   - Use revalidation for stale data
+   - Implement pagination and infinite scrolling
+
+## User Preferences (2025-03-16)
+
+1. **Code Style**:
+
+   - Use TypeScript for all new code
+   - Follow ESLint and Prettier configurations
+   - Use meaningful variable and function names
+   - Write comments for complex logic
+   - Create reusable utility functions
+   - Use proper typing for all variables and functions
+
+2. **UI/UX Preferences**:
+
+   - Implement clean, minimalist design
+   - Use consistent color scheme
+   - Ensure responsive design for all screen sizes
+   - Prioritize accessibility
+   - Use animations sparingly
+   - Implement dark mode support
+   - Ensure consistent button heights and alignment
+
+3. **Documentation**:
+   - Update memory-bank files for significant changes
+   - Document API endpoints
+   - Create README files for new features
+   - Document environment variables
+   - Update .cursorrules for new patterns
+
+## Project-Specific Patterns (2025-03-16)
+
+### Email Service
+
+1. **Implementation**:
+
+   - Use unified email service in `nextjs-app/src/lib/email.ts`
+   - Implement fallback mechanisms between SendGrid and Nodemailer
+   - Log all email activities to the database
+   - Use standardized email templates
+   - Implement retry logic for failed emails
+   - Check for EmailLog model existence before querying
+
+2. **Admin Interface**:
+   - Display email logs with filtering options
+   - Show statistics for email status distribution
+   - Implement pagination for email logs
+   - Allow deletion of older logs
+   - Provide detailed view for individual emails
+   - Handle cases where the EmailLog model doesn't exist yet
+
+### Knowledge GPT
+
+1. **Implementation**:
+
+   - Use Gemini 1.5 Flash-8B for Knowledge GPT
+   - Implement web search integration for up-to-date information
+   - Support multiple languages
+   - Implement domain selection for specialized knowledge
+   - Use client-side formatting for responses
+   - Provide loading states during generation
+
+2. **UI**:
+   - Show chat-like interface for questions and answers
+   - Implement language selection dropdown
+   - Display web search toggle button
+   - Show domain selection for specialized knowledge
+   - Provide clear user guidance
+   - Ensure responsive design for all devices
+
+### Learning Content Creator
+
+1. **Implementation**:
+
+   - Use GPT-4o-Mini for Learning Creator
+   - Support multiple languages
+   - Implement structured content generation
+   - Store generated content in the database
+   - Provide options for content customization
+   - Implement retry logic for failed generations
+
+2. **UI**:
+   - Show form for topic submission
+   - Implement language selection dropdown
+   - Display generated content with proper formatting
+   - Provide options for content customization
+   - Show loading states during generation
+   - Ensure responsive design for all devices
+
+### Admin Dashboard
+
+1. **Implementation**:
+
+   - Create responsive admin layout
+   - Implement sidebar navigation
+   - Show statistics and data visualization
+   - Provide filtering and sorting options
+   - Implement pagination for large data sets
+   - Use try-catch blocks for all database operations
+   - Check for table existence before querying
+   - Initialize default values for all data variables
+
+2. **UI**:
+   - Use card-based layout for statistics
+   - Implement responsive design for all screen sizes
+   - Show loading states during data fetching
+   - Provide clear error messages
+   - Use consistent styling across all admin pages
+   - Ensure all SelectItem components have non-empty values
+
+## Environment Setup (2025-03-16)
+
+1. **Development Environment**:
+
+   - Node.js 18+
+   - npm 9+
+   - PostgreSQL 14+
+   - Redis (optional)
+   - Git
+
+2. **Environment Variables**:
+
+   - `DATABASE_URL`: PostgreSQL connection string
+   - `NEXTAUTH_URL`: NextAuth.js URL
+   - `NEXTAUTH_SECRET`: NextAuth.js secret
+   - `GOOGLE_CLIENT_ID`: Google OAuth client ID
+   - `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
+   - `SENDGRID_API_KEY`: SendGrid API key
+   - `EMAIL_FROM`: Sender email address
+   - `SMTP_HOST`: SMTP host for Nodemailer
+   - `SMTP_PORT`: SMTP port for Nodemailer
+   - `SMTP_USER`: SMTP user for Nodemailer
+   - `SMTP_PASSWORD`: SMTP password for Nodemailer
+   - `GOOGLE_SEARCH_API_KEY`: Google Custom Search API key
+   - `GOOGLE_SEARCH_ENGINE_ID`: Google Custom Search Engine ID
+   - `PUBMED_API_KEY`: PubMed API key
+   - `GEMINI_API_KEY`: Google Gemini API key
+   - `OPENAI_API_KEY`: OpenAI API key
+
+3. **Development Commands**:
+   - `npm run dev`: Start development server
+   - `npm run build`: Build for production
+   - `npm run start`: Start production server
+   - `npm run lint`: Run ESLint
+   - `npm run test`: Run tests
+   - `npx prisma migrate dev`: Run Prisma migrations
+   - `npx prisma generate`: Generate Prisma client
+   - `npx prisma studio`: Open Prisma Studio
+
+## Recent Learnings (2025-03-16)
+
+1. **Database Error Handling**:
+
+   - Always check for table existence before querying
+   - Use `information_schema.tables` to verify table existence
+   - Initialize default values for all data variables
+   - Use try-catch blocks for all database operations
+   - Implement fallbacks for missing or undefined data
+   - Add specific error messages for different failure scenarios
+
+2. **Authentication Error Handling**:
+
+   - Use try-catch blocks around authentication checks
+   - Initialize session variable as null
+   - Use optional chaining for user properties
+   - Add null checking for user properties
+   - Implement fallbacks for authentication failures
+   - Log authentication errors for debugging
+
+3. **UI Component Best Practices**:
+
+   - Ensure all SelectItem components have non-empty values
+   - Use "all" instead of empty strings for filter values
+   - Update filter logic to handle the "all" value correctly
+   - Provide fallback UI states when data is missing
+   - Use loading states for async operations
+   - Implement error boundaries for critical components
+
+4. **API Route Patterns**:
+
+   - Check for model existence before CRUD operations
+   - Use raw SQL queries to verify table existence
+   - Implement proper error handling for all API routes
+   - Return appropriate HTTP status codes and error messages
+   - Use try-catch blocks for all database operations
+   - Provide fallback responses when data is missing
+
+5. **Next.js App Router Patterns**:
+   - Use server components for data fetching
+   - Implement client components for interactive elements
+   - Use layout components for shared UI
+   - Implement error boundaries for critical sections
+   - Use loading states for async operations
+   - Handle authentication in layout components
+
+## Troubleshooting Guide (2025-03-16)
+
+1. **Database Connection Issues**:
+
+   - Check DATABASE_URL environment variable
+   - Verify PostgreSQL service is running
+   - Check network connectivity
+   - Verify database user permissions
+   - Run `npx prisma migrate dev` to apply migrations
+   - Check for missing tables using `information_schema.tables`
+
+2. **Authentication Issues**:
+
+   - Verify NEXTAUTH_URL and NEXTAUTH_SECRET
+   - Check Google OAuth credentials
+   - Clear browser cookies and try again
+   - Verify user roles in the database
+   - Check for session expiration
+   - Implement try-catch blocks around authentication checks
+
+3. **API Errors**:
+
+   - Check browser console for error messages
+   - Verify API route implementation
+   - Check for missing environment variables
+   - Verify database connection
+   - Implement proper error handling
+   - Check for model existence before querying
+
+4. **UI Issues**:
+
+   - Check browser console for error messages
+   - Verify component props and types
+   - Check for missing or undefined data
+   - Implement fallback UI states
+   - Use error boundaries for critical components
+   - Ensure all SelectItem components have non-empty values
+
+5. **Deployment Issues**:
+   - Verify environment variables in production
+   - Check build logs for errors
+   - Verify database connection in production
+   - Check for missing dependencies
+   - Verify API routes are working
+   - Check for CORS issues
+
+## Common Errors and Solutions (2025-03-16)
+
+1. **"Cannot read properties of undefined"**:
+
+   - Initialize default values for all data variables
+   - Use optional chaining for potentially undefined properties
+   - Add null checking for user properties
+   - Implement fallbacks for missing or undefined data
+   - Use try-catch blocks for all operations that might fail
+   - Check for table existence before querying
+
+2. **"ChunkLoadError: Loading chunk failed"**:
+
+   - Implement proper error handling for all database operations
+   - Initialize default values for all data variables
+   - Use try-catch blocks for all API calls
+   - Provide fallback UI states when data is missing
+   - Check for table existence before querying
+   - Handle authentication errors gracefully
+
+3. **"Failed to fetch"**:
+
+   - Check network connectivity
+   - Verify API route implementation
+   - Check for CORS issues
+   - Implement retry logic for failed requests
+   - Use try-catch blocks for all API calls
+   - Provide fallback UI states when data is missing
+
+4. **"Prisma error: Table does not exist"**:
+
+   - Run `npx prisma migrate dev` to apply migrations
+   - Check for table existence before querying
+   - Use `information_schema.tables` to verify table existence
+   - Implement fallbacks for missing tables
+   - Use try-catch blocks for all database operations
+   - Initialize default values for all data variables
+
+5. **"TypeError: Cannot read property 'map' of undefined"**:
+   - Initialize arrays as empty arrays
+   - Check if data exists before mapping
+   - Use optional chaining for potentially undefined properties
+   - Implement fallbacks for missing or undefined data
+   - Use try-catch blocks for all operations that might fail
+   - Provide default values for all variables

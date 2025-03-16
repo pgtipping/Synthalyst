@@ -86,6 +86,7 @@ The current focus is on optimizing the application's backend services, particula
     - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
 12. **Admin Pages Error Handling Improvements** (March 16, 2025):
+
     - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
     - Changed empty values to "all" in SelectItem components to prevent errors
     - Updated filter logic to handle the new "all" value correctly
@@ -97,6 +98,18 @@ The current focus is on optimizing the application's backend services, particula
     - Added error handling for cases where database models might not exist yet
     - Implemented fallback to empty arrays when data is missing or undefined
     - Added try-catch blocks for API calls to handle errors independently
+
+13. **Admin Page Database Checks** (March 16, 2025):
+    - Added SQL queries to check if tables exist before attempting to query them
+    - Used `information_schema.tables` to verify table existence in the database
+    - Implemented default values for all data variables to prevent undefined errors
+    - Added comprehensive error handling for all database operations in the admin page
+    - Enhanced authentication error handling in the admin layout
+    - Added null checking for user properties to prevent undefined errors
+    - Used optional chaining for user properties to handle potential null values
+    - Fixed "Cannot read properties of undefined" errors in the admin page
+    - Resolved chunk loading errors by properly handling database queries
+    - Improved error logging for all database operations
 
 ### Next Steps
 
@@ -114,6 +127,7 @@ The current focus is on optimizing the application's backend services, particula
 12. **Medical Knowledge Enhancements**: Add more medical data sources and improve evidence grading.
 13. **Conversational Context**: Improve the Medical Knowledge Assistant to maintain conversational context between queries.
 14. **Systematic Error Handling**: Implement a more proactive approach to error detection and resolution across all admin pages.
+15. **Redis Monitoring Fix**: Resolve 500 errors in the Redis monitoring page.
 
 ### Active Decisions
 
@@ -196,3 +210,5 @@ The current focus is on optimizing the application's backend services, particula
     - Using toast notifications to inform users of errors
     - Checking for the existence of database models before querying them
     - Ensuring non-empty values for required component props
+    - Verifying table existence before executing database queries
+    - Initializing default values for all data variables to prevent undefined errors

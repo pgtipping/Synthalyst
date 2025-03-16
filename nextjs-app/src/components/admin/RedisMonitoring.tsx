@@ -47,7 +47,7 @@ interface RedisMetrics {
       limit: number;
       remaining: number;
       reset: string;
-    };
+    } | null;
   };
   status: {
     healthy: boolean;
@@ -68,7 +68,9 @@ export function RedisMonitoring() {
 
       const response = await fetch("/api/monitoring/redis", {
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_API_KEY}`,
+          Authorization: `Bearer ${
+            process.env.NEXT_PUBLIC_ADMIN_API_KEY || ""
+          }`,
         },
       });
 
@@ -79,6 +81,7 @@ export function RedisMonitoring() {
       const data = await response.json();
       setMetrics(data);
     } catch (error) {
+      console.error("Failed to fetch Redis metrics:", error);
       setError(
         error instanceof Error ? error.message : "Failed to fetch metrics"
       );
@@ -90,18 +93,32 @@ export function RedisMonitoring() {
 
   const handleResetMetrics = async () => {
     try {
-      const response = await fetch("/api/monitoring/redis/reset", {
+      setLoading(true);
+      const response = await fetch("/api/monitoring/redis", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${
+            process.env.NEXT_PUBLIC_ADMIN_API_KEY || ""
+          }`,
+        },
+        body: JSON.stringify({ action: "reset_metrics" }),
       });
 
       if (response.ok) {
         toast.success("Redis metrics have been reset successfully.");
         fetchMetrics();
       } else {
-        toast.error("Failed to reset metrics. Please try again.");
+        const errorData = await response.json();
+        toast.error(
+          `Failed to reset metrics: ${errorData.error || "Unknown error"}`
+        );
       }
-    } catch {
+    } catch (error) {
+      console.error("Error resetting metrics:", error);
       toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,17 +142,27 @@ export function RedisMonitoring() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Redis Monitoring</h2>
-        <Button
-          onClick={() => fetchMetrics()}
-          disabled={loading}
-          variant="outline"
-        >
-          {loading ? (
-            <ReloadIcon className="h-4 w-4 animate-spin" />
-          ) : (
-            "Refresh Metrics"
-          )}
-        </Button>
+        <div className="space-x-2">
+          <Button
+            onClick={handleResetMetrics}
+            disabled={loading}
+            variant="destructive"
+            size="sm"
+          >
+            Reset Metrics
+          </Button>
+          <Button
+            onClick={() => fetchMetrics()}
+            disabled={loading}
+            variant="outline"
+          >
+            {loading ? (
+              <ReloadIcon className="h-4 w-4 animate-spin" />
+            ) : (
+              "Refresh Metrics"
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -186,13 +213,13 @@ export function RedisMonitoring() {
               <div className="flex justify-between">
                 <span>Current Limit:</span>
                 <span className="font-mono">
-                  {metrics?.rateLimiting.currentLimits.limit || 0}
+                  {metrics?.rateLimiting?.currentLimits?.limit || 0}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Remaining:</span>
                 <span className="font-mono">
-                  {metrics?.rateLimiting.currentLimits.remaining || 0}
+                  {metrics?.rateLimiting?.currentLimits?.remaining || 0}
                 </span>
               </div>
             </div>
@@ -265,23 +292,6 @@ export function RedisMonitoring() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
-
-      {/* Reset Controls */}
-      <Card>
-        <CardHeader>
-          <CardTitle>System Controls</CardTitle>
-          <CardDescription>Reset system metrics and caches</CardDescription>
-        </CardHeader>
-        <CardContent className="flex gap-4">
-          <Button
-            onClick={() => handleResetMetrics()}
-            disabled={loading}
-            variant="outline"
-          >
-            Reset Metrics
-          </Button>
         </CardContent>
       </Card>
     </div>
