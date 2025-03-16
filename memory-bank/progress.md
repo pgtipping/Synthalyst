@@ -20,6 +20,7 @@
 - Feedback system with rate limiting and database storage
 - Admin dashboard for email logs with filtering and statistics
 - Admin user management with role updates
+- Newsletter subscription system with confirmation workflow
 - Robust error handling for admin pages and API routes
 
 ### Technical Infrastructure
@@ -41,6 +42,7 @@
 - Responsive admin layout with mobile support
 - Try-catch blocks for all API calls with appropriate fallbacks
 - NextJS 15 compatibility with proper async params handling
+- Development mode with database persistence for testing
 
 ## What's Left to Build
 
@@ -140,6 +142,15 @@
 - Added better error handling for Redis connection issues
 - Made authorization optional for development environment
 - Improved error responses to return 200 status with error details instead of 500
+- Fixed model name in API routes from `newsletter` to `newsletterSubscriber` to match Prisma schema
+- Added functionality to create real subscribers in the database when in development mode
+- Implemented proper handling of both subscription and confirmation processes
+- Added code to create pending subscribers during subscription process
+- Added code to update subscribers to confirmed status during confirmation process
+- Ensured subscribers appear correctly in the admin dashboard
+- Fixed issue where mock subscribers weren't being stored in the database
+- Added proper error handling for database operations in newsletter subscription system
+- Enhanced logging for subscription and confirmation processes
 
 ### In Progress
 
@@ -191,11 +202,13 @@
   - Settings page for user preferences
   - Unified email service with logging
   - Feedback system with rate limiting
+  - Newsletter subscription system with confirmation workflow
 
 - **Admin Dashboard**:
 
   - Email logs monitoring with filtering and statistics
   - User management with role updates
+  - Newsletter subscriber management with filtering and tags
   - Responsive layout with mobile support
   - Sidebar navigation for easy access to different sections
   - Pagination for large data sets

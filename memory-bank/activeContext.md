@@ -2,7 +2,7 @@
 
 ## Current Focus (March 16, 2025)
 
-The current focus is on optimizing the application's backend services, particularly email handling, feedback processing, and admin monitoring capabilities. We're enhancing the admin dashboard with robust monitoring features and fixing critical errors in the Redis monitoring functionality and user role management. These optimizations aim to improve performance, reliability, and maintainability of the platform.
+The current focus is on optimizing the application's backend services, particularly email handling, feedback processing, and admin monitoring capabilities. We're enhancing the admin dashboard with robust monitoring features and fixing critical errors in the Redis monitoring functionality, user role management, and newsletter subscription system. These optimizations aim to improve performance, reliability, and maintainability of the platform.
 
 ### Recent Changes
 
@@ -55,27 +55,39 @@ The current focus is on optimizing the application's backend services, particula
    - Ensured consistent error handling across all admin API routes
    - Fixed TypeScript errors in the admin user management components
 
-6. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+6. **Newsletter Subscription System Fixes** (March 16, 2025):
 
-7. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+   - Fixed model name in API routes from `newsletter` to `newsletterSubscriber` to match Prisma schema
+   - Added functionality to create real subscribers in the database when in development mode
+   - Implemented proper handling of both subscription and confirmation processes
+   - Added code to create pending subscribers during subscription process
+   - Added code to update subscribers to confirmed status during confirmation process
+   - Ensured subscribers appear correctly in the admin dashboard
+   - Fixed issue where mock subscribers weren't being stored in the database
+   - Added proper error handling for database operations
+   - Enhanced logging for subscription and confirmation processes
 
-8. **Model Router Updates**:
+7. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+
+8. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+
+9. **Model Router Updates**:
 
    - Added a new `generateContentV2` function with improved parameter handling
    - Updated the API route to use the new function
    - Standardized language support across models
    - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 
-9. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
+10. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
 
-10. **Knowledge GPT Web Search Integration**:
+11. **Knowledge GPT Web Search Integration**:
 
     - Added web search capability to provide up-to-date information
     - Implemented Google Custom Search API integration
     - Updated system prompts to include current information
     - Enhanced UI to inform users about web search capability
 
-11. **Knowledge GPT Improvements** (March 16, 2025):
+12. **Knowledge GPT Improvements** (March 16, 2025):
 
     - Updated loading animation to use three dots instead of spinning icon
     - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
@@ -86,7 +98,7 @@ The current focus is on optimizing the application's backend services, particula
     - Simplified web search logic by removing automatic detection in favor of explicit user control
     - Moved loading animation to appear in chat window instead of on send button
 
-12. **Language Selector Improvements** (March 16, 2025):
+13. **Language Selector Improvements** (March 16, 2025):
 
     - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
     - Included English in the dropdown list
@@ -95,7 +107,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added local storage to remember user language preferences
     - Improved browser language detection and handling
 
-13. **Medical Knowledge Integration** (March 16, 2025):
+14. **Medical Knowledge Integration** (March 16, 2025):
 
     - Added PubMed API integration for evidence-based medical information
     - Implemented evidence grading system based on study types
@@ -107,7 +119,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added PUBMED_API_KEY to environment variables
     - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
-14. **Admin Pages Error Handling Improvements** (March 16, 2025):
+15. **Admin Pages Error Handling Improvements** (March 16, 2025):
 
     - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
     - Changed empty values to "all" in SelectItem components to prevent errors
@@ -121,7 +133,7 @@ The current focus is on optimizing the application's backend services, particula
     - Implemented fallback to empty arrays when data is missing or undefined
     - Added try-catch blocks for API calls to handle errors independently
 
-15. **Admin Page Database Checks** (March 16, 2025):
+16. **Admin Page Database Checks** (March 16, 2025):
     - Added SQL queries to check if tables exist before attempting to query them
     - Used `information_schema.tables` to verify table existence in the database
     - Implemented default values for all data variables to prevent undefined errors

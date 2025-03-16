@@ -37,6 +37,50 @@ export async function GET(req: NextRequest) {
         "DEV MODE with MOCK_NEWSLETTER: Simulating successful confirmation"
       );
 
+      // Create a real subscriber in the database for testing
+      try {
+        // Check if the subscriber already exists
+        const existingSubscriber = await prisma.newsletterSubscriber.findUnique(
+          {
+            where: { email },
+          }
+        );
+
+        if (!existingSubscriber) {
+          // Create a new subscriber
+          await prisma.newsletterSubscriber.create({
+            data: {
+              email,
+              name: email.split("@")[0], // Use part of email as name
+              confirmed: true,
+              confirmedAt: new Date(),
+              status: "confirmed",
+              source: "website",
+              tags: ["website", "test"],
+            },
+          });
+          console.log(
+            `Created real subscriber in database for testing: ${email}`
+          );
+        } else if (!existingSubscriber.confirmed) {
+          // Update existing subscriber to confirmed
+          await prisma.newsletterSubscriber.update({
+            where: { email },
+            data: {
+              confirmed: true,
+              confirmedAt: new Date(),
+              status: "confirmed",
+            },
+          });
+          console.log(`Updated existing subscriber to confirmed: ${email}`);
+        } else {
+          console.log(`Subscriber already exists and is confirmed: ${email}`);
+        }
+      } catch (dbError) {
+        console.error("Error creating test subscriber in database:", dbError);
+        // Continue with the mock flow even if database operation fails
+      }
+
       // Send welcome email
       const welcomeEmailSent = await sendWelcomeEmail(email);
       console.log(`Welcome email sent: ${welcomeEmailSent}`);
@@ -53,7 +97,7 @@ export async function GET(req: NextRequest) {
     const prismaAny = prisma as any;
 
     // First check if the subscriber exists at all
-    const subscriberExists = await prismaAny.newsletter.findUnique({
+    const subscriberExists = await prismaAny.newsletterSubscriber.findUnique({
       where: { email },
     });
 
@@ -122,10 +166,12 @@ export async function GET(req: NextRequest) {
       );
 
       // Update the subscriber to confirmed status
-      await prismaAny.newsletter.update({
+      await prismaAny.newsletterSubscriber.update({
         where: { id: subscriberExists.id },
         data: {
           confirmed: true,
+          confirmedAt: new Date(),
+          status: "confirmed",
           token: null,
           tokenExpiry: null,
         },
@@ -174,10 +220,12 @@ export async function GET(req: NextRequest) {
     }
 
     // Update the subscriber to confirmed status
-    await prismaAny.newsletter.update({
+    await prismaAny.newsletterSubscriber.update({
       where: { id: subscriberExists.id },
       data: {
         confirmed: true,
+        confirmedAt: new Date(),
+        status: "confirmed",
         token: null,
         tokenExpiry: null,
       },

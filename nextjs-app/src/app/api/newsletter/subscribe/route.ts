@@ -36,6 +36,54 @@ export async function POST(req: NextRequest) {
       );
       const token = generateToken();
 
+      // Create a pending subscriber in the database for testing
+      try {
+        // Check if the subscriber already exists
+        const existingSubscriber = await prisma.newsletterSubscriber.findUnique(
+          {
+            where: { email },
+          }
+        );
+
+        if (!existingSubscriber) {
+          // Create a new subscriber with pending status
+          await prisma.newsletterSubscriber.create({
+            data: {
+              email,
+              name: name || email.split("@")[0], // Use provided name or part of email
+              confirmed: false,
+              status: "pending",
+              source: source || "website",
+              tags: source ? [source] : ["website"],
+              token,
+              tokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+            },
+          });
+          console.log(
+            `Created pending subscriber in database for testing: ${email}`
+          );
+        } else if (existingSubscriber.confirmed) {
+          console.log(`Subscriber already exists and is confirmed: ${email}`);
+          return NextResponse.json(
+            { message: "You are already subscribed to our newsletter" },
+            { status: 200 }
+          );
+        } else {
+          // Update existing subscriber with new token
+          await prisma.newsletterSubscriber.update({
+            where: { email },
+            data: {
+              token,
+              tokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+            },
+          });
+          console.log(`Updated existing subscriber with new token: ${email}`);
+        }
+      } catch (dbError) {
+        console.error("Error creating test subscriber in database:", dbError);
+        // Continue with the mock flow even if database operation fails
+      }
+
       try {
         await sendConfirmationEmail(email, token);
         return NextResponse.json(
@@ -63,9 +111,10 @@ export async function POST(req: NextRequest) {
         // Use type assertion to work around the type error
         const prismaAny = prisma as any;
 
-        const existingSubscriber = await prismaAny.newsletter.findUnique({
-          where: { email },
-        });
+        const existingSubscriber =
+          await prismaAny.newsletterSubscriber.findUnique({
+            where: { email },
+          });
 
         if (existingSubscriber) {
           // If already confirmed, return success
@@ -81,7 +130,7 @@ export async function POST(req: NextRequest) {
           // Set token expiry to 24 hours
           const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-          await prismaAny.newsletter.update({
+          await prismaAny.newsletterSubscriber.update({
             where: { email },
             data: {
               token,
@@ -116,7 +165,7 @@ export async function POST(req: NextRequest) {
         // Set token expiry to 24 hours
         const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-        await prismaAny.newsletter.create({
+        await prismaAny.newsletterSubscriber.create({
           data: {
             email,
             name,

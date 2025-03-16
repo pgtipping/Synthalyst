@@ -2458,3 +2458,99 @@ const limiter = new Ratelimit({
 - Provide fallback UI states when data is missing or loading
 - Ensure consistent button heights and alignment
 - Use responsive design for all components, especially admin interfaces
+
+# Newsletter Subscription System (March 16, 2025)
+
+When working with the newsletter subscription system, ensure:
+
+1. Use the correct model name `newsletterSubscriber` (not `newsletter`) in all API routes
+2. In development mode with MOCK_NEWSLETTER=true, create real database entries for testing
+3. Handle both pending and confirmed states properly
+4. Implement proper error handling for database operations
+5. Use proper logging for subscription and confirmation processes
+
+## Development Mode Testing
+
+When testing in development mode:
+
+- Set MOCK_NEWSLETTER=true in .env
+- Create real subscribers in the database for testing
+- Use pending status during subscription
+- Update to confirmed status during confirmation
+- Ensure subscribers appear in the admin dashboard
+
+## Newsletter Subscriber Model
+
+The newsletter subscriber model has the following fields:
+
+- id: string (cuid)
+- email: string (unique)
+- name: string (optional)
+- tags: string[]
+- confirmed: boolean
+- confirmedAt: DateTime (optional)
+- status: string (pending, confirmed, unsubscribed)
+- token: string (for confirmation)
+- tokenExpiry: DateTime
+- source: string (optional)
+
+## NextJS 15 Dynamic Route Parameters (March 16, 2025)
+
+In Next.js 15, dynamic route parameters are now asynchronous and must be awaited before use. This is a breaking change from previous versions.
+
+### Correct Pattern for API Routes
+
+```typescript
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Await the params object to get the id
+  const { id } = await params;
+
+  // Use the id parameter
+  // ...
+}
+```
+
+### Common Errors
+
+- Using `params.id` directly without awaiting params first
+- Not typing params as a Promise
+- Not destructuring the id after awaiting params
+
+### Best Practices
+
+- Always type params as `Promise<{ paramName: string }>`
+- Always await params before accessing its properties
+- Use destructuring to extract parameters after awaiting
+- Add proper error handling for asynchronous operations
+
+## Redis Rate Limiting (March 16, 2025)
+
+When using Upstash Redis for rate limiting, use the string format for duration:
+
+```typescript
+const limiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(limit, `${windowInSeconds} s`),
+  analytics: true,
+  prefix: `rate_limit_${endpoint}`,
+});
+```
+
+## Admin Dashboard Error Handling (March 16, 2025)
+
+- Always add try-catch blocks for all API calls
+- Provide fallback values when data is missing or undefined
+- Check for database table existence before querying
+- Initialize default values for all data variables
+- Use optional chaining for potentially null values
+- Return 200 status with error details instead of 500 errors
+
+## UI Component Rules (March 16, 2025)
+
+- Ensure all SelectItem components have non-empty values (use "all" instead of empty string)
+- Provide fallback UI states when data is missing or loading
+- Ensure consistent button heights and alignment
+- Use responsive design for all components, especially admin interfaces
