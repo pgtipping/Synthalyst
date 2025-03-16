@@ -2078,3 +2078,25 @@ To use the web search capability, the following environment variables must be se
 - Search results are included in the system prompt if available
 - The model combines web search results with its own knowledge to provide accurate answers
 - If web search fails or returns no results, the model falls back to its own knowledge
+
+## Knowledge GPT Improvements (March 16, 2025)
+
+The Knowledge GPT feature has been enhanced with several improvements:
+
+1. **Smart Web Search Detection**: Added logic to only use web search when necessary, avoiding unnecessary API calls for:
+
+   - Simple math questions (e.g., "what is 20 + 15?")
+   - Basic definition questions (e.g., "what is a prime number?")
+   - Questions about the assistant itself (e.g., "who are you?")
+
+2. **Improved Text Formatting**:
+
+   - Updated system prompt to instruct the LLM to use proper formatting without asterisks
+   - Added client-side formatting to properly render bold text and lists
+   - Implemented HTML rendering for assistant messages using dangerouslySetInnerHTML
+
+3. **Enhanced Loading Animation**:
+   - Replaced the spinning icon with the three dots animation for better UX
+   - Used the LoadingDots component for consistent loading indicators
+
+These improvements enhance the user experience by providing better formatted responses and more efficient API usage.

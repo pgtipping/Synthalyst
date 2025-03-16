@@ -33,32 +33,39 @@ export async function POST(req: NextRequest) {
     let searchError = null;
 
     if (type === "knowledge") {
-      try {
-        // Call the web search API
-        const searchResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/web-search`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ query: question }),
-          }
-        );
+      // Check if the question likely needs web search
+      const needsWebSearch = shouldUseWebSearch(question);
 
-        const searchData = await searchResponse.json();
-
-        if (searchData.results && searchData.results.length > 0) {
-          searchResults = searchData.results;
-          console.log(
-            `Found ${searchResults.length} search results for question`
+      if (needsWebSearch) {
+        try {
+          // Call the web search API
+          const searchResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/web-search`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ query: question }),
+            }
           );
-        } else if (searchData.error) {
-          searchError = searchData.error;
-          console.warn(`Search error: ${searchError}`);
+
+          const searchData = await searchResponse.json();
+
+          if (searchData.results && searchData.results.length > 0) {
+            searchResults = searchData.results;
+            console.log(
+              `Found ${searchResults.length} search results for question`
+            );
+          } else if (searchData.error) {
+            searchError = searchData.error;
+            console.warn(`Search error: ${searchError}`);
+          }
+        } catch (error) {
+          console.error("Error fetching search results:", error);
         }
-      } catch (error) {
-        console.error("Error fetching search results:", error);
+      } else {
+        console.log("Skipping web search for this question type");
       }
     }
 
@@ -71,6 +78,18 @@ export async function POST(req: NextRequest) {
       
 Important: Always provide the most current information available. For example, as of 2025, Donald Trump is the President of the United States (having won the 2024 election).
 
+Only use the web search results when:
+1. The question is about current events or recent information that might have changed since your training data
+2. The question requires very specific or factual information that you're uncertain about
+3. The question explicitly asks for the latest information on a topic
+
+For general knowledge questions, common facts, or conceptual explanations that don't require up-to-date information, rely on your built-in knowledge instead of web search results.
+
+FORMATTING INSTRUCTIONS:
+- Do NOT use markdown formatting with asterisks (**) for bold text
+- Use proper numbered lists (1., 2., 3.) instead of asterisks for numbered points
+- Use proper bullet points (•) for bullet lists instead of asterisks
+- Format your response with clean paragraphs and proper spacing
 `;
 
       // Add search results to the prompt if available
@@ -161,4 +180,57 @@ Based on the above information and your knowledge, please provide accurate infor
       { status: 200 } // Return 200 with error message in content
     );
   }
+}
+
+// Helper function to determine if a question likely needs web search
+function shouldUseWebSearch(question: string): boolean {
+  // Convert to lowercase for easier matching
+  const q = question.toLowerCase();
+
+  // Skip web search for simple math questions
+  if (q.match(/what is \d+\s*[\+\-\*\/]\s*\d+/)) {
+    return false;
+  }
+
+  // Skip for basic definition questions that don't need current info
+  if (q.match(/^what is (a|an|the) /)) {
+    return false;
+  }
+
+  // Skip for questions about the assistant itself
+  if (q.includes("who are you") || q.includes("what are you")) {
+    return false;
+  }
+
+  // Keywords that suggest current events or time-sensitive information
+  const currentEventKeywords = [
+    "president",
+    "election",
+    "latest",
+    "recent",
+    "current",
+    "today",
+    "news",
+    "covid",
+    "pandemic",
+    "war",
+    "crisis",
+    "stock",
+    "price",
+    "weather",
+    "released",
+    "announced",
+    "launched",
+    "update",
+  ];
+
+  // Check if any current event keywords are present
+  for (const keyword of currentEventKeywords) {
+    if (q.includes(keyword)) {
+      return true;
+    }
+  }
+
+  // Default to using web search for most questions
+  return true;
 }

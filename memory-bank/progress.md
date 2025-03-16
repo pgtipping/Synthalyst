@@ -62,6 +62,10 @@
 - Added web search capability to Knowledge GPT for up-to-date information
 - Updated system prompts to include current information
 - Implemented Google Custom Search API integration
+- Improved Knowledge GPT with smart web search detection to avoid unnecessary API calls
+- Enhanced text formatting in Knowledge GPT responses to properly display bold text and lists
+- Updated loading animation to use three dots instead of spinning icon for better UX
+- Added client-side formatting to properly render content with HTML formatting
 
 ### In Progress
 

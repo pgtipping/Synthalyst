@@ -4,14 +4,32 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Loader2, Send, Info } from "lucide-react";
+import { Send, Info } from "lucide-react";
 import {
   LanguageSelector,
   LanguageInfo,
 } from "@/components/ui/language-selector";
+import { LoadingDots } from "@/components/ui/loading-dots";
 
 // Define the KNOWLEDGE_MODEL constant
 const KNOWLEDGE_MODEL = "KNOWLEDGE_MODEL";
+
+// Function to convert asterisks to proper HTML formatting
+function formatMessageContent(content: string): string {
+  // Replace **text** with <strong>text</strong>
+  let formatted = content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+  // Replace bullet points with proper HTML bullets
+  formatted = formatted.replace(/^\s*\*\s+(.+)$/gm, "<li>$1</li>");
+
+  // Wrap bullet lists in <ul> tags
+  formatted = formatted.replace(
+    /<li>(.+)<\/li>(\n<li>(.+)<\/li>)+/g,
+    "<ul>$&</ul>"
+  );
+
+  return formatted;
+}
 
 export default function KnowledgeGPT() {
   const [question, setQuestion] = useState("");
@@ -197,7 +215,16 @@ export default function KnowledgeGPT() {
                       : "bg-card border"
                   }`}
                 >
-                  <div className="whitespace-pre-wrap">{message.content}</div>
+                  {message.role === "assistant" ? (
+                    <div
+                      className="whitespace-pre-wrap"
+                      dangerouslySetInnerHTML={{
+                        __html: formatMessageContent(message.content),
+                      }}
+                    />
+                  ) : (
+                    <div className="whitespace-pre-wrap">{message.content}</div>
+                  )}
                 </div>
               </div>
             ))}
@@ -224,7 +251,7 @@ export default function KnowledgeGPT() {
             disabled={!question.trim() || isLoading}
           >
             {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <LoadingDots className="text-primary-foreground" />
             ) : (
               <Send className="h-5 w-5" />
             )}

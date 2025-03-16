@@ -19,6 +19,12 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Implemented Google Custom Search API integration
    - Updated system prompts to include current information
    - Enhanced UI to inform users about web search capability
+6. **Knowledge GPT Improvements** (March 16, 2025):
+   - Updated loading animation to use three dots instead of spinning icon
+   - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
+   - Added client-side formatting to properly render bold text and lists
+   - Implemented smart web search detection to only use search when necessary
+   - Added logic to skip web search for simple math questions and basic definitions
 
 ### Next Steps
 
