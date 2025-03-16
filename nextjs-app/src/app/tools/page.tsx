@@ -195,10 +195,11 @@ export default function ToolsPage() {
     },
     {
       icon: <UserPlus className="w-8 h-8" />,
-      title: "Induction Program Builder",
-      description: "Create comprehensive induction programs for new employees.",
-      link: existingRoutes.includes("/induction-creator")
-        ? "/induction-creator"
+      title: "AI Onboarder",
+      description:
+        "Seamless starts for every new journey. Create comprehensive onboarding programs for new employees.",
+      link: existingRoutes.includes("/ai-onboarder")
+        ? "/ai-onboarder"
         : "/coming-soon",
       status: "coming-soon",
     },

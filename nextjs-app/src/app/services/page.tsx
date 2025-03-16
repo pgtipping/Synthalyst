@@ -171,7 +171,7 @@ export default function Services() {
           <p className="text-lg text-black leading-relaxed mb-8">
             Upgrade to our premium services for enhanced features, unlimited
             usage, and priority support. Our premium plans are designed for
-            businesses that need more advanced HR solutions.
+            businesses that need more advanced solutions.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

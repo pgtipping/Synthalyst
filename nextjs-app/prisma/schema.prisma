@@ -859,4 +859,23 @@ model LearningContentEntry {
   @@index([contentType])
 }
 
+model EmailLog {
+  id                String    @id @default(cuid())
+  to                String
+  from              String
+  subject           String
+  category          String    @default("general")
+  status            String    @default("pending") // pending, sent, failed
+  provider          String?   // sendgrid, nodemailer
+  providerMessageId String?
+  error             String?
+  sentAt            DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+}
+
 // Knowledge GPT models

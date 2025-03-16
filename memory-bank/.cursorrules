@@ -2185,3 +2185,44 @@ The loading animation in the Knowledge GPT feature has been improved:
    - Removed the loading animation from the send button
 
 This change completes the set of UI improvements for the Knowledge GPT feature, providing a more polished and intuitive user experience.
+
+## Email Service and Admin Dashboard Optimization - March 16, 2025
+
+### Email Service Architecture
+
+- The application uses a unified email service located in `nextjs-app/src/lib/email.ts`
+- Primary email provider is SendGrid with Nodemailer as a fallback
+- All email activities are logged in the database using the `EmailLog` model
+- Email logs include status tracking (pending, sent, failed)
+- Email categories are used to organize different types of emails (contact_form, feedback_alert, etc.)
+
+### Feedback API Implementation
+
+- Feedback submissions are stored directly in the database using the `AppFeedback` model
+- Rate limiting is implemented using LRU cache to prevent abuse
+- The rate limiter is configured to allow 5 submissions per minute per IP address
+- The `FeedbackButton` component handles the UI for collecting user feedback
+- Low ratings (1-2 stars) trigger admin notification emails
+
+### Admin Dashboard Structure
+
+- Admin pages use a responsive layout with a sidebar navigation
+- The `AdminLayout` component in `nextjs-app/src/components/admin/AdminLayout.tsx` provides the base structure
+- Mobile support includes a collapsible sidebar and adapted layout
+- The Email Logs page includes filtering, pagination, and statistics
+- Admin navigation is defined in both `nextjs-app/src/app/admin/layout.tsx` and `AdminLayout.tsx`
+
+### Email Logs Dashboard Features
+
+- Filtering by status (sent, failed, pending) and category
+- Statistics for email status distribution and top categories
+- Pagination for navigating through large sets of logs
+- Dedicated section for failed emails with error details
+- Functionality to delete logs older than a specified date
+- Responsive design that works well on both desktop and mobile
+
+### Database Schema Updates
+
+- Added `EmailLog` model to the Prisma schema
+- The model includes fields for tracking email status, provider, and error messages
+- Prisma migration is needed to apply the schema changes to the database

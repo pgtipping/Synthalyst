@@ -1,45 +1,175 @@
 import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
+
+// Initialize SendGrid
+let sendgridInitialized = false;
+try {
+  if (process.env.SENDGRID_API_KEY) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    sendgridInitialized = true;
+    logger.info("SendGrid API key set successfully");
+  } else {
+    logger.warn("SendGrid API key not found. Falling back to Nodemailer.");
+  }
+} catch (error) {
+  logger.error("Error initializing SendGrid:", error);
+}
 
 interface EmailOptions {
-  to: string;
+  to: string | string[];
   subject: string;
   text: string;
   html?: string;
   from?: string;
   replyTo?: string;
+  attachments?: Array<{
+    content?: string;
+    filename?: string;
+    type?: string;
+    disposition?: string;
+    contentId?: string;
+  }>;
+  templateId?: string;
+  dynamicTemplateData?: Record<string, string | number | boolean | null>;
+  category?: string;
 }
 
+/**
+ * Unified email sending function that uses SendGrid with Nodemailer fallback
+ */
 export async function sendEmail({
   to,
   subject,
   text,
   html,
-  from = process.env.EMAIL_FROM || "noreply@synthalyst.com",
+  from = process.env.SENDGRID_FROM_EMAIL || "noreply@synthalyst.com",
   replyTo = process.env.EMAIL_REPLY_TO || "support@synthalyst.com",
+  attachments = [],
+  templateId,
+  dynamicTemplateData,
+  category = "general",
 }: EmailOptions) {
-  // Create a transporter
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_SERVER_HOST,
-    port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
-    secure: process.env.EMAIL_SERVER_SECURE === "true",
-    auth: {
-      user: process.env.EMAIL_SERVER_USER,
-      pass: process.env.EMAIL_SERVER_PASSWORD,
-    },
-  });
+  try {
+    // Track email sending in database
+    const emailLog = await prisma.emailLog.create({
+      data: {
+        to: Array.isArray(to) ? to.join(", ") : to,
+        subject,
+        from,
+        category,
+        status: "pending",
+      },
+    });
 
-  // Send the email
-  const info = await transporter.sendMail({
-    from,
-    to,
-    replyTo,
-    subject,
-    text,
-    html: html || text.replace(/\n/g, "<br>"),
-  });
+    // Try SendGrid first if available
+    if (sendgridInitialized) {
+      const msg = {
+        to,
+        from,
+        subject,
+        text,
+        html: html || text.replace(/\n/g, "<br>"),
+        replyTo,
+        attachments,
+        templateId,
+        dynamicTemplateData,
+        category: [category],
+        trackingSettings: {
+          clickTracking: { enable: false },
+          openTracking: { enable: true },
+        },
+        customArgs: {
+          emailLogId: emailLog.id,
+        },
+      };
 
-  return info;
+      const response = await sgMail.send(msg);
+
+      // Update email log with success
+      await prisma.emailLog.update({
+        where: { id: emailLog.id },
+        data: {
+          status: "sent",
+          provider: "sendgrid",
+          providerMessageId: response[0]?.headers["x-message-id"] || null,
+          sentAt: new Date(),
+        },
+      });
+
+      logger.info("Email sent successfully via SendGrid", {
+        to: Array.isArray(to) ? to.join(", ") : to,
+        subject,
+        category,
+        emailLogId: emailLog.id,
+      });
+
+      return { success: true, provider: "sendgrid", emailLogId: emailLog.id };
+    }
+
+    // Fall back to Nodemailer if SendGrid is not available
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_SERVER_HOST,
+      port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
+      secure: process.env.EMAIL_SERVER_SECURE === "true",
+      auth: {
+        user: process.env.EMAIL_SERVER_USER,
+        pass: process.env.EMAIL_SERVER_PASSWORD,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from,
+      to,
+      replyTo,
+      subject,
+      text,
+      html: html || text.replace(/\n/g, "<br>"),
+      attachments: attachments.map((attachment) => ({
+        filename: attachment.filename,
+        content: attachment.content,
+        contentType: attachment.type,
+      })),
+    });
+
+    // Update email log with success
+    await prisma.emailLog.update({
+      where: { id: emailLog.id },
+      data: {
+        status: "sent",
+        provider: "nodemailer",
+        providerMessageId: info.messageId || null,
+        sentAt: new Date(),
+      },
+    });
+
+    logger.info("Email sent successfully via Nodemailer", {
+      to: Array.isArray(to) ? to.join(", ") : to,
+      subject,
+      category,
+      emailLogId: emailLog.id,
+    });
+
+    return { success: true, provider: "nodemailer", emailLogId: emailLog.id };
+  } catch (error) {
+    logger.error("Failed to send email:", error);
+
+    // Update email log with failure
+    try {
+      await prisma.emailLog.update({
+        where: { id: emailLog.id },
+        data: {
+          status: "failed",
+          error: error.message || "Unknown error",
+        },
+      });
+    } catch (logError) {
+      logger.error("Failed to update email log:", logError);
+    }
+
+    return { success: false, error: error.message || "Failed to send email" };
+  }
 }
 
 // Function to parse incoming emails and create contact submissions
@@ -129,7 +259,7 @@ export async function processInboundEmail(email: {
       submissionId: newSubmission.id,
     };
   } catch (error) {
-    console.error("Error processing inbound email:", error);
+    logger.error("Error processing inbound email:", error);
     return {
       success: false,
       error: "Failed to process inbound email",
@@ -143,26 +273,28 @@ export async function sendContactReply(
   subject: string,
   htmlMessage: string,
   fromName: string = "Synthalyst Support",
-  fromEmail: string = process.env.EMAIL_FROM || "noreply@synthalyst.com",
+  fromEmail: string = process.env.SENDGRID_FROM_EMAIL ||
+    "noreply@synthalyst.com",
   replyToEmail: string = process.env.EMAIL_REPLY_TO || "support@synthalyst.com"
 ) {
   try {
     // Create a formatted from address with name
     const from = `${fromName} <${fromEmail}>`;
 
-    // Send the email using the existing sendEmail function
-    await sendEmail({
+    // Send the email using the unified sendEmail function
+    const result = await sendEmail({
       to,
       subject,
       text: htmlMessage.replace(/<br>/g, "\n").replace(/<[^>]*>/g, ""), // Convert HTML to plain text
       html: htmlMessage,
       from,
       replyTo: replyToEmail,
+      category: "contact_reply",
     });
 
-    return true;
+    return result.success;
   } catch (error) {
-    console.error("Error sending contact reply:", error);
+    logger.error("Error sending contact reply:", error);
     return false;
   }
 }

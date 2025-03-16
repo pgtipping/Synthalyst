@@ -44,7 +44,7 @@ export default function GetStarted() {
       number: 3,
       title: "Customize Settings",
       description:
-        "Configure your tools to match your organization&apos;s specific requirements.",
+        "Configure your tools to match your organization's specific requirements.",
       icon: <Settings className="w-6 h-6" />,
       action: {
         text: "Learn More",
@@ -55,11 +55,11 @@ export default function GetStarted() {
       number: 4,
       title: "Start Using Synthalyst",
       description:
-        "Begin using our tools to enhance your productivity and streamline your HR operations.",
+        "Begin using our tools to enhance your productivity and streamline your operations.",
       icon: <Zap className="w-6 h-6" />,
       action: {
         text: "Get Started",
-        link: "/login",
+        link: "/tools",
       },
     },
   ];
@@ -109,7 +109,7 @@ export default function GetStarted() {
           </h1>
           <p className="text-xl md:text-2xl leading-relaxed max-w-3xl">
             Follow these simple steps to start using our AI-powered tools and
-            transform your HR operations.
+            transform your business operations.
           </p>
         </div>
 
@@ -197,7 +197,7 @@ export default function GetStarted() {
             <h3 className="text-xl font-semibold mb-4">AI-Powered</h3>
             <p className="text-gray-600 mb-4">
               Leverage the power of artificial intelligence to automate and
-              enhance your HR processes.
+              enhance your business processes.
             </p>
             <div className="flex items-center text-blue-600">
               <Zap className="w-5 h-5 mr-2" />
@@ -208,8 +208,8 @@ export default function GetStarted() {
           <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-600">
             <h3 className="text-xl font-semibold mb-4">Customizable</h3>
             <p className="text-gray-600 mb-4">
-              Tailor our tools to match your organization&apos;s specific needs
-              and requirements.
+              We can tailor our tools to match your organization&apos; specific
+              needs and requirements.
             </p>
             <div className="flex items-center text-blue-600">
               <Zap className="w-5 h-5 mr-2" />
@@ -245,7 +245,7 @@ export default function GetStarted() {
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-xl mb-8 max-w-3xl mx-auto">
             Join the growing number of organizations already using Synthalyst to
-            streamline their HR processes.
+            streamline their business processes.
           </p>
           <Link href="/login">
             <Button

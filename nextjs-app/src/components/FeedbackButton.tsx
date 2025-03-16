@@ -74,37 +74,19 @@ export default function FeedbackButton({
 
       const data = await response.json();
 
-      if (!response.ok && response.status >= 400) {
-        throw new Error(data.error || "Failed to submit feedback");
-      }
-
-      // Handle fallback case
-      if (data.fallback) {
-        // Store in localStorage as a temporary solution
-        try {
-          const storedFeedback = localStorage.getItem("app_feedback") || "[]";
-          const feedbackArray = JSON.parse(storedFeedback);
-          feedbackArray.push({
-            appName,
-            rating,
-            feedback,
-            createdAt: new Date().toISOString(),
-          });
-          localStorage.setItem("app_feedback", JSON.stringify(feedbackArray));
-        } catch (storageError) {
-          console.error(
-            "Error storing feedback in localStorage:",
-            storageError
+      if (!response.ok) {
+        // Handle rate limiting
+        if (response.status === 429) {
+          throw new Error(
+            "Too many feedback submissions. Please try again later."
           );
         }
 
-        toast.success(
-          "Thank you for your feedback! It will be saved locally until our database is available."
-        );
-      } else {
-        toast.success("Thank you for your feedback!");
+        // Handle other errors
+        throw new Error(data.error || "Failed to submit feedback");
       }
 
+      toast.success("Thank you for your feedback!");
       setIsOpen(false);
 
       // Reset the form
@@ -113,7 +95,11 @@ export default function FeedbackButton({
       setStep("rating");
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      toast.error("Failed to submit feedback. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit feedback. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }

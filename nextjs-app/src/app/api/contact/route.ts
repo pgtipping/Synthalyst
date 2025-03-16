@@ -3,6 +3,7 @@ import { z } from "zod";
 import { validateRequest, handleAPIError } from "@/lib/middleware";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email";
 
 // Updated schema to match the enhanced contact form
 const contactSchema = z.object({
@@ -57,24 +58,71 @@ export async function POST(request: Request) {
           : formData.message,
     });
 
-    // Here you would typically integrate with your email service
-    // For example, using nodemailer, SendGrid, or another email service
+    // Send notification email to admin
+    const adminNotificationResult = await sendEmail({
+      to: process.env.ADMIN_EMAIL || "support@synthalyst.com",
+      from: "Synthalyst Contact Form <noreply@synthalyst.com>",
+      subject: `New Contact Form: ${formData.subject}`,
+      text: `
+        Name: ${formData.name}
+        Email: ${formData.email}
+        Company: ${formData.company || "Not provided"}
+        Phone: ${formData.phone || "Not provided"}
+        Inquiry Type: ${formData.inquiryType}
+        Message: ${formData.message}
+        
+        View in admin: ${
+          process.env.NEXT_PUBLIC_APP_URL
+        }/admin/contact-submissions/${submission.id}
+      `,
+      category: "contact_form_notification",
+    });
 
-    // TODO: Add actual email sending logic here
-    // Example with SendGrid or similar service:
-    // await sendEmail({
-    //   to: "support@synthalyst.com",
-    //   from: "no-reply@synthalyst.com",
-    //   subject: `New Contact Form: ${formData.subject}`,
-    //   text: `
-    //     Name: ${formData.name}
-    //     Email: ${formData.email}
-    //     Company: ${formData.company || "Not provided"}
-    //     Phone: ${formData.phone || "Not provided"}
-    //     Inquiry Type: ${formData.inquiryType}
-    //     Message: ${formData.message}
-    //   `,
-    // });
+    if (!adminNotificationResult.success) {
+      logger.warn("Failed to send admin notification email", {
+        error: adminNotificationResult.error,
+        submissionId: submission.id,
+      });
+    }
+
+    // Send auto-response to the user
+    const autoResponseResult = await sendEmail({
+      to: formData.email,
+      from: "Synthalyst Support <support@synthalyst.com>",
+      subject: `We've received your message: ${formData.subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4a6cf7;">Thank you for contacting Synthalyst</h2>
+          <p>Hello ${formData.name},</p>
+          <p>We've received your message and our team will review it shortly. Here's a summary of what you sent us:</p>
+          
+          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Subject:</strong> ${formData.subject}</p>
+            <p><strong>Inquiry Type:</strong> ${formData.inquiryType}</p>
+            <p><strong>Message:</strong></p>
+            <p style="white-space: pre-line;">${formData.message}</p>
+          </div>
+          
+          <p>We typically respond within 1-2 business days. If your matter is urgent, please call us at ${
+            process.env.SUPPORT_PHONE || "+1 (555) 123-4567"
+          }.</p>
+          
+          <p>Best regards,<br>The Synthalyst Team</p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+            <p>This is an automated response to your inquiry. Please do not reply to this email.</p>
+          </div>
+        </div>
+      `,
+      category: "contact_form_auto_response",
+    });
+
+    if (!autoResponseResult.success) {
+      logger.warn("Failed to send auto-response email", {
+        error: autoResponseResult.error,
+        submissionId: submission.id,
+      });
+    }
 
     return NextResponse.json(
       {

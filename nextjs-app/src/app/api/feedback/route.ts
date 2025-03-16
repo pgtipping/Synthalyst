@@ -2,292 +2,173 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import fs from "fs";
-import path from "path";
+import { logger } from "@/lib/logger";
+import { z } from "zod";
+import { sendEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limiter";
 
-// Define the path for storing feedback data
-// Ensure the file is always stored in the nextjs-app directory
-const feedbackFilePath = path.resolve(
-  process.cwd().includes("nextjs-app")
-    ? process.cwd()
-    : path.join(process.cwd(), "nextjs-app"),
-  "feedback-data.json"
-);
+// Define the feedback schema
+const feedbackSchema = z.object({
+  appName: z.string().min(1, "App name is required"),
+  rating: z.number().min(1).max(5),
+  feedback: z.string().optional(),
+});
 
-console.log(`Feedback file path: ${feedbackFilePath}`);
-console.log(`Current working directory: ${process.cwd()}`);
-
-// Define the feedback item interface
-interface FeedbackItem {
-  id: string;
-  appName: string;
-  rating: number;
-  feedback?: string;
-  userId?: string | null;
-  userEmail?: string | null;
-  createdAt: string;
-}
-
-// Define a type for Prisma with AppFeedback
-type PrismaWithAppFeedback = typeof prisma & {
-  appFeedback: {
-    create: (args: {
-      data: {
-        appName: string;
-        rating: number;
-        feedback: string;
-        user?: {
-          connect: {
-            id: string;
-          };
-        };
-      };
-    }) => Promise<{ id: string }>;
-    findMany: (args?: {
-      where?: { appName?: string };
-      orderBy?: { createdAt: "asc" | "desc" };
-    }) => Promise<
-      Array<{
-        id: string;
-        appName: string;
-        rating: number;
-        feedback: string;
-        createdAt: Date;
-        user?: { id: string; email: string } | null;
-      }>
-    >;
-    groupBy: (args: {
-      by: string[];
-      _avg?: { rating: true };
-      where?: { appName?: string };
-    }) => Promise<
-      Array<{
-        appName: string;
-        _avg: { rating: number } | null;
-      }>
-    >;
-  };
-};
-
-// Helper function to read feedback data from file
-function readFeedbackData(): FeedbackItem[] {
-  try {
-    console.log(`Reading feedback data from ${feedbackFilePath}`);
-    console.log(`File exists: ${fs.existsSync(feedbackFilePath)}`);
-
-    if (fs.existsSync(feedbackFilePath)) {
-      const data = fs.readFileSync(feedbackFilePath, "utf8");
-      console.log(`Read data length: ${data.length}`);
-      console.log(`Raw data: "${data}"`);
-
-      if (!data || data.trim() === "") {
-        console.log("File exists but is empty, returning empty array");
-        return [];
-      }
-
-      try {
-        const parsed = JSON.parse(data);
-        console.log(`Parsed data: ${JSON.stringify(parsed)}`);
-        return parsed;
-      } catch (parseError) {
-        console.error(`Error parsing JSON: ${parseError}`);
-        return [];
-      }
-    }
-
-    console.log(`File does not exist, creating empty file`);
-    fs.writeFileSync(feedbackFilePath, JSON.stringify([]));
-    return [];
-  } catch (error) {
-    console.error(`Error reading feedback data: ${error}`);
-    console.error(`Error stack: ${(error as Error).stack}`);
-  }
-  return [];
-}
-
-// Helper function to write feedback data to file
-function writeFeedbackData(data: FeedbackItem[]) {
-  try {
-    console.log(`Writing feedback data to ${feedbackFilePath}`);
-    console.log(`Data to write: ${JSON.stringify(data, null, 2)}`);
-
-    // Create directory if it doesn't exist
-    const dir = path.dirname(feedbackFilePath);
-    if (!fs.existsSync(dir)) {
-      console.log(`Creating directory: ${dir}`);
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    // Write data to file
-    fs.writeFileSync(feedbackFilePath, JSON.stringify(data, null, 2));
-
-    // Verify the file was written correctly
-    const fileExists = fs.existsSync(feedbackFilePath);
-    console.log(`File exists after write: ${fileExists}`);
-
-    if (fileExists) {
-      const writtenData = fs.readFileSync(feedbackFilePath, "utf8");
-      console.log(`Written data length: ${writtenData.length}`);
-      console.log(`Written data: "${writtenData}"`);
-    }
-
-    console.log(`Successfully wrote feedback data to ${feedbackFilePath}`);
-    return true;
-  } catch (error) {
-    console.error(`Error writing feedback data: ${error}`);
-    console.error(`Error stack: ${(error as Error).stack}`);
-    return false;
-  }
-}
+// Rate limiter for feedback submissions
+const limiter = rateLimit({
+  interval: 60 * 1000, // 1 minute
+  uniqueTokenPerInterval: 10, // Max 10 users per second
+});
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  const { appName, rating, feedback } = await request.json();
-
-  if (!appName || !rating) {
-    return NextResponse.json(
-      { error: "App name and rating are required" },
-      { status: 400 }
-    );
-  }
-
-  // Try to use Prisma if available
   try {
-    const prismaWithFeedback = prisma as PrismaWithAppFeedback;
+    // Get client IP for rate limiting
+    const ip = request.headers.get("x-forwarded-for") || "anonymous";
 
-    if (prismaWithFeedback.appFeedback) {
-      const feedbackEntry = await prismaWithFeedback.appFeedback.create({
-        data: {
-          appName,
-          rating,
-          feedback: feedback || "",
-          // Connect to user if session exists, otherwise leave as null
-          ...(session?.user?.id
-            ? {
-                user: {
-                  connect: {
-                    id: session.user.id,
-                  },
-                },
-              }
-            : {}),
-        },
-      });
-
+    // Apply rate limiting - 5 requests per minute per IP
+    try {
+      await limiter.check(5, ip);
+    } catch {
+      logger.warn("Rate limit exceeded for feedback submission", { ip });
       return NextResponse.json(
-        { message: "Feedback submitted successfully", id: feedbackEntry.id },
-        { status: 201 }
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
       );
     }
-  } catch (prismaError) {
-    console.error("Prisma error:", prismaError);
-    // Fall through to file-based storage
-  }
 
-  // Fallback to file-based storage
-  try {
-    console.log("Falling back to file-based storage");
-    const feedbackData = readFeedbackData();
-    console.log(`Current feedback data: ${JSON.stringify(feedbackData)}`);
+    // Parse request body
+    const body = await request.json();
 
-    // Generate a more unique ID
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 9);
-    const feedbackId = `feedback_${timestamp}_${randomStr}`;
-
-    const newFeedback: FeedbackItem = {
-      id: feedbackId,
-      appName,
-      rating,
-      feedback,
-      userId: session?.user?.id || null,
-      userEmail: session?.user?.email || null,
-      createdAt: new Date().toISOString(),
-    };
-    console.log(`New feedback: ${JSON.stringify(newFeedback)}`);
-    feedbackData.push(newFeedback);
-    const success = writeFeedbackData(feedbackData);
-
-    if (success) {
+    // Validate the request body
+    const validationResult = feedbackSchema.safeParse(body);
+    if (!validationResult.success) {
+      logger.warn("Invalid feedback submission", {
+        errors: validationResult.error.errors,
+      });
       return NextResponse.json(
         {
-          message: "Feedback submitted successfully (file storage)",
-          id: newFeedback.id,
-          fallback: true,
+          error: "Invalid feedback data",
+          details: validationResult.error.errors,
         },
-        { status: 201 }
-      );
-    } else {
-      return NextResponse.json(
-        { error: "Failed to save feedback to file" },
-        { status: 500 }
+        { status: 400 }
       );
     }
-  } catch (error) {
-    console.error(`Error saving feedback: ${error}`);
-    console.error(`Error stack: ${(error as Error).stack}`);
+
+    const { appName, rating, feedback } = validationResult.data;
+
+    // Get user session if available
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    const userEmail = session?.user?.email;
+
+    // Create feedback in database
+    const feedbackEntry = await prisma.appFeedback.create({
+      data: {
+        appName,
+        rating,
+        feedback: feedback || "",
+        ...(userId ? { user: { connect: { id: userId } } } : {}),
+      },
+    });
+
+    logger.info("Feedback submitted successfully", {
+      id: feedbackEntry.id,
+      appName,
+      rating,
+      userEmail: userEmail || "anonymous",
+    });
+
+    // Send notification email for low ratings (1-2)
+    if (rating <= 2) {
+      await sendEmail({
+        to: process.env.ADMIN_EMAIL || "support@synthalyst.com",
+        subject: `Low Rating Alert: ${appName} (${rating}/5)`,
+        text: `
+          A user has submitted a low rating for ${appName}.
+          
+          Rating: ${rating}/5
+          Feedback: ${feedback || "No feedback provided"}
+          User: ${userEmail || "Anonymous"}
+          
+          You may want to follow up on this feedback.
+        `,
+        category: "feedback_alert",
+      });
+    }
+
     return NextResponse.json(
-      { error: "Failed to save feedback" },
+      { success: true, id: feedbackEntry.id },
+      { status: 200 }
+    );
+  } catch (error) {
+    logger.error("Error processing feedback", error);
+    return NextResponse.json(
+      { error: "Failed to process feedback" },
       { status: 500 }
     );
   }
 }
 
 export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  const { searchParams } = new URL(request.url);
-  const appName = searchParams.get("appName");
-
-  // Only allow admins to access feedback data
-  if (
-    !session?.user?.email ||
-    !session.user.email.endsWith("@synthalyst.com")
-  ) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-  }
-
-  // Try to get feedback data from Prisma
   try {
-    const prismaWithFeedback = prisma as PrismaWithAppFeedback;
+    // Get query parameters
+    const { searchParams } = new URL(request.url);
+    const appName = searchParams.get("appName");
 
-    if (prismaWithFeedback.appFeedback) {
-      const feedbackItems = await prismaWithFeedback.appFeedback.findMany(
-        appName
-          ? {
-              where: { appName },
-              orderBy: { createdAt: "desc" },
-            }
-          : { orderBy: { createdAt: "desc" } }
-      );
-
-      if (feedbackItems.length > 0) {
-        return NextResponse.json({ feedback: feedbackItems });
-      }
-    }
-  } catch (prismaError) {
-    console.error("Prisma error:", prismaError);
-    // Fall through to file-based storage
-  }
-
-  // Fallback to file-based storage
-  try {
-    let feedbackData = readFeedbackData();
-
-    if (appName) {
-      feedbackData = feedbackData.filter(
-        (item: FeedbackItem) => item.appName === appName
+    // Only allow authenticated admin users to access feedback data
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
-    // Sort by createdAt in descending order
-    feedbackData.sort(
-      (a: FeedbackItem, b: FeedbackItem) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    // Check if user is an admin
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { role: true },
+    });
 
-    return NextResponse.json({ feedback: feedbackData });
+    if (user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized access" },
+        { status: 403 }
+      );
+    }
+
+    // Query parameters for filtering
+    const whereClause = appName ? { appName } : {};
+
+    // Get feedback data
+    const feedback = await prisma.appFeedback.findMany({
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Get average ratings
+    const averageRatings = await prisma.appFeedback.groupBy({
+      by: ["appName"],
+      _avg: {
+        rating: true,
+      },
+      where: whereClause,
+    });
+
+    return NextResponse.json({
+      feedback,
+      averageRatings,
+    });
   } catch (error) {
-    console.error("Error retrieving feedback:", error);
+    logger.error("Error retrieving feedback", error);
     return NextResponse.json(
       { error: "Failed to retrieve feedback" },
       { status: 500 }

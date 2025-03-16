@@ -10,6 +10,8 @@ import {
   BarChart,
   Settings,
   Star,
+  Inbox,
+  MailCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -40,6 +42,16 @@ const adminNavItems = [
     title: "Communications",
     href: "/admin/communications",
     icon: MessageSquare,
+  },
+  {
+    title: "Contact Submissions",
+    href: "/admin/contact-submissions",
+    icon: Inbox,
+  },
+  {
+    title: "Email Logs",
+    href: "/admin/email-logs",
+    icon: MailCheck,
   },
   {
     title: "Blog",

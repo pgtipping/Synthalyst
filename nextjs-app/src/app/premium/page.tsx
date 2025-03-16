@@ -17,8 +17,8 @@ export default function PremiumPage() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Upgrade to Premium</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Unlock powerful features to streamline your HR processes and get the
-          most out of Synthalyst&apos;s AI-powered tools.
+          Unlock powerful features to streamline your business processes and get
+          the most out of Synthalyst&apos; AI-powered tools.
         </p>
       </div>
 

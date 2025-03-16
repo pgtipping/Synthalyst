@@ -868,7 +868,7 @@ export default function CompetencyManager() {
                               Include any specific skills, knowledge, or
                               requirements that are essential for this role.
                               This helps tailor the framework to your
-                              organization&apos;s specific needs.
+                              organization&apos; specific needs.
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -896,7 +896,7 @@ export default function CompetencyManager() {
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="max-w-xs">
-                              Include your organization&apos;s core values to
+                              Include your organization&apos; core values to
                               ensure the competency framework aligns with your
                               culture. This helps create competencies that
                               reinforce your values.
