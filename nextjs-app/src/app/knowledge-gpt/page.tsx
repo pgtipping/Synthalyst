@@ -199,15 +199,17 @@ export default function KnowledgeGPT() {
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  disabled
-                >
-                  <Globe2 className="h-4 w-4 text-muted-foreground" />
-                  <span>Web Search: OFF</span>
-                </Button>
+                <div className="inline-block">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    disabled
+                  >
+                    <Globe2 className="h-4 w-4 text-muted-foreground" />
+                    <span>Web Search: OFF</span>
+                  </Button>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Login to use web search</p>
