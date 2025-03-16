@@ -32,6 +32,12 @@ The current focus is on optimizing the application's backend services, particula
    - Added functionality to delete older logs
    - Updated admin navigation to include the Email Logs page
    - Created a responsive `AdminLayout` component with mobile support
+   - Fixed layout issues with the admin sidebar and main content (March 16, 2025)
+   - Improved mobile responsiveness with proper sidebar toggle controls
+   - Restructured the admin layout to use a flex-based approach for better content positioning
+   - Added a close button to the sidebar for better mobile usability
+   - Made the top navigation bar sticky for better navigation on long pages
+   - Ensured consistent spacing and alignment across all admin pages
 
 4. **Admin Monitoring Fixes** (March 16, 2025):
 

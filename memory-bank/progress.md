@@ -84,6 +84,12 @@
 - Created a dedicated section for failed emails and functionality to delete older logs
 - Updated admin navigation to include the Email Logs page
 - Created a responsive `AdminLayout` component with mobile support
+- Fixed layout issues with the admin sidebar and main content to prevent overlap
+- Improved mobile responsiveness with proper sidebar toggle controls
+- Restructured the admin layout to use a flex-based approach for better content positioning
+- Added a close button to the sidebar for better mobile usability
+- Made the top navigation bar sticky for better navigation on long pages
+- Ensured consistent spacing and alignment across all admin pages
 - Implemented model optimization for Knowledge GPT and Learning Creator
 - Added multilingual support to both features
 - Created a model router service for dynamic model selection
@@ -216,6 +222,11 @@
   - Newsletter subscriber management with filtering and tags
   - Responsive layout with mobile support
   - Sidebar navigation for easy access to different sections
+  - Proper sidebar toggle controls for mobile devices
+  - Sticky top navigation bar for better usability
+  - Flex-based layout structure for better content positioning
+  - Close button in sidebar for improved mobile experience
+  - Consistent spacing and alignment across all admin pages
   - Pagination for large data sets
   - Data visualization for email statistics
   - Robust error handling for API calls and missing data

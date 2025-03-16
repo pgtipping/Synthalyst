@@ -46,13 +46,11 @@ import {
   RefreshCw,
   Trash2,
   Filter,
-  Calendar,
   Mail,
   AlertCircle,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define types
 interface EmailLog {
@@ -238,7 +236,7 @@ export default function EmailLogsPage() {
   if (status === "loading") {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center justify-center h-64">
           <RefreshCw className="h-8 w-8 animate-spin text-primary" />
         </div>
       </AdminLayout>
@@ -251,11 +249,16 @@ export default function EmailLogsPage() {
 
   return (
     <AdminLayout>
-      <div className="container mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Email Logs</h1>
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={fetchLogs}>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">Email Logs</h1>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchLogs}
+              className="flex items-center"
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -264,7 +267,11 @@ export default function EmailLogsPage() {
               onOpenChange={setDeleteDialogOpen}
             >
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="flex items-center"
+                >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete Logs
                 </Button>
@@ -273,18 +280,25 @@ export default function EmailLogsPage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Email Logs</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action will permanently delete email logs older than
-                    the specified date.
+                    This will permanently delete email logs older than the
+                    specified date. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <div className="flex items-center space-x-2 my-4">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <Input
-                    type="date"
-                    value={deleteOlderThan}
-                    onChange={(e) => setDeleteOlderThan(e.target.value)}
-                    placeholder="Select date"
-                  />
+                <div className="py-4">
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="deleteDate"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Delete logs older than:
+                    </label>
+                    <Input
+                      id="deleteDate"
+                      type="date"
+                      value={deleteOlderThan}
+                      onChange={(e) => setDeleteOlderThan(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -297,347 +311,291 @@ export default function EmailLogsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Total Emails Card */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Total Emails</CardTitle>
               <CardDescription>All email logs in the system</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{pagination.total}</div>
+              {loading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-3xl font-bold">{pagination.total}</div>
+              )}
             </CardContent>
           </Card>
 
+          {/* Status Breakdown */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Status Distribution</CardTitle>
-              <CardDescription>Email status breakdown</CardDescription>
+              <CardTitle className="text-lg">Status Breakdown</CardTitle>
+              <CardDescription>Email delivery status</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {stats.map((stat) => (
-                  <Badge
+            <CardContent className="space-y-2">
+              {loading ? (
+                <>
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-full" />
+                </>
+              ) : stats.length > 0 ? (
+                stats.map((stat) => (
+                  <div
                     key={stat.status}
-                    className={`${getStatusBadgeColor(stat.status)} text-white`}
+                    className="flex justify-between items-center"
                   >
-                    {stat.status}: {stat.count}
-                  </Badge>
-                ))}
-              </div>
+                    <div className="flex items-center">
+                      <Badge
+                        className={getStatusBadgeColor(stat.status)}
+                        variant="secondary"
+                      >
+                        {stat.status}
+                      </Badge>
+                    </div>
+                    <span className="font-medium">{stat.count}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-500">No data available</div>
+              )}
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Category Breakdown */}
+          <Card className="col-span-1 md:col-span-2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Top Categories</CardTitle>
-              <CardDescription>Most common email categories</CardDescription>
+              <CardTitle className="text-lg">Category Breakdown</CardTitle>
+              <CardDescription>Email categories</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {categoryStats.slice(0, 5).map((stat) => (
-                  <Badge key={stat.category} variant="outline">
-                    {stat.category}: {stat.count}
-                  </Badge>
-                ))}
-              </div>
+            <CardContent className="space-y-2">
+              {loading ? (
+                <>
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-full" />
+                </>
+              ) : categoryStats.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {categoryStats.map((stat) => (
+                    <div
+                      key={stat.category}
+                      className="flex justify-between items-center"
+                    >
+                      <div className="flex items-center">
+                        <Badge variant="outline">{stat.category}</Badge>
+                      </div>
+                      <span className="font-medium">{stat.count}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500">No data available</div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="logs" className="mb-6">
-          <TabsList>
-            <TabsTrigger value="logs">Email Logs</TabsTrigger>
-            <TabsTrigger value="stats">Detailed Statistics</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="logs">
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <CardTitle>Email Log History</CardTitle>
-                  <div className="flex flex-col md:flex-row gap-2">
-                    <div className="flex items-center space-x-2">
-                      <Filter className="h-4 w-4 text-gray-500" />
-                      <Select
-                        value={statusFilter}
-                        onValueChange={setStatusFilter}
-                      >
-                        <SelectTrigger className="w-[150px]">
-                          <SelectValue placeholder="Filter by status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Statuses</SelectItem>
-                          <SelectItem value="sent">Sent</SelectItem>
-                          <SelectItem value="failed">Failed</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Mail className="h-4 w-4 text-gray-500" />
-                      <Select
-                        value={categoryFilter}
-                        onValueChange={setCategoryFilter}
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Filter by category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
-                          {categoryStats.map((stat) => (
-                            <SelectItem
-                              key={stat.category}
-                              value={stat.category}
-                            >
-                              {stat.category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+        <div className="bg-white rounded-lg border shadow-sm">
+          <div className="p-4 border-b">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h2 className="text-xl font-semibold">Email Log Records</h2>
+              <div className="flex flex-wrap gap-2">
+                <div className="flex items-center space-x-2">
+                  <Filter className="h-4 w-4 text-gray-500" />
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-8 w-[120px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="sent">Sent</SelectItem>
+                      <SelectItem value="failed">Failed</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>To</TableHead>
-                        <TableHead>Subject</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Provider</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {loading ? (
-                        Array.from({ length: 5 }).map((_, index) => (
-                          <TableRow key={index}>
-                            <TableCell>
-                              <Skeleton className="h-4 w-24" />
-                            </TableCell>
-                            <TableCell>
-                              <Skeleton className="h-4 w-32" />
-                            </TableCell>
-                            <TableCell>
-                              <Skeleton className="h-4 w-40" />
-                            </TableCell>
-                            <TableCell>
-                              <Skeleton className="h-4 w-20" />
-                            </TableCell>
-                            <TableCell>
-                              <Skeleton className="h-4 w-16" />
-                            </TableCell>
-                            <TableCell>
-                              <Skeleton className="h-4 w-20" />
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : logs.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-4">
-                            <div className="flex flex-col items-center justify-center text-gray-500">
-                              <Mail className="h-8 w-8 mb-2" />
-                              <p>No email logs found</p>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        logs.map((log) => (
-                          <TableRow key={log.id}>
-                            <TableCell>{formatDate(log.createdAt)}</TableCell>
-                            <TableCell
-                              className="max-w-[200px] truncate"
-                              title={log.to}
-                            >
-                              {log.to}
-                            </TableCell>
-                            <TableCell
-                              className="max-w-[250px] truncate"
-                              title={log.subject}
-                            >
-                              {log.subject}
-                            </TableCell>
-                            <TableCell>{log.category}</TableCell>
-                            <TableCell>
-                              <Badge
-                                className={`${getStatusBadgeColor(
-                                  log.status
-                                )} text-white`}
-                              >
-                                {log.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{log.provider || "N/A"}</TableCell>
-                          </TableRow>
-                        ))
+                <div className="flex items-center space-x-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <Select
+                    value={categoryFilter}
+                    onValueChange={setCategoryFilter}
+                  >
+                    <SelectTrigger className="h-8 w-[120px]">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {categoryStats.map((stat) => (
+                        <SelectItem key={stat.category} value={stat.category}>
+                          {stat.category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>To</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Sent At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[150px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[200px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[100px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[80px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[120px]" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : logs.length > 0 ? (
+                  logs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="font-medium truncate max-w-[150px]">
+                        {log.to}
+                      </TableCell>
+                      <TableCell className="truncate max-w-[200px]">
+                        {log.subject}
+                      </TableCell>
+                      <TableCell>{log.category}</TableCell>
+                      <TableCell>
+                        <Badge
+                          className={getStatusBadgeColor(log.status)}
+                          variant="secondary"
+                        >
+                          {log.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {formatDate(log.sentAt || log.createdAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-4">
+                      <div className="flex flex-col items-center justify-center text-gray-500">
+                        <AlertCircle className="h-8 w-8 mb-2" />
+                        <p>No email logs found</p>
+                        {(statusFilter || categoryFilter) && (
+                          <p className="text-sm mt-1">
+                            Try changing your filters
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Pagination */}
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t">
+              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Showing{" "}
+                    <span className="font-medium">
+                      {(pagination.page - 1) * pagination.limit + 1}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-medium">
+                      {Math.min(
+                        pagination.page * pagination.limit,
+                        pagination.total
                       )}
-                    </TableBody>
-                  </Table>
+                    </span>{" "}
+                    of <span className="font-medium">{pagination.total}</span>{" "}
+                    results
+                  </p>
                 </div>
-
-                {/* Pagination */}
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-500">
-                    Showing {logs.length} of {pagination.total} results
-                  </div>
-                  <div className="flex items-center space-x-2">
+                <div>
+                  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handlePageChange(pagination.page - 1)}
-                      disabled={pagination.page <= 1 || loading}
+                      disabled={pagination.page === 1}
+                      className="rounded-l-md"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="text-sm">
-                      Page {pagination.page} of {pagination.pages}
-                    </span>
+                    {Array.from({ length: pagination.pages }).map((_, i) => (
+                      <Button
+                        key={i}
+                        variant={
+                          pagination.page === i + 1 ? "default" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => handlePageChange(i + 1)}
+                        className="hidden md:inline-flex"
+                      >
+                        {i + 1}
+                      </Button>
+                    ))}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handlePageChange(pagination.page + 1)}
-                      disabled={pagination.page >= pagination.pages || loading}
+                      disabled={pagination.page === pagination.pages}
+                      className="rounded-r-md"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
-                  </div>
+                  </nav>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="stats">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Status Distribution</CardTitle>
-                  <CardDescription>Breakdown of email statuses</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {stats.map((stat) => (
-                      <div
-                        key={stat.status}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center">
-                          <div
-                            className={`w-3 h-3 rounded-full ${getStatusBadgeColor(
-                              stat.status
-                            )} mr-2`}
-                          />
-                          <span className="capitalize">{stat.status}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{stat.count}</span>
-                          <span className="text-sm text-gray-500">
-                            (
-                            {(
-                              (Number(stat.count) / pagination.total) *
-                              100
-                            ).toFixed(1)}
-                            %)
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Category Distribution</CardTitle>
-                  <CardDescription>Top email categories</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {categoryStats.map((stat) => (
-                      <div
-                        key={stat.category}
-                        className="flex items-center justify-between"
-                      >
-                        <span
-                          className="truncate max-w-[200px]"
-                          title={stat.category}
-                        >
-                          {stat.category}
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{stat.count}</span>
-                          <span className="text-sm text-gray-500">
-                            (
-                            {(
-                              (Number(stat.count) / pagination.total) *
-                              100
-                            ).toFixed(1)}
-                            %)
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              </div>
+              <div className="flex sm:hidden justify-between w-full">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <span className="self-center text-sm">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page === pagination.pages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
             </div>
-          </TabsContent>
-        </Tabs>
-
-        {logs.some((log) => log.status === "failed") && (
-          <Card className="mt-6 border-red-200">
-            <CardHeader className="pb-2">
-              <div className="flex items-center">
-                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                <CardTitle>Failed Emails</CardTitle>
-              </div>
-              <CardDescription>
-                Some emails failed to send. Check the errors below.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>To</TableHead>
-                      <TableHead>Subject</TableHead>
-                      <TableHead>Error</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {logs
-                      .filter((log) => log.status === "failed")
-                      .map((log) => (
-                        <TableRow key={`failed-${log.id}`}>
-                          <TableCell>{formatDate(log.createdAt)}</TableCell>
-                          <TableCell
-                            className="max-w-[200px] truncate"
-                            title={log.to}
-                          >
-                            {log.to}
-                          </TableCell>
-                          <TableCell
-                            className="max-w-[250px] truncate"
-                            title={log.subject}
-                          >
-                            {log.subject}
-                          </TableCell>
-                          <TableCell className="text-red-500">
-                            {log.error || "Unknown error"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          )}
+        </div>
       </div>
     </AdminLayout>
   );
