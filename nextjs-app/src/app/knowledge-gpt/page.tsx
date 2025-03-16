@@ -211,7 +211,7 @@ export default function KnowledgeGPT() {
                   </Button>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="bg-blue-600 text-white !text-white font-medium">
+              <TooltipContent>
                 <p>Login to use web search</p>
               </TooltipContent>
             </Tooltip>
