@@ -2116,12 +2116,13 @@ The Knowledge GPT feature has been enhanced with a web search toggle button:
    - Modified the generate API route to respect the useWebSearch parameter
    - Updated system prompt to indicate when web search is being used
    - Only performs web search when explicitly enabled by the user
+   - Removed automatic web search detection in favor of explicit user control
 
 3. **Cost Optimization**:
 
    - Reduces API costs by only using web search when requested
    - Creates potential for a premium feature (web search could be limited to paid users)
-   - Still maintains smart filtering to avoid unnecessary searches even when enabled
+   - Simplified logic ensures web search is only used when explicitly enabled
 
 4. **UI Updates**:
    - Updated page description to reflect the new toggle feature

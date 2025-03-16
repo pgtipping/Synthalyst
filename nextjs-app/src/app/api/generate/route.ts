@@ -34,39 +34,32 @@ export async function POST(req: NextRequest) {
     let searchError = null;
 
     if (type === "knowledge" && useWebSearch) {
-      // Check if the question likely needs web search
-      const needsWebSearch = shouldUseWebSearch(question);
-
-      if (needsWebSearch) {
-        try {
-          // Call the web search API
-          const searchResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/web-search`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ query: question }),
-            }
-          );
-
-          const searchData = await searchResponse.json();
-
-          if (searchData.results && searchData.results.length > 0) {
-            searchResults = searchData.results;
-            console.log(
-              `Found ${searchResults.length} search results for question`
-            );
-          } else if (searchData.error) {
-            searchError = searchData.error;
-            console.warn(`Search error: ${searchError}`);
+      try {
+        // Call the web search API
+        const searchResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/web-search`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: question }),
           }
-        } catch (error) {
-          console.error("Error fetching search results:", error);
+        );
+
+        const searchData = await searchResponse.json();
+
+        if (searchData.results && searchData.results.length > 0) {
+          searchResults = searchData.results;
+          console.log(
+            `Found ${searchResults.length} search results for question`
+          );
+        } else if (searchData.error) {
+          searchError = searchData.error;
+          console.warn(`Search error: ${searchError}`);
         }
-      } else {
-        console.log("Skipping web search for this question type");
+      } catch (error) {
+        console.error("Error fetching search results:", error);
       }
     } else if (type === "knowledge" && !useWebSearch) {
       console.log("Web search disabled by user");
@@ -182,57 +175,4 @@ Based on the above information and your knowledge, please provide accurate infor
       { status: 200 } // Return 200 with error message in content
     );
   }
-}
-
-// Helper function to determine if a question likely needs web search
-function shouldUseWebSearch(question: string): boolean {
-  // Convert to lowercase for easier matching
-  const q = question.toLowerCase();
-
-  // Skip web search for simple math questions
-  if (q.match(/what is \d+\s*[\+\-\*\/]\s*\d+/)) {
-    return false;
-  }
-
-  // Skip for basic definition questions that don't need current info
-  if (q.match(/^what is (a|an|the) /)) {
-    return false;
-  }
-
-  // Skip for questions about the assistant itself
-  if (q.includes("who are you") || q.includes("what are you")) {
-    return false;
-  }
-
-  // Keywords that suggest current events or time-sensitive information
-  const currentEventKeywords = [
-    "president",
-    "election",
-    "latest",
-    "recent",
-    "current",
-    "today",
-    "news",
-    "covid",
-    "pandemic",
-    "war",
-    "crisis",
-    "stock",
-    "price",
-    "weather",
-    "released",
-    "announced",
-    "launched",
-    "update",
-  ];
-
-  // Check if any current event keywords are present
-  for (const keyword of currentEventKeywords) {
-    if (q.includes(keyword)) {
-      return true;
-    }
-  }
-
-  // Default to using web search for most questions
-  return true;
 }

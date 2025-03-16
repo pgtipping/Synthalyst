@@ -23,11 +23,10 @@ The current focus is on optimizing LLM model usage for the Synthalyst platform, 
    - Updated loading animation to use three dots instead of spinning icon
    - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
    - Added client-side formatting to properly render bold text and lists
-   - Implemented smart web search detection to only use search when necessary
-   - Added logic to skip web search for simple math questions and basic definitions
    - Added web search toggle button to let users control when web search is used
    - Updated UI to clearly indicate when web search is enabled or disabled
    - Modified API to respect user preference for web search
+   - Simplified web search logic by removing automatic detection in favor of explicit user control
 
 ### Next Steps
 
