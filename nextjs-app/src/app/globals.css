@@ -93,17 +93,17 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-[color:hsl(var(--border))];
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
   }
 }
 
 /* Add your global styles here */
 
 body {
-  @apply bg-gray-100;
+  @apply bg-[#f3f4f6];
   font-family: sans-serif;
 }
 
@@ -113,37 +113,37 @@ h3,
 h4,
 h5,
 h6 {
-  @apply text-black;
+  @apply text-[#000000];
 }
 
 p {
-  @apply text-black;
+  @apply text-[#000000];
 }
 
 /* Force tooltip text to be white */
 [data-radix-tooltip-content] p {
-  color: white !important;
+  @apply text-[#ffffff];
 }
 
 a {
-  @apply text-blue-500 no-underline hover:text-blue-700 transition-colors;
+  @apply text-[#3b82f6] no-underline hover:text-[#1d4ed8] transition-colors;
 }
 
 /* Accessibility improvements for buttons */
 button,
 .button {
-  @apply font-medium;
+  @apply font-[500];
 }
 
 /* Ensure sufficient contrast for button text */
 button.bg-blue-600,
 .button.bg-blue-600 {
-  @apply text-white;
+  @apply text-[#ffffff];
 }
 
 button.bg-gray-200,
 .button.bg-gray-200 {
-  @apply text-black;
+  @apply text-[#000000];
 }
 
 /* Note: Non-critical styles have been moved to non-critical.css */
@@ -199,4 +199,20 @@ button.bg-gray-200,
     flex-direction: row !important;
     flex-wrap: wrap !important;
   }
+}
+
+button,
+input[type="submit"],
+input[type="button"] {
+  @apply cursor-pointer;
+}
+
+button.bg-blue-600,
+input[type="submit"].bg-blue-600 {
+  @apply text-[#ffffff];
+}
+
+button.bg-gray-200,
+input[type="submit"].bg-gray-200 {
+  @apply text-[#000000];
 }

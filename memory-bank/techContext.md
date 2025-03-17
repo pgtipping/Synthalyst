@@ -238,3 +238,48 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
   - Secure key generation
   - Data sanitization
   - TTL enforcement
+
+## CSS and Styling Infrastructure [2025-03-17]
+
+### Tailwind CSS Configuration
+
+- **Version**: Tailwind CSS 3.4.1
+- **PostCSS Integration**: Using @tailwindcss/postcss 4.0.14 instead of direct tailwindcss usage
+- **Configuration File**: postcss.config.cjs with standardized plugin setup
+- **Additional Plugins**:
+  - autoprefixer for vendor prefixing
+  - @tailwindcss/typography for rich text styling
+
+### CSS Organization
+
+- **Global Styles**: src/app/globals.css with Tailwind imports
+- **Critical CSS**: src/app/critical.css for above-the-fold styling
+- **Non-Critical CSS**: public/styles/non-critical.css loaded asynchronously
+- **Component Styles**: Component-specific CSS modules when needed
+- **Theme Variables**: CSS variables in :root and .dark selectors
+
+### CSS Best Practices
+
+- **Color Usage**:
+
+  - HSL variables for theme colors (--background, --foreground, etc.)
+  - Explicit bracket notation for direct colors (bg-[#f3f4f6])
+  - Consistent color scheme across light and dark modes
+
+- **Utility Classes**:
+
+  - Proper syntax for custom properties (border-[color:hsl(var(--border))])
+  - Font weight using numeric values (font-[500] instead of font-medium)
+  - Consistent spacing and sizing utilities
+
+- **Responsive Design**:
+  - Mobile-first approach
+  - Breakpoint-specific classes
+  - Fluid typography and spacing
+
+### CSS Tooling
+
+- **PostCSS**: For processing CSS with plugins
+- **Autoprefixer**: For vendor prefixing
+- **@tailwindcss/typography**: For rich text styling
+- **tailwindcss-animate**: For animation utilities

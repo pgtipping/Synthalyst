@@ -2732,3 +2732,67 @@ These improvements ensure a consistent and responsive admin dashboard experience
   - Example: `REF-abc123-20250317101500`
   - These are included in the subject line of outgoing emails
   - When replies are received, the reference code is extracted to link the reply to the original submission
+
+## Tailwind CSS Configuration (March 17, 2025)
+
+When working with CSS in this project, follow these guidelines:
+
+1. Use `@tailwindcss/postcss` instead of direct `tailwindcss` usage in PostCSS config:
+
+   ```javascript
+   // postcss.config.cjs
+   const config = {
+     plugins: {
+       "@tailwindcss/postcss": {},
+       autoprefixer: {},
+     },
+   };
+   ```
+
+2. Add Tailwind imports to all CSS files that use Tailwind features:
+
+   ```css
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   ```
+
+3. Use explicit color values with bracket notation instead of named colors:
+
+   ```jsx
+   // Instead of this:
+   <div className="bg-gray-100 text-black">
+
+   // Use this:
+   <div className="bg-[#f3f4f6] text-[#000000]">
+   ```
+
+4. For theme colors, use HSL variables:
+
+   ```jsx
+   <div className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+   ```
+
+5. For font weights, use numeric values:
+
+   ```jsx
+   // Instead of this:
+   <div className="font-medium">
+
+   // Use this:
+   <div className="font-[500]">
+   ```
+
+6. For border colors, use the proper syntax:
+
+   ```jsx
+   // Instead of this:
+   <div className="border-border">
+
+   // Use this:
+   <div className="border-[color:hsl(var(--border))]">
+   ```
+
+7. Standardize on a single PostCSS configuration file to avoid conflicts.
+
+8. Test CSS changes in a separate branch before merging to main.

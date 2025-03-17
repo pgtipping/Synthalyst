@@ -194,6 +194,16 @@
 - Fixed "Cannot read properties of undefined (reading 'totalPages')" error in the newsletter admin page
 - Added conditional rendering for pagination controls to prevent errors when data is loading
 - Updated API response structure to match frontend expectations by wrapping pagination properties in a pagination object
+- Created a separate branch `fix-tailwind-postcss` for testing Tailwind CSS fixes
+- Identified and fixed error related to Tailwind CSS's PostCSS plugin moving to a separate package
+- Installed `@tailwindcss/postcss` package to replace direct usage of `tailwindcss` in PostCSS config
+- Updated `postcss.config.cjs` to use `@tailwindcss/postcss` instead of `tailwindcss` directly
+- Fixed CSS classes in `globals.css` that were using Tailwind's utility classes directly
+- Updated classes like `border-border`, `bg-background`, `text-foreground`, etc. to use proper syntax
+- Added Tailwind imports to `critical.css` to ensure it can use Tailwind's features
+- Fixed font-medium class by using font-[500] instead
+- Ensured all color classes use the proper bracket notation (e.g., `text-[#000000]` instead of `text-black`)
+- Standardized on a single PostCSS configuration file to avoid conflicts
 
 ### In Progress
 
@@ -210,6 +220,8 @@
 - Refining web search integration for better results
 - Improving the Medical Knowledge Assistant's ability to maintain conversational context
 - Implementing a systematic approach to error detection and resolution across all admin pages
+- Testing Tailwind CSS fixes in the fix-tailwind-postcss branch before merging to main
+- Preparing to deploy Tailwind CSS fixes to production after verification in preview deployment
 
 ### Known Issues
 
@@ -228,6 +240,9 @@
 - Port 3001 sometimes remains in use after server shutdown, requiring manual termination
 - Need to ensure proper separation of client and server components in Next.js, especially regarding metadata exports
 - Need to be careful with library version updates, particularly for packages like lru-cache where API changes can cause build failures
+- Tailwind CSS configuration needs to be updated to use @tailwindcss/postcss instead of tailwindcss directly
+- CSS classes using Tailwind utility classes directly need to be updated to use proper syntax
+- Need to ensure all CSS files that use Tailwind features have the proper imports
 
 ### UI Guidelines
 

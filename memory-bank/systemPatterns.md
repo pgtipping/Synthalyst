@@ -679,3 +679,114 @@ The AudioRecorder component follows a stateful component pattern:
 - Automatic retry mechanism
 - Error logging and monitoring
 - User feedback on cache status
+
+## Tailwind CSS Configuration Patterns (March 17, 2025)
+
+### PostCSS Integration
+
+The application uses Tailwind CSS with PostCSS for styling. The configuration follows these patterns:
+
+1. **PostCSS Plugin Structure**:
+
+   ```javascript
+   // postcss.config.cjs
+   const config = {
+     plugins: {
+       "@tailwindcss/postcss": {},
+       autoprefixer: {},
+     },
+   };
+   ```
+
+2. **CSS Import Pattern**:
+
+   ```css
+   /* In CSS files that use Tailwind */
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   ```
+
+3. **Custom Utility Pattern**:
+   ```css
+   /* Custom utilities in @layer */
+   @layer utilities {
+     .custom-utility {
+       /* properties */
+     }
+   }
+   ```
+
+### CSS Class Usage Patterns
+
+1. **Color Variable Usage**:
+
+   ```css
+   /* Using HSL variables */
+   .element {
+     background-color: hsl(var(--background));
+     color: hsl(var(--foreground));
+   }
+   ```
+
+2. **Tailwind Class Pattern**:
+
+   ```jsx
+   // In React components
+   <div className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+     Content
+   </div>
+   ```
+
+3. **Direct Color Usage**:
+   ```jsx
+   // Using explicit colors with bracket notation
+   <div className="bg-[#f3f4f6] text-[#000000]">Content</div>
+   ```
+
+### CSS Organization
+
+1. **File Structure**:
+
+   ```
+   /src
+     /app
+       globals.css       # Global styles with Tailwind imports
+       critical.css      # Critical above-the-fold styles
+     /components
+       /ui
+         component.module.css  # Component-specific styles
+   /public
+     /styles
+       non-critical.css  # Non-critical styles loaded asynchronously
+   ```
+
+2. **Variable Organization**:
+
+   ```css
+   :root {
+     /* Color variables */
+     --background: 0 0% 100%;
+     --foreground: 222.2 84% 4.9%;
+
+     /* Size variables */
+     --radius: 0.5rem;
+   }
+
+   .dark {
+     /* Dark mode overrides */
+     --background: 222.2 84% 4.9%;
+     --foreground: 210 40% 98%;
+   }
+   ```
+
+### Best Practices
+
+1. **Use `@tailwindcss/postcss` instead of direct `tailwindcss` usage**
+2. **Add Tailwind imports to all CSS files that use Tailwind features**
+3. **Use explicit color values with bracket notation instead of named colors**
+4. **Standardize on a single PostCSS configuration file**
+5. **Use CSS variables for theme colors and sizes**
+6. **Apply proper font weights using the font-[weight] syntax**
+7. **Use HSL color variables for theme consistency**
+8. **Test CSS changes in a separate branch before merging to main**

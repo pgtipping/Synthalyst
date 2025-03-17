@@ -166,6 +166,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added try-catch blocks for API calls to handle errors independently
 
 18. **Admin Page Database Checks** (March 16, 2025):
+
     - Added SQL queries to check if tables exist before attempting to query them
     - Used `information_schema.tables` to verify table existence in the database
     - Implemented default values for all data variables to prevent undefined errors
@@ -176,6 +177,18 @@ The current focus is on optimizing the application's backend services, particula
     - Fixed "Cannot read properties of undefined" errors in the admin page
     - Resolved chunk loading errors by properly handling database queries
     - Improved error logging for all database operations
+
+19. **Tailwind CSS Configuration Fixes** (March 17, 2025):
+    - Created a separate branch `fix-tailwind-postcss` for testing Tailwind CSS fixes
+    - Identified and fixed error related to Tailwind CSS's PostCSS plugin moving to a separate package
+    - Installed `@tailwindcss/postcss` package to replace direct usage of `tailwindcss` in PostCSS config
+    - Updated `postcss.config.cjs` to use `@tailwindcss/postcss` instead of `tailwindcss` directly
+    - Fixed CSS classes in `globals.css` that were using Tailwind's utility classes directly
+    - Updated classes like `border-border`, `bg-background`, `text-foreground`, etc. to use proper syntax
+    - Added Tailwind imports to `critical.css` to ensure it can use Tailwind's features
+    - Fixed font-medium class by using font-[500] instead
+    - Ensured all color classes use the proper bracket notation (e.g., `text-[#000000]` instead of `text-black`)
+    - Standardized on a single PostCSS configuration file to avoid conflicts
 
 ### Next Steps
 
@@ -196,6 +209,7 @@ The current focus is on optimizing the application's backend services, particula
 15. **Medical Knowledge Enhancements**: Add more medical data sources and improve evidence grading.
 16. **Conversational Context**: Improve the Medical Knowledge Assistant to maintain conversational context between queries.
 17. **Systematic Error Handling**: Implement a more proactive approach to error detection and resolution across all admin pages.
+18. **Tailwind CSS Deployment**: Deploy the Tailwind CSS fixes to production after verifying they work correctly in the preview deployment.
 
 ### Active Decisions
 
@@ -301,3 +315,11 @@ The current focus is on optimizing the application's backend services, particula
     - Initializing default values for all data variables to prevent undefined errors
     - Adding conditional rendering for UI elements that depend on asynchronously loaded data
     - Using optional chaining and nullish coalescing operators to handle potentially undefined values
+
+14. **Tailwind CSS Configuration** (March 17, 2025):
+
+- Using `@tailwindcss/postcss` instead of direct `tailwindcss` usage in PostCSS config
+- Using explicit color values with bracket notation instead of named colors
+- Adding Tailwind imports to all CSS files that use Tailwind features
+- Standardizing on a single PostCSS configuration file
+- Testing changes in a separate branch before merging to main
