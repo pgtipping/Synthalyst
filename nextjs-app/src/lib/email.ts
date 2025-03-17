@@ -21,6 +21,48 @@ const hasEmailLogModel = (): boolean => {
   }
 };
 
+// Helper function to safely create an email log entry
+const safelyCreateEmailLog = async (
+  data: Record<string, unknown>
+): Promise<EmailLogEntry | null> => {
+  try {
+    if (!hasEmailLogModel()) {
+      logger.warn("EmailLog model not available, skipping log creation");
+      return null;
+    }
+
+    // @ts-expect-error - EmailLog model might not be in the Prisma client type
+    return await prisma.emailLog.create({ data });
+  } catch (error) {
+    logger.error("Failed to create email log entry", error);
+    return null;
+  }
+};
+
+// Helper function to safely update an email log entry
+const safelyUpdateEmailLog = async (
+  id: string | number,
+  data: Record<string, unknown>
+): Promise<EmailLogEntry | null> => {
+  try {
+    if (!hasEmailLogModel() || !id) {
+      logger.warn(
+        "EmailLog model not available or no ID provided, skipping log update"
+      );
+      return null;
+    }
+
+    // @ts-expect-error - EmailLog model might not be in the Prisma client type
+    return await prisma.emailLog.update({
+      where: { id },
+      data,
+    });
+  } catch (error) {
+    logger.error("Failed to update email log entry", error);
+    return null;
+  }
+};
+
 // Helper function to serialize BigInt values
 function serializeBigInt(data: unknown): unknown {
   if (data === null || data === undefined) {
@@ -109,23 +151,13 @@ export async function sendEmail({
 
   try {
     // Track email sending in database if EmailLog model exists
-    if (hasEmailLogModel()) {
-      try {
-        // @ts-expect-error - EmailLog model might not be in the Prisma client type
-        emailLogEntry = await prisma.emailLog.create({
-          data: {
-            to: Array.isArray(to) ? to.join(", ") : to,
-            subject,
-            from,
-            category,
-            status: "pending",
-          },
-        });
-      } catch (dbError) {
-        logger.error("Failed to create email log entry", dbError);
-        // Continue without email logging if database operation fails
-      }
-    }
+    emailLogEntry = await safelyCreateEmailLog({
+      to: Array.isArray(to) ? to.join(", ") : to,
+      subject,
+      from,
+      category,
+      status: "pending",
+    });
 
     // Try SendGrid first if available
     if (sendgridInitialized) {
@@ -163,25 +195,13 @@ export async function sendEmail({
         const response = await sgMail.send(msg);
 
         // Update email log with success
-        if (emailLogEntry && hasEmailLogModel()) {
-          try {
-            // @ts-expect-error - EmailLog model might not be in the Prisma client type
-            await prisma.emailLog.update({
-              where: { id: emailLogEntry.id },
-              data: {
-                status: "sent",
-                provider: "sendgrid",
-                providerMessageId: response[0]?.headers["x-message-id"] || null,
-                sentAt: new Date(),
-              },
-            });
-          } catch (updateError) {
-            logger.error(
-              "Failed to update email log after successful send",
-              updateError
-            );
-            // Continue even if log update fails
-          }
+        if (emailLogEntry) {
+          await safelyUpdateEmailLog(emailLogEntry.id, {
+            status: "sent",
+            provider: "sendgrid",
+            providerMessageId: response[0]?.headers["x-message-id"] || null,
+            sentAt: new Date(),
+          });
         }
 
         logger.info("Email sent successfully via SendGrid", {
@@ -236,25 +256,13 @@ export async function sendEmail({
       });
 
       // Update email log with success
-      if (emailLogEntry && hasEmailLogModel()) {
-        try {
-          // @ts-expect-error - EmailLog model might not be in the Prisma client type
-          await prisma.emailLog.update({
-            where: { id: emailLogEntry.id },
-            data: {
-              status: "sent",
-              provider: "nodemailer",
-              providerMessageId: info.messageId || null,
-              sentAt: new Date(),
-            },
-          });
-        } catch (updateError) {
-          logger.error(
-            "Failed to update email log after successful send",
-            updateError
-          );
-          // Continue even if log update fails
-        }
+      if (emailLogEntry) {
+        await safelyUpdateEmailLog(emailLogEntry.id, {
+          status: "sent",
+          provider: "nodemailer",
+          providerMessageId: info.messageId || null,
+          sentAt: new Date(),
+        });
       }
 
       logger.info("Email sent successfully via Nodemailer", {
@@ -289,19 +297,11 @@ export async function sendEmail({
     logger.error("Failed to send email:", error);
 
     // Update email log with failure
-    if (emailLogEntry && hasEmailLogModel()) {
-      try {
-        // @ts-expect-error - EmailLog model might not be in the Prisma client type
-        await prisma.emailLog.update({
-          where: { id: emailLogEntry.id },
-          data: {
-            status: "failed",
-            error: errorMessage,
-          },
-        });
-      } catch (logError) {
-        logger.error("Failed to update email log with error status:", logError);
-      }
+    if (emailLogEntry) {
+      await safelyUpdateEmailLog(emailLogEntry.id, {
+        status: "failed",
+        error: errorMessage,
+      });
     }
 
     return {
