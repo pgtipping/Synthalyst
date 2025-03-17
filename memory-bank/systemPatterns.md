@@ -689,13 +689,15 @@ The application uses Tailwind CSS with PostCSS for styling. The configuration fo
 1. **PostCSS Plugin Structure**:
 
    ```javascript
-   // postcss.config.cjs
+   /** @type {import('postcss-load-config').Config} */
    const config = {
      plugins: {
        "@tailwindcss/postcss": {},
        autoprefixer: {},
      },
    };
+
+   module.exports = config;
    ```
 
 2. **CSS Import Pattern**:
@@ -790,3 +792,60 @@ The application uses Tailwind CSS with PostCSS for styling. The configuration fo
 6. **Apply proper font weights using the font-[weight] syntax**
 7. **Use HSL color variables for theme consistency**
 8. **Test CSS changes in a separate branch before merging to main**
+
+## CSS Configuration Patterns [2025-03-17]
+
+### Tailwind CSS v4 Setup
+
+Starting with Tailwind CSS v4, the PostCSS plugin has been moved to a separate package (`@tailwindcss/postcss`). This change requires updating the PostCSS configuration file.
+
+#### PostCSS Configuration
+
+```js
+/** @type {import('postcss-load-config').Config} */
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {}, // Use the new package instead of 'tailwindcss'
+    autoprefixer: {},
+  },
+};
+
+module.exports = config;
+```
+
+#### Required Dependencies
+
+```json
+{
+  "dependencies": {
+    "tailwindcss": "^4.0.14",
+    "@tailwindcss/postcss": "^4.0.14"
+  }
+}
+```
+
+#### Error Pattern
+
+If you see this error during build:
+
+```
+Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+```
+
+The solution is to:
+
+1. Install `@tailwindcss/postcss` package
+2. Update the PostCSS configuration to use the new package
+3. Rebuild the application
+
+#### Integration Pattern
+
+```mermaid
+flowchart TD
+    TW[Tailwind CSS] --> TWP[@tailwindcss/postcss]
+    TWP --> PC[PostCSS Config]
+    PC --> CSS[CSS Processing]
+    CSS --> NC[Next.js Compilation]
+```
+
+This separation of concerns allows Tailwind to better maintain the PostCSS plugin separately from the core library.

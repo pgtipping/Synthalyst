@@ -1,6 +1,7 @@
 /**
  * This is a global stylesheet for the entire application.
  * It defines common styles that will be applied to all pages.
+ * Tailwind directives are processed by @tailwindcss/postcss plugin
  */
 
 @tailwind base;

@@ -243,11 +243,17 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
 
 ### Tailwind CSS Configuration
 
-- **Version**: Tailwind CSS 3.4.1
+- **Version**: Tailwind CSS 4.0.14
 - **PostCSS Integration**: Using @tailwindcss/postcss 4.0.14 instead of direct tailwindcss usage
 - **Configuration File**: postcss.config.cjs with standardized plugin setup
+- **Configuration Changes** (2025-03-17):
+  - Migrated from direct `tailwindcss` plugin usage to `@tailwindcss/postcss` for compatibility with Tailwind v4
+  - Updated PostCSS configuration to use the new plugin format
+  - Verified build process works correctly with the new configuration
+  - Fixed Vercel deployment errors related to PostCSS plugin changes
 - **Additional Plugins**:
   - autoprefixer for vendor prefixing
+  - tailwindcss-animate for animation utilities
   - @tailwindcss/typography for rich text styling
 
 ### CSS Organization

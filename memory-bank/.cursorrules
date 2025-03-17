@@ -2796,3 +2796,36 @@ When working with CSS in this project, follow these guidelines:
 7. Standardize on a single PostCSS configuration file to avoid conflicts.
 
 8. Test CSS changes in a separate branch before merging to main.
+
+### Tailwind CSS v4 Configuration Pattern - [2025-03-17 13:08:22]
+
+- Tailwind CSS v4 requires a different PostCSS configuration pattern
+- The PostCSS plugin has moved to a separate package: `@tailwindcss/postcss`
+- Always use this pattern in the `postcss.config.cjs` file:
+
+  ```js
+  /** @type {import('postcss-load-config').Config} */
+  const config = {
+    plugins: {
+      "@tailwindcss/postcss": {},
+      autoprefixer: {},
+    },
+  };
+
+  module.exports = config;
+  ```
+
+- Do NOT use the old pattern with direct `tailwindcss` plugin:
+  ```js
+  // AVOID THIS PATTERN
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+  ```
+- Ensure the `@tailwindcss/postcss` package is installed:
+  ```bash
+  npm install @tailwindcss/postcss
+  ```
+- This configuration is required for successful builds on Vercel with Tailwind CSS v4
+- The error "It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin" indicates you need to make this change

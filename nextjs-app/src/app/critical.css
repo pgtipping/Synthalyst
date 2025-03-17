@@ -1,7 +1,5 @@
 /* Critical CSS for above-the-fold content */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind directives are now imported via postcss.config.cjs */
 
 /* Base styles */
 :root {
