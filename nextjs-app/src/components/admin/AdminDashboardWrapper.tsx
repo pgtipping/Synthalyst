@@ -1,13 +1,19 @@
 "use client";
 
-import { RedisMonitoring } from "@/components/admin/RedisMonitoring";
-import AdminLayout from "@/components/admin/AdminLayout";
+import { ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { Loader2 } from "lucide-react";
 
-export default function MonitoringPage() {
+interface AdminDashboardWrapperProps {
+  children: ReactNode;
+}
+
+export default function AdminDashboardWrapper({
+  children,
+}: AdminDashboardWrapperProps) {
   const { status } = useSession();
   const router = useRouter();
 
@@ -32,9 +38,5 @@ export default function MonitoringPage() {
     return null;
   }
 
-  return (
-    <AdminLayout>
-      <RedisMonitoring />
-    </AdminLayout>
-  );
+  return <AdminLayout>{children}</AdminLayout>;
 }

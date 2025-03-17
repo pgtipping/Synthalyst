@@ -90,6 +90,16 @@
 - Added a close button to the sidebar for better mobile usability
 - Made the top navigation bar sticky for better navigation on long pages
 - Ensured consistent spacing and alignment across all admin pages
+- Standardized all admin pages to use the `AdminLayout` component for consistent UI
+- Updated the main admin dashboard, blog, newsletter, monitoring, and feedback pages to use the `AdminLayout` component
+- Created an `AdminDashboardWrapper` client component to wrap server components with the `AdminLayout`
+- Ensured all admin pages have consistent authentication checks and loading states
+- Fixed navigation issues by ensuring the sidebar is present on all admin pages
+- Improved user experience with consistent layout and navigation across the entire admin section
+- Fixed build error in monitoring page by properly separating metadata from client components
+- Created a dedicated layout file for the monitoring page to handle metadata correctly
+- Updated the rate-limiter to use the latest LRUCache API (v10+)
+- Fixed build error related to LRUCache constructor by upgrading the package and updating the implementation
 - Implemented model optimization for Knowledge GPT and Learning Creator
 - Added multilingual support to both features
 - Created a model router service for dynamic model selection
@@ -186,6 +196,8 @@
 - Medical Knowledge Assistant treats conversational phrases as new medical queries
 - Some TypeScript errors still exist in test files that need to be addressed
 - Port 3001 sometimes remains in use after server shutdown, requiring manual termination
+- Need to ensure proper separation of client and server components in Next.js, especially regarding metadata exports
+- Need to be careful with library version updates, particularly for packages like lru-cache where API changes can cause build failures
 
 ### UI Guidelines
 
@@ -227,6 +239,9 @@
   - Flex-based layout structure for better content positioning
   - Close button in sidebar for improved mobile experience
   - Consistent spacing and alignment across all admin pages
+  - Standardized layout using the `AdminLayout` component across all admin pages
+  - Consistent authentication checks and loading states on all admin pages
+  - Unified navigation experience with sidebar present on all admin pages
   - Pagination for large data sets
   - Data visualization for email statistics
   - Robust error handling for API calls and missing data

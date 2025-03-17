@@ -11,7 +11,8 @@ type Options = {
  * @returns Rate limiter object
  */
 export function rateLimit(options: Options) {
-  const tokenCache = new LRUCache<string, number[]>({
+  // Create a new LRUCache instance with the updated constructor pattern for v10+
+  const tokenCache = new LRUCache({
     max: options.uniqueTokenPerInterval || 500,
     ttl: options.interval || 60000,
   });
