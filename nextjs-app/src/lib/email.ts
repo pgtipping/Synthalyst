@@ -6,8 +6,15 @@ import { logger } from "@/lib/logger";
 // Helper function to check if EmailLog model exists in Prisma
 const hasEmailLogModel = (): boolean => {
   try {
+    // More robust check for EmailLog model existence
     // @ts-expect-error - Checking if model exists
-    return typeof prisma.emailLog === "object";
+    return (
+      typeof prisma.emailLog === "object" &&
+      // @ts-expect-error - Additional check for model methods
+      typeof prisma.emailLog.create === "function" &&
+      // @ts-expect-error - Additional check for model methods
+      typeof prisma.emailLog.findFirst === "function"
+    );
   } catch (error) {
     logger.error("Error checking for EmailLog model:", error);
     return false;
