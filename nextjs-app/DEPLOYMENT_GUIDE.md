@@ -70,6 +70,7 @@ If you encounter database migration issues in production:
 
 1. Connect to the production database
 2. Run migrations manually:
+
    ```bash
    DATABASE_URL=your_production_db_url npx prisma migrate deploy
    ```

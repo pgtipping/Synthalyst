@@ -679,3 +679,129 @@ The AudioRecorder component follows a stateful component pattern:
 - Automatic retry mechanism
 - Error logging and monitoring
 - User feedback on cache status
+
+## Error Handling Patterns
+
+### Graceful Degradation Pattern - March 17, 2025
+
+For operations that involve multiple steps (like database operations and email sending), we implement a graceful degradation pattern to ensure that the operation can succeed even if some parts fail.
+
+```typescript
+// Example from contact form API
+let submission;
+try {
+  // Database operation
+  submission = await prisma.contactSubmission.create({
+    data: {
+      /* ... */
+    },
+  });
+} catch (dbError) {
+  logger.error("Database error", dbError);
+  // Continue with other operations even if database save fails
+}
+
+let emailSent = false;
+try {
+  // Email operation
+  const emailResult = await sendEmail({
+    /* ... */
+  });
+  if (emailResult.success) {
+    emailSent = true;
+  }
+} catch (emailError) {
+  logger.error("Email error", emailError);
+  // Continue with other operations even if email fails
+}
+
+// Return success if at least one operation succeeded
+if (submission || emailSent) {
+  return NextResponse.json({
+    success: true,
+    // Include warnings about failed operations
+    warnings: {
+      database: !submission ? "Failed to save to database" : null,
+      email: !emailSent ? "Failed to send email" : null,
+    },
+  });
+} else {
+  // Only return error if all operations failed
+  return NextResponse.json(
+    {
+      success: false,
+      error: "All operations failed",
+    },
+    { status: 500 }
+  );
+}
+```
+
+### BigInt Serialization Pattern - March 17, 2025
+
+Since BigInt values cannot be directly serialized to JSON, we use a helper function to convert them to strings before JSON serialization.
+
+```typescript
+function serializeBigInt(data: unknown): unknown {
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  if (typeof data === "bigint") {
+    return data.toString();
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(serializeBigInt);
+  }
+
+  if (typeof data === "object") {
+    return Object.fromEntries(
+      Object.entries(data as Record<string, unknown>).map(([key, value]) => [
+        key,
+        serializeBigInt(value),
+      ])
+    );
+  }
+
+  return data;
+}
+
+// Usage in API routes
+return NextResponse.json({
+  success: true,
+  data: serializeBigInt(data),
+});
+```
+
+### Optional Feature Pattern - March 17, 2025
+
+For features that depend on external services or database models that might not be available, we implement an optional feature pattern to make them optional.
+
+```typescript
+// Check if a model exists
+function hasModel(modelName: string): boolean {
+  try {
+    // @ts-expect-error - Checking if model exists
+    return typeof prisma[modelName] === "object";
+  } catch (error) {
+    logger.error(`Error checking for ${modelName} model:`, error);
+    return false;
+  }
+}
+
+// Usage
+if (hasModel("emailLog")) {
+  try {
+    // Use the model
+    await prisma.emailLog.create({
+      /* ... */
+    });
+  } catch (error) {
+    // Handle error but continue with main functionality
+    logger.error("Failed to log email:", error);
+  }
+}
+
+// Main functionality continues regardless of optional feature success
+```
