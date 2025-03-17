@@ -9,15 +9,19 @@ echo "Starting deployment process..."
 echo "Installing dependencies..."
 npm ci
 
-# Step 2: Run database migrations
+# Step 2: Fix Tailwind CSS configuration
+echo "Fixing Tailwind CSS configuration..."
+./scripts/fix-tailwind.sh
+
+# Step 3: Run database migrations
 echo "Running database migrations..."
 npx prisma migrate deploy
 
-# Step 3: Generate Prisma client
+# Step 4: Generate Prisma client
 echo "Generating Prisma client..."
 npx prisma generate
 
-# Step 4: Build the application
+# Step 5: Build the application
 echo "Building the application..."
 npm run build
 
