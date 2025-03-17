@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ContactSubmissionsList from "@/components/contact-submissions/ContactSubmissionsList";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 interface ContactSubmission {
   id: string;
@@ -91,74 +92,76 @@ export default function ContactSubmissionsPage({
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Contact Submissions</h1>
+    <AdminLayout>
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold mb-6">Contact Submissions</h1>
 
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex justify-between items-center mb-6">
-          <TabsList>
-            <TabsTrigger value="all">
-              All
-              <span className="ml-2 bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
-                {counts.all}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="new">
-              New
-              <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">
-                {counts.new}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="in_progress">
-              In Progress
-              <span className="ml-2 bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs">
-                {counts.in_progress}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed
-              <span className="ml-2 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">
-                {counts.completed}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="archived">
-              Archived
-              <span className="ml-2 bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
-                {counts.archived}
-              </span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex justify-between items-center mb-6">
+            <TabsList>
+              <TabsTrigger value="all">
+                All
+                <span className="ml-2 bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                  {counts.all}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="new">
+                New
+                <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">
+                  {counts.new}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="in_progress">
+                In Progress
+                <span className="ml-2 bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs">
+                  {counts.in_progress}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="completed">
+                Completed
+                <span className="ml-2 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">
+                  {counts.completed}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="archived">
+                Archived
+                <span className="ml-2 bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                  {counts.archived}
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <TabsContent value={activeTab}>
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {activeTab === "all"
-                  ? "All Contact Submissions"
-                  : `${
-                      activeTab.charAt(0).toUpperCase() +
-                      activeTab.slice(1).replace("_", " ")
-                    } Submissions`}
-              </CardTitle>
-              <CardDescription>
-                {activeTab === "all"
-                  ? "View and manage all contact form submissions"
-                  : `Manage ${activeTab.replace(
-                      "_",
-                      " "
-                    )} contact form submissions`}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ContactSubmissionsList
-                submissions={filteredSubmissions}
-                onStatusChange={handleStatusChange}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+          <TabsContent value={activeTab}>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {activeTab === "all"
+                    ? "All Contact Submissions"
+                    : `${
+                        activeTab.charAt(0).toUpperCase() +
+                        activeTab.slice(1).replace("_", " ")
+                      } Submissions`}
+                </CardTitle>
+                <CardDescription>
+                  {activeTab === "all"
+                    ? "View and manage all contact form submissions"
+                    : `Manage ${activeTab.replace(
+                        "_",
+                        " "
+                      )} contact form submissions`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ContactSubmissionsList
+                  submissions={filteredSubmissions}
+                  onStatusChange={handleStatusChange}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AdminLayout>
   );
 }

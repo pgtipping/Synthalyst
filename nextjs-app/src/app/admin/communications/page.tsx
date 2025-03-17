@@ -31,6 +31,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { format } from "date-fns";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 // Define interfaces for our data
 interface ContactSubmission {
@@ -78,7 +79,7 @@ interface UnifiedMessage {
   originalId: string;
 }
 
-export default function UnifiedCommunicationsPage() {
+export default function CommunicationsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -309,177 +310,188 @@ export default function UnifiedCommunicationsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <Breadcrumb
-          items={[
-            { label: "Admin", href: "/admin" },
-            { label: "Unified Communications", href: "/admin/communications" },
-          ]}
-        />
-        <Button
-          onClick={() => router.refresh()}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">
-            Unified Communications
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs
-            defaultValue="all"
-            value={activeTab}
-            onValueChange={setActiveTab}
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <Breadcrumb
+            items={[
+              { label: "Admin", href: "/admin" },
+              {
+                label: "Unified Communications",
+                href: "/admin/communications",
+              },
+            ]}
+          />
+          <Button
+            onClick={() => router.refresh()}
+            variant="outline"
+            className="flex items-center gap-2"
           >
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-              <TabsList>
-                <TabsTrigger value="all" className="flex items-center gap-2">
-                  All
-                </TabsTrigger>
-                <TabsTrigger
-                  value="contact"
-                  className="flex items-center gap-2"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Contact
-                </TabsTrigger>
-                <TabsTrigger
-                  value="newsletter"
-                  className="flex items-center gap-2"
-                >
-                  <Mail className="h-4 w-4" />
-                  Newsletter
-                </TabsTrigger>
-                <TabsTrigger value="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </TabsTrigger>
-              </TabsList>
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
 
-              <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-                <div className="relative w-full md:w-64">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search..."
-                    className="pl-8"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">
+              Unified Communications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs
+              defaultValue="all"
+              value={activeTab}
+              onValueChange={setActiveTab}
+            >
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <TabsList>
+                  <TabsTrigger value="all" className="flex items-center gap-2">
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="contact"
+                    className="flex items-center gap-2"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Contact
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="newsletter"
+                    className="flex items-center gap-2"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Newsletter
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="email"
+                    className="flex items-center gap-2"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Email
+                  </TabsTrigger>
+                </TabsList>
+
+                <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                  <div className="relative w-full md:w-64">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search..."
+                      className="pl-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full md:w-40">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="received">Received</SelectItem>
+                      <SelectItem value="processed">Processed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-full md:w-40">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="contact">Contact</SelectItem>
+                      <SelectItem value="newsletter">Newsletter</SelectItem>
+                      <SelectItem value="email">Email</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full md:w-40">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="received">Received</SelectItem>
-                    <SelectItem value="processed">Processed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-full md:w-40">
-                    <SelectValue placeholder="Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="contact">Contact</SelectItem>
-                    <SelectItem value="newsletter">Newsletter</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                  </SelectContent>
-                </Select>
+              </div>
+
+              <TabsContent value="all" className="m-0">
+                {renderMessageTable()}
+              </TabsContent>
+              <TabsContent value="contact" className="m-0">
+                {renderMessageTable()}
+              </TabsContent>
+              <TabsContent value="newsletter" className="m-0">
+                {renderMessageTable()}
+              </TabsContent>
+              <TabsContent value="email" className="m-0">
+                {renderMessageTable()}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl font-bold">
+              Communication Metrics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-blue-800">
+                  Contact Submissions
+                </h3>
+                <p className="text-3xl font-bold text-blue-900">
+                  {unifiedMessages.filter((m) => m.type === "contact").length}
+                </p>
+                <p className="text-sm text-blue-700">
+                  New:{" "}
+                  {
+                    unifiedMessages.filter(
+                      (m) => m.type === "contact" && m.status === "new"
+                    ).length
+                  }
+                </p>
+              </div>
+              <div className="bg-pink-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-pink-800">
+                  Newsletter Replies
+                </h3>
+                <p className="text-3xl font-bold text-pink-900">
+                  {
+                    unifiedMessages.filter((m) => m.type === "newsletter")
+                      .length
+                  }
+                </p>
+                <p className="text-sm text-pink-700">
+                  Last 7 days:{" "}
+                  {
+                    unifiedMessages.filter(
+                      (m) =>
+                        m.type === "newsletter" &&
+                        new Date(m.createdAt) >
+                          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    ).length
+                  }
+                </p>
+              </div>
+              <div className="bg-orange-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-orange-800">
+                  Inbound Emails
+                </h3>
+                <p className="text-3xl font-bold text-orange-900">
+                  {unifiedMessages.filter((m) => m.type === "email").length}
+                </p>
+                <p className="text-sm text-orange-700">
+                  Unprocessed:{" "}
+                  {
+                    unifiedMessages.filter(
+                      (m) => m.type === "email" && m.status === "new"
+                    ).length
+                  }
+                </p>
               </div>
             </div>
-
-            <TabsContent value="all" className="m-0">
-              {renderMessageTable()}
-            </TabsContent>
-            <TabsContent value="contact" className="m-0">
-              {renderMessageTable()}
-            </TabsContent>
-            <TabsContent value="newsletter" className="m-0">
-              {renderMessageTable()}
-            </TabsContent>
-            <TabsContent value="email" className="m-0">
-              {renderMessageTable()}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-bold">
-            Communication Metrics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium text-blue-800">
-                Contact Submissions
-              </h3>
-              <p className="text-3xl font-bold text-blue-900">
-                {unifiedMessages.filter((m) => m.type === "contact").length}
-              </p>
-              <p className="text-sm text-blue-700">
-                New:{" "}
-                {
-                  unifiedMessages.filter(
-                    (m) => m.type === "contact" && m.status === "new"
-                  ).length
-                }
-              </p>
-            </div>
-            <div className="bg-pink-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium text-pink-800">
-                Newsletter Replies
-              </h3>
-              <p className="text-3xl font-bold text-pink-900">
-                {unifiedMessages.filter((m) => m.type === "newsletter").length}
-              </p>
-              <p className="text-sm text-pink-700">
-                Last 7 days:{" "}
-                {
-                  unifiedMessages.filter(
-                    (m) =>
-                      m.type === "newsletter" &&
-                      new Date(m.createdAt) >
-                        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                  ).length
-                }
-              </p>
-            </div>
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium text-orange-800">
-                Inbound Emails
-              </h3>
-              <p className="text-3xl font-bold text-orange-900">
-                {unifiedMessages.filter((m) => m.type === "email").length}
-              </p>
-              <p className="text-sm text-orange-700">
-                Unprocessed:{" "}
-                {
-                  unifiedMessages.filter(
-                    (m) => m.type === "email" && m.status === "new"
-                  ).length
-                }
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </AdminLayout>
   );
 
   // Helper function to render the message table
