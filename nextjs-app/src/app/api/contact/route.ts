@@ -60,9 +60,10 @@ export async function POST(request: Request) {
       inquiryType: formData.inquiryType,
     });
 
+    let submission;
     try {
       // Save the submission to the database
-      const submission = await prisma.contactSubmission.create({
+      submission = await prisma.contactSubmission.create({
         data: {
           name: formData.name,
           email: formData.email,
@@ -84,114 +85,139 @@ export async function POST(request: Request) {
             ? `${formData.message.substring(0, 20)}...`
             : formData.message,
       });
-
-      try {
-        // Send notification email to admin
-        const adminNotificationResult = await sendEmail({
-          to: process.env.ADMIN_EMAIL || "support@synthalyst.com",
-          from: "Synthalyst Contact Form <noreply@synthalyst.com>",
-          subject: `New Contact Form: ${formData.subject}`,
-          text: `
-            Name: ${formData.name}
-            Email: ${formData.email}
-            Company: ${formData.company || "Not provided"}
-            Phone: ${formData.phone || "Not provided"}
-            Inquiry Type: ${formData.inquiryType}
-            Message: ${formData.message}
-            
-            View in admin: ${
-              process.env.NEXT_PUBLIC_APP_URL
-            }/admin/contact-submissions/${submission.id}
-          `,
-          category: "contact_form_notification",
-        });
-
-        if (!adminNotificationResult.success) {
-          logger.warn("Failed to send admin notification email", {
-            error: adminNotificationResult.error,
-            submissionId: submission.id,
-          });
-          // Continue even if admin notification fails
-        }
-      } catch (emailError) {
-        logger.error("Error sending admin notification email", emailError);
-        // Continue even if admin notification fails
-      }
-
-      try {
-        // Send auto-response to the user
-        const autoResponseResult = await sendEmail({
-          to: formData.email,
-          from: "Synthalyst Support <support@synthalyst.com>",
-          subject: `We've received your message: ${formData.subject}`,
-          text: `Thank you for contacting Synthalyst. We've received your message and our team will review it shortly.`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #4a6cf7;">Thank you for contacting Synthalyst</h2>
-              <p>Hello ${formData.name},</p>
-              <p>We've received your message and our team will review it shortly. Here's a summary of what you sent us:</p>
-              
-              <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <p><strong>Subject:</strong> ${formData.subject}</p>
-                <p><strong>Inquiry Type:</strong> ${formData.inquiryType}</p>
-                <p><strong>Message:</strong></p>
-                <p style="white-space: pre-line;">${formData.message}</p>
-              </div>
-              
-              <p>We typically respond within 1-2 business days. If your matter is urgent, please call us at ${
-                process.env.SUPPORT_PHONE || "+1 (555) 123-4567"
-              }.</p>
-              
-              <p>Best regards,<br>The Synthalyst Team</p>
-              
-              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
-                <p>This is an automated response to your inquiry. Please do not reply to this email.</p>
-              </div>
-            </div>
-          `,
-          category: "contact_form_auto_response",
-        });
-
-        if (!autoResponseResult.success) {
-          logger.warn("Failed to send auto-response email", {
-            error: autoResponseResult.error,
-            submissionId: submission.id,
-          });
-          // Continue even if auto-response fails
-        }
-      } catch (emailError) {
-        logger.error("Error sending auto-response email", emailError);
-        // Continue even if auto-response fails
-      }
-
-      // Serialize any BigInt values before returning the response
-      const serializedSubmissionId = serializeBigInt(submission.id);
-
-      return NextResponse.json(
-        {
-          message: "Message sent successfully",
-          success: true,
-          submissionId: serializedSubmissionId,
-        },
-        { status: 200 }
-      );
-    } catch (dbError: unknown) {
+    } catch (dbError) {
       logger.error("Database error in contact form submission", dbError);
+      // Continue with email sending even if database save fails
+      logger.info("Continuing with email sending despite database error");
+    }
+
+    let adminEmailSent = false;
+    try {
+      // Send notification email to admin
+      const adminNotificationResult = await sendEmail({
+        to: process.env.ADMIN_EMAIL || "support@synthalyst.com",
+        from: "Synthalyst Contact Form <noreply@synthalyst.com>",
+        subject: `New Contact Form: ${formData.subject}`,
+        text: `
+          Name: ${formData.name}
+          Email: ${formData.email}
+          Company: ${formData.company || "Not provided"}
+          Phone: ${formData.phone || "Not provided"}
+          Inquiry Type: ${formData.inquiryType}
+          Message: ${formData.message}
+          
+          ${
+            submission
+              ? `View in admin: ${process.env.NEXT_PUBLIC_APP_URL}/admin/contact-submissions/${submission.id}`
+              : "Note: Submission was not saved to database."
+          }
+        `,
+        category: "contact_form_notification",
+      });
+
+      if (!adminNotificationResult.success) {
+        logger.warn("Failed to send admin notification email", {
+          error: adminNotificationResult.error,
+          submissionId: submission?.id,
+        });
+        // Continue even if admin notification fails
+      } else {
+        adminEmailSent = true;
+      }
+    } catch (emailError) {
+      logger.error("Error sending admin notification email", emailError);
+      // Continue even if admin notification fails
+    }
+
+    let userEmailSent = false;
+    try {
+      // Send auto-response to the user
+      const autoResponseResult = await sendEmail({
+        to: formData.email,
+        from: "Synthalyst Support <support@synthalyst.com>",
+        subject: `We've received your message: ${formData.subject}`,
+        text: `Thank you for contacting Synthalyst. We've received your message and our team will review it shortly.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #4a6cf7;">Thank you for contacting Synthalyst</h2>
+            <p>Hello ${formData.name},</p>
+            <p>We've received your message and our team will review it shortly. Here's a summary of what you sent us:</p>
+            
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <p><strong>Subject:</strong> ${formData.subject}</p>
+              <p><strong>Inquiry Type:</strong> ${formData.inquiryType}</p>
+              <p><strong>Message:</strong></p>
+              <p style="white-space: pre-line;">${formData.message}</p>
+            </div>
+            
+            <p>We typically respond within 1-2 business days. If your matter is urgent, please call us at ${
+              process.env.SUPPORT_PHONE || "+1 (555) 123-4567"
+            }.</p>
+            
+            <p>Best regards,<br>The Synthalyst Team</p>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+              <p>This is an automated response to your inquiry. Please do not reply to this email.</p>
+            </div>
+          </div>
+        `,
+        category: "contact_form_auto_response",
+      });
+
+      if (!autoResponseResult.success) {
+        logger.warn("Failed to send auto-response email", {
+          error: autoResponseResult.error,
+          submissionId: submission?.id,
+        });
+        // Continue even if auto-response fails
+      } else {
+        userEmailSent = true;
+      }
+    } catch (emailError) {
+      logger.error("Error sending auto-response email", emailError);
+      // Continue even if auto-response fails
+    }
+
+    // If we have a submission, serialize any BigInt values before returning
+    const serializedSubmissionId = submission
+      ? serializeBigInt(submission.id)
+      : null;
+
+    // If both database and emails failed, return an error
+    if (!submission && !adminEmailSent && !userEmailSent) {
+      logger.error(
+        "Contact form submission completely failed - all operations failed"
+      );
       return NextResponse.json(
         {
           error: {
-            message: "Failed to save your message to our database",
-            details:
-              process.env.NODE_ENV === "development"
-                ? dbError instanceof Error
-                  ? dbError.message
-                  : String(dbError)
-                : undefined,
+            message:
+              "Failed to process your message. Please try again later or contact us directly.",
           },
         },
         { status: 500 }
       );
     }
+
+    // Return success even if some parts failed, as long as at least one operation succeeded
+    return NextResponse.json(
+      {
+        message: "Message sent successfully",
+        success: true,
+        submissionId: serializedSubmissionId,
+        // Include warnings if some operations failed
+        warnings: {
+          databaseSave: !submission ? "Failed to save to database" : null,
+          adminEmail: !adminEmailSent
+            ? "Failed to send admin notification"
+            : null,
+          userEmail: !userEmailSent
+            ? "Failed to send confirmation email"
+            : null,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     logger.error("Failed to process contact form submission", error);
     return handleAPIError(error);

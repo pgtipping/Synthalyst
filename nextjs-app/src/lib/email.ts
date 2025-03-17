@@ -5,7 +5,13 @@ import { logger } from "@/lib/logger";
 
 // Helper function to check if EmailLog model exists in Prisma
 const hasEmailLogModel = (): boolean => {
-  return "emailLog" in prisma;
+  try {
+    // @ts-expect-error - Checking if model exists
+    return typeof prisma.emailLog === "object";
+  } catch (error) {
+    logger.error("Error checking for EmailLog model:", error);
+    return false;
+  }
 };
 
 // Helper function to serialize BigInt values
