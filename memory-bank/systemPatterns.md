@@ -680,128 +680,113 @@ The AudioRecorder component follows a stateful component pattern:
 - Error logging and monitoring
 - User feedback on cache status
 
-## Error Handling Patterns
+## Tailwind CSS Configuration Patterns (March 17, 2025)
 
-### Graceful Degradation Pattern - March 17, 2025
+### PostCSS Integration
 
-For operations that involve multiple steps (like database operations and email sending), we implement a graceful degradation pattern to ensure that the operation can succeed even if some parts fail.
+The application uses Tailwind CSS with PostCSS for styling. The configuration follows these patterns:
 
-```typescript
-// Example from contact form API
-let submission;
-try {
-  // Database operation
-  submission = await prisma.contactSubmission.create({
-    data: {
-      /* ... */
-    },
-  });
-} catch (dbError) {
-  logger.error("Database error", dbError);
-  // Continue with other operations even if database save fails
-}
+1. **PostCSS Plugin Structure**:
 
-let emailSent = false;
-try {
-  // Email operation
-  const emailResult = await sendEmail({
-    /* ... */
-  });
-  if (emailResult.success) {
-    emailSent = true;
-  }
-} catch (emailError) {
-  logger.error("Email error", emailError);
-  // Continue with other operations even if email fails
-}
+   ```javascript
+   // postcss.config.cjs
+   const config = {
+     plugins: {
+       "@tailwindcss/postcss": {},
+       autoprefixer: {},
+     },
+   };
+   ```
 
-// Return success if at least one operation succeeded
-if (submission || emailSent) {
-  return NextResponse.json({
-    success: true,
-    // Include warnings about failed operations
-    warnings: {
-      database: !submission ? "Failed to save to database" : null,
-      email: !emailSent ? "Failed to send email" : null,
-    },
-  });
-} else {
-  // Only return error if all operations failed
-  return NextResponse.json(
-    {
-      success: false,
-      error: "All operations failed",
-    },
-    { status: 500 }
-  );
-}
-```
+2. **CSS Import Pattern**:
 
-### BigInt Serialization Pattern - March 17, 2025
+   ```css
+   /* In CSS files that use Tailwind */
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   ```
 
-Since BigInt values cannot be directly serialized to JSON, we use a helper function to convert them to strings before JSON serialization.
+3. **Custom Utility Pattern**:
+   ```css
+   /* Custom utilities in @layer */
+   @layer utilities {
+     .custom-utility {
+       /* properties */
+     }
+   }
+   ```
 
-```typescript
-function serializeBigInt(data: unknown): unknown {
-  if (data === null || data === undefined) {
-    return data;
-  }
+### CSS Class Usage Patterns
 
-  if (typeof data === "bigint") {
-    return data.toString();
-  }
+1. **Color Variable Usage**:
 
-  if (Array.isArray(data)) {
-    return data.map(serializeBigInt);
-  }
+   ```css
+   /* Using HSL variables */
+   .element {
+     background-color: hsl(var(--background));
+     color: hsl(var(--foreground));
+   }
+   ```
 
-  if (typeof data === "object") {
-    return Object.fromEntries(
-      Object.entries(data as Record<string, unknown>).map(([key, value]) => [
-        key,
-        serializeBigInt(value),
-      ])
-    );
-  }
+2. **Tailwind Class Pattern**:
 
-  return data;
-}
+   ```jsx
+   // In React components
+   <div className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+     Content
+   </div>
+   ```
 
-// Usage in API routes
-return NextResponse.json({
-  success: true,
-  data: serializeBigInt(data),
-});
-```
+3. **Direct Color Usage**:
+   ```jsx
+   // Using explicit colors with bracket notation
+   <div className="bg-[#f3f4f6] text-[#000000]">Content</div>
+   ```
 
-### Optional Feature Pattern - March 17, 2025
+### CSS Organization
 
-For features that depend on external services or database models that might not be available, we implement an optional feature pattern to make them optional.
+1. **File Structure**:
 
-```typescript
-// Check if a model exists
-function hasModel(modelName: string): boolean {
-  try {
-    // @ts-expect-error - Checking if model exists
-    return typeof prisma[modelName] === "object";
-  } catch (error) {
-    logger.error(`Error checking for ${modelName} model:`, error);
-    return false;
-  }
-}
+   ```
+   /src
+     /app
+       globals.css       # Global styles with Tailwind imports
+       critical.css      # Critical above-the-fold styles
+     /components
+       /ui
+         component.module.css  # Component-specific styles
+   /public
+     /styles
+       non-critical.css  # Non-critical styles loaded asynchronously
+   ```
 
-// Usage
-if (hasModel("emailLog")) {
-  try {
-    // Use the model
-    await prisma.emailLog.create({
-      /* ... */
-    });
-  } catch (error) {
-    // Handle error but continue with main functionality
-    logger.error("Failed to log email:", error);
-  }
-}
+2. **Variable Organization**:
 
-// Main functionality continues regardless of optional feature success
-```
+   ```css
+   :root {
+     /* Color variables */
+     --background: 0 0% 100%;
+     --foreground: 222.2 84% 4.9%;
+
+     /* Size variables */
+     --radius: 0.5rem;
+   }
+
+   .dark {
+     /* Dark mode overrides */
+     --background: 222.2 84% 4.9%;
+     --foreground: 210 40% 98%;
+   }
+   ```
+
+### Best Practices
+
+1. **Use `@tailwindcss/postcss` instead of direct `tailwindcss` usage**
+2. **Add Tailwind imports to all CSS files that use Tailwind features**
+3. **Use explicit color values with bracket notation instead of named colors**
+4. **Standardize on a single PostCSS configuration file**
+5. **Use CSS variables for theme colors and sizes**
+6. **Apply proper font weights using the font-[weight] syntax**
+7. **Use HSL color variables for theme consistency**
+8. **Test CSS changes in a separate branch before merging to main**

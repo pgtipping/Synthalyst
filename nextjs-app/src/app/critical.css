@@ -1,4 +1,7 @@
 /* Critical CSS for above-the-fold content */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Base styles */
 :root {

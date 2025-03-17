@@ -1901,559 +1901,898 @@ When working with audio components in the application:
 
 # Cursor Rules for Synthalyst Project
 
-## Project Structure (2025-03-17)
+## Project Structure (2025-03-16)
 
-- `nextjs-app/` - Main Next.js application
-- `memory-bank/` - Documentation and project context
-- `screenshots/` - Screenshots for documentation and debugging
+- `nextjs-app/`: Main Next.js application
+  - `src/`: Source code
+    - `app/`: Next.js App Router
+      - `admin/`: Admin dashboard pages
+      - `api/`: API routes
+      - `auth/`: Authentication pages
+      - `blog/`: Blog pages
+      - `dashboard/`: User dashboard
+      - `tools/`: Tools pages
+    - `components/`: Reusable components
+    - `lib/`: Utility functions and libraries
+    - `styles/`: Global styles
+    - `types/`: TypeScript type definitions
+  - `public/`: Static assets
+  - `prisma/`: Prisma schema and migrations
+  - `tests/`: Test files
+- `memory-bank/`: Project documentation
 
-## Code Patterns (2025-03-17)
+## Coding Patterns (2025-03-16)
 
-### Error Handling Pattern (2025-03-17)
+### Error Handling
 
-- Use nested try-catch blocks to handle different types of errors separately
-- Separate database errors from email sending errors and other API errors
-- Make features optional when they depend on external services or database models
-- Enhance error messages with detailed information for better debugging
-- Implement graceful degradation so features can succeed even if some parts fail
-- Add checks to verify if database models exist before attempting to use them
-- Use TypeScript to ensure type safety and prevent runtime errors
-- Serialize BigInt values to strings before including them in JSON responses
+1. **API Routes**:
 
-Example pattern for BigInt serialization:
+   - Always use try-catch blocks for database operations
+   - Return appropriate HTTP status codes
+   - Include meaningful error messages
+   - Log errors to console in development
+   - Check for model/table existence before querying
+   - Use SQL queries to verify table existence in the database
+   - Initialize default values for all data variables to prevent undefined errors
+
+2. **Frontend Components**:
+
+   - Implement error boundaries for critical components
+   - Use loading states for async operations
+   - Provide fallback UI for error states
+   - Handle network errors gracefully
+   - Use optional chaining for potentially undefined properties
+   - Add null checking for user properties to prevent undefined errors
+
+3. **Authentication**:
+   - Verify user authentication before accessing protected routes
+   - Check user roles for admin-only features
+   - Handle session expiration gracefully
+   - Redirect unauthenticated users to login page
+   - Use try-catch blocks around authentication checks
+   - Implement fallbacks for authentication failures
+
+### Database Operations
+
+1. **Prisma Queries**:
+
+   - Use transactions for related operations
+   - Include error handling for all database operations
+   - Implement pagination for large data sets
+   - Use appropriate filters and sorting
+   - Check for table existence before querying
+   - Use raw SQL queries when necessary for complex operations
+   - Verify model existence before attempting CRUD operations
+
+2. **Data Validation**:
+   - Validate input data before database operations
+   - Use zod for schema validation
+   - Sanitize user input to prevent injection attacks
+   - Implement rate limiting for write operations
+   - Provide meaningful error messages for validation failures
+
+### Component Patterns
+
+1. **Form Components**:
+
+   - Use react-hook-form for form handling
+   - Implement client-side validation
+   - Show loading states during submission
+   - Disable submit button when form is invalid
+   - Provide clear error messages
+   - Use controlled components for form inputs
+
+2. **Layout Components**:
+
+   - Create responsive layouts using Tailwind CSS
+   - Implement mobile-first design
+   - Use CSS Grid and Flexbox for complex layouts
+   - Create reusable layout components
+   - Ensure consistent spacing and alignment
+
+3. **UI Components**:
+   - Use shadcn/ui components for consistent design
+   - Implement dark mode support
+   - Ensure accessibility compliance
+   - Create reusable UI components
+   - Use Tailwind CSS for styling
+   - Ensure all SelectItem components have non-empty values
+
+### API Integration
+
+1. **External APIs**:
+
+   - Implement retry logic for failed requests
+   - Use environment variables for API keys
+   - Create service classes for API integration
+   - Handle rate limiting and quotas
+   - Implement caching for frequently used data
+   - Use try-catch blocks for all API calls
+
+2. **Authentication**:
+   - Use NextAuth.js for authentication
+   - Implement role-based access control
+   - Secure API routes with authentication middleware
+   - Handle token refresh automatically
+   - Store tokens securely
+
+### State Management
+
+1. **React State**:
+
+   - Use React hooks for local state
+   - Implement context for shared state
+   - Use reducers for complex state logic
+   - Avoid prop drilling
+   - Initialize state with default values to prevent undefined errors
+
+2. **Server State**:
+   - Use SWR for data fetching
+   - Implement optimistic updates
+   - Handle loading and error states
+   - Use revalidation for stale data
+   - Implement pagination and infinite scrolling
+
+## User Preferences (2025-03-16)
+
+1. **Code Style**:
+
+   - Use TypeScript for all new code
+   - Follow ESLint and Prettier configurations
+   - Use meaningful variable and function names
+   - Write comments for complex logic
+   - Create reusable utility functions
+   - Use proper typing for all variables and functions
+
+2. **UI/UX Preferences**:
+
+   - Implement clean, minimalist design
+   - Use consistent color scheme
+   - Ensure responsive design for all screen sizes
+   - Prioritize accessibility
+   - Use animations sparingly
+   - Implement dark mode support
+   - Ensure consistent button heights and alignment
+
+3. **Documentation**:
+   - Update memory-bank files for significant changes
+   - Document API endpoints
+   - Create README files for new features
+   - Document environment variables
+   - Update .cursorrules for new patterns
+
+## Project-Specific Patterns (2025-03-16)
+
+### Email Service
+
+1. **Implementation**:
+
+   - Use unified email service in `nextjs-app/src/lib/email.ts`
+   - Implement fallback mechanisms between SendGrid and Nodemailer
+   - Log all email activities to the database
+   - Use standardized email templates
+   - Implement retry logic for failed emails
+   - Check for EmailLog model existence before querying
+
+2. **Admin Interface**:
+   - Display email logs with filtering options
+   - Show statistics for email status distribution
+   - Implement pagination for email logs
+   - Allow deletion of older logs
+   - Provide detailed view for individual emails
+   - Handle cases where the EmailLog model doesn't exist yet
+
+### Knowledge GPT
+
+1. **Implementation**:
+
+   - Use Gemini 1.5 Flash-8B for Knowledge GPT
+   - Implement web search integration for up-to-date information
+   - Support multiple languages
+   - Implement domain selection for specialized knowledge
+   - Use client-side formatting for responses
+   - Provide loading states during generation
+
+2. **UI**:
+   - Show chat-like interface for questions and answers
+   - Implement language selection dropdown
+   - Display web search toggle button
+   - Show domain selection for specialized knowledge
+   - Provide clear user guidance
+   - Ensure responsive design for all devices
+
+### Learning Content Creator
+
+1. **Implementation**:
+
+   - Use GPT-4o-Mini for Learning Creator
+   - Support multiple languages
+   - Implement structured content generation
+   - Store generated content in the database
+   - Provide options for content customization
+   - Implement retry logic for failed generations
+
+2. **UI**:
+   - Show form for topic submission
+   - Implement language selection dropdown
+   - Display generated content with proper formatting
+   - Provide options for content customization
+   - Show loading states during generation
+   - Ensure responsive design for all devices
+
+### Admin Dashboard
+
+1. **Implementation**:
+
+   - Create responsive admin layout
+   - Implement sidebar navigation
+   - Show statistics and data visualization
+   - Provide filtering and sorting options
+   - Implement pagination for large data sets
+   - Use try-catch blocks for all database operations
+   - Check for table existence before querying
+   - Initialize default values for all data variables
+
+2. **UI**:
+   - Use card-based layout for statistics
+   - Implement responsive design for all screen sizes
+   - Show loading states during data fetching
+   - Provide clear error messages
+   - Use consistent styling across all admin pages
+   - Ensure all SelectItem components have non-empty values
+
+## Environment Setup (2025-03-16)
+
+1. **Development Environment**:
+
+   - Node.js 18+
+   - npm 9+
+   - PostgreSQL 14+
+   - Redis (optional)
+   - Git
+
+2. **Environment Variables**:
+
+   - `DATABASE_URL`: PostgreSQL connection string
+   - `NEXTAUTH_URL`: NextAuth.js URL
+   - `NEXTAUTH_SECRET`: NextAuth.js secret
+   - `GOOGLE_CLIENT_ID`: Google OAuth client ID
+   - `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
+   - `SENDGRID_API_KEY`: SendGrid API key
+   - `EMAIL_FROM`: Sender email address
+   - `SMTP_HOST`: SMTP host for Nodemailer
+   - `SMTP_PORT`: SMTP port for Nodemailer
+   - `SMTP_USER`: SMTP user for Nodemailer
+   - `SMTP_PASSWORD`: SMTP password for Nodemailer
+   - `GOOGLE_SEARCH_API_KEY`: Google Custom Search API key
+   - `GOOGLE_SEARCH_ENGINE_ID`: Google Custom Search Engine ID
+   - `PUBMED_API_KEY`: PubMed API key
+   - `GEMINI_API_KEY`: Google Gemini API key
+   - `OPENAI_API_KEY`: OpenAI API key
+
+3. **Development Commands**:
+   - `npm run dev`: Start development server
+   - `npm run build`: Build for production
+   - `npm run start`: Start production server
+   - `npm run lint`: Run ESLint
+   - `npm run test`: Run tests
+   - `npx prisma migrate dev`: Run Prisma migrations
+   - `npx prisma generate`: Generate Prisma client
+   - `npx prisma studio`: Open Prisma Studio
+
+## Recent Learnings (2025-03-16)
+
+1. **Database Error Handling**:
+
+   - Always check for table existence before querying
+   - Use `information_schema.tables` to verify table existence
+   - Initialize default values for all data variables
+   - Use try-catch blocks for all database operations
+   - Implement fallbacks for missing or undefined data
+   - Add specific error messages for different failure scenarios
+
+2. **Authentication Error Handling**:
+
+   - Use try-catch blocks around authentication checks
+   - Initialize session variable as null
+   - Use optional chaining for user properties
+   - Add null checking for user properties
+   - Implement fallbacks for authentication failures
+   - Log authentication errors for debugging
+
+3. **UI Component Best Practices**:
+
+   - Ensure all SelectItem components have non-empty values
+   - Use "all" instead of empty strings for filter values
+   - Update filter logic to handle the "all" value correctly
+   - Provide fallback UI states when data is missing
+   - Use loading states for async operations
+   - Implement error boundaries for critical components
+
+4. **API Route Patterns**:
+
+   - Check for model existence before CRUD operations
+   - Use raw SQL queries to verify table existence
+   - Implement proper error handling for all API routes
+   - Return appropriate HTTP status codes and error messages
+   - Use try-catch blocks for all database operations
+   - Provide fallback responses when data is missing
+
+5. **Next.js App Router Patterns**:
+   - Use server components for data fetching
+   - Implement client components for interactive elements
+   - Use layout components for shared UI
+   - Implement error boundaries for critical sections
+   - Use loading states for async operations
+   - Handle authentication in layout components
+
+## Troubleshooting Guide (2025-03-16)
+
+1. **Database Connection Issues**:
+
+   - Check DATABASE_URL environment variable
+   - Verify PostgreSQL service is running
+   - Check network connectivity
+   - Verify database user permissions
+   - Run `npx prisma migrate dev` to apply migrations
+   - Check for missing tables using `information_schema.tables`
+
+2. **Authentication Issues**:
+
+   - Verify NEXTAUTH_URL and NEXTAUTH_SECRET
+   - Check Google OAuth credentials
+   - Clear browser cookies and try again
+   - Verify user roles in the database
+   - Check for session expiration
+   - Implement try-catch blocks around authentication checks
+
+3. **API Errors**:
+
+   - Check browser console for error messages
+   - Verify API route implementation
+   - Check for missing environment variables
+   - Verify database connection
+   - Implement proper error handling
+   - Check for model existence before querying
+
+4. **UI Issues**:
+
+   - Check browser console for error messages
+   - Verify component props and types
+   - Check for missing or undefined data
+   - Implement fallback UI states
+   - Use error boundaries for critical components
+   - Ensure all SelectItem components have non-empty values
+
+5. **Deployment Issues**:
+   - Verify environment variables in production
+   - Check build logs for errors
+   - Verify database connection in production
+   - Check for missing dependencies
+   - Verify API routes are working
+   - Check for CORS issues
+
+## Common Errors and Solutions (2025-03-16)
+
+1. **"Cannot read properties of undefined"**:
+
+   - Initialize default values for all data variables
+   - Use optional chaining for potentially undefined properties
+   - Add null checking for user properties
+   - Implement fallbacks for missing or undefined data
+   - Use try-catch blocks for all operations that might fail
+   - Check for table existence before querying
+
+2. **"ChunkLoadError: Loading chunk failed"**:
+
+   - Implement proper error handling for all database operations
+   - Initialize default values for all data variables
+   - Use try-catch blocks for all API calls
+   - Provide fallback UI states when data is missing
+   - Check for table existence before querying
+   - Handle authentication errors gracefully
+
+3. **"Failed to fetch"**:
+
+   - Check network connectivity
+   - Verify API route implementation
+   - Check for CORS issues
+   - Implement retry logic for failed requests
+   - Use try-catch blocks for all API calls
+   - Provide fallback UI states when data is missing
+
+4. **"Prisma error: Table does not exist"**:
+
+   - Run `npx prisma migrate dev` to apply migrations
+   - Check for table existence before querying
+   - Use `information_schema.tables` to verify table existence
+   - Implement fallbacks for missing tables
+   - Use try-catch blocks for all database operations
+   - Initialize default values for all data variables
+
+5. **"TypeError: Cannot read property 'map' of undefined"**:
+   - Initialize arrays as empty arrays
+   - Check if data exists before mapping
+   - Use optional chaining for potentially undefined properties
+   - Implement fallbacks for missing or undefined data
+   - Use try-catch blocks for all operations that might fail
+   - Provide default values for all variables
+
+# Cursor Rules
+
+## Redis Monitoring Implementation (March 16, 2025)
+
+### Redis Monitoring API Endpoint
+
+The Redis monitoring API endpoint is implemented in `nextjs-app/src/app/api/monitoring/redis/route.ts`. This endpoint provides metrics about Redis usage, including cache statistics and rate limiting information. Key implementation details:
+
+1. **Error Handling**:
+
+   - The endpoint checks if Redis is configured before attempting to access it
+   - Returns a 200 status with error details in the response body instead of a 500 error
+   - Uses try-catch blocks around Redis operations to prevent crashes
+   - Makes authorization optional in development environment
+
+2. **Data Type Handling**:
+
+   - Checks if data is already an object before attempting to parse it as JSON
+   - Uses type guards to prevent "not valid JSON" errors
+   - Handles both string and object data types appropriately
+
+3. **Rate Limiting**:
+
+   - Uses Upstash Ratelimit library with string format for duration (e.g., "60 s")
+   - Implements error handling for rate limiting failures
+   - Allows the application to continue functioning even if rate limiting fails
+
+4. **Metrics Collection**:
+
+   - Gathers metrics from redisMonitor, redisCache, and rateLimit services
+   - Calculates cache hit rates and other performance metrics
+   - Provides reset functionality for metrics, cache, and rate limits
+
+5. **Response Format**:
+   - Returns a standardized response format with success status and data
+   - Includes error details when operations fail
+   - Provides comprehensive monitoring data for the admin dashboard
+
+### Redis Monitoring Component
+
+The Redis monitoring component is implemented in `nextjs-app/src/components/admin/RedisMonitoring.tsx`. Key implementation details:
+
+1. **Error Handling**:
+
+   - Uses optional chaining to handle null or undefined values
+   - Provides fallback UI when Redis is not configured
+   - Displays error messages when operations fail
+
+2. **UI Features**:
+
+   - Displays cache hit rates and other performance metrics
+   - Provides buttons to reset metrics, cache, and rate limits
+   - Uses responsive design for mobile compatibility
+
+3. **Data Fetching**:
+   - Implements polling to update metrics at regular intervals
+   - Handles loading and error states appropriately
+   - Uses SWR for data fetching with automatic revalidation
+
+### Rate Limiting Implementation
+
+The rate limiting implementation is in `nextjs-app/src/lib/rate-limit.ts`. Key implementation details:
+
+1. **Configuration**:
+
+   - Uses Upstash Ratelimit library for Redis-based rate limiting
+   - Configures sliding window duration using string format (e.g., "60 s")
+   - Implements error tracking and monitoring
+
+2. **Error Handling**:
+
+   - Uses try-catch blocks to handle rate limiting failures
+   - Provides fallback behavior when rate limiting fails
+   - Logs errors for monitoring and debugging
+
+3. **Integration**:
+   - Integrates with the monitoring system to provide rate limiting metrics
+   - Supports reset functionality for rate limits
+   - Configurable limits based on environment and endpoint
+
+## NextJS 15 Dynamic Route Parameters (March 16, 2025)
+
+In Next.js 15, dynamic route parameters are now asynchronous and must be awaited before use. This is a breaking change from previous versions.
+
+### Correct Pattern for API Routes
 
 ```typescript
-// Helper function to serialize BigInt values in objects
-function serializeBigInt(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  if (typeof obj === "bigint") {
-    return obj.toString();
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(serializeBigInt);
-  }
-
-  if (typeof obj === "object") {
-    const result: any = {};
-    for (const key in obj) {
-      result[key] = serializeBigInt(obj[key]);
-    }
-    return result;
-  }
-
-  return obj;
-}
-
-// Usage in API routes
-return NextResponse.json({
-  success: true,
-  data: serializeBigInt(data),
-});
-```
-
-Example pattern for checking if a model exists:
-
-```typescript
-// Check if EmailLog model exists in Prisma client
-function hasEmailLogModel(): boolean {
-  try {
-    // @ts-expect-error - Checking if model exists
-    return typeof prisma.emailLog === "object";
-  } catch (error) {
-    return false;
-  }
-}
-
-// Usage in functions
-if (hasEmailLogModel()) {
-  // Use the model
-} else {
-  // Skip using the model
-}
-```
-
-### Admin Layout Pattern (2025-03-17)
-
-- Use `AdminLayout` component for all admin pages
-- Conditional header rendering to hide main site header on admin pages
-- Sidebar-only navigation for desktop
-- Mobile-only top bar with menu toggle and logout button
-- Proper z-index values to prevent overlapping elements
-
-### Email Service Pattern (2025-03-17)
-
-- Unified email service in `nextjs-app/src/lib/email.ts`
-- Fallback mechanisms between SendGrid and Nodemailer
-- Email logging with the `EmailLog` model in Prisma schema
-- Optional email logging to prevent failures if database is unavailable
-
-### API Response Pattern (2025-03-17)
-
-- Consistent structure for all API responses
-- Success flag to indicate if the operation was successful
-- Data property for the actual response data
-- Error property for error details
-- Pagination object for paginated responses
-
-Example:
-
-```typescript
-return NextResponse.json({
-  success: true,
-  data: serializeBigInt(data),
-  pagination: {
-    totalItems,
-    totalPages,
-    currentPage,
-    itemsPerPage,
-  },
-});
-```
-
-### Form Submission Pattern (2025-03-17)
-
-- Client-side validation before submission
-- Server-side validation in API routes
-- Detailed error messages for validation failures
-- Try-catch blocks for all database operations
-- Graceful degradation for features to succeed even if some parts fail
-
-## User Preferences (2025-03-17)
-
-- Prefer TypeScript over JavaScript
-- Prefer server components over client components when possible
-- Prefer shadcn/ui components for UI elements
-- Prefer Tailwind CSS for styling
-- Prefer Prisma ORM for database operations
-- Prefer Next.js App Router over Pages Router
-
-## Development Workflow (2025-03-17)
-
-- Run `npm run dev` to start the development server
-- Run `npm run build` to build the application
-- Run `npm run start` to start the production server
-- Use `git add .` to stage all changes
-- Use `git commit -m "message"` to commit changes
-- Use `git push origin main` to push changes to the remote repository
-
-## Environment Variables (2025-03-17)
-
-- `DATABASE_URL` - PostgreSQL connection string
-- `NEXTAUTH_SECRET` - Secret for NextAuth.js
-- `NEXTAUTH_URL` - URL for NextAuth.js
-- `SENDGRID_API_KEY` - SendGrid API key
-- `EMAIL_FROM` - Email address to send emails from
-- `GOOGLE_SEARCH_API_KEY` - Google Custom Search API key
-- `GOOGLE_SEARCH_ENGINE_ID` - Google Custom Search Engine ID
-- `PUBMED_API_KEY` - PubMed API key
-
-## Common Issues and Solutions (2025-03-17)
-
-### BigInt Serialization (2025-03-17)
-
-**Issue**: BigInt values cannot be serialized to JSON directly.
-
-**Solution**: Use a helper function to serialize BigInt values to strings before including them in JSON responses.
-
-```typescript
-function serializeBigInt(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  if (typeof obj === "bigint") {
-    return obj.toString();
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(serializeBigInt);
-  }
-
-  if (typeof obj === "object") {
-    const result: any = {};
-    for (const key in obj) {
-      result[key] = serializeBigInt(obj[key]);
-    }
-    return result;
-  }
-
-  return obj;
-}
-```
-
-### Database Model Existence (2025-03-17)
-
-**Issue**: Attempting to use a database model that doesn't exist yet can cause runtime errors.
-
-**Solution**: Check if the model exists before attempting to use it.
-
-```typescript
-function hasModel(modelName: string): boolean {
-  try {
-    // @ts-expect-error - Checking if model exists
-    return typeof prisma[modelName] === "object";
-  } catch (error) {
-    return false;
-  }
-}
-```
-
-### Port Already in Use (2025-03-17)
-
-**Issue**: Port 3001 sometimes remains in use after server shutdown.
-
-**Solution**: Manually terminate the process using the port.
-
-Windows:
-
-```bash
-netstat -ano | findstr :3001
-taskkill /PID <PID> /F
-```
-
-### TypeScript Errors in Test Files (2025-03-17)
-
-**Issue**: Some TypeScript errors still exist in test files.
-
-**Solution**: Add `@ts-expect-error` comments with explanations for known issues.
-
-### LRUCache API Changes (2025-03-17)
-
-**Issue**: LRUCache constructor API changed in v10+.
-
-**Solution**: Update the implementation to use the new API.
-
-```typescript
-// Old API
-const cache = new LRUCache({ max: 100, maxAge: 1000 * 60 * 5 });
-
-// New API
-const cache = new LRUCache({
-  max: 100,
-  ttl: 1000 * 60 * 5,
-  allowStale: false,
-});
-```
-
-### Next.js 15 Dynamic Route Parameters (2025-03-17)
-
-**Issue**: Next.js 15 requires awaiting params object in dynamic routes.
-
-**Solution**: Update the API route to properly await params object.
-
-```typescript
-// Old API
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = params;
-  // ...
-}
-
-// New API
-export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Await the params object to get the id
   const { id } = await params;
+
+  // Use the id parameter
   // ...
 }
 ```
 
-### Contact Form Error Handling (2025-03-17)
+### Common Errors
 
-**Issue**: Contact form submissions were failing with 500 Internal Server Error in production.
+- Using `params.id` directly without awaiting params first
+- Not typing params as a Promise
+- Not destructuring the id after awaiting params
 
-**Solution**:
+### Best Practices
 
-1. Add BigInt serialization to handle database IDs properly in JSON responses
-2. Enhance error handling with nested try-catch blocks to separate different types of errors
-3. Make email logging optional to prevent failures if the database is unavailable
-4. Add detailed error information capture from API responses
-5. Implement graceful degradation so the form can succeed even if email sending fails
+- Always type params as `Promise<{ paramName: string }>`
+- Always await params before accessing its properties
+- Use destructuring to extract parameters after awaiting
+- Add proper error handling for asynchronous operations
 
-```typescript
-// Example of enhanced error handling in contact form API
-try {
-  // Process form data
+## Redis Rate Limiting (March 16, 2025)
 
-  try {
-    // Send email
-  } catch (emailError) {
-    console.error("Email sending failed:", emailError);
-    // Continue with form submission even if email fails
-  }
-
-  try {
-    // Log to database
-  } catch (dbError) {
-    console.error("Database logging failed:", dbError);
-    // Continue with form submission even if logging fails
-  }
-
-  return NextResponse.json({ success: true });
-} catch (error) {
-  console.error("Contact form submission failed:", error);
-  return NextResponse.json({
-    success: false,
-    error: error instanceof Error ? error.message : "Unknown error",
-  });
-}
-```
-
-### Contact Form Error Handling - [2025-03-17 04:16:00]
-
-- Contact form submissions were failing with 500 Internal Server Error in production
-- Key patterns implemented to fix the issues:
-  1. BigInt serialization for database IDs in JSON responses
-  2. Nested try-catch blocks to handle different types of errors separately
-  3. Optional email logging to prevent failures if database is unavailable
-  4. Detailed error information capture from API responses
-  5. Graceful degradation so the form can succeed even if email sending fails
-
-Example pattern for BigInt serialization:
+When using Upstash Redis for rate limiting, use the string format for duration:
 
 ```typescript
-// Helper function to serialize BigInt values in objects
-function serializeBigInt(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  if (typeof obj === "bigint") {
-    return obj.toString();
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(serializeBigInt);
-  }
-
-  if (typeof obj === "object") {
-    const result: any = {};
-    for (const key in obj) {
-      result[key] = serializeBigInt(obj[key]);
-    }
-    return result;
-  }
-
-  return obj;
-}
-
-// Usage in API routes
-return NextResponse.json({
-  success: true,
-  data: serializeBigInt(data),
+const limiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(limit, `${windowInSeconds} s`),
+  analytics: true,
+  prefix: `rate_limit_${endpoint}`,
 });
 ```
 
-Example pattern for checking if a model exists:
+## Admin Dashboard Error Handling (March 16, 2025)
+
+- Always add try-catch blocks for all API calls
+- Provide fallback values when data is missing or undefined
+- Check for database table existence before querying
+- Initialize default values for all data variables
+- Use optional chaining for potentially null values
+- Return 200 status with error details instead of 500 errors
+
+## UI Component Rules (March 16, 2025)
+
+- Ensure all SelectItem components have non-empty values (use "all" instead of empty string)
+- Provide fallback UI states when data is missing or loading
+- Ensure consistent button heights and alignment
+- Use responsive design for all components, especially admin interfaces
+
+# Newsletter Subscription System (March 16, 2025)
+
+When working with the newsletter subscription system, ensure:
+
+1. Use the correct model name `newsletterSubscriber` (not `newsletter`) in all API routes
+2. In development mode with MOCK_NEWSLETTER=true, create real database entries for testing
+3. Handle both pending and confirmed states properly
+4. Implement proper error handling for database operations
+5. Use proper logging for subscription and confirmation processes
+
+## Development Mode Testing
+
+When testing in development mode:
+
+- Set MOCK_NEWSLETTER=true in .env
+- Create real subscribers in the database for testing
+- Use pending status during subscription
+- Update to confirmed status during confirmation
+- Ensure subscribers appear in the admin dashboard
+
+## Newsletter Subscriber Model
+
+The newsletter subscriber model has the following fields:
+
+- id: string (cuid)
+- email: string (unique)
+- name: string (optional)
+- tags: string[]
+- confirmed: boolean
+- confirmedAt: DateTime (optional)
+- status: string (pending, confirmed, unsubscribed)
+- token: string (for confirmation)
+- tokenExpiry: DateTime
+- source: string (optional)
+
+## NextJS 15 Dynamic Route Parameters (March 16, 2025)
+
+In Next.js 15, dynamic route parameters are now asynchronous and must be awaited before use. This is a breaking change from previous versions.
+
+### Correct Pattern for API Routes
 
 ```typescript
-// Check if EmailLog model exists in Prisma client
-function hasEmailLogModel(): boolean {
-  try {
-    // @ts-expect-error - Checking if model exists
-    return typeof prisma.emailLog === "object";
-  } catch (error) {
-    return false;
-  }
-}
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Await the params object to get the id
+  const { id } = await params;
 
-// Usage in functions
-if (hasEmailLogModel()) {
-  // Use the model
-} else {
-  // Skip using the model
+  // Use the id parameter
+  // ...
 }
 ```
 
-Example of enhanced error handling in contact form API:
+### Common Errors
+
+- Using `params.id` directly without awaiting params first
+- Not typing params as a Promise
+- Not destructuring the id after awaiting params
+
+### Best Practices
+
+- Always type params as `Promise<{ paramName: string }>`
+- Always await params before accessing its properties
+- Use destructuring to extract parameters after awaiting
+- Add proper error handling for asynchronous operations
+
+## Redis Rate Limiting (March 16, 2025)
+
+When using Upstash Redis for rate limiting, use the string format for duration:
 
 ```typescript
-try {
-  // Process form data
-
-  try {
-    // Send email
-  } catch (emailError) {
-    console.error("Email sending failed:", emailError);
-    // Continue with form submission even if email fails
-  }
-
-  try {
-    // Log to database
-  } catch (dbError) {
-    console.error("Database logging failed:", dbError);
-    // Continue with form submission even if logging fails
-  }
-
-  return NextResponse.json({ success: true });
-} catch (error) {
-  console.error("Contact form submission failed:", error);
-  return NextResponse.json({
-    success: false,
-    error: error instanceof Error ? error.message : "Unknown error",
-  });
-}
-```
-
-### Contact Form Error Handling - [2025-03-17 04:45:00]
-
-- Contact form submissions were failing with 500 Internal Server Error in production
-- Key patterns implemented to fix the issues:
-  1. BigInt serialization for database IDs in JSON responses
-  2. Nested try-catch blocks to handle different types of errors separately
-  3. Optional email logging to prevent failures if database is unavailable
-  4. Detailed error information capture from API responses
-  5. Graceful degradation so the form can succeed even if email sending fails
-  6. Independent tracking of success/failure for each operation
-  7. Return success as long as at least one operation succeeds
-  8. Include detailed warnings in the response about any failed operations
-
-Example pattern for BigInt serialization:
-
-```typescript
-// Helper function to serialize BigInt values in objects
-function serializeBigInt(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  if (typeof obj === "bigint") {
-    return obj.toString();
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(serializeBigInt);
-  }
-
-  if (typeof obj === "object") {
-    const result: any = {};
-    for (const key in obj) {
-      result[key] = serializeBigInt(obj[key]);
-    }
-    return result;
-  }
-
-  return obj;
-}
-
-// Usage in API routes
-return NextResponse.json({
-  success: true,
-  data: serializeBigInt(data),
+const limiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(limit, `${windowInSeconds} s`),
+  analytics: true,
+  prefix: `rate_limit_${endpoint}`,
 });
 ```
 
-Example pattern for checking if a model exists:
+## Admin Dashboard Error Handling (March 16, 2025)
 
-```typescript
-// Check if EmailLog model exists in Prisma client
-function hasEmailLogModel(): boolean {
-  try {
-    // @ts-expect-error - Checking if model exists
-    return typeof prisma.emailLog === "object";
-  } catch (error) {
-    logger.error("Error checking for EmailLog model:", error);
-    return false;
-  }
-}
+- Always add try-catch blocks for all API calls
+- Provide fallback values when data is missing or undefined
+- Check for database table existence before querying
+- Initialize default values for all data variables
+- Use optional chaining for potentially null values
+- Return 200 status with error details instead of 500 errors
 
-// Usage in functions
-if (hasEmailLogModel()) {
-  // Use the model
-} else {
-  // Skip using the model
+## UI Component Rules (March 16, 2025)
+
+- Ensure all SelectItem components have non-empty values (use "all" instead of empty string)
+- Provide fallback UI states when data is missing or loading
+- Ensure consistent button heights and alignment
+- Use responsive design for all components, especially admin interfaces
+
+## React Error Handling Pattern for Asynchronously Loaded Data (March 16, 2025)
+
+When working with asynchronously loaded data in React components, it's important to implement proper error handling to prevent "Cannot read properties of undefined" errors. Here's the pattern we've established:
+
+1. **Conditional Rendering**: Always wrap UI elements that depend on asynchronously loaded data in conditional checks.
+
+```jsx
+{
+  historyPagination && (
+    <div className="pagination-controls">
+      {/* Pagination controls that use historyPagination */}
+    </div>
+  );
 }
 ```
 
-Example of enhanced error handling in contact form API with graceful degradation:
+2. **Default Values**: Initialize state variables with sensible default values that match the expected structure.
 
-```typescript
-// Separate database operations from email sending
-let submission;
-try {
-  // Save the submission to the database
-  submission = await prisma.contactSubmission.create({
-    data: {
-      // ...form data
-    },
-  });
-} catch (dbError) {
-  logger.error("Database error in contact form submission", dbError);
-  // Continue with email sending even if database save fails
-}
+```jsx
+const [historyPagination, setHistoryPagination] = useState({
+  page: 1,
+  limit: 10,
+  total: 0,
+  totalPages: 1,
+});
+```
 
-// Track success of each operation
-let adminEmailSent = false;
-try {
-  // Send notification email to admin
-  const adminNotificationResult = await sendEmail({
-    // ...email options
-  });
+3. **Optional Chaining and Nullish Coalescing**: Use optional chaining and nullish coalescing operators to handle potentially undefined values.
 
-  if (adminNotificationResult.success) {
-    adminEmailSent = true;
-  }
-} catch (emailError) {
-  logger.error("Error sending admin notification email", emailError);
-  // Continue even if admin notification fails
-}
+```jsx
+<span>{historyPagination?.totalPages || 1}</span>
+```
 
-let userEmailSent = false;
-try {
-  // Send auto-response to the user
-  const autoResponseResult = await sendEmail({
-    // ...email options
-  });
+4. **API Response Structure**: Ensure API response structures match frontend expectations. When modifying API responses, update all places where the data is used.
 
-  if (autoResponseResult.success) {
-    userEmailSent = true;
-  }
-} catch (emailError) {
-  logger.error("Error sending auto-response email", emailError);
-  // Continue even if auto-response fails
-}
-
-// If we have a submission, serialize any BigInt values before returning
-const serializedSubmissionId = submission
-  ? serializeBigInt(submission.id)
-  : null;
-
-// If both database and emails failed, return an error
-if (!submission && !adminEmailSent && !userEmailSent) {
-  logger.error(
-    "Contact form submission completely failed - all operations failed"
-  );
-  return NextResponse.json(
-    {
-      error: {
-        message:
-          "Failed to process your message. Please try again later or contact us directly.",
-      },
-    },
-    { status: 500 }
-  );
-}
-
-// Return success even if some parts failed, as long as at least one operation succeeded
-return NextResponse.json(
-  {
-    message: "Message sent successfully",
-    success: true,
-    submissionId: serializedSubmissionId,
-    // Include warnings if some operations failed
-    warnings: {
-      databaseSave: !submission ? "Failed to save to database" : null,
-      adminEmail: !adminEmailSent ? "Failed to send admin notification" : null,
-      userEmail: !userEmailSent ? "Failed to send confirmation email" : null,
-    },
+```jsx
+// API response
+return NextResponse.json({
+  history: formattedHistory,
+  pagination: {
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
   },
-  { status: 200 }
-);
+});
+
+// Frontend usage
+setHistory(data.history);
+setHistoryPagination(data.pagination);
 ```
+
+5. **Error Handling in API Calls**: Implement try-catch blocks for all API calls with appropriate fallbacks.
+
+```jsx
+try {
+  const response = await fetch("/api/endpoint");
+  const data = await response.json();
+  // Process data
+} catch (error) {
+  console.error("Error fetching data:", error);
+  // Set default values or show error message
+} finally {
+  // Clean up (e.g., set loading state to false)
+}
+```
+
+This pattern helps prevent runtime errors and provides a better user experience by gracefully handling cases where data might not be available yet.
+
+## Admin Layout Improvements - March 16, 2025
+
+The admin layout has been improved to fix issues with the sidebar and main content:
+
+1. **Layout Structure**:
+
+   - Changed from a relative positioning approach to a flex-based layout
+   - Used `flex min-h-screen` on the root container to ensure proper height
+   - Made the main content area use `flex-1 flex flex-col` for proper spacing
+
+2. **Sidebar Improvements**:
+
+   - Fixed the sidebar to prevent overlap with main content
+   - Added a close button in the sidebar for better mobile usability
+   - Made the sidebar use `lg:relative` instead of `lg:static` for better positioning
+   - Ensured consistent width and spacing in the sidebar
+
+3. **Navigation Bar**:
+
+   - Made the top navigation bar sticky with `sticky top-0` for better navigation on long pages
+   - Improved the mobile toggle button placement and visibility
+   - Added proper spacing between navigation elements
+
+4. **Mobile Responsiveness**:
+
+   - Improved sidebar toggle controls for mobile devices
+   - Added proper z-index management to ensure UI elements don't overlap
+   - Ensured the sidebar overlay properly covers the entire screen on mobile
+   - Made the sidebar close when clicking outside or on a navigation link
+
+5. **Content Area**:
+   - Added proper padding and margin to the main content area
+   - Ensured consistent spacing between elements
+   - Added `mt-4` to the main content to separate it from the breadcrumb
+
+These improvements ensure a consistent and responsive admin dashboard experience across all device sizes.
+
+## API Endpoint Patterns - [2025-03-17 10:15:00]
+
+### Prisma Query Best Practices - [2025-03-17 10:15:00]
+
+- Avoid using raw SQL queries with `prisma.$queryRaw` when possible
+- Prefer standard Prisma query methods like `findMany`, `findUnique`, `update`, etc.
+- Raw SQL queries can cause serialization issues with BigInt values and other complex types
+- When transforming data from Prisma queries, use proper type safety:
+  ```typescript
+  // Transform the data to include additional properties
+  const transformedData = data.map((item) => ({
+    ...item,
+    computedProperty: calculateValue(item),
+    // Remove properties that shouldn't be sent to the client
+    sensitiveData: undefined,
+  }));
+  ```
+- Always handle potential null or undefined values in query results
+- Use proper error handling with try/catch blocks for all database operations
+
+### API Error Handling - [2025-03-17 10:15:00]
+
+- Implement consistent error handling across all API endpoints
+- Use try/catch blocks to catch and properly handle errors
+- Log errors with appropriate context for debugging
+- Return standardized error responses with meaningful messages
+- Example pattern:
+  ```typescript
+  try {
+    // Database operations or other code that might throw
+    const result = await prisma.someModel.findMany();
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    console.error("Error description:", error);
+    return NextResponse.json(
+      { error: "User-friendly error message" },
+      { status: 500 }
+    );
+  }
+  ```
+
+## Email Integration Patterns - [2025-03-17 10:15:00]
+
+### SendGrid Inbound Parse Configuration - [2025-03-17 10:15:00]
+
+- SendGrid Inbound Parse is used to process incoming emails
+- Configuration requirements:
+  1. Set up MX records for the domain to point to SendGrid's inbound mail servers
+  2. Configure SendGrid Inbound Parse to forward emails to the webhook URL: `/api/webhooks/inbound-email`
+  3. Ensure the webhook endpoint can handle the specific JSON format sent by SendGrid
+- The webhook handler expects specific fields from SendGrid:
+  - `from` or `sender` or `email` for the sender's email address
+  - `subject` for the email subject
+  - `text` or `plain` or `content` for the plain text content
+  - `html` or `html_content` for the HTML content
+- Incoming emails are stored in the `InboundEmail` model and processed to create contact submissions or replies
+
+### Email Processing Workflow - [2025-03-17 10:15:00]
+
+- Incoming emails follow this processing flow:
+  1. Email is received by SendGrid's inbound mail servers
+  2. SendGrid forwards the email to the webhook endpoint
+  3. The webhook handler stores the raw email in the `InboundEmail` model
+  4. The `processInboundEmail` function analyzes the email to determine if it's a new submission or a reply
+  5. If it's a reply (contains a reference code), it's linked to the existing submission
+  6. If it's a new submission, a new contact submission is created
+- Reference codes are used to track email threads:
+  - Format: `REF-[submissionId]-[timestamp]`
+  - Example: `REF-abc123-20250317101500`
+  - These are included in the subject line of outgoing emails
+  - When replies are received, the reference code is extracted to link the reply to the original submission
+
+## Tailwind CSS Configuration (March 17, 2025)
+
+When working with CSS in this project, follow these guidelines:
+
+1. Use `@tailwindcss/postcss` instead of direct `tailwindcss` usage in PostCSS config:
+
+   ```javascript
+   // postcss.config.cjs
+   const config = {
+     plugins: {
+       "@tailwindcss/postcss": {},
+       autoprefixer: {},
+     },
+   };
+   ```
+
+2. Add Tailwind imports to all CSS files that use Tailwind features:
+
+   ```css
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   ```
+
+3. Use explicit color values with bracket notation instead of named colors:
+
+   ```jsx
+   // Instead of this:
+   <div className="bg-gray-100 text-black">
+
+   // Use this:
+   <div className="bg-[#f3f4f6] text-[#000000]">
+   ```
+
+4. For theme colors, use HSL variables:
+
+   ```jsx
+   <div className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+   ```
+
+5. For font weights, use numeric values:
+
+   ```jsx
+   // Instead of this:
+   <div className="font-medium">
+
+   // Use this:
+   <div className="font-[500]">
+   ```
+
+6. For border colors, use the proper syntax:
+
+   ```jsx
+   // Instead of this:
+   <div className="border-border">
+
+   // Use this:
+   <div className="border-[color:hsl(var(--border))]">
+   ```
+
+7. Standardize on a single PostCSS configuration file to avoid conflicts.
+
+8. Test CSS changes in a separate branch before merging to main.
