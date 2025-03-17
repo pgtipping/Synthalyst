@@ -10,12 +10,6 @@
     "NEXT_TELEMETRY_DISABLED": "1"
   },
   "outputDirectory": ".next",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",
