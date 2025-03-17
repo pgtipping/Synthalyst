@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Session } from "next-auth";
@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SynthalystLogoAnimated from "./SynthalystLogoAnimated";
+import { cn } from "@/lib/utils";
 
 // Define the Tool interface
 interface Tool {
@@ -55,14 +56,30 @@ export default function Header() {
   };
   const [menuOpen, setMenuOpen] = useState(false);
   const { toast } = useToast();
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Debug session state - removed for production
-  // useEffect(() => {
-  //   if (process.env.NODE_ENV === "development") {
-  //     console.log("Session Status:", status);
-  //     console.log("Session Data:", session);
-  //   }
-  // }, [session, status]);
+  // Handle scroll events for navbar visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Show navbar when:
+      // 1. At the top of the page
+      // 2. Scrolling up
+      if (currentScrollY <= 0 || currentScrollY < lastScrollY) {
+        setIsNavbarVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Hide navbar when scrolling down and not at the top
+        setIsNavbarVisible(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -267,8 +284,13 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-24 max-w-6xl items-center">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transform transition-transform duration-300 ease-in-out",
+        isNavbarVisible ? "translate-y-0" : "-translate-y-full"
+      )}
+    >
+      <div className="container flex h-16 max-w-6xl items-center">
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
             <SynthalystLogoAnimated />
@@ -365,7 +387,7 @@ export default function Header() {
         </button>
 
         {menuOpen && (
-          <div className="absolute top-24 left-0 right-0 bg-background border-b md:hidden">
+          <div className="absolute top-16 left-0 right-0 bg-background border-b md:hidden">
             <nav className="container flex flex-col space-y-4 p-4">
               <Link
                 href="/about"

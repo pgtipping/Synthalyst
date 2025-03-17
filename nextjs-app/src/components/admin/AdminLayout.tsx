@@ -144,7 +144,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between h-16 px-4 border-b">
+          <div className="flex items-center justify-between h-14 px-4 border-b">
             <Link href="/admin" className="text-xl font-bold text-gray-900">
               Admin
             </Link>
@@ -203,52 +203,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col">
-        {/* Top navigation bar - visible on all screen sizes */}
-        <div className="bg-white shadow-sm z-10 sticky top-0">
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 justify-between items-center">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="lg:hidden mr-2"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  aria-label="Toggle sidebar"
-                >
-                  <Menu className="h-6 w-6" />
-                </Button>
-                <span className="text-xl font-bold text-gray-900 lg:hidden">
-                  Admin
-                </span>
-              </div>
-
-              {/* Desktop horizontal nav */}
-              <div className="hidden md:flex md:items-center md:space-x-4">
-                {navigation.slice(0, 5).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={cn(
-                        "flex items-center px-2 py-1 text-sm font-medium rounded-md",
-                        item.current
-                          ? "bg-gray-100 text-gray-900"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )}
-                    >
-                      <Icon className="h-4 w-4 mr-1" />
-                      <span className="hidden lg:inline">{item.name}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-
-              {/* Sign out button - always visible */}
+        {/* Mobile menu toggle */}
+        <div className="sticky top-0 z-10 bg-white shadow-sm lg:hidden">
+          <div className="px-4 py-2">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="mr-2"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label="Toggle sidebar"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+              <span className="text-xl font-bold text-gray-900">Admin</span>
               <Button
                 variant="outline"
                 size="sm"
-                className="hidden sm:flex items-center"
+                className="flex items-center"
                 onClick={() => signOut()}
               >
                 <LogOut className="h-4 w-4 mr-2" />

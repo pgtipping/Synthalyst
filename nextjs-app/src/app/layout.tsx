@@ -8,8 +8,8 @@ import { ToastProvider } from "@/components/ui/use-toast";
 
 // Import original components
 import ClientLayout from "@/components/ClientLayout";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ConditionalHeader from "@/components/ConditionalHeader";
 
 // Import critical CSS
 import "./critical.css";
@@ -270,7 +270,7 @@ export default function RootLayout({
       >
         <ToastProvider>
           <ClientLayout>
-            <Header />
+            <ConditionalHeader />
             <main className="flex-grow flex flex-col">{children}</main>
             <Footer />
             <Toaster />

@@ -6,7 +6,19 @@ The current focus is on optimizing the application's backend services, particula
 
 ### Recent Changes
 
-1. **Admin Dashboard API Fixes** (March 17, 2025):
+1. **Admin Dashboard Navigation Improvements** (March 17, 2025):
+
+   - Fixed the main Synthalyst app navbar overlapping with the admin sidebar
+   - Created a ConditionalHeader component to hide the main site header on admin pages
+   - Removed the scroll behavior from the admin navbar for better usability
+   - Simplified the admin navigation by removing the top navbar on desktop
+   - Kept only the sidebar for navigation on desktop for a cleaner interface
+   - Added a mobile-only top bar with menu toggle and logout button
+   - Ensured proper z-index values to prevent overlapping elements
+   - Updated the root layout to conditionally render the header based on the current path
+   - Improved the overall admin navigation experience with a more focused interface
+
+2. **Admin Dashboard API Fixes** (March 17, 2025):
 
    - Fixed API endpoints in the admin dashboard that were causing 500 Internal Server Error
    - Replaced raw SQL queries with standard Prisma query methods in contact-submissions API endpoint
@@ -17,7 +29,7 @@ The current focus is on optimizing the application's backend services, particula
    - Successfully built the application with all the fixes in place
    - Ensured the communications page properly displays contact submissions, newsletter replies, and inbound emails
 
-2. **Email Service Optimization**:
+3. **Email Service Optimization**:
 
    - Created a unified email service in `nextjs-app/src/lib/email.ts`
    - Implemented a standardized approach for all email sending functionality
@@ -25,7 +37,7 @@ The current focus is on optimizing the application's backend services, particula
    - Created an `EmailLog` model in the Prisma schema
    - Implemented fallback mechanisms between SendGrid and Nodemailer
 
-3. **Feedback API Improvements**:
+4. **Feedback API Improvements**:
 
    - Simplified the feedback API implementation
    - Removed file-based storage logic in favor of database-only storage
@@ -33,7 +45,7 @@ The current focus is on optimizing the application's backend services, particula
    - Enhanced error handling for feedback submissions
    - Updated the `FeedbackButton` component to use the new API
 
-4. **Admin Dashboard Enhancements**:
+5. **Admin Dashboard Enhancements**:
 
    - Created an email logs admin dashboard UI
    - Implemented filtering by status and category
@@ -50,7 +62,7 @@ The current focus is on optimizing the application's backend services, particula
    - Made the top navigation bar sticky for better navigation on long pages
    - Ensured consistent spacing and alignment across all admin pages
 
-5. **Admin Monitoring Fixes** (March 16, 2025):
+6. **Admin Monitoring Fixes** (March 16, 2025):
 
    - Fixed Redis monitoring functionality in the admin dashboard
    - Resolved JSON parsing errors in the Redis monitor by adding type checking
@@ -63,7 +75,7 @@ The current focus is on optimizing the application's backend services, particula
    - Fixed TypeScript errors in the rate-limit library
    - Added proper type definitions for LRU cache
 
-6. **Admin User Management Fixes** (March 16, 2025):
+7. **Admin User Management Fixes** (March 16, 2025):
 
    - Fixed NextJS dynamic route parameter issue in the user role update API
    - Updated the API route to properly await params object in Next.js 15
@@ -72,7 +84,7 @@ The current focus is on optimizing the application's backend services, particula
    - Ensured consistent error handling across all admin API routes
    - Fixed TypeScript errors in the admin user management components
 
-7. **Newsletter Subscription System Fixes** (March 16, 2025):
+8. **Newsletter Subscription System Fixes** (March 16, 2025):
 
    - Fixed model name in API routes from `newsletter` to `newsletterSubscriber` to match Prisma schema
    - Added functionality to create real subscribers in the database when in development mode
@@ -87,27 +99,27 @@ The current focus is on optimizing the application's backend services, particula
    - Added conditional rendering for pagination controls to prevent errors when data is loading
    - Updated API response structure to match frontend expectations by wrapping pagination properties in a pagination object
 
-8. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+9. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
 
-9. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+10. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
 
-10. **Model Router Updates**:
+11. **Model Router Updates**:
 
     - Added a new `generateContentV2` function with improved parameter handling
     - Updated the API route to use the new function
     - Standardized language support across models
     - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 
-11. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
+12. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
 
-12. **Knowledge GPT Web Search Integration**:
+13. **Knowledge GPT Web Search Integration**:
 
     - Added web search capability to provide up-to-date information
     - Implemented Google Custom Search API integration
     - Updated system prompts to include current information
     - Enhanced UI to inform users about web search capability
 
-13. **Knowledge GPT Improvements** (March 16, 2025):
+14. **Knowledge GPT Improvements** (March 16, 2025):
 
     - Updated loading animation to use three dots instead of spinning icon
     - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
@@ -118,7 +130,7 @@ The current focus is on optimizing the application's backend services, particula
     - Simplified web search logic by removing automatic detection in favor of explicit user control
     - Moved loading animation to appear in chat window instead of on send button
 
-14. **Language Selector Improvements** (March 16, 2025):
+15. **Language Selector Improvements** (March 16, 2025):
 
     - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
     - Included English in the dropdown list
@@ -127,7 +139,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added local storage to remember user language preferences
     - Improved browser language detection and handling
 
-15. **Medical Knowledge Integration** (March 16, 2025):
+16. **Medical Knowledge Integration** (March 16, 2025):
 
     - Added PubMed API integration for evidence-based medical information
     - Implemented evidence grading system based on study types
@@ -139,7 +151,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added PUBMED_API_KEY to environment variables
     - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
-16. **Admin Pages Error Handling Improvements** (March 16, 2025):
+17. **Admin Pages Error Handling Improvements** (March 16, 2025):
 
     - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
     - Changed empty values to "all" in SelectItem components to prevent errors
@@ -153,7 +165,7 @@ The current focus is on optimizing the application's backend services, particula
     - Implemented fallback to empty arrays when data is missing or undefined
     - Added try-catch blocks for API calls to handle errors independently
 
-17. **Admin Page Database Checks** (March 16, 2025):
+18. **Admin Page Database Checks** (March 16, 2025):
     - Added SQL queries to check if tables exist before attempting to query them
     - Used `information_schema.tables` to verify table existence in the database
     - Implemented default values for all data variables to prevent undefined errors
@@ -187,7 +199,16 @@ The current focus is on optimizing the application's backend services, particula
 
 ### Active Decisions
 
-1. **Email Service Architecture**:
+1. **Admin Navigation Design** (March 17, 2025):
+
+   - Using a sidebar-only navigation approach for desktop admin pages
+   - Hiding the main Synthalyst header on admin pages for a cleaner interface
+   - Using a mobile-only top bar with essential controls for smaller screens
+   - Implementing a conditional header rendering based on the current path
+   - Ensuring proper z-index values to prevent overlapping elements
+   - Focusing on a clean, distraction-free admin experience
+
+2. **Email Service Architecture**:
 
    - Using a unified email service with SendGrid as primary provider and Nodemailer as fallback
    - Implementing comprehensive logging for all email activities
@@ -195,7 +216,7 @@ The current focus is on optimizing the application's backend services, particula
    - Using SendGrid Inbound Parse for processing incoming emails
    - Storing incoming emails in the database for tracking and processing
 
-2. **Admin Dashboard Design**:
+3. **Admin Dashboard Design**:
 
    - Creating a responsive admin layout with mobile support
    - Implementing a sidebar navigation for easy access to different admin sections
@@ -206,38 +227,38 @@ The current focus is on optimizing the application's backend services, particula
    - Adding conditional rendering for UI elements that depend on asynchronously loaded data
    - Using null checks and default values to prevent "Cannot read properties of undefined" errors
 
-3. **Feedback System**:
+4. **Feedback System**:
 
    - Using database-only storage for feedback submissions
    - Implementing rate limiting to prevent abuse
    - Enhancing error handling for better user experience
 
-4. **Model Selection**:
+5. **Model Selection**:
 
    - Using **Gemini 1.5 Flash-8B** for Knowledge GPT
    - Using **GPT-4o-Mini** for Learning Creator
 
-5. **Tiered Approach**: Implementing a tiered approach for model selection based on:
+6. **Tiered Approach**: Implementing a tiered approach for model selection based on:
 
    - Task complexity
    - Content length
    - Language support
    - Cost priority
 
-6. **Language Support**:
+7. **Language Support**:
 
    - Standardized language support across the application
    - Improved language detection and handling
    - Enhanced multilingual prompts
 
-7. **User Experience**:
+8. **User Experience**:
 
    - Focus on functionality rather than exposing model details
    - Simplified UI with clear language options
    - Consistent experience across different tools
    - Domain selection for specialized knowledge
 
-8. **API Integration**:
+9. **API Integration**:
 
    - Adapted to model-specific requirements (e.g., Gemini's lack of system role support)
    - Standardized API response format
@@ -246,20 +267,20 @@ The current focus is on optimizing the application's backend services, particula
    - Implemented fallbacks for missing or undefined data
    - Ensured API response structures match frontend expectations
 
-9. **Web Search Integration**:
+10. **Web Search Integration**:
 
-   - Using Google Custom Search API for up-to-date information
-   - Combining web search results with model knowledge
-   - Ensuring accurate information for current events and facts
+    - Using Google Custom Search API for up-to-date information
+    - Combining web search results with model knowledge
+    - Ensuring accurate information for current events and facts
 
-10. **Knowledge Domain Strategy**:
+11. **Knowledge Domain Strategy**:
 
     - Integrating specialized domains within Knowledge GPT rather than creating separate tools
     - Starting with medical knowledge as the first specialized domain
     - Using a unified interface with domain selection
     - Adapting the UI based on the selected domain
 
-11. **UI Improvements**:
+12. **UI Improvements**:
 
     - Consistent button heights and alignment for better mobile experience
     - Clear visual distinction between different knowledge domains
@@ -268,7 +289,7 @@ The current focus is on optimizing the application's backend services, particula
     - Conditional rendering for UI elements that depend on asynchronously loaded data
     - Using null checks and default values to prevent "Cannot read properties of undefined" errors
 
-12. **Error Handling Strategy**:
+13. **Error Handling Strategy**:
 
     - Implementing try-catch blocks for all API calls
     - Providing fallback values when data is missing or undefined
