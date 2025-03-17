@@ -25,7 +25,16 @@ export async function GET(request: Request) {
     const offset = (page - 1) * limit;
 
     // Build the query
-    let whereClause = {};
+    let whereClause: {
+      status?: string;
+      inquiryType?: string;
+      OR?: Array<{
+        name?: { contains: string; mode: "insensitive" };
+        email?: { contains: string; mode: "insensitive" };
+        subject?: { contains: string; mode: "insensitive" };
+        message?: { contains: string; mode: "insensitive" };
+      }>;
+    } = {};
 
     if (status) {
       whereClause = { ...whereClause, status };
@@ -47,15 +56,56 @@ export async function GET(request: Request) {
       };
     }
 
-    // Get submissions with reply count and last replied at
-    const submissions = await prisma.$queryRaw`
-      SELECT cs.*, 
-        (SELECT COUNT(*) FROM "ContactSubmissionReply" csr WHERE csr."contactSubmissionId" = cs.id) as "replyCount",
-        (SELECT MAX(csr."createdAt") FROM "ContactSubmissionReply" csr WHERE csr."contactSubmissionId" = cs.id) as "lastRepliedAt"
-      FROM "ContactSubmission" cs 
-      ORDER BY cs."createdAt" DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+    // Get submissions
+    const submissions = await prisma.contactSubmission.findMany({
+      where: whereClause,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        replies: {
+          select: {
+            id: true,
+            createdAt: true,
+          },
+        },
+      },
+      skip: offset,
+      take: limit,
+    });
+
+    // Transform the data to include reply count and last replied at
+    const transformedSubmissions = submissions.map((submission) => {
+      const replyCount = submission.replies.length;
+      const lastRepliedAt =
+        replyCount > 0
+          ? submission.replies.reduce(
+              (latest, reply) =>
+                reply.createdAt > latest ? reply.createdAt : latest,
+              submission.replies[0].createdAt
+            )
+          : null;
+
+      // Create a new object without the replies property
+      return {
+        id: submission.id,
+        name: submission.name,
+        email: submission.email,
+        subject: submission.subject,
+        company: submission.company,
+        phone: submission.phone,
+        inquiryType: submission.inquiryType,
+        message: submission.message,
+        status: submission.status,
+        notes: submission.notes,
+        assignedTo: submission.assignedTo,
+        createdAt: submission.createdAt,
+        updatedAt: submission.updatedAt,
+        source: submission.source,
+        replyCount,
+        lastRepliedAt,
+      };
+    });
 
     // Get total count for pagination
     const totalCount = await prisma.contactSubmission.count({
@@ -63,7 +113,7 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json({
-      data: submissions,
+      data: transformedSubmissions,
       meta: {
         total: totalCount,
         page,

@@ -2660,3 +2660,75 @@ The admin layout has been improved to fix issues with the sidebar and main conte
    - Added `mt-4` to the main content to separate it from the breadcrumb
 
 These improvements ensure a consistent and responsive admin dashboard experience across all device sizes.
+
+## API Endpoint Patterns - [2025-03-17 10:15:00]
+
+### Prisma Query Best Practices - [2025-03-17 10:15:00]
+
+- Avoid using raw SQL queries with `prisma.$queryRaw` when possible
+- Prefer standard Prisma query methods like `findMany`, `findUnique`, `update`, etc.
+- Raw SQL queries can cause serialization issues with BigInt values and other complex types
+- When transforming data from Prisma queries, use proper type safety:
+  ```typescript
+  // Transform the data to include additional properties
+  const transformedData = data.map((item) => ({
+    ...item,
+    computedProperty: calculateValue(item),
+    // Remove properties that shouldn't be sent to the client
+    sensitiveData: undefined,
+  }));
+  ```
+- Always handle potential null or undefined values in query results
+- Use proper error handling with try/catch blocks for all database operations
+
+### API Error Handling - [2025-03-17 10:15:00]
+
+- Implement consistent error handling across all API endpoints
+- Use try/catch blocks to catch and properly handle errors
+- Log errors with appropriate context for debugging
+- Return standardized error responses with meaningful messages
+- Example pattern:
+  ```typescript
+  try {
+    // Database operations or other code that might throw
+    const result = await prisma.someModel.findMany();
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    console.error("Error description:", error);
+    return NextResponse.json(
+      { error: "User-friendly error message" },
+      { status: 500 }
+    );
+  }
+  ```
+
+## Email Integration Patterns - [2025-03-17 10:15:00]
+
+### SendGrid Inbound Parse Configuration - [2025-03-17 10:15:00]
+
+- SendGrid Inbound Parse is used to process incoming emails
+- Configuration requirements:
+  1. Set up MX records for the domain to point to SendGrid's inbound mail servers
+  2. Configure SendGrid Inbound Parse to forward emails to the webhook URL: `/api/webhooks/inbound-email`
+  3. Ensure the webhook endpoint can handle the specific JSON format sent by SendGrid
+- The webhook handler expects specific fields from SendGrid:
+  - `from` or `sender` or `email` for the sender's email address
+  - `subject` for the email subject
+  - `text` or `plain` or `content` for the plain text content
+  - `html` or `html_content` for the HTML content
+- Incoming emails are stored in the `InboundEmail` model and processed to create contact submissions or replies
+
+### Email Processing Workflow - [2025-03-17 10:15:00]
+
+- Incoming emails follow this processing flow:
+  1. Email is received by SendGrid's inbound mail servers
+  2. SendGrid forwards the email to the webhook endpoint
+  3. The webhook handler stores the raw email in the `InboundEmail` model
+  4. The `processInboundEmail` function analyzes the email to determine if it's a new submission or a reply
+  5. If it's a reply (contains a reference code), it's linked to the existing submission
+  6. If it's a new submission, a new contact submission is created
+- Reference codes are used to track email threads:
+  - Format: `REF-[submissionId]-[timestamp]`
+  - Example: `REF-abc123-20250317101500`
+  - These are included in the subject line of outgoing emails
+  - When replies are received, the reference code is extracted to link the reply to the original submission

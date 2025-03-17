@@ -1,12 +1,23 @@
 # Active Context
 
-## Current Focus (March 16, 2025)
+## Current Focus (March 17, 2025)
 
-The current focus is on optimizing the application's backend services, particularly email handling, feedback processing, and admin monitoring capabilities. We're enhancing the admin dashboard with robust monitoring features and fixing critical errors in the Redis monitoring functionality, user role management, and newsletter subscription system. These optimizations aim to improve performance, reliability, and maintainability of the platform.
+The current focus is on optimizing the application's backend services, particularly email handling, feedback processing, and admin monitoring capabilities. We're enhancing the admin dashboard with robust monitoring features and fixing critical errors in the API endpoints, Redis monitoring functionality, user role management, and newsletter subscription system. These optimizations aim to improve performance, reliability, and maintainability of the platform.
 
 ### Recent Changes
 
-1. **Email Service Optimization**:
+1. **Admin Dashboard API Fixes** (March 17, 2025):
+
+   - Fixed API endpoints in the admin dashboard that were causing 500 Internal Server Error
+   - Replaced raw SQL queries with standard Prisma query methods in contact-submissions API endpoint
+   - Fixed the update-status API endpoint for contact submissions to use standard Prisma methods
+   - Fixed the newsletter replies API endpoint to properly handle data transformation
+   - Ensured all admin API endpoints are using proper error handling and type safety
+   - Verified that all admin dashboard functionality is working correctly with no console errors
+   - Successfully built the application with all the fixes in place
+   - Ensured the communications page properly displays contact submissions, newsletter replies, and inbound emails
+
+2. **Email Service Optimization**:
 
    - Created a unified email service in `nextjs-app/src/lib/email.ts`
    - Implemented a standardized approach for all email sending functionality
@@ -14,7 +25,7 @@ The current focus is on optimizing the application's backend services, particula
    - Created an `EmailLog` model in the Prisma schema
    - Implemented fallback mechanisms between SendGrid and Nodemailer
 
-2. **Feedback API Improvements**:
+3. **Feedback API Improvements**:
 
    - Simplified the feedback API implementation
    - Removed file-based storage logic in favor of database-only storage
@@ -22,7 +33,7 @@ The current focus is on optimizing the application's backend services, particula
    - Enhanced error handling for feedback submissions
    - Updated the `FeedbackButton` component to use the new API
 
-3. **Admin Dashboard Enhancements**:
+4. **Admin Dashboard Enhancements**:
 
    - Created an email logs admin dashboard UI
    - Implemented filtering by status and category
@@ -39,7 +50,7 @@ The current focus is on optimizing the application's backend services, particula
    - Made the top navigation bar sticky for better navigation on long pages
    - Ensured consistent spacing and alignment across all admin pages
 
-4. **Admin Monitoring Fixes** (March 16, 2025):
+5. **Admin Monitoring Fixes** (March 16, 2025):
 
    - Fixed Redis monitoring functionality in the admin dashboard
    - Resolved JSON parsing errors in the Redis monitor by adding type checking
@@ -52,7 +63,7 @@ The current focus is on optimizing the application's backend services, particula
    - Fixed TypeScript errors in the rate-limit library
    - Added proper type definitions for LRU cache
 
-5. **Admin User Management Fixes** (March 16, 2025):
+6. **Admin User Management Fixes** (March 16, 2025):
 
    - Fixed NextJS dynamic route parameter issue in the user role update API
    - Updated the API route to properly await params object in Next.js 15
@@ -61,7 +72,7 @@ The current focus is on optimizing the application's backend services, particula
    - Ensured consistent error handling across all admin API routes
    - Fixed TypeScript errors in the admin user management components
 
-6. **Newsletter Subscription System Fixes** (March 16, 2025):
+7. **Newsletter Subscription System Fixes** (March 16, 2025):
 
    - Fixed model name in API routes from `newsletter` to `newsletterSubscriber` to match Prisma schema
    - Added functionality to create real subscribers in the database when in development mode
@@ -76,27 +87,27 @@ The current focus is on optimizing the application's backend services, particula
    - Added conditional rendering for pagination controls to prevent errors when data is loading
    - Updated API response structure to match frontend expectations by wrapping pagination properties in a pagination object
 
-7. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+8. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
 
-8. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+9. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
 
-9. **Model Router Updates**:
+10. **Model Router Updates**:
 
-   - Added a new `generateContentV2` function with improved parameter handling
-   - Updated the API route to use the new function
-   - Standardized language support across models
-   - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
+    - Added a new `generateContentV2` function with improved parameter handling
+    - Updated the API route to use the new function
+    - Standardized language support across models
+    - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 
-10. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
+11. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
 
-11. **Knowledge GPT Web Search Integration**:
+12. **Knowledge GPT Web Search Integration**:
 
     - Added web search capability to provide up-to-date information
     - Implemented Google Custom Search API integration
     - Updated system prompts to include current information
     - Enhanced UI to inform users about web search capability
 
-12. **Knowledge GPT Improvements** (March 16, 2025):
+13. **Knowledge GPT Improvements** (March 16, 2025):
 
     - Updated loading animation to use three dots instead of spinning icon
     - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
@@ -107,7 +118,7 @@ The current focus is on optimizing the application's backend services, particula
     - Simplified web search logic by removing automatic detection in favor of explicit user control
     - Moved loading animation to appear in chat window instead of on send button
 
-13. **Language Selector Improvements** (March 16, 2025):
+14. **Language Selector Improvements** (March 16, 2025):
 
     - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
     - Included English in the dropdown list
@@ -116,7 +127,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added local storage to remember user language preferences
     - Improved browser language detection and handling
 
-14. **Medical Knowledge Integration** (March 16, 2025):
+15. **Medical Knowledge Integration** (March 16, 2025):
 
     - Added PubMed API integration for evidence-based medical information
     - Implemented evidence grading system based on study types
@@ -128,7 +139,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added PUBMED_API_KEY to environment variables
     - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
-15. **Admin Pages Error Handling Improvements** (March 16, 2025):
+16. **Admin Pages Error Handling Improvements** (March 16, 2025):
 
     - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
     - Changed empty values to "all" in SelectItem components to prevent errors
@@ -142,7 +153,7 @@ The current focus is on optimizing the application's backend services, particula
     - Implemented fallback to empty arrays when data is missing or undefined
     - Added try-catch blocks for API calls to handle errors independently
 
-16. **Admin Page Database Checks** (March 16, 2025):
+17. **Admin Page Database Checks** (March 16, 2025):
     - Added SQL queries to check if tables exist before attempting to query them
     - Used `information_schema.tables` to verify table existence in the database
     - Implemented default values for all data variables to prevent undefined errors
@@ -156,20 +167,23 @@ The current focus is on optimizing the application's backend services, particula
 
 ### Next Steps
 
-1. **Prisma Migration**: Complete the Prisma migration to add the new `EmailLog` model.
-2. **Email Service Testing**: Comprehensive testing of the unified email service.
-3. **Admin Dashboard Enhancements**: Add more filtering options and detailed analytics for email logs.
-4. **Feedback System Improvements**: Enhance the feedback system with more detailed analytics and user segmentation.
-5. **Backend Model Routing Logic**: Implement sophisticated model routing logic based on task complexity, content length, and language.
-6. **Cost Optimization Features**: Add features to track and optimize model usage costs.
-7. **Enhanced Error Handling**: Improve error handling for API calls and model responses.
-8. **User Preference Settings**: Implement user preference settings for language selection.
-9. **Analytics Implementation**: Add analytics to track model usage and performance.
-10. **Web Search Enhancements**: Improve web search integration with better result filtering and source attribution.
-11. **Additional Specialized Domains**: Expand Knowledge GPT with more specialized domains (legal, financial, etc.).
-12. **Medical Knowledge Enhancements**: Add more medical data sources and improve evidence grading.
-13. **Conversational Context**: Improve the Medical Knowledge Assistant to maintain conversational context between queries.
-14. **Systematic Error Handling**: Implement a more proactive approach to error detection and resolution across all admin pages.
+1. **Email Webhook Configuration**: Set up SendGrid Inbound Parse to properly forward emails to the application's webhook endpoint.
+2. **MX Records Setup**: Ensure proper MX records are set up for the domain to receive emails.
+3. **Webhook Testing**: Test the email processing workflow from external sources to verify it's working correctly.
+4. **Prisma Migration**: Complete the Prisma migration to add the new `EmailLog` model.
+5. **Email Service Testing**: Comprehensive testing of the unified email service.
+6. **Admin Dashboard Enhancements**: Add more filtering options and detailed analytics for email logs.
+7. **Feedback System Improvements**: Enhance the feedback system with more detailed analytics and user segmentation.
+8. **Backend Model Routing Logic**: Implement sophisticated model routing logic based on task complexity, content length, and language.
+9. **Cost Optimization Features**: Add features to track and optimize model usage costs.
+10. **Enhanced Error Handling**: Improve error handling for API calls and model responses.
+11. **User Preference Settings**: Implement user preference settings for language selection.
+12. **Analytics Implementation**: Add analytics to track model usage and performance.
+13. **Web Search Enhancements**: Improve web search integration with better result filtering and source attribution.
+14. **Additional Specialized Domains**: Expand Knowledge GPT with more specialized domains (legal, financial, etc.).
+15. **Medical Knowledge Enhancements**: Add more medical data sources and improve evidence grading.
+16. **Conversational Context**: Improve the Medical Knowledge Assistant to maintain conversational context between queries.
+17. **Systematic Error Handling**: Implement a more proactive approach to error detection and resolution across all admin pages.
 
 ### Active Decisions
 
@@ -178,6 +192,8 @@ The current focus is on optimizing the application's backend services, particula
    - Using a unified email service with SendGrid as primary provider and Nodemailer as fallback
    - Implementing comprehensive logging for all email activities
    - Standardizing email templates and categories
+   - Using SendGrid Inbound Parse for processing incoming emails
+   - Storing incoming emails in the database for tracking and processing
 
 2. **Admin Dashboard Design**:
 

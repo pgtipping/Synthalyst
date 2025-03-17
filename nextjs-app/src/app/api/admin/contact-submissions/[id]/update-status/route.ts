@@ -44,12 +44,14 @@ export async function POST(
     const validatedData = statusUpdateSchema.parse({ status });
 
     try {
-      // Update the submission status
-      await prisma.$queryRaw`
-        UPDATE "ContactSubmission"
-        SET status = ${validatedData.status}, "updatedAt" = ${new Date()}
-        WHERE id = ${id}
-      `;
+      // Update the submission status using Prisma's standard update method
+      await prisma.contactSubmission.update({
+        where: { id },
+        data: {
+          status: validatedData.status,
+          updatedAt: new Date(),
+        },
+      });
     } catch (dbError) {
       logger.error(
         "Database error updating contact submission status",
