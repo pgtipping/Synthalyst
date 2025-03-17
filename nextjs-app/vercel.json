@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "npx rimraf .next && prisma generate && node scripts/handle-db-build.js && next build",
   "devCommand": "npm run dev",
-  "installCommand": "npm ci",
+  "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
@@ -13,16 +13,12 @@
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",
-      "NODE_OPTIONS": "--max-old-space-size=4096",
-      "PRISMA_GENERATE_DATAPROXY": "true"
+      "NODE_OPTIONS": "--max-old-space-size=4096"
     }
   },
   "functions": {
-    "api/**/*": {
-      "memory": 1024
+    "src/app/api/apply-right/**/*": {
+      "maxDuration": 60
     }
-  },
-  "github": {
-    "silent": true
   }
 }
