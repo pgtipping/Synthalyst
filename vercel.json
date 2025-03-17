@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm install @tailwindcss/postcss && npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs"
+}
