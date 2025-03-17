@@ -3,6 +3,32 @@ import { ZodError, ZodSchema } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
 
+// Helper function to serialize BigInt values
+function serializeBigInt(data: unknown): unknown {
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  if (typeof data === "bigint") {
+    return data.toString();
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(serializeBigInt);
+  }
+
+  if (typeof data === "object") {
+    return Object.fromEntries(
+      Object.entries(data as Record<string, unknown>).map(([key, value]) => [
+        key,
+        serializeBigInt(value),
+      ])
+    );
+  }
+
+  return data;
+}
+
 export class APIError extends Error {
   constructor(
     message: string,
@@ -73,6 +99,9 @@ function isPublicRoute(url: string): boolean {
 export function handleAPIError(error: unknown) {
   console.error("API Error:", error);
 
+  // No need to serialize the entire error object here
+  // We'll serialize specific fields as needed
+
   if (error instanceof APIError) {
     return NextResponse.json(
       {
@@ -98,67 +127,58 @@ export function handleAPIError(error: unknown) {
     if (error.name.startsWith("PrismaClient")) {
       // @ts-expect-error - Accessing Prisma-specific properties
       const code = error.code;
-      let errorMessage = `Database error: ${error.message}`;
-      let statusCode = 500;
-      let errorCode = "DATABASE_ERROR";
 
-      // Handle specific Prisma error codes
+      // Handle specific Prisma errors
       if (code === "P2002") {
-        errorMessage = "A unique constraint would be violated.";
-        statusCode = 400;
-        errorCode = "UNIQUE_CONSTRAINT_VIOLATION";
-      } else if (code === "P2025") {
-        errorMessage = "Record not found.";
-        statusCode = 404;
-        errorCode = "RECORD_NOT_FOUND";
-      } else if (code === "P2003") {
-        errorMessage = "Foreign key constraint failed.";
-        statusCode = 400;
-        errorCode = "FOREIGN_KEY_CONSTRAINT_FAILED";
-      } else if (code === "P2023") {
-        errorMessage = "Invalid ID format.";
-        statusCode = 400;
-        errorCode = "INVALID_ID_FORMAT";
+        return NextResponse.json(
+          {
+            error: {
+              message: "A record with this data already exists",
+              code: "DUPLICATE_RECORD",
+              status: 409,
+              // @ts-expect-error - Accessing Prisma-specific properties
+              fields: serializeBigInt(error.meta?.target || []),
+            },
+          },
+          { status: 409 }
+        );
       }
 
-      return NextResponse.json(
-        {
-          error: {
-            message: errorMessage,
-            code: errorCode,
-            status: statusCode,
-            type: error.name,
-            // @ts-expect-error - Accessing Prisma-specific properties
-            details: error.meta ? JSON.stringify(error.meta) : undefined,
+      if (code === "P2025") {
+        return NextResponse.json(
+          {
+            error: {
+              message: "Record not found",
+              code: "NOT_FOUND",
+              status: 404,
+            },
           },
-        },
-        { status: statusCode }
-      );
+          { status: 404 }
+        );
+      }
     }
 
-    // Return a more informative error response for other errors
     return NextResponse.json(
       {
         error: {
-          message: `Server error: ${error.message}`,
+          message: "An unexpected error occurred",
           code: "INTERNAL_SERVER_ERROR",
           status: 500,
-          type: error.name,
+          details:
+            process.env.NODE_ENV === "development" ? error.message : undefined,
         },
       },
       { status: 500 }
     );
   }
 
-  // Handle unexpected errors
+  // For unknown error types
   return NextResponse.json(
     {
       error: {
-        message: "Internal server error",
+        message: "An unexpected error occurred",
         code: "INTERNAL_SERVER_ERROR",
         status: 500,
-        details:
-          typeof error === "object" ? JSON.stringify(error) : String(error),
       },
     },
     { status: 500 }

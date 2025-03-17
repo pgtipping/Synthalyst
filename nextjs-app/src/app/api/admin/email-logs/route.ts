@@ -4,6 +4,32 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
+// Helper function to serialize BigInt values
+function serializeBigInt<T>(data: T): unknown {
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  if (typeof data === "bigint") {
+    return data.toString();
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(serializeBigInt);
+  }
+
+  if (typeof data === "object") {
+    return Object.fromEntries(
+      Object.entries(data as Record<string, unknown>).map(([key, value]) => [
+        key,
+        serializeBigInt(value),
+      ])
+    );
+  }
+
+  return data;
+}
+
 // Define a type for the EmailLog model
 type EmailLogModel = {
   findMany: (args: {
@@ -149,16 +175,21 @@ export async function GET(request: NextRequest) {
       LIMIT 10
     `;
 
+    // Serialize any BigInt values before returning the response
+    const serializedLogs = serializeBigInt(logs);
+    const serializedStats = serializeBigInt(stats);
+    const serializedCategoryStats = serializeBigInt(categoryStats);
+
     return NextResponse.json({
-      logs,
+      logs: serializedLogs,
       pagination: {
         total,
         page,
         limit,
         pages: Math.ceil(total / limit),
       },
-      stats,
-      categoryStats,
+      stats: serializedStats,
+      categoryStats: serializedCategoryStats,
     });
   } catch (error) {
     logger.error("Error retrieving email logs", error);

@@ -83,14 +83,30 @@ const Contact = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        // Get more detailed error information from the response
+        let errorDetail = "";
+        try {
+          const errorResponse = await response.json();
+          errorDetail =
+            errorResponse.error?.message || JSON.stringify(errorResponse);
+        } catch {
+          // If we can't parse the JSON response, just use the status text
+          errorDetail = `Status ${response.status}: ${response.statusText}`;
+        }
+
+        console.error("Contact form API error:", errorDetail);
+        throw new Error(`Failed to send message: ${errorDetail}`);
       }
 
       toast.success("Message sent successfully! We'll get back to you soon.");
       form.reset();
     } catch (error) {
-      toast.error("Failed to send message. Please try again.");
       console.error("Contact form error:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to send message. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -3,6 +3,37 @@ import sgMail from "@sendgrid/mail";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
+// Helper function to check if EmailLog model exists in Prisma
+const hasEmailLogModel = (): boolean => {
+  return "emailLog" in prisma;
+};
+
+// Helper function to serialize BigInt values
+function serializeBigInt(data: unknown): unknown {
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  if (typeof data === "bigint") {
+    return data.toString();
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(serializeBigInt);
+  }
+
+  if (typeof data === "object") {
+    return Object.fromEntries(
+      Object.entries(data as Record<string, unknown>).map(([key, value]) => [
+        key,
+        serializeBigInt(value),
+      ])
+    );
+  }
+
+  return data;
+}
+
 // Initialize SendGrid
 let sendgridInitialized = false;
 try {
@@ -36,6 +67,16 @@ interface EmailOptions {
   category?: string;
 }
 
+// Type for EmailLog entry
+interface EmailLogEntry {
+  id: string | number;
+  status: string;
+  provider?: string | null;
+  providerMessageId?: string | null;
+  sentAt?: Date | null;
+  error?: string | null;
+}
+
 /**
  * Unified email sending function that uses SendGrid with Nodemailer fallback
  */
@@ -51,124 +92,210 @@ export async function sendEmail({
   dynamicTemplateData,
   category = "general",
 }: EmailOptions) {
+  let emailLogEntry: EmailLogEntry | null = null;
+
   try {
-    // Track email sending in database
-    const emailLog = await prisma.emailLog.create({
-      data: {
-        to: Array.isArray(to) ? to.join(", ") : to,
-        subject,
-        from,
-        category,
-        status: "pending",
-      },
-    });
+    // Track email sending in database if EmailLog model exists
+    if (hasEmailLogModel()) {
+      try {
+        // @ts-expect-error - EmailLog model might not be in the Prisma client type
+        emailLogEntry = await prisma.emailLog.create({
+          data: {
+            to: Array.isArray(to) ? to.join(", ") : to,
+            subject,
+            from,
+            category,
+            status: "pending",
+          },
+        });
+      } catch (dbError) {
+        logger.error("Failed to create email log entry", dbError);
+        // Continue without email logging if database operation fails
+      }
+    }
 
     // Try SendGrid first if available
     if (sendgridInitialized) {
-      const msg = {
-        to,
+      try {
+        // Prepare SendGrid message with proper typing
+        const msg: sgMail.MailDataRequired = {
+          to,
+          from,
+          subject,
+          text,
+          html: html || text.replace(/\n/g, "<br>"),
+          replyTo,
+          attachments: attachments.map((attachment) => ({
+            content: attachment.content || "",
+            filename: attachment.filename || "",
+            type: attachment.type || "",
+            disposition: attachment.disposition || "",
+            contentId: attachment.contentId || "",
+          })),
+          templateId,
+          dynamicTemplateData,
+          // @ts-expect-error - SendGrid types are not fully compatible with category as array
+          category: [category],
+          trackingSettings: {
+            clickTracking: { enable: false },
+            openTracking: { enable: true },
+          },
+          customArgs: {
+            emailLogId: emailLogEntry
+              ? serializeBigInt(emailLogEntry.id).toString()
+              : undefined,
+          },
+        };
+
+        const response = await sgMail.send(msg);
+
+        // Update email log with success
+        if (emailLogEntry && hasEmailLogModel()) {
+          try {
+            // @ts-expect-error - EmailLog model might not be in the Prisma client type
+            await prisma.emailLog.update({
+              where: { id: emailLogEntry.id },
+              data: {
+                status: "sent",
+                provider: "sendgrid",
+                providerMessageId: response[0]?.headers["x-message-id"] || null,
+                sentAt: new Date(),
+              },
+            });
+          } catch (updateError) {
+            logger.error(
+              "Failed to update email log after successful send",
+              updateError
+            );
+            // Continue even if log update fails
+          }
+        }
+
+        logger.info("Email sent successfully via SendGrid", {
+          to: Array.isArray(to) ? to.join(", ") : to,
+          subject,
+          category,
+          emailLogId: emailLogEntry
+            ? serializeBigInt(emailLogEntry.id)
+            : undefined,
+        });
+
+        return {
+          success: true,
+          provider: "sendgrid",
+          emailLogId: emailLogEntry
+            ? serializeBigInt(emailLogEntry.id)
+            : undefined,
+        };
+      } catch (sendgridError) {
+        logger.error(
+          "SendGrid error, falling back to Nodemailer",
+          sendgridError
+        );
+        // Fall through to Nodemailer
+      }
+    }
+
+    // Fall back to Nodemailer if SendGrid is not available or failed
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_SERVER_HOST,
+        port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
+        secure: process.env.EMAIL_SERVER_SECURE === "true",
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASSWORD,
+        },
+      });
+
+      const info = await transporter.sendMail({
         from,
+        to,
+        replyTo,
         subject,
         text,
         html: html || text.replace(/\n/g, "<br>"),
-        replyTo,
-        attachments,
-        templateId,
-        dynamicTemplateData,
-        category: [category],
-        trackingSettings: {
-          clickTracking: { enable: false },
-          openTracking: { enable: true },
-        },
-        customArgs: {
-          emailLogId: emailLog.id,
-        },
-      };
-
-      const response = await sgMail.send(msg);
-
-      // Update email log with success
-      await prisma.emailLog.update({
-        where: { id: emailLog.id },
-        data: {
-          status: "sent",
-          provider: "sendgrid",
-          providerMessageId: response[0]?.headers["x-message-id"] || null,
-          sentAt: new Date(),
-        },
+        attachments: attachments.map((attachment) => ({
+          filename: attachment.filename || "",
+          content: attachment.content || "",
+          contentType: attachment.type || "",
+        })),
       });
 
-      logger.info("Email sent successfully via SendGrid", {
+      // Update email log with success
+      if (emailLogEntry && hasEmailLogModel()) {
+        try {
+          // @ts-expect-error - EmailLog model might not be in the Prisma client type
+          await prisma.emailLog.update({
+            where: { id: emailLogEntry.id },
+            data: {
+              status: "sent",
+              provider: "nodemailer",
+              providerMessageId: info.messageId || null,
+              sentAt: new Date(),
+            },
+          });
+        } catch (updateError) {
+          logger.error(
+            "Failed to update email log after successful send",
+            updateError
+          );
+          // Continue even if log update fails
+        }
+      }
+
+      logger.info("Email sent successfully via Nodemailer", {
         to: Array.isArray(to) ? to.join(", ") : to,
         subject,
         category,
-        emailLogId: emailLog.id,
+        emailLogId: emailLogEntry
+          ? serializeBigInt(emailLogEntry.id)
+          : undefined,
       });
 
-      return { success: true, provider: "sendgrid", emailLogId: emailLog.id };
-    }
-
-    // Fall back to Nodemailer if SendGrid is not available
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_SERVER_HOST,
-      port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
-      secure: process.env.EMAIL_SERVER_SECURE === "true",
-      auth: {
-        user: process.env.EMAIL_SERVER_USER,
-        pass: process.env.EMAIL_SERVER_PASSWORD,
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from,
-      to,
-      replyTo,
-      subject,
-      text,
-      html: html || text.replace(/\n/g, "<br>"),
-      attachments: attachments.map((attachment) => ({
-        filename: attachment.filename,
-        content: attachment.content,
-        contentType: attachment.type,
-      })),
-    });
-
-    // Update email log with success
-    await prisma.emailLog.update({
-      where: { id: emailLog.id },
-      data: {
-        status: "sent",
+      return {
+        success: true,
         provider: "nodemailer",
-        providerMessageId: info.messageId || null,
-        sentAt: new Date(),
-      },
-    });
-
-    logger.info("Email sent successfully via Nodemailer", {
-      to: Array.isArray(to) ? to.join(", ") : to,
-      subject,
-      category,
-      emailLogId: emailLog.id,
-    });
-
-    return { success: true, provider: "nodemailer", emailLogId: emailLog.id };
+        emailLogId: emailLogEntry
+          ? serializeBigInt(emailLogEntry.id)
+          : undefined,
+      };
+    } catch (nodemailerError) {
+      // Both SendGrid and Nodemailer failed
+      throw new Error(
+        `Email sending failed: ${
+          nodemailerError instanceof Error
+            ? nodemailerError.message
+            : "Unknown error"
+        }`
+      );
+    }
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     logger.error("Failed to send email:", error);
 
     // Update email log with failure
-    try {
-      await prisma.emailLog.update({
-        where: { id: emailLog.id },
-        data: {
-          status: "failed",
-          error: error.message || "Unknown error",
-        },
-      });
-    } catch (logError) {
-      logger.error("Failed to update email log:", logError);
+    if (emailLogEntry && hasEmailLogModel()) {
+      try {
+        // @ts-expect-error - EmailLog model might not be in the Prisma client type
+        await prisma.emailLog.update({
+          where: { id: emailLogEntry.id },
+          data: {
+            status: "failed",
+            error: errorMessage,
+          },
+        });
+      } catch (logError) {
+        logger.error("Failed to update email log with error status:", logError);
+      }
     }
 
-    return { success: false, error: error.message || "Failed to send email" };
+    return {
+      success: false,
+      error: errorMessage,
+      details: error instanceof Error ? error.stack : undefined,
+    };
   }
 }
 
