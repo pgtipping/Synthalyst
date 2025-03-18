@@ -28,6 +28,9 @@
 
 - Next.js 15.2.3 with App Router
 - Tailwind CSS 4.0.14 with @tailwindcss/postcss integration
+- Component resolution system with dynamic build-time copying mechanism
+- Webpack alias configuration for reliable UI component resolution
+- Modified build scripts for Vercel deployment compatibility
 - Reliable deployment pipeline with custom build scripts
 - Automated configuration verification during build
 - Prisma ORM with PostgreSQL

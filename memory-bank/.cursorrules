@@ -15,6 +15,24 @@
 - Stage and commit files from the root directory
 - Always stage files with `git add .`
 
+### UI Component Resolution for Vercel Deployment - [2025-03-18 08:00:00]
+
+- The application uses aliased imports for UI components (`@/components/ui/...`)
+- Special handling is required for Vercel deployment due to path resolution issues
+- Critical UI components are copied to the build directory during build time
+- The following scripts handle component resolution:
+  - `scripts/copy-ui-components-to-build.js`: Copies essential UI components to build directory
+  - `scripts/verify-ui-components.js`: Verifies that all required UI components exist
+  - `scripts/vercel-build.sh`: Orchestrates the build process including component copying
+- The `next.config.js` file includes explicit webpack aliases for UI components
+- Always ensure any new shared UI components are included in the verification and copy scripts
+- Essential UI components that require special handling:
+  - breadcrumb.tsx
+  - button.tsx
+  - card.tsx
+  - tabs.tsx
+- These components are referenced via the `@/components/ui/` path alias
+
 ### Next.js App Router Conventions - [2025-03-11 15:06:15]
 
 - Each route requires its own directory (e.g., `/about`, `/services`, `/contact`)

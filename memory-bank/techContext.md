@@ -1,13 +1,14 @@
-# Technical Context - Updated on ${new Date().toLocaleDateString()}
+# Technical Context - Updated on March 18, 2025
 
 ## Technologies Used
 
 ### Frontend
 
-- **Next.js 15.2.1**: React framework with App Router
+- **Next.js 15.2.3**: React framework with App Router
 - **React 18.2.0**: UI library
 - **TypeScript 5.8.2**: Type-safe JavaScript
-- **Tailwind CSS 3.4.1**: Utility-first CSS framework
+- **Tailwind CSS 4.0.14**: Utility-first CSS framework with PostCSS integration
+- **@tailwindcss/postcss**: Tailwind CSS PostCSS plugin (separated in v4)
 - **shadcn/ui 2.4.0**: Component library based on Radix UI
 - **Lucide React 0.475.0**: Icon library
 - **React Hook Form 7.54.2**: Form handling
@@ -25,6 +26,17 @@
 - **Google Generative AI SDK 0.22.0**: Gemini API integration
 - **Groq SDK 0.15.0**: Groq API integration
 - **OpenAI SDK 4.86.1**: OpenAI API integration
+
+### Build System
+
+- **Component Resolution System**: Custom system for reliable UI component resolution
+  - **verify-ui-components.js**: Script to verify existence of critical components
+  - **copy-ui-components-to-build.js**: Script to copy essential components to build directory
+  - **webpack aliases**: Explicit path mapping for component imports
+- **vercel-build.sh**: Custom build script for Vercel deployments
+- **PostCSS**: Advanced CSS processing (configured in postcss.config.js)
+- **Webpack**: Module bundling (configured in next.config.js)
+- **Babel**: JavaScript transpilation (configured for Next.js)
 
 ### Development Tools
 

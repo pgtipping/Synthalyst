@@ -2,6 +2,47 @@
 
 _Last Updated: ${new Date().toISOString()}_
 
+## UI Component Resolution System (2025-03-18)
+
+### Architecture
+
+The UI Component Resolution System ensures reliable component availability during deployment:
+
+1. **Verification Layer**: Scripts verify the existence of critical UI components
+2. **Copy Layer**: Scripts copy essential components to the build directory
+3. **Alias Layer**: Webpack configuration provides explicit path aliases
+4. **Fallback Layer**: Default implementations ensure minimal functionality if components fail to load
+
+### Data Flow
+
+```
+Build Process Start
+  ↓
+Component Verification (verify-ui-components.js)
+  ↓
+Component Copying (copy-ui-components-to-build.js)
+  ↓
+Webpack Alias Configuration (next.config.js)
+  ↓
+Next.js Build Process
+  ↓
+Deployment Bundle
+```
+
+### Key Patterns
+
+1. **Build-time Component Verification**: Checks for the existence of required components before build
+2. **Dynamic Component Copying**: Copies essential components to the build directory during build
+3. **Explicit Path Aliasing**: Uses webpack configuration to map component imports to specific paths
+4. **Fallback Component Strategy**: Provides default implementations to prevent critical failures
+
+### Implementation Details
+
+1. The system primarily targets components imported via the `@/components/ui/` path alias
+2. Essential components include breadcrumb, button, card, and tabs components
+3. The vercel-build.sh script orchestrates the component verification and copying process
+4. The webpack configuration in next.config.js provides explicit path resolution
+
 ## Audio Recording System (2023-07-10)
 
 ### Architecture
