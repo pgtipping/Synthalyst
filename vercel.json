@@ -3,8 +3,9 @@
   "installCommand": "cd nextjs-app && npm install",
   "framework": "nextjs",
   "env": {
-    "NEXT_PUBLIC_BASE_URL": "https://synthalyst.vercel.app",
-    "NEXTAUTH_URL": "https://synthalyst.vercel.app",
+    "NEXT_PUBLIC_BASE_URL": "https://www.synthalyst.com",
+    "NEXT_PUBLIC_APP_URL": "https://www.synthalyst.com",
+    "NEXTAUTH_URL": "https://www.synthalyst.com",
     "VERCEL": "1",
     "VERCEL_ENV": "production"
   }
