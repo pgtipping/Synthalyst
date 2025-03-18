@@ -1,4 +1,4 @@
-{
+could{
   "buildCommand": "cd nextjs-app && npm install && node scripts/simple-build.js",
   "installCommand": "cd nextjs-app && npm install",
   "framework": "nextjs",

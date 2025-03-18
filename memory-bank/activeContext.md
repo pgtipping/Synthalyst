@@ -4,9 +4,42 @@
 
 The current focus is on resolving persistent Vercel deployment issues, particularly related to UI component resolution and dependency management. We are addressing the challenges of Next.js 15 with Tailwind CSS v4 integration in a production environment, which is proving to be more complex than anticipated. The immediate goal is to achieve a successful production deployment while maintaining the integrity of the application's features and user experience.
 
+After multiple approaches to fix the component resolution issues, we're now considering a modular architecture approach as a more sustainable solution. This approach would break the application into standalone modules that can be built and deployed independently, preventing issues in one area from affecting others.
+
 ### Recent Changes (March 18, 2025)
 
-1. **Enhanced Dependency Management for Vercel Deployment** (March 18, 2025):
+1. **Modular Architecture Planning** (March 18, 2025):
+
+   - Created a comprehensive modular architecture plan to address deployment issues
+   - Designed a phased approach to breaking up the application using Next.js route groups
+   - Planned a shared component system with versioning and clear module boundaries
+   - Outlined module-specific deployment configurations for better build isolation
+   - Developed migration strategy with focus on problematic admin module first
+   - Created detailed action items with immediate, short-term, and long-term tasks
+   - Documented example module structure and configuration for implementation
+
+2. **Advanced Component Resolution Fixes** (March 18, 2025):
+
+   - Implemented direct component exports in admin and contact-submissions directories
+   - Created fallback components for crucial UI elements
+   - Added direct import replacement for problematic files
+   - Updated webpack configuration for explicit path aliases
+   - Created a module resolution helper for mapping import paths
+   - Ensured TypeScript path configurations match the import resolution strategy
+   - Implemented multiple layers of resolution fallbacks for build resilience
+   - Added direct path modification for problematic component imports
+
+3. **Vercel Configuration Optimization** (March 18, 2025):
+
+   - Identified conflicting vercel.json files in root and nextjs-app directories
+   - Resolved configuration conflict by using only the root vercel.json
+   - Backed up the nextjs-app vercel.json to prevent conflicts
+   - Updated build process to use simple-build.js script for deployment
+   - Fixed JSON syntax issues in vercel.json configuration
+   - Ensured proper environment variable configuration for production deployment
+   - Set correct output directory path for Next.js build artifacts
+
+4. **Enhanced Dependency Management for Vercel Deployment** (March 18, 2025):
 
    - Implemented comprehensive dependency verification in build scripts
    - Added explicit version pinning for all critical dependencies to prevent compatibility issues
@@ -18,7 +51,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
    - Updated vercel-build.sh to validate dependency installation success
    - Prevented cascading failures from single dependency issues
 
-2. **Component Resolution Fixes for Vercel Deployment** (March 18, 2025):
+5. **Component Resolution Fixes for Vercel Deployment** (March 18, 2025):
 
    - Created a script to copy essential UI components directly to the build directory
    - Added explicit webpack alias configuration in next.config.js for UI components
@@ -28,7 +61,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
    - Added verification checks to ensure all required dependencies are installed
    - Resolved "Module not found" errors that were causing build failures on Vercel
 
-3. **Tailwind CSS v4 Deployment Fixes** (March 18, 2025):
+6. **Tailwind CSS v4 Deployment Fixes** (March 18, 2025):
 
    - Identified and resolved complex PostCSS plugin configuration issues with Tailwind CSS v4
    - Created specialized build scripts to handle Vercel-specific deployment requirements
@@ -41,7 +74,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
    - Enhanced error logging and debugging capabilities for build process
    - Improved script execution permissions handling for Unix environments
 
-4. **Admin Dashboard Navigation Improvements** (March 17, 2025):
+7. **Admin Dashboard Navigation Improvements** (March 17, 2025):
 
    - Fixed the main Synthalyst app navbar overlapping with the admin sidebar
    - Created a ConditionalHeader component to hide the main site header on admin pages
@@ -53,7 +86,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
    - Updated the root layout to conditionally render the header based on the current path
    - Improved the overall admin navigation experience with a more focused interface
 
-5. **Admin Dashboard API Fixes** (March 17, 2025):
+8. **Admin Dashboard API Fixes** (March 17, 2025):
 
    - Fixed API endpoints in the admin dashboard that were causing 500 Internal Server Error
    - Replaced raw SQL queries with standard Prisma query methods in contact-submissions API endpoint
@@ -64,7 +97,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
    - Successfully built the application with all the fixes in place
    - Ensured the communications page properly displays contact submissions, newsletter replies, and inbound emails
 
-6. **Email Service Optimization**:
+9. **Email Service Optimization**:
 
    - Created a unified email service in `nextjs-app/src/lib/email.ts`
    - Implemented a standardized approach for all email sending functionality
@@ -72,45 +105,45 @@ The current focus is on resolving persistent Vercel deployment issues, particula
    - Created an `EmailLog` model in the Prisma schema
    - Implemented fallback mechanisms between SendGrid and Nodemailer
 
-7. **Feedback API Improvements**:
+10. **Feedback API Improvements**:
 
-   - Simplified the feedback API implementation
-   - Removed file-based storage logic in favor of database-only storage
-   - Implemented rate limiting using LRU cache
-   - Enhanced error handling for feedback submissions
-   - Updated the `FeedbackButton` component to use the new API
+    - Simplified the feedback API implementation
+    - Removed file-based storage logic in favor of database-only storage
+    - Implemented rate limiting using LRU cache
+    - Enhanced error handling for feedback submissions
+    - Updated the `FeedbackButton` component to use the new API
 
-8. **Admin Dashboard Enhancements**:
+11. **Admin Dashboard Enhancements**:
 
-   - Created an email logs admin dashboard UI
-   - Implemented filtering by status and category
-   - Added statistics for email status distribution
-   - Added pagination for email logs
-   - Created a dedicated section for failed emails
-   - Added functionality to delete older logs
-   - Updated admin navigation to include the Email Logs page
-   - Created a responsive `AdminLayout` component with mobile support
-   - Fixed layout issues with the admin sidebar and main content (March 16, 2025)
-   - Improved mobile responsiveness with proper sidebar toggle controls
-   - Restructured the admin layout to use a flex-based approach for better content positioning
-   - Added a close button to the sidebar for better mobile usability
-   - Made the top navigation bar sticky for better navigation on long pages
-   - Ensured consistent spacing and alignment across all admin pages
+    - Created an email logs admin dashboard UI
+    - Implemented filtering by status and category
+    - Added statistics for email status distribution
+    - Added pagination for email logs
+    - Created a dedicated section for failed emails
+    - Added functionality to delete older logs
+    - Updated admin navigation to include the Email Logs page
+    - Created a responsive `AdminLayout` component with mobile support
+    - Fixed layout issues with the admin sidebar and main content (March 16, 2025)
+    - Improved mobile responsiveness with proper sidebar toggle controls
+    - Restructured the admin layout to use a flex-based approach for better content positioning
+    - Added a close button to the sidebar for better mobile usability
+    - Made the top navigation bar sticky for better navigation on long pages
+    - Ensured consistent spacing and alignment across all admin pages
 
-9. **Admin Monitoring Fixes** (March 16, 2025):
+12. **Admin Monitoring Fixes** (March 16, 2025):
 
-   - Fixed Redis monitoring functionality in the admin dashboard
-   - Resolved JSON parsing errors in the Redis monitor by adding type checking
-   - Fixed rate limiting errors by using the correct string format for duration
-   - Added better error handling for Redis connection issues
-   - Made authorization optional for development environment
-   - Improved error responses to return 200 status with error details instead of 500
-   - Enhanced the RedisMonitoring component to handle null values properly
-   - Added a reset metrics button to the monitoring UI
-   - Fixed TypeScript errors in the rate-limit library
-   - Added proper type definitions for LRU cache
+    - Fixed Redis monitoring functionality in the admin dashboard
+    - Resolved JSON parsing errors in the Redis monitor by adding type checking
+    - Fixed rate limiting errors by using the correct string format for duration
+    - Added better error handling for Redis connection issues
+    - Made authorization optional for development environment
+    - Improved error responses to return 200 status with error details instead of 500
+    - Enhanced the RedisMonitoring component to handle null values properly
+    - Added a reset metrics button to the monitoring UI
+    - Fixed TypeScript errors in the rate-limit library
+    - Added proper type definitions for LRU cache
 
-10. **Admin User Management Fixes** (March 16, 2025):
+13. **Admin User Management Fixes** (March 16, 2025):
 
     - Fixed NextJS dynamic route parameter issue in the user role update API
     - Updated the API route to properly await params object in Next.js 15
@@ -119,7 +152,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
     - Ensured consistent error handling across all admin API routes
     - Fixed TypeScript errors in the admin user management components
 
-11. **Newsletter Subscription System Fixes** (March 16, 2025):
+14. **Newsletter Subscription System Fixes** (March 16, 2025):
 
     - Fixed model name in API routes from `newsletter` to `newsletterSubscriber` to match Prisma schema
     - Added functionality to create real subscribers in the database when in development mode
@@ -134,27 +167,27 @@ The current focus is on resolving persistent Vercel deployment issues, particula
     - Added conditional rendering for pagination controls to prevent errors when data is loading
     - Updated API response structure to match frontend expectations by wrapping pagination properties in a pagination object
 
-12. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+15. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
 
-13. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+16. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
 
-14. **Model Router Updates**:
+17. **Model Router Updates**:
 
     - Added a new `generateContentV2` function with improved parameter handling
     - Updated the API route to use the new function
     - Standardized language support across models
     - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 
-15. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
+18. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
 
-16. **Knowledge GPT Web Search Integration**:
+19. **Knowledge GPT Web Search Integration**:
 
     - Added web search capability to provide up-to-date information
     - Implemented Google Custom Search API integration
     - Updated system prompts to include current information
     - Enhanced UI to inform users about web search capability
 
-17. **Knowledge GPT Improvements** (March 16, 2025):
+20. **Knowledge GPT Improvements** (March 16, 2025):
 
     - Updated loading animation to use three dots instead of spinning icon
     - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
@@ -165,7 +198,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
     - Simplified web search logic by removing automatic detection in favor of explicit user control
     - Moved loading animation to appear in chat window instead of on send button
 
-18. **Language Selector Improvements** (March 16, 2025):
+21. **Language Selector Improvements** (March 16, 2025):
 
     - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
     - Included English in the dropdown list
@@ -174,7 +207,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
     - Added local storage to remember user language preferences
     - Improved browser language detection and handling
 
-19. **Medical Knowledge Integration** (March 16, 2025):
+22. **Medical Knowledge Integration** (March 16, 2025):
 
     - Added PubMed API integration for evidence-based medical information
     - Implemented evidence grading system based on study types
@@ -186,7 +219,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
     - Added PUBMED_API_KEY to environment variables
     - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
-20. **Admin Pages Error Handling Improvements** (March 16, 2025):
+23. **Admin Pages Error Handling Improvements** (March 16, 2025):
 
     - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
     - Changed empty values to "all" in SelectItem components to prevent errors
@@ -200,7 +233,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
     - Implemented fallback to empty arrays when data is missing or undefined
     - Added try-catch blocks for API calls to handle errors independently
 
-21. **Admin Page Database Checks** (March 16, 2025):
+24. **Admin Page Database Checks** (March 16, 2025):
 
     - Added SQL queries to check if tables exist before attempting to query them
     - Used `information_schema.tables` to verify table existence in the database
@@ -213,27 +246,7 @@ The current focus is on resolving persistent Vercel deployment issues, particula
     - Resolved chunk loading errors by properly handling database queries
     - Improved error logging for all database operations
 
-22. **Tailwind CSS Configuration Fixes** (March 17, 2025):
-
-    - Identified and fixed error related to Tailwind CSS's PostCSS plugin moving to a separate package
-    - Installed `@tailwindcss/postcss` package to replace direct usage of `tailwindcss` in PostCSS config
-    - Updated `postcss.config.cjs` to use `@tailwindcss/postcss` instead of `tailwindcss` directly
-    - Successfully tested the build process locally to confirm the fix works
-    - Resolved merge conflicts with the remote repository that had updated to Tailwind CSS v4
-    - Pushed the changes to the main branch to trigger a new Vercel deployment
-    - Fixed the "It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin" error
-    - Documented the new configuration pattern in the memory bank files
-    - Added a rule in .cursorrules to ensure future PostCSS configurations use the correct pattern
-    - Updated the systemPatterns.md with a new CSS Configuration Patterns section
-    - Modified CSS files to ensure consistent Tailwind directives usage:
-      - Removed Tailwind directives from critical.css to avoid duplication
-      - Added clear comments in globals.css about the PostCSS plugin
-      - Verified non-critical.css doesn't contain Tailwind directives
-    - Created vercel.json with explicit build commands to ensure proper package installation
-    - Disabled CSS optimization in next.config.js to resolve potential conflicts with Tailwind CSS v4
-    - Implemented multiple iterative fixes to address persistent build issues on Vercel
-
-23. **Tailwind CSS Configuration** (${new Date().toLocaleDateString()}):
+25. **Tailwind CSS Configuration** (${new Date().toLocaleDateString()}):
 
     - Using `@tailwindcss/postcss` instead of direct `tailwindcss` usage in PostCSS config
     - Using explicit color values with bracket notation instead of named colors
@@ -246,24 +259,16 @@ The current focus is on resolving persistent Vercel deployment issues, particula
 
 ### Next Steps
 
-1. **Email Webhook Configuration**: Set up SendGrid Inbound Parse to properly forward emails to the application's webhook endpoint.
-2. **MX Records Setup**: Ensure proper MX records are set up for the domain to receive emails.
-3. **Webhook Testing**: Test the email processing workflow from external sources to verify it's working correctly.
-4. **Prisma Migration**: Complete the Prisma migration to add the new `EmailLog` model.
-5. **Email Service Testing**: Comprehensive testing of the unified email service.
-6. **Admin Dashboard Enhancements**: Add more filtering options and detailed analytics for email logs.
-7. **Feedback System Improvements**: Enhance the feedback system with more detailed analytics and user segmentation.
-8. **Backend Model Routing Logic**: Implement sophisticated model routing logic based on task complexity, content length, and language.
-9. **Cost Optimization Features**: Add features to track and optimize model usage costs.
-10. **Enhanced Error Handling**: Improve error handling for API calls and model responses.
-11. **User Preference Settings**: Implement user preference settings for language selection.
-12. **Analytics Implementation**: Add analytics to track model usage and performance.
-13. **Web Search Enhancements**: Improve web search integration with better result filtering and source attribution.
-14. **Additional Specialized Domains**: Expand Knowledge GPT with more specialized domains (legal, financial, etc.).
-15. **Medical Knowledge Enhancements**: Add more medical data sources and improve evidence grading.
-16. **Conversational Context**: Improve the Medical Knowledge Assistant to maintain conversational context between queries.
-17. **Systematic Error Handling**: Implement a more proactive approach to error detection and resolution across all admin pages.
-18. **Tailwind CSS Deployment**: Deploy the Tailwind CSS fixes to production after verifying they work correctly in the preview deployment.
+1. **Implement Modular Architecture**:
+
+   - Begin implementing the modular architecture plan
+   - Start with isolating the admin module as a separate route group
+   - Create dedicated component directories for each module
+   - Update build scripts to support module-specific builds
+
+2. **Email Webhook Configuration**: Set up SendGrid Inbound Parse to properly forward emails to the application's webhook endpoint.
+
+3. **MX Records Setup**: Ensure proper MX records are set up for the domain to receive emails.
 
 ### Active Decisions
 

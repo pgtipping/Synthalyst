@@ -1070,3 +1070,494 @@ Separate configurations for development and production:
 3. **Adaptability**: Environment-specific handling improves compatibility
 4. **Resilience**: Fallback mechanisms prevent catastrophic failures
 5. **Maintainability**: Clear structure makes the build process easy to understand and modify
+
+## Architecture (March 18, 2025)
+
+### Overall Architecture
+
+Synthalyst is built using a Next.js 15 application with a monolithic approach but is now transitioning to a more modular architecture using Next.js route groups. The system follows a client-server architecture with a React front-end and Node.js serverless functions for backend APIs. Data is stored in a PostgreSQL database accessed via Prisma ORM.
+
+### Current Architecture
+
+```mermaid
+graph TD
+    Client[Client Browser] --> NextJS[Next.js Application]
+    NextJS --> API[API Routes]
+    NextJS --> Pages[Pages]
+    NextJS --> Components[Components]
+    API --> Prisma[Prisma ORM]
+    Prisma --> DB[(PostgreSQL)]
+    API --> Redis[(Redis)]
+    API --> External[External APIs]
+    External --> OpenAI[OpenAI]
+    External --> SendGrid[SendGrid]
+    External --> GoogleSearch[Google Search]
+    External --> PubMed[PubMed]
+```
+
+### Planned Modular Architecture (March 18, 2025)
+
+The system is transitioning to a modular architecture using Next.js route groups and directory-based component organization. This approach will create logical separation between different functional areas while maintaining a single repository.
+
+```mermaid
+graph TD
+    Client[Client Browser] --> NextJS[Next.js Application]
+
+    NextJS --> AdminModule[Admin Module]
+    NextJS --> PublicModule[Public Module]
+    NextJS --> KnowledgeModule[Knowledge Module]
+    NextJS --> ApplicationsModule[Applications Module]
+    NextJS --> BlogModule[Blog Module]
+    NextJS --> AuthModule[Auth Module]
+
+    subgraph Shared[Shared Resources]
+      SharedComponents[Shared UI Components]
+      SharedLib[Shared Utilities]
+      SharedStyles[Shared Styles]
+    end
+
+    AdminModule --> SharedComponents
+    PublicModule --> SharedComponents
+    KnowledgeModule --> SharedComponents
+    ApplicationsModule --> SharedComponents
+    BlogModule --> SharedComponents
+    AuthModule --> SharedComponents
+
+    AdminModule --> AdminAPI[Admin APIs]
+    PublicModule --> PublicAPI[Public APIs]
+    KnowledgeModule --> KnowledgeAPI[Knowledge APIs]
+    ApplicationsModule --> ApplicationsAPI[Applications APIs]
+    BlogModule --> BlogAPI[Blog APIs]
+    AuthModule --> AuthAPI[Auth APIs]
+
+    AdminAPI --> Prisma[Prisma ORM]
+    PublicAPI --> Prisma
+    KnowledgeAPI --> Prisma
+    ApplicationsAPI --> Prisma
+    BlogAPI --> Prisma
+    AuthAPI --> Prisma
+
+    Prisma --> DB[(PostgreSQL)]
+
+    KnowledgeAPI --> ExternalAI[External AI APIs]
+    ExternalAI --> OpenAI[OpenAI]
+    ExternalAI --> Gemini[Google Gemini]
+    ExternalAI --> Anthropic[Anthropic]
+
+    AdminAPI --> Redis[(Redis)]
+    KnowledgeAPI --> Redis
+    ApplicationsAPI --> Redis
+
+    AdminAPI --> Email[Email Services]
+    PublicAPI --> Email
+    Email --> SendGrid[SendGrid]
+    Email --> Nodemailer[Nodemailer]
+
+    KnowledgeAPI --> WebSearch[Web Search]
+    WebSearch --> GoogleSearch[Google Search]
+    WebSearch --> PubMed[PubMed API]
+```
+
+#### Module Boundaries and Responsibility
+
+Each module in the system has clear boundaries and responsibilities:
+
+1. **Admin Module**:
+
+   - Manages administrative functions
+   - User management and role assignment
+   - System monitoring and configuration
+   - Communications management (emails, contact forms, newsletters)
+   - Content moderation
+   - Analytics dashboards
+
+2. **Public Module**:
+
+   - Main public-facing pages
+   - Marketing content
+   - Pricing information
+   - Contact forms and feedback collection
+   - Feature showcase
+   - SEO-optimized content
+
+3. **Knowledge Module**:
+
+   - Knowledge GPT chat interface
+   - Medical knowledge domain
+   - Web search integration
+   - Domain selection for specialized knowledge
+   - Evidence grading and citation
+   - Language selection and support
+
+4. **Applications Module**:
+
+   - ApplyRight application tool
+   - Interview preparation tools
+   - Document parsing and extraction
+   - Task management and tracking
+   - Progress analytics for users
+
+5. **Blog Module**:
+
+   - Blog listing and article pages
+   - Author profiles and information
+   - Content creation tools
+   - Comment system and moderation
+   - SEO optimization for blog content
+
+6. **Auth Module**:
+   - Authentication services
+   - User session management
+   - Role-based access control
+   - Account management
+   - Security controls and monitoring
+
+#### Shared Resources
+
+Truly shared resources span across modules:
+
+1. **Shared UI Components**:
+
+   - Basic UI elements (buttons, cards, modals)
+   - Layout components (containers, grids)
+   - Navigation components (breadcrumbs, pagination)
+   - Form elements (inputs, selectors, checkboxes)
+   - Feedback components (alerts, notifications)
+
+2. **Shared Utilities**:
+
+   - Date formatting and manipulation
+   - String processing and validation
+   - Common type definitions
+   - API request helpers
+   - Error handling utilities
+
+3. **Shared Styles**:
+   - Global CSS variables
+   - Typography styles
+   - Color theme definitions
+   - Animation definitions
+   - Responsive breakpoint utilities
+
+## Front-End Patterns (March 18, 2025)
+
+### Component Structure
+
+Components follow a hierarchical pattern:
+
+1. **Page Components**: Container components that represent full pages
+2. **Layout Components**: Control the overall structure and positioning
+3. **Feature Components**: Implement specific features or sections
+4. **UI Components**: Reusable UI elements like buttons, cards, etc.
+
+### Component Organization
+
+Components are organized by module boundaries:
+
+```
+src/
+├── app/
+│   ├── (admin)/
+│   │   ├── components/  # Admin-specific components
+│   │   ├── lib/         # Admin-specific utilities
+│   │   └── [...routes]  # Admin routes
+│   ├── (public)/
+│   │   ├── components/  # Public-specific components
+│   │   └── [...routes]  # Public routes
+│   └── [...other modules]
+├── components/          # Truly shared components
+├── lib/                 # Shared utilities
+└── styles/              # Shared styles
+```
+
+### State Management
+
+1. **Local Component State**: For UI state using React's useState
+2. **Context API**: For shared state within specific feature areas
+3. **URL State**: For shareable and bookmarkable state via URL parameters
+4. **Server State**: For data that primarily lives on the server
+5. **Form State**: Using React Hook Form for form management
+
+### Routing
+
+Next.js App Router with route groups for module separation:
+
+```
+app/
+├── (admin)/
+│   ├── dashboard/page.tsx
+│   ├── users/page.tsx
+│   └── settings/page.tsx
+├── (public)/
+│   ├── page.tsx
+│   ├── about/page.tsx
+│   └── contact/page.tsx
+└── [...other modules]
+```
+
+### Data Fetching
+
+1. **React Server Components**: For direct database access without API
+2. **API Routes**: For client-side requests requiring authentication
+3. **Server Actions**: For form submissions and data mutations
+4. **External API Integration**: For third-party services
+
+## Back-End Patterns (March 18, 2025)
+
+### API Structure
+
+APIs are organized by module:
+
+```
+app/
+├── api/
+│   ├── admin/
+│   │   ├── users/route.ts
+│   │   └── settings/route.ts
+│   ├── knowledge/
+│   │   ├── chat/route.ts
+│   │   └── domains/route.ts
+│   └── [...other modules]
+```
+
+### Database Access
+
+1. **Prisma ORM**: Primary data access layer
+2. **Repository Pattern**: Encapsulating data operations by entity
+3. **Direct Access in RSC**: Server components directly using Prisma client
+4. **Transactional Operations**: For multi-step database operations
+
+### Authentication
+
+1. **Next-Auth**: For authentication management
+2. **JWT Tokens**: For stateless authentication between client and server
+3. **Role-Based Access Control**: For permission management
+4. **API Route Protection**: Using middleware for securing endpoints
+
+### Caching
+
+1. **Redis**: For server-side caching of expensive computations
+2. **Static Site Generation**: For static content
+3. **Incremental Static Regeneration**: For semi-dynamic content
+4. **Client-Side Caching**: For UI state persistence
+
+## Dependency Management (March 18, 2025)
+
+Synthalyst follows these principles for dependency management:
+
+1. **Dependency Isolation**: Moving toward module-specific dependencies where possible
+2. **Version Pinning**: Exact versions specified for all dependencies
+3. **Peer Dependency Resolution**: Careful management of peer dependencies
+4. **Build-Time Validation**: Verifying all dependencies are correctly installed
+5. **Fallback Mechanisms**: Creating fallbacks for missing or failed dependencies
+
+## UI Component Patterns (March 18, 2025)
+
+### Component Library
+
+1. **Radix UI**: Core unstyled UI primitives for accessibility and behavior
+2. **Tailwind CSS**: For styling components
+3. **Custom Components**: Building on top of Radix and Tailwind for specific needs
+4. **Component Versioning**: Moving toward versioned shared components
+
+### CSS Architecture
+
+1. **Tailwind CSS**: Primary styling approach
+2. **CSS Modules**: For complex component-specific styles
+3. **Global Styles**: Minimal global styles for typography and variables
+4. **CSS Variables**: For theme configuration
+5. **Separate CSS Files**: For critical and non-critical content
+
+## Build and Deployment (March 18, 2025)
+
+### Build Process
+
+Moving to a modular build process with these steps:
+
+1. **Module-Specific Building**: Building each module independently
+2. **Dependency Verification**: Ensuring all required dependencies are installed
+3. **Path Alias Resolution**: Resolving import paths correctly
+4. **CSS Processing**: Handling Tailwind and PostCSS correctly
+5. **Output Verification**: Validating build artifacts before deployment
+
+### Deployment Strategy
+
+1. **Vercel Deployment**: Primary deployment platform with:
+   - Module-specific configuration
+   - Environment variable management
+   - Preview deployments for pull requests
+   - Production deployments via main branch
+2. **Build Scripts**: Custom build scripts for different modules
+3. **Fallback Mechanisms**: For handling build failures gracefully
+4. **Staged Deployments**: For minimizing production impact
+
+## Testing Patterns (March 18, 2025)
+
+1. **Unit Testing**: With Jest for individual functions and components
+2. **Component Testing**: With React Testing Library
+3. **API Testing**: With SuperTest for API routes
+4. **End-to-End Testing**: With Playwright
+5. **Visual Regression Testing**: With Chromatic
+
+## Error Handling (March 18, 2025)
+
+1. **Client-Side Error Boundary**: Catching React rendering errors
+2. **Server-Side Error Logging**: Capturing API and server errors
+3. **User-Friendly Error Pages**: Custom 404 and 500 pages
+4. **Error Reporting**: Structured error reporting for debugging
+5. **Fallback UI**: Degrading gracefully when components fail
+
+## Performance Patterns (March 18, 2025)
+
+1. **Code Splitting**: Automatic code splitting with Next.js
+2. **Image Optimization**: With Next.js Image component
+3. **Font Optimization**: With Next.js Font system
+4. **Lazy Loading**: For non-critical components
+5. **Server-Side Rendering**: For improved initial load performance
+
+## Documentation Patterns (March 18, 2025)
+
+1. **Code Comments**: For complex logic and non-obvious behavior
+2. **README Files**: For each major directory
+3. **TypeScript Types**: As living documentation for data structures
+4. **API Documentation**: Using JSDoc comments for API routes
+5. **Component Props Documentation**: Using TypeScript and comments
+
+## CSS Configuration Patterns (March 18, 2025)
+
+### Tailwind CSS Configuration
+
+1. **@tailwindcss/postcss**: Using this package instead of direct `tailwindcss` usage in PostCSS config
+2. **Explicit Color Values**: Using bracket notation instead of named colors
+3. **Standardized PostCSS Config**: A single configuration file for consistency
+4. **Critical CSS**: Separating critical and non-critical CSS for performance
+5. **CSS Optimization**: Disabled in next.config.js to avoid Tailwind conflicts
+
+## Modular Architecture Implementation (March 18, 2025)
+
+To implement the modular architecture, the following patterns will be used:
+
+### 1. Next.js Route Groups
+
+Using Next.js route groups to create logical separation between different application areas:
+
+```
+app/
+├── (admin)/
+├── (public)/
+├── (knowledge)/
+├── (applications)/
+├── (blog)/
+└── (auth)/
+```
+
+Each route group acts as a self-contained module with its own components, utilities, and styles.
+
+### 2. Component Directory Structure
+
+Each module will have its own component directory structure:
+
+```
+app/
+├── (admin)/
+│   ├── components/
+│   │   ├── layout/
+│   │   ├── ui/
+│   │   └── features/
+│   ├── lib/
+│   └── styles/
+```
+
+### 3. API Route Organization
+
+API routes will be organized by module:
+
+```
+app/
+├── api/
+│   ├── admin/
+│   ├── knowledge/
+│   ├── applications/
+│   └── blog/
+```
+
+### 4. Shared Component Library
+
+A versioned shared component library will be established:
+
+```
+src/
+├── components/
+│   ├── ui/
+│   │   ├── button/
+│   │   │   ├── v1/
+│   │   │   └── v2/
+│   │   ├── card/
+│   │   └── input/
+│   └── layout/
+```
+
+### 5. Module-Specific Build Configuration
+
+Each module will have its own build configuration:
+
+```javascript
+// build-admin.js
+const { execSync } = require("child_process");
+
+// Clean cache for admin module
+execSync("rm -rf node_modules/.cache .next/cache/admin", { stdio: "inherit" });
+
+// Install admin-specific dependencies
+execSync("npm install --save @headlessui/react @radix-ui/react-dropdown-menu", {
+  stdio: "inherit",
+});
+
+// Build Next.js app with admin focus
+execSync("npx next build", { stdio: "inherit" });
+```
+
+### 6. Module Boundary Rules
+
+Clear rules for cross-module communication:
+
+1. **API-Based Communication**: Modules communicate via well-defined API contracts
+2. **Shared State Management**: Using context providers at the module level
+3. **Interface-Based Design**: Clearly defined interfaces for shared components
+4. **Event-Based Communication**: For loosely coupled interactions between modules
+
+### 7. Deployment Configuration
+
+Module-specific deployment configuration:
+
+```json
+// admin-vercel.json
+{
+  "buildCommand": "cd nextjs-app && npm install && node scripts/build-admin.js",
+  "installCommand": "cd nextjs-app && npm install",
+  "framework": "nextjs",
+  "outputDirectory": "nextjs-app/.next",
+  "env": {
+    "MODULE": "admin",
+    "NEXT_PUBLIC_MODULE": "admin"
+  }
+}
+```
+
+### 8. Migration Strategy
+
+The migration to this modular architecture will follow these patterns:
+
+1. **Incremental Migration**: Moving one module at a time, starting with admin
+2. **Dual Running**: Supporting both old and new structures during transition
+3. **Component Shadowing**: Module-specific components can override shared ones
+4. **Import Redirection**: Gradually updating imports to use new module paths
+5. **Backward Compatibility Layer**: Ensuring old code continues to work during migration
+
+## Error Handling Patterns (March 18, 2025)
+
+1. **Centralized Error Handling**: Common error handling utilities across modules
+2. **Module-Specific Error Boundaries**: Each module has its own error boundaries
+3. **Fallback Components**: When a component fails, show a meaningful fallback
+4. **Error Logging**: Structured error logging for debugging and monitoring
+5. **User Feedback**: Clear error messages for user-facing errors
