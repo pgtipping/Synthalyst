@@ -7,11 +7,20 @@ set -x
 # Install necessary packages
 echo "Installing required packages..."
 npm install --save-dev @babel/plugin-syntax-import-attributes@7.26.0
-npm install --save @tailwindcss/postcss
+npm install --save @tailwindcss/postcss clsx tailwind-merge
+npm install --save @radix-ui/react-slot @radix-ui/react-tabs
 
 # Run the PostCSS config check
 echo "Verifying PostCSS configuration..."
 node scripts/ensure-postcss-config.js
+
+# Run the UI Components preparation
+echo "Preparing UI components..."
+node scripts/prepare-ui-components.js
+
+# Verify UI components
+echo "Verifying UI components..."
+node scripts/verify-ui-components.js
 
 # Run the Babel config debug script
 echo "Debugging Babel configuration..."

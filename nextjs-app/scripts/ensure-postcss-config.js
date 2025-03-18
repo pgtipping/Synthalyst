@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
 
 // Check if @tailwindcss/postcss is properly configured
 const postcssConfigPath = path.resolve(__dirname, "..", "postcss.config.cjs");
@@ -33,8 +34,20 @@ module.exports = config;
       );
 
       // Replace tailwindcss with @tailwindcss/postcss
-      const updatedConfig = postcssConfig.replace(
+      let updatedConfig = postcssConfig.replace(
         /tailwindcss\s*:\s*\{\}/g,
+        '"@tailwindcss/postcss": {}'
+      );
+
+      // Also replace "tailwindcss" string literals
+      updatedConfig = updatedConfig.replace(
+        /"tailwindcss"\s*:\s*\{\}/g,
+        '"@tailwindcss/postcss": {}'
+      );
+
+      // Also replace 'tailwindcss' string literals
+      updatedConfig = updatedConfig.replace(
+        /'tailwindcss'\s*:\s*\{\}/g,
         '"@tailwindcss/postcss": {}'
       );
 
@@ -52,24 +65,27 @@ module.exports = config;
   process.exit(1);
 }
 
-// Verify the installation of @tailwindcss/postcss
-try {
-  require.resolve("@tailwindcss/postcss");
-  console.log("✅ @tailwindcss/postcss package is installed");
-} catch (error) {
-  console.log(
-    "⚠️ @tailwindcss/postcss package is not installed. Installing now..."
-  );
-  const { execSync } = require("child_process");
+// Verify and install required dependencies
+const requiredPackages = [
+  "@tailwindcss/postcss",
+  "autoprefixer",
+  "clsx",
+  "tailwind-merge",
+];
+
+for (const pkg of requiredPackages) {
   try {
-    execSync("npm install --save @tailwindcss/postcss", { stdio: "inherit" });
-    console.log("✅ @tailwindcss/postcss installed successfully!");
-  } catch (installError) {
-    console.error(
-      "❌ Failed to install @tailwindcss/postcss:",
-      installError.message
-    );
-    process.exit(1);
+    require.resolve(pkg);
+    console.log(`✅ ${pkg} package is installed`);
+  } catch (error) {
+    console.log(`⚠️ ${pkg} package is not installed. Installing now...`);
+    try {
+      execSync(`npm install --save ${pkg}`, { stdio: "inherit" });
+      console.log(`✅ ${pkg} installed successfully!`);
+    } catch (installError) {
+      console.error(`❌ Failed to install ${pkg}:`, installError.message);
+      process.exit(1);
+    }
   }
 }
 
@@ -119,8 +135,91 @@ ${globalsCss.includes("@layer base") ? "" : "@layer base {\n"}${
     }
   } else {
     console.log(
-      "⚠️ globals.css not found. Tailwind directives need to be checked manually."
+      "⚠️ globals.css not found. Creating one with Tailwind directives..."
     );
+
+    const appDir = path.dirname(globalsCssPath);
+    if (!fs.existsSync(appDir)) {
+      fs.mkdirSync(appDir, { recursive: true });
+    }
+
+    const basicGlobalsCss = `/**
+ * This is a global stylesheet for the entire application.
+ * It defines common styles that will be applied to all pages.
+ * Tailwind directives are processed by @tailwindcss/postcss plugin
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+`;
+
+    fs.writeFileSync(globalsCssPath, basicGlobalsCss);
+    console.log("✅ Created globals.css with Tailwind directives!");
   }
 } catch (error) {
   console.error("❌ Error checking globals.css:", error.message);
