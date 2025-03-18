@@ -5,6 +5,7 @@
   "env": {
     "NEXT_PUBLIC_BASE_URL": "https://synthalyst.vercel.app",
     "NEXTAUTH_URL": "https://synthalyst.vercel.app",
-    "VERCEL": "1"
+    "VERCEL": "1",
+    "VERCEL_ENV": "production"
   }
 }
