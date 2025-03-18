@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     // Other experimental features can go here
-    optimizeCss: true, // Enable CSS optimization
+    optimizeCss: false, // Temporarily disable CSS optimization due to Tailwind CSS v4 compatibility issues
     optimizePackageImports: ["@/components", "@/lib", "@/hooks"], // Optimize package imports
     // Add modern JavaScript optimization
     serverActions: {
