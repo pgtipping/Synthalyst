@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npm install @tailwindcss/postcss && node scripts/ensure-postcss-config.js && npx rimraf .next && prisma generate && node scripts/handle-db-build.js && next build",
+  "buildCommand": "chmod +x scripts/vercel-build.sh && ./scripts/vercel-build.sh",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
