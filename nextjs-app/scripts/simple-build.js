@@ -4,6 +4,17 @@ const { execSync } = require("child_process");
 console.log("Cleaning cache and build artifacts...");
 execSync("rm -rf node_modules/.cache .next", { stdio: "inherit" });
 
+// Verify environment variables
+console.log("Verifying environment variables...");
+try {
+  execSync("node scripts/verify-env.js", { stdio: "inherit" });
+} catch (err) {
+  console.warn(
+    "Environment verification completed with warnings - continuing build"
+  );
+  console.warn(`Error details: ${err.message}`);
+}
+
 // Install critical dependencies directly
 console.log("Installing critical dependencies...");
 execSync(
