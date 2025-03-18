@@ -250,9 +250,8 @@ export default function RootLayout({
           content="facebook-domain-verification-code"
         />
 
-        {/* Load non-critical CSS both with and without JavaScript */}
+        {/* Load non-critical CSS asynchronously */}
         <link rel="preload" href="/styles/non-critical.css" as="style" />
-        <link rel="stylesheet" href="/styles/non-critical.css" />
         <noscript>
           <link rel="stylesheet" href="/styles/non-critical.css" />
         </noscript>

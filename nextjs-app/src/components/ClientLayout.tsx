@@ -1,7 +1,7 @@
 "use client";
 
 import { SessionProvider } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function ClientLayout({
   children,
@@ -9,35 +9,90 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [error, setError] = useState<Error | null>(null);
+  const cssLoadAttempted = useRef<boolean>(false);
+  const cssLoadTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Load non-critical CSS
+    // Load non-critical CSS with performance monitoring
     const loadNonCriticalCSS = () => {
-      console.log("Loading non-critical CSS...");
+      if (cssLoadAttempted.current) return; // Prevent duplicate attempts
+      cssLoadAttempted.current = true;
+
+      // Start timing the CSS load
+      const startTime = performance.now();
+
+      // Create link element
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.href = "/styles/non-critical.css";
 
       // Add event listeners to handle success/failure
       link.onload = () => {
-        console.log("Non-critical CSS loaded successfully");
+        // Calculate load time for performance monitoring
+        const loadTime = performance.now() - startTime;
+        console.log(
+          `Non-critical CSS loaded successfully in ${loadTime.toFixed(2)}ms`
+        );
+
+        // Clear fallback timer if it exists
+        if (cssLoadTimer.current) {
+          clearTimeout(cssLoadTimer.current);
+          cssLoadTimer.current = null;
+        }
+
+        // Add a class to body indicating CSS is loaded
+        document.body.classList.add("non-critical-css-loaded");
       };
 
       link.onerror = (e) => {
-        console.error("Failed to load non-critical CSS, retrying...", e);
-        // If loading fails, try again with a cache-busting parameter
+        console.error(
+          "Failed to load non-critical CSS, retrying with cache-busting...",
+          e
+        );
+
+        // Retry with cache-busting parameter
         setTimeout(() => {
           const retryLink = document.createElement("link");
           retryLink.rel = "stylesheet";
           retryLink.href = `/styles/non-critical.css?t=${new Date().getTime()}`;
+
+          retryLink.onload = () => {
+            console.log("Non-critical CSS loaded successfully via retry");
+            document.body.classList.add("non-critical-css-loaded");
+
+            if (cssLoadTimer.current) {
+              clearTimeout(cssLoadTimer.current);
+              cssLoadTimer.current = null;
+            }
+          };
+
+          retryLink.onerror = () => {
+            console.error("Failed to load non-critical CSS even after retry");
+          };
+
           document.head.appendChild(retryLink);
-        }, 1000);
+        }, 500);
       };
 
+      // Set a fallback timer to load CSS directly if it takes too long
+      cssLoadTimer.current = setTimeout(() => {
+        if (!document.body.classList.contains("non-critical-css-loaded")) {
+          console.warn(
+            "CSS load timeout reached, adding direct stylesheet link"
+          );
+
+          const fallbackLink = document.createElement("link");
+          fallbackLink.rel = "stylesheet";
+          fallbackLink.href = `/styles/non-critical.css?fallback=true`;
+          document.head.appendChild(fallbackLink);
+        }
+      }, 3000); // 3 second timeout
+
+      // Append the link to head
       document.head.appendChild(link);
     };
 
-    // Load CSS
+    // Load CSS asynchronously
     loadNonCriticalCSS();
 
     // Add event listener for unhandled errors
@@ -67,6 +122,10 @@ export default function ClientLayout({
 
     return () => {
       window.removeEventListener("error", handleError);
+      // Clear any timers when component unmounts
+      if (cssLoadTimer.current) {
+        clearTimeout(cssLoadTimer.current);
+      }
     };
   }, []);
 

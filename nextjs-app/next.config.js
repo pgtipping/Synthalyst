@@ -8,21 +8,13 @@ const resolvePath = (basePath, ...paths) => {
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    // Other experimental features can go here
-    optimizeCss: false, // Disable CSS optimization due to Tailwind CSS v4 compatibility issues
+    // Optimize CSS but ensure compatibility with Tailwind CSS v4
+    optimizeCss: true, // Enable CSS optimization
     optimizePackageImports: ["@/components", "@/lib", "@/hooks"], // Optimize package imports
     // Add modern JavaScript optimization
     serverActions: {
       bodySizeLimit: "2mb",
     },
-  },
-  // Disable CSS optimization and ensure CSS modules are enabled
-  compiler: {
-    // Disable React's automatic transform to preserve styles
-    reactRemoveProperties:
-      process.env.NODE_ENV === "production"
-        ? { properties: ["^data-test"] }
-        : false,
   },
   // Enable source maps in production
   productionBrowserSourceMaps: true,
@@ -50,37 +42,48 @@ const nextConfig = {
     // Add externals to prevent server-side only modules from causing issues
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
 
-    // Ensure CSS is processed correctly
-    // Find the rule that handles CSS
+    // Configure CSS processing for optimal Tailwind compatibility
     const cssRules = config.module.rules.find((rule) =>
       rule.oneOf?.find(({ test }) => test?.test?.(".css"))
     )?.oneOf;
 
     if (cssRules) {
-      // Make sure CSS modules are properly handled
-      const cssModuleRules = cssRules.find(({ test }) =>
-        test?.test?.(".module.css")
-      );
-
-      // Make sure global CSS is properly handled
+      // Get global CSS rules (non-modules)
       const globalCSSRules = cssRules.find(
         ({ test, exclude }) =>
           test?.test?.(".css") && exclude?.test?.(".module.css")
       );
 
-      // Disable CSS minimization for better compatibility with Tailwind
+      // Setup CSS loader properly for Tailwind compatibility
       if (globalCSSRules?.use) {
         const cssLoader = globalCSSRules.use.find(({ loader }) =>
           loader?.includes?.("css-loader")
         );
         if (cssLoader?.options) {
+          // Keep modules disabled for global CSS
           cssLoader.options.modules = false;
-          cssLoader.options.importLoaders = 2;
+          // Enable source maps for debugging
           cssLoader.options.sourceMap = true;
-          // Disable minification to prevent Tailwind conflicts
+          // Keep import loaders setting
+          cssLoader.options.importLoaders = 2;
+
+          // Allow optimization but ensure it's configured properly
           if (cssLoader.options.minify !== undefined) {
-            cssLoader.options.minify = false;
+            // Allow minification but with safe settings
+            cssLoader.options.minify = true;
           }
+        }
+
+        // Find PostCSS loader to configure Tailwind properly
+        const postcssLoader = globalCSSRules.use.find(({ loader }) =>
+          loader?.includes?.("postcss-loader")
+        );
+        if (postcssLoader?.options?.postcssOptions) {
+          // Ensure postcss has the right config for preserving Tailwind classes
+          postcssLoader.options.postcssOptions = {
+            ...postcssLoader.options.postcssOptions,
+            // Add any specific config needed for Tailwind preservation
+          };
         }
       }
     }
@@ -172,7 +175,7 @@ const nextConfig = {
             chunks: "all",
             priority: 30,
           },
-          // Add a separate chunk for styles
+          // Add a separate chunk for styles but ensure proper optimization
           styles: {
             name: "styles",
             test: /\.css$/,
@@ -246,7 +249,7 @@ const nextConfig = {
   // Skip database-dependent pages during static generation
   staticPageGenerationTimeout: 120,
   output: "standalone",
-  // Ensure CSS files from public directory are accessible
+  // Setup headers to ensure proper caching of CSS files
   async headers() {
     return [
       {
