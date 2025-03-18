@@ -26,6 +26,16 @@ const nextConfig = {
     "xlsx",
   ],
   webpack: (config, { isServer, webpack }) => {
+    // Add explicit alias for UI components
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@/components/ui": require("path").resolve(
+        __dirname,
+        "./src/components/ui"
+      ),
+      "@/lib/utils": require("path").resolve(__dirname, "./src/lib/utils.ts"),
+    };
+
     // Add externals to prevent server-side only modules from causing issues
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
 

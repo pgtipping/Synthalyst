@@ -22,6 +22,10 @@ node scripts/prepare-ui-components.js
 echo "Verifying UI components..."
 node scripts/verify-ui-components.js
 
+# Copy components to ensure they're available to the build
+echo "Copying UI components..."
+node scripts/copy-ui-components-to-build.js
+
 # Run the Babel config debug script
 echo "Debugging Babel configuration..."
 node scripts/debug-babel.js

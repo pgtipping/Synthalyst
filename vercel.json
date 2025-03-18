@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd nextjs-app && rm -rf node_modules/.cache && chmod +x scripts/vercel-build.sh && ./scripts/vercel-build.sh",
+  "buildCommand": "cd nextjs-app && npm install clsx tailwind-merge @tailwindcss/postcss @radix-ui/react-slot @radix-ui/react-tabs && rm -rf node_modules/.cache && chmod +x scripts/vercel-build.sh && ./scripts/vercel-build.sh",
   "installCommand": "cd nextjs-app && npm install",
   "framework": "nextjs"
 }
