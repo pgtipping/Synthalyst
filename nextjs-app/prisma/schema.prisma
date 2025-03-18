@@ -711,6 +711,7 @@ model InboundEmail {
   textContent     String?
   htmlContent     String?
   attachmentCount Int       @default(0)
+  rawPayload      String?   @db.Text
   processed       Boolean   @default(false)
   processedAt     DateTime?
   createdAt       DateTime  @default(now())
