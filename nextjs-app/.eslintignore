@@ -1,0 +1,7 @@
+# Build scripts
+scripts/
+**/*.js
+node_modules/
+.next/
+public/
+*.d.ts 
