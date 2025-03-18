@@ -1,14 +1,28 @@
 /** @type {import('next').NextConfig} */
+
+// Helper function to resolve paths without require()
+const resolvePath = (basePath, ...paths) => {
+  return [basePath, ...paths].join("/").replace(/\/+/g, "/");
+};
+
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
     // Other experimental features can go here
-    optimizeCss: false, // Temporarily disable CSS optimization due to Tailwind CSS v4 compatibility issues
+    optimizeCss: false, // Disable CSS optimization due to Tailwind CSS v4 compatibility issues
     optimizePackageImports: ["@/components", "@/lib", "@/hooks"], // Optimize package imports
     // Add modern JavaScript optimization
     serverActions: {
       bodySizeLimit: "2mb",
     },
+  },
+  // Disable CSS optimization and ensure CSS modules are enabled
+  compiler: {
+    // Disable React's automatic transform to preserve styles
+    reactRemoveProperties:
+      process.env.NODE_ENV === "production"
+        ? { properties: ["^data-test"] }
+        : false,
   },
   // Enable source maps in production
   productionBrowserSourceMaps: true,
@@ -29,15 +43,47 @@ const nextConfig = {
     // Add explicit alias for UI components
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@/components/ui": require("path").resolve(
-        __dirname,
-        "./src/components/ui"
-      ),
-      "@/lib/utils": require("path").resolve(__dirname, "./src/lib/utils.ts"),
+      "@/components/ui": resolvePath(process.cwd(), "src/components/ui"),
+      "@/lib/utils": resolvePath(process.cwd(), "src/lib/utils.ts"),
     };
 
     // Add externals to prevent server-side only modules from causing issues
     config.externals = [...(config.externals || []), "canvas", "jsdom"];
+
+    // Ensure CSS is processed correctly
+    // Find the rule that handles CSS
+    const cssRules = config.module.rules.find((rule) =>
+      rule.oneOf?.find(({ test }) => test?.test?.(".css"))
+    )?.oneOf;
+
+    if (cssRules) {
+      // Make sure CSS modules are properly handled
+      const cssModuleRules = cssRules.find(({ test }) =>
+        test?.test?.(".module.css")
+      );
+
+      // Make sure global CSS is properly handled
+      const globalCSSRules = cssRules.find(
+        ({ test, exclude }) =>
+          test?.test?.(".css") && exclude?.test?.(".module.css")
+      );
+
+      // Disable CSS minimization for better compatibility with Tailwind
+      if (globalCSSRules?.use) {
+        const cssLoader = globalCSSRules.use.find(({ loader }) =>
+          loader?.includes?.("css-loader")
+        );
+        if (cssLoader?.options) {
+          cssLoader.options.modules = false;
+          cssLoader.options.importLoaders = 2;
+          cssLoader.options.sourceMap = true;
+          // Disable minification to prevent Tailwind conflicts
+          if (cssLoader.options.minify !== undefined) {
+            cssLoader.options.minify = false;
+          }
+        }
+      }
+    }
 
     // Add fallbacks for node modules that aren't available in the browser
     if (!isServer) {
@@ -126,6 +172,14 @@ const nextConfig = {
             chunks: "all",
             priority: 30,
           },
+          // Add a separate chunk for styles
+          styles: {
+            name: "styles",
+            test: /\.css$/,
+            chunks: "all",
+            enforce: true,
+            priority: 40,
+          },
         },
       };
 
@@ -192,6 +246,20 @@ const nextConfig = {
   // Skip database-dependent pages during static generation
   staticPageGenerationTimeout: 120,
   output: "standalone",
+  // Ensure CSS files from public directory are accessible
+  async headers() {
+    return [
+      {
+        source: "/styles/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

@@ -13,9 +13,27 @@ export default function ClientLayout({
   useEffect(() => {
     // Load non-critical CSS
     const loadNonCriticalCSS = () => {
+      console.log("Loading non-critical CSS...");
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.href = "/styles/non-critical.css";
+
+      // Add event listeners to handle success/failure
+      link.onload = () => {
+        console.log("Non-critical CSS loaded successfully");
+      };
+
+      link.onerror = (e) => {
+        console.error("Failed to load non-critical CSS, retrying...", e);
+        // If loading fails, try again with a cache-busting parameter
+        setTimeout(() => {
+          const retryLink = document.createElement("link");
+          retryLink.rel = "stylesheet";
+          retryLink.href = `/styles/non-critical.css?t=${new Date().getTime()}`;
+          document.head.appendChild(retryLink);
+        }, 1000);
+      };
+
       document.head.appendChild(link);
     };
 

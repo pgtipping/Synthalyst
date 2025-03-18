@@ -36,6 +36,10 @@ fi
 echo "Verifying PostCSS configuration..."
 node scripts/ensure-postcss-config.js
 
+# Prepare styles (CSS files)
+echo "Preparing styles..."
+node scripts/prepare-styles.js
+
 # Run the UI Components preparation
 echo "Preparing UI components..."
 node scripts/prepare-ui-components.js
@@ -76,6 +80,18 @@ node scripts/handle-db-build.js
 # Build the Next.js app
 echo "Building Next.js app with default compiler..."
 npx next build
+
+# Verify CSS output
+echo "Verifying CSS files in the build output..."
+node scripts/verify-css-output.js || echo "CSS verification failed but continuing with the build"
+
+# Copy critical files to output directory to ensure they are available
+echo "Ensuring critical files are available in output directory..."
+mkdir -p .next/static/styles
+if [ -f "public/styles/non-critical.css" ]; then
+  echo "Copying non-critical.css to output directory..."
+  cp -f public/styles/non-critical.css .next/static/styles/
+fi
 
 # Restore babel config files
 echo "Restoring Babel configuration files..."
