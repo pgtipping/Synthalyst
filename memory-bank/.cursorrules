@@ -15,6 +15,24 @@
 - Stage and commit files from the root directory
 - Always stage files with `git add .`
 
+### Vercel Deployment Challenges - [2025-03-18 12:00:00]
+
+- Next.js 15 with Tailwind CSS v4 presents significant deployment challenges on Vercel
+- Multiple strategies have been attempted to resolve component path resolution issues:
+  - Explicit webpack alias configuration in next.config.js
+  - Component copying scripts during build
+  - Fallback component implementations
+  - Dependency verification and installation during build
+- Despite these efforts, Vercel builds continue to fail with "Module not found" errors
+- Local development works perfectly, but production builds on Vercel fail
+- Consider the following approaches for future attempts:
+  - Use relative imports instead of path aliases for critical components
+  - Bundle all UI components into a single file
+  - Implement server-side only rendering for problematic components
+  - Directly integrate component code where it's used rather than importing
+  - Contact Vercel support for specific guidance
+- Always ensure that all UI component dependencies are explicitly installed in package.json
+
 ### UI Component Resolution for Vercel Deployment - [2025-03-18 08:00:00]
 
 - The application uses aliased imports for UI components (`@/components/ui/...`)

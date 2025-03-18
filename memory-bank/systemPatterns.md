@@ -1,22 +1,25 @@
 # System Patterns
 
-_Last Updated: ${new Date().toISOString()}_
+_Last Updated: March 18, 2025_
 
 ## UI Component Resolution System (2025-03-18)
 
 ### Architecture
 
-The UI Component Resolution System ensures reliable component availability during deployment:
+The UI Component Resolution System attempts to ensure reliable component availability during deployment:
 
 1. **Verification Layer**: Scripts verify the existence of critical UI components
 2. **Copy Layer**: Scripts copy essential components to the build directory
 3. **Alias Layer**: Webpack configuration provides explicit path aliases
 4. **Fallback Layer**: Default implementations ensure minimal functionality if components fail to load
+5. **Dependency Layer**: Dependency verification and installation during build process
 
 ### Data Flow
 
 ```
 Build Process Start
+  ↓
+Dependency Verification and Installation
   ↓
 Component Verification (verify-ui-components.js)
   ↓
@@ -31,17 +34,29 @@ Deployment Bundle
 
 ### Key Patterns
 
-1. **Build-time Component Verification**: Checks for the existence of required components before build
-2. **Dynamic Component Copying**: Copies essential components to the build directory during build
-3. **Explicit Path Aliasing**: Uses webpack configuration to map component imports to specific paths
-4. **Fallback Component Strategy**: Provides default implementations to prevent critical failures
+1. **Dependency Management**: Explicit verification and installation of required dependencies
+2. **Build-time Component Verification**: Checks for the existence of required components before build
+3. **Dynamic Component Copying**: Copies essential components to the build directory during build
+4. **Explicit Path Aliasing**: Uses webpack configuration to map component imports to specific paths
+5. **Fallback Component Strategy**: Provides default implementations to prevent critical failures
 
 ### Implementation Details
 
 1. The system primarily targets components imported via the `@/components/ui/` path alias
 2. Essential components include breadcrumb, button, card, and tabs components
-3. The vercel-build.sh script orchestrates the component verification and copying process
+3. The vercel-build.sh script orchestrates the dependency installation, component verification, and copying process
 4. The webpack configuration in next.config.js provides explicit path resolution
+5. Despite multiple layers of fallbacks, the system still encounters issues in production deployment
+
+### Known Limitations
+
+1. Despite extensive configuration, Vercel builds still fail with "Module not found" errors
+2. Local development works perfectly, but production builds encounter path resolution issues
+3. The multiple layers of fallbacks add complexity to the build process
+4. Future versions may need to consider more radical approaches:
+   - Bundle all UI components into a single file
+   - Use relative imports instead of path aliases
+   - Directly integrate component code where it's used
 
 ## Audio Recording System (2023-07-10)
 
