@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 // Clean cache and build artifacts
 console.log("Cleaning cache and build artifacts...");
@@ -25,8 +27,6 @@ execSync(
 
 // Ensure PostCSS is properly configured
 console.log("Verifying PostCSS configuration...");
-const fs = require("fs");
-const path = require("path");
 const postcssConfigPath = path.resolve(__dirname, "..", "postcss.config.cjs");
 const postcssConfig = fs.readFileSync(postcssConfigPath, "utf8");
 if (!postcssConfig.includes("@tailwindcss/postcss")) {
@@ -38,108 +38,121 @@ if (!postcssConfig.includes("@tailwindcss/postcss")) {
   fs.writeFileSync(postcssConfigPath, updatedConfig);
 }
 
-// Create an explicit index export file for admin components
-const adminComponentsDir = path.resolve(__dirname, "../src/components/admin");
-const adminIndexPath = path.join(adminComponentsDir, "index.ts");
-if (fs.existsSync(adminComponentsDir)) {
-  console.log("Creating admin components index file...");
+// Function to create index files for component directories
+function createComponentIndex(
+  componentDir,
+  componentName,
+  defaultExport = false
+) {
+  const dirPath = path.resolve(
+    __dirname,
+    "..",
+    "src",
+    "components",
+    componentDir
+  );
+  const indexPath = path.join(dirPath, "index.ts");
 
-  // Check which files exist and how they're exported
-  const adminFiles = fs
-    .readdirSync(adminComponentsDir)
-    .filter((file) => file.endsWith(".tsx") && !file.startsWith("index"));
+  if (fs.existsSync(dirPath)) {
+    console.log(`Creating ${componentDir} components index file...`);
 
-  // Handle AdminLayout specifically with default export
-  if (adminFiles.includes("AdminLayout.tsx")) {
-    // Create specific exports for important components
-    let adminIndexContent = `export { default } from './AdminLayout';\n`;
-    adminIndexContent += `export { default as AdminLayout } from './AdminLayout';\n`;
+    // Get all component files
+    const componentFiles = fs
+      .readdirSync(dirPath)
+      .filter((file) => file.endsWith(".tsx") && !file.startsWith("index"));
 
-    // Add other exports
-    adminFiles.forEach((file) => {
-      if (file !== "AdminLayout.tsx") {
-        const componentName = file.replace(".tsx", "");
-        const fileContent = fs.readFileSync(
-          path.join(adminComponentsDir, file),
-          "utf8"
-        );
+    let indexContent = "";
 
-        if (fileContent.includes("export default")) {
-          adminIndexContent += `export { default as ${componentName} } from './${componentName}';\n`;
-        } else {
-          adminIndexContent += `export * from './${componentName}';\n`;
-        }
+    // Handle the main component specifically
+    if (componentName && componentFiles.includes(`${componentName}.tsx`)) {
+      if (defaultExport) {
+        indexContent += `export { default } from './${componentName}';\n`;
       }
-    });
+      indexContent += `export { default as ${componentName} } from './${componentName}';\n`;
 
-    fs.writeFileSync(adminIndexPath, adminIndexContent);
+      // Add other exports
+      componentFiles.forEach((file) => {
+        if (file !== `${componentName}.tsx`) {
+          const name = file.replace(".tsx", "");
+          const fileContent = fs.readFileSync(path.join(dirPath, file), "utf8");
+
+          if (fileContent.includes("export default")) {
+            indexContent += `export { default as ${name} } from './${name}';\n`;
+          } else {
+            indexContent += `export * from './${name}';\n`;
+          }
+        }
+      });
+    } else {
+      // Fallback to generic exports
+      indexContent = componentFiles
+        .map((file) => {
+          const name = file.replace(".tsx", "");
+          return `export * from './${name}';`;
+        })
+        .join("\n");
+    }
+
+    fs.writeFileSync(indexPath, indexContent);
+    console.log(`${componentDir} components index file created successfully`);
   } else {
-    // Fallback to generic exports if AdminLayout doesn't exist
-    const exportStatements = adminFiles
-      .map((file) => {
-        const componentName = file.replace(".tsx", "");
-        return `export * from './${componentName}';`;
-      })
-      .join("\n");
-
-    fs.writeFileSync(adminIndexPath, exportStatements);
+    console.warn(`${dirPath} does not exist, skipping index file creation`);
   }
-
-  console.log("Admin components index file created successfully");
 }
 
-// Similar approach for contact-submissions
-const contactSubmissionsDir = path.resolve(
+// Create index files for key component directories
+createComponentIndex("admin", "AdminLayout", true);
+createComponentIndex("contact-submissions", "ContactSubmissionsList", false);
+createComponentIndex("ui", null, false);
+
+// Also create a direct AdminLayout.tsx in src/components if it doesn't exist
+const adminLayoutPath = path.resolve(
   __dirname,
-  "../src/components/contact-submissions"
+  "..",
+  "src",
+  "components",
+  "AdminLayout.tsx"
 );
-const contactSubmissionsIndexPath = path.join(
-  contactSubmissionsDir,
-  "index.ts"
+const sourceAdminLayoutPath = path.resolve(
+  __dirname,
+  "..",
+  "src",
+  "components",
+  "admin",
+  "AdminLayout.tsx"
 );
-if (fs.existsSync(contactSubmissionsDir)) {
-  console.log("Creating contact-submissions components index file...");
 
-  const contactFiles = fs
-    .readdirSync(contactSubmissionsDir)
-    .filter((file) => file.endsWith(".tsx") && !file.startsWith("index"));
+if (!fs.existsSync(adminLayoutPath) && fs.existsSync(sourceAdminLayoutPath)) {
+  console.log(
+    "Creating AdminLayout.tsx in src/components for direct imports..."
+  );
+  const content = `// Re-export AdminLayout from admin directory
+export { default } from './admin/AdminLayout';
+`;
+  fs.writeFileSync(adminLayoutPath, content);
+}
 
-  // Handle ContactSubmissionsList specifically
-  if (contactFiles.includes("ContactSubmissionsList.tsx")) {
-    // Create specific exports for important components
-    let contactIndexContent = `export { default as ContactSubmissionsList } from './ContactSubmissionsList';\n`;
+// Create web pack alias file to ensure path resolution works correctly
+console.log("Creating webpack aliases configuration...");
+const nextConfigPath = path.resolve(__dirname, "..", "next.config.js");
+const nextConfigContent = fs.readFileSync(nextConfigPath, "utf8");
 
-    // Add other exports
-    contactFiles.forEach((file) => {
-      if (file !== "ContactSubmissionsList.tsx") {
-        const componentName = file.replace(".tsx", "");
-        const fileContent = fs.readFileSync(
-          path.join(contactSubmissionsDir, file),
-          "utf8"
-        );
+if (!nextConfigContent.includes("'@/components/admin'")) {
+  console.log("Adding explicit component aliases to next.config.js...");
 
-        if (fileContent.includes("export default")) {
-          contactIndexContent += `export { default as ${componentName} } from './${componentName}';\n`;
-        } else {
-          contactIndexContent += `export * from './${componentName}';\n`;
-        }
-      }
-    });
+  const updatedConfig = nextConfigContent.replace(
+    /webpack: \(config\) => \{/,
+    `webpack: (config) => {
+    // Add explicit aliases for components that are being resolved
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@/components/admin': path.resolve(__dirname, './src/components/admin'),
+      '@/components/contact-submissions': path.resolve(__dirname, './src/components/contact-submissions'),
+      '@/components/ui': path.resolve(__dirname, './src/components/ui'),
+    };`
+  );
 
-    fs.writeFileSync(contactSubmissionsIndexPath, contactIndexContent);
-  } else {
-    // Fallback to generic exports
-    const exportStatements = contactFiles
-      .map((file) => {
-        const componentName = file.replace(".tsx", "");
-        return `export * from './${componentName}';`;
-      })
-      .join("\n");
-
-    fs.writeFileSync(contactSubmissionsIndexPath, exportStatements);
-  }
-
-  console.log("Contact-submissions components index file created successfully");
+  fs.writeFileSync(nextConfigPath, updatedConfig);
 }
 
 // Temporarily move babel config files
