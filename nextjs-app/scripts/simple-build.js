@@ -31,18 +31,48 @@ const adminComponentsDir = path.resolve(__dirname, "../src/components/admin");
 const adminIndexPath = path.join(adminComponentsDir, "index.ts");
 if (fs.existsSync(adminComponentsDir)) {
   console.log("Creating admin components index file...");
+
+  // Check which files exist and how they're exported
   const adminFiles = fs
     .readdirSync(adminComponentsDir)
     .filter((file) => file.endsWith(".tsx") && !file.startsWith("index"));
 
-  const exportStatements = adminFiles
-    .map((file) => {
-      const componentName = file.replace(".tsx", "");
-      return `export * from './${componentName}';`;
-    })
-    .join("\n");
+  // Handle AdminLayout specifically with default export
+  if (adminFiles.includes("AdminLayout.tsx")) {
+    // Create specific exports for important components
+    let adminIndexContent = `export { default } from './AdminLayout';\n`;
+    adminIndexContent += `export { default as AdminLayout } from './AdminLayout';\n`;
 
-  fs.writeFileSync(adminIndexPath, exportStatements);
+    // Add other exports
+    adminFiles.forEach((file) => {
+      if (file !== "AdminLayout.tsx") {
+        const componentName = file.replace(".tsx", "");
+        const fileContent = fs.readFileSync(
+          path.join(adminComponentsDir, file),
+          "utf8"
+        );
+
+        if (fileContent.includes("export default")) {
+          adminIndexContent += `export { default as ${componentName} } from './${componentName}';\n`;
+        } else {
+          adminIndexContent += `export * from './${componentName}';\n`;
+        }
+      }
+    });
+
+    fs.writeFileSync(adminIndexPath, adminIndexContent);
+  } else {
+    // Fallback to generic exports if AdminLayout doesn't exist
+    const exportStatements = adminFiles
+      .map((file) => {
+        const componentName = file.replace(".tsx", "");
+        return `export * from './${componentName}';`;
+      })
+      .join("\n");
+
+    fs.writeFileSync(adminIndexPath, exportStatements);
+  }
+
   console.log("Admin components index file created successfully");
 }
 
@@ -57,18 +87,46 @@ const contactSubmissionsIndexPath = path.join(
 );
 if (fs.existsSync(contactSubmissionsDir)) {
   console.log("Creating contact-submissions components index file...");
+
   const contactFiles = fs
     .readdirSync(contactSubmissionsDir)
     .filter((file) => file.endsWith(".tsx") && !file.startsWith("index"));
 
-  const exportStatements = contactFiles
-    .map((file) => {
-      const componentName = file.replace(".tsx", "");
-      return `export * from './${componentName}';`;
-    })
-    .join("\n");
+  // Handle ContactSubmissionsList specifically
+  if (contactFiles.includes("ContactSubmissionsList.tsx")) {
+    // Create specific exports for important components
+    let contactIndexContent = `export { default as ContactSubmissionsList } from './ContactSubmissionsList';\n`;
 
-  fs.writeFileSync(contactSubmissionsIndexPath, exportStatements);
+    // Add other exports
+    contactFiles.forEach((file) => {
+      if (file !== "ContactSubmissionsList.tsx") {
+        const componentName = file.replace(".tsx", "");
+        const fileContent = fs.readFileSync(
+          path.join(contactSubmissionsDir, file),
+          "utf8"
+        );
+
+        if (fileContent.includes("export default")) {
+          contactIndexContent += `export { default as ${componentName} } from './${componentName}';\n`;
+        } else {
+          contactIndexContent += `export * from './${componentName}';\n`;
+        }
+      }
+    });
+
+    fs.writeFileSync(contactSubmissionsIndexPath, contactIndexContent);
+  } else {
+    // Fallback to generic exports
+    const exportStatements = contactFiles
+      .map((file) => {
+        const componentName = file.replace(".tsx", "");
+        return `export * from './${componentName}';`;
+      })
+      .join("\n");
+
+    fs.writeFileSync(contactSubmissionsIndexPath, exportStatements);
+  }
+
   console.log("Contact-submissions components index file created successfully");
 }
 
