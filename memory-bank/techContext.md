@@ -251,6 +251,10 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
   - Updated PostCSS configuration to use the new plugin format
   - Verified build process works correctly with the new configuration
   - Fixed Vercel deployment errors related to PostCSS plugin changes
+  - Removed Tailwind directives from critical.css to avoid duplication
+  - Added clear comments in globals.css about the PostCSS plugin
+  - Created vercel.json with explicit build commands for Vercel deployments
+  - Disabled CSS optimization in next.config.js due to conflicts with Tailwind CSS v4
 - **Additional Plugins**:
   - autoprefixer for vendor prefixing
   - tailwindcss-animate for animation utilities

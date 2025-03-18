@@ -2829,3 +2829,23 @@ When working with CSS in this project, follow these guidelines:
   ```
 - This configuration is required for successful builds on Vercel with Tailwind CSS v4
 - The error "It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin" indicates you need to make this change
+- For Next.js projects, you may need to disable CSS optimization in next.config.js:
+  ```js
+  // next.config.js
+  const nextConfig = {
+    experimental: {
+      optimizeCss: false, // Disable CSS optimization due to Tailwind CSS v4 compatibility issues
+      // other experimental features...
+    },
+    // other config options...
+  };
+  ```
+- For Vercel deployments, create a vercel.json file with explicit build commands:
+  ```json
+  {
+    "buildCommand": "npm install @tailwindcss/postcss && npm run build",
+    "installCommand": "npm install",
+    "framework": "nextjs"
+  }
+  ```
+- Only include Tailwind directives (@tailwind base, @tailwind components, @tailwind utilities) in one CSS file (typically globals.css) to avoid duplication and conflicts

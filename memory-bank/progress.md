@@ -204,6 +204,13 @@
 - Fixed the "It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin" error
 - Created comprehensive documentation for the Tailwind CSS v4 configuration pattern
 - Updated the memory bank with detailed instructions for future PostCSS configurations
+- Modified CSS files to ensure consistent Tailwind directives usage:
+  - Removed Tailwind directives from critical.css to avoid duplication
+  - Added clear comments in globals.css about the PostCSS plugin
+  - Verified non-critical.css doesn't contain Tailwind directives
+- Created vercel.json with explicit build commands to ensure proper package installation
+- Disabled CSS optimization in next.config.js to resolve potential conflicts with Tailwind CSS v4
+- Implemented iterative approach to fixing Tailwind CSS v4 compatibility issues
 
 ### In Progress
 

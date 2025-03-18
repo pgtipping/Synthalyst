@@ -824,6 +824,41 @@ module.exports = config;
 }
 ```
 
+#### Next.js Configuration Adjustments
+
+When using Tailwind CSS v4 with Next.js, it may be necessary to disable CSS optimization to prevent conflicts:
+
+```js
+// next.config.js
+const nextConfig = {
+  experimental: {
+    optimizeCss: false, // Disable CSS optimization due to Tailwind CSS v4 compatibility issues
+    // other experimental features...
+  },
+  // other config options...
+};
+```
+
+#### Vercel Deployment Configuration
+
+For Vercel deployments, create a `vercel.json` file in the root directory to ensure the required packages are installed:
+
+```json
+{
+  "buildCommand": "npm install @tailwindcss/postcss && npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs"
+}
+```
+
+#### CSS Files Organization
+
+For optimal Tailwind CSS v4 usage:
+
+1. Include Tailwind directives in only one CSS file (typically globals.css)
+2. Remove Tailwind directives from other CSS files
+3. Add clear comments about Tailwind directives being processed by @tailwindcss/postcss
+
 #### Error Pattern
 
 If you see this error during build:
@@ -837,6 +872,7 @@ The solution is to:
 1. Install `@tailwindcss/postcss` package
 2. Update the PostCSS configuration to use the new package
 3. Rebuild the application
+4. If issues persist, disable CSS optimization in next.config.js
 
 #### Integration Pattern
 

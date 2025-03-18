@@ -1,5 +1,9 @@
-/* Critical CSS for above-the-fold content */
-/* Tailwind directives are now imported via postcss.config.cjs */
+/* 
+ * Critical CSS for above-the-fold content
+ * IMPORTANT: This file should NOT contain Tailwind directives (@tailwind)
+ * Tailwind directives should only be included in globals.css
+ * This file is processed by the @tailwindcss/postcss plugin but should not contain directives
+ */
 
 /* Base styles */
 :root {

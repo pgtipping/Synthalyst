@@ -189,6 +189,13 @@ The current focus is on optimizing the application's backend services, particula
     - Documented the new configuration pattern in the memory bank files
     - Added a rule in .cursorrules to ensure future PostCSS configurations use the correct pattern
     - Updated the systemPatterns.md with a new CSS Configuration Patterns section
+    - Modified CSS files to ensure consistent Tailwind directives usage:
+      - Removed Tailwind directives from critical.css to avoid duplication
+      - Added clear comments in globals.css about the PostCSS plugin
+      - Verified non-critical.css doesn't contain Tailwind directives
+    - Created vercel.json with explicit build commands to ensure proper package installation
+    - Disabled CSS optimization in next.config.js to resolve potential conflicts with Tailwind CSS v4
+    - Implemented multiple iterative fixes to address persistent build issues on Vercel
 
 ### Next Steps
 

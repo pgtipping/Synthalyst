@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm install @tailwindcss/postcss && npm run build",
-  "installCommand": "npm install",
+  "buildCommand": "cd nextjs-app && npm install @tailwindcss/postcss && node scripts/ensure-postcss-config.js && npx rimraf .next && prisma generate && node scripts/handle-db-build.js && next build",
+  "installCommand": "cd nextjs-app && npm install",
   "framework": "nextjs"
 }
