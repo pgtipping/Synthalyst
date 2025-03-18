@@ -239,14 +239,14 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
   - Data sanitization
   - TTL enforcement
 
-## CSS and Styling Infrastructure [2025-03-17]
+## CSS and Styling Infrastructure [${new Date().toLocaleDateString()}]
 
 ### Tailwind CSS Configuration
 
 - **Version**: Tailwind CSS 4.0.14
 - **PostCSS Integration**: Using @tailwindcss/postcss 4.0.14 instead of direct tailwindcss usage
 - **Configuration File**: postcss.config.cjs with standardized plugin setup
-- **Configuration Changes** (2025-03-17):
+- **Configuration Changes**:
   - Migrated from direct `tailwindcss` plugin usage to `@tailwindcss/postcss` for compatibility with Tailwind v4
   - Updated PostCSS configuration to use the new plugin format
   - Verified build process works correctly with the new configuration
@@ -255,10 +255,32 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
   - Added clear comments in globals.css about the PostCSS plugin
   - Created vercel.json with explicit build commands for Vercel deployments
   - Disabled CSS optimization in next.config.js due to conflicts with Tailwind CSS v4
+- **Deployment Fix (${new Date().toLocaleDateString()})**:
+  - Created special `vercel-build.sh` script to handle build process reliably in Vercel environment
+  - Added PostCSS configuration verification script that ensures correct setup
+  - Temporarily moving Babel configuration files during build to prevent compiler conflicts
+  - Enhanced error logging and debugging with detailed build steps
+  - Added automatic package installation checks to ensure required dependencies are present
+  - Implemented script to debug Babel configuration issues
+  - Created fallback mechanism for globals.css to ensure Tailwind directives are properly included
+  - Added node_modules/.cache clearing step to prevent stale cache issues
 - **Additional Plugins**:
   - autoprefixer for vendor prefixing
   - tailwindcss-animate for animation utilities
   - @tailwindcss/typography for rich text styling
+
+### Babel Configuration
+
+- **Issue**: Next.js 15 with custom Babel configuration requires specific plugins for import attributes
+- **Required Plugin**: @babel/plugin-syntax-import-attributes@7.26.0
+- **Config Files**:
+  - .babelrc with plugin and presets configuration
+  - babel.config.js with size optimization settings
+- **Deployment Fix**:
+  - Temporary removal of custom Babel configuration during build process
+  - Verification script to check and install required plugins
+  - Detailed logging to debug configuration issues
+  - Automatic restoration of config files after build completes
 
 ### CSS Organization
 

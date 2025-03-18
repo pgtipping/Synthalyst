@@ -4,9 +4,22 @@
 
 The current focus is on optimizing the application's backend services, particularly email handling, feedback processing, and admin monitoring capabilities. We're enhancing the admin dashboard with robust monitoring features and fixing critical errors in the API endpoints, Redis monitoring functionality, user role management, and newsletter subscription system. These optimizations aim to improve performance, reliability, and maintainability of the platform.
 
-### Recent Changes
+### Recent Changes (${new Date().toLocaleDateString()})
 
-1. **Admin Dashboard Navigation Improvements** (March 17, 2025):
+1. **Tailwind CSS v4 Deployment Fixes**:
+
+   - Identified and resolved complex PostCSS plugin configuration issues with Tailwind CSS v4
+   - Created specialized build scripts to handle Vercel-specific deployment requirements
+   - Implemented a comprehensive debug system for tracking build issues
+   - Created fallback mechanisms for CSS configuration to ensure compatibility
+   - Added automatic verification of critical dependencies during build
+   - Resolved Babel configuration conflicts with Next.js 15
+   - Created a temporary Babel configuration bypass for Vercel builds
+   - Added node_modules cache clearing to prevent stale dependency issues
+   - Enhanced error logging and debugging capabilities for build process
+   - Improved script execution permissions handling for Unix environments
+
+2. **Admin Dashboard Navigation Improvements** (March 17, 2025):
 
    - Fixed the main Synthalyst app navbar overlapping with the admin sidebar
    - Created a ConditionalHeader component to hide the main site header on admin pages
@@ -18,7 +31,7 @@ The current focus is on optimizing the application's backend services, particula
    - Updated the root layout to conditionally render the header based on the current path
    - Improved the overall admin navigation experience with a more focused interface
 
-2. **Admin Dashboard API Fixes** (March 17, 2025):
+3. **Admin Dashboard API Fixes** (March 17, 2025):
 
    - Fixed API endpoints in the admin dashboard that were causing 500 Internal Server Error
    - Replaced raw SQL queries with standard Prisma query methods in contact-submissions API endpoint
@@ -29,7 +42,7 @@ The current focus is on optimizing the application's backend services, particula
    - Successfully built the application with all the fixes in place
    - Ensured the communications page properly displays contact submissions, newsletter replies, and inbound emails
 
-3. **Email Service Optimization**:
+4. **Email Service Optimization**:
 
    - Created a unified email service in `nextjs-app/src/lib/email.ts`
    - Implemented a standardized approach for all email sending functionality
@@ -37,7 +50,7 @@ The current focus is on optimizing the application's backend services, particula
    - Created an `EmailLog` model in the Prisma schema
    - Implemented fallback mechanisms between SendGrid and Nodemailer
 
-4. **Feedback API Improvements**:
+5. **Feedback API Improvements**:
 
    - Simplified the feedback API implementation
    - Removed file-based storage logic in favor of database-only storage
@@ -45,7 +58,7 @@ The current focus is on optimizing the application's backend services, particula
    - Enhanced error handling for feedback submissions
    - Updated the `FeedbackButton` component to use the new API
 
-5. **Admin Dashboard Enhancements**:
+6. **Admin Dashboard Enhancements**:
 
    - Created an email logs admin dashboard UI
    - Implemented filtering by status and category
@@ -62,7 +75,7 @@ The current focus is on optimizing the application's backend services, particula
    - Made the top navigation bar sticky for better navigation on long pages
    - Ensured consistent spacing and alignment across all admin pages
 
-6. **Admin Monitoring Fixes** (March 16, 2025):
+7. **Admin Monitoring Fixes** (March 16, 2025):
 
    - Fixed Redis monitoring functionality in the admin dashboard
    - Resolved JSON parsing errors in the Redis monitor by adding type checking
@@ -75,7 +88,7 @@ The current focus is on optimizing the application's backend services, particula
    - Fixed TypeScript errors in the rate-limit library
    - Added proper type definitions for LRU cache
 
-7. **Admin User Management Fixes** (March 16, 2025):
+8. **Admin User Management Fixes** (March 16, 2025):
 
    - Fixed NextJS dynamic route parameter issue in the user role update API
    - Updated the API route to properly await params object in Next.js 15
@@ -84,7 +97,7 @@ The current focus is on optimizing the application's backend services, particula
    - Ensured consistent error handling across all admin API routes
    - Fixed TypeScript errors in the admin user management components
 
-8. **Newsletter Subscription System Fixes** (March 16, 2025):
+9. **Newsletter Subscription System Fixes** (March 16, 2025):
 
    - Fixed model name in API routes from `newsletter` to `newsletterSubscriber` to match Prisma schema
    - Added functionality to create real subscribers in the database when in development mode
@@ -99,27 +112,27 @@ The current focus is on optimizing the application's backend services, particula
    - Added conditional rendering for pagination controls to prevent errors when data is loading
    - Updated API response structure to match frontend expectations by wrapping pagination properties in a pagination object
 
-9. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
+10. **Model Information Removal from UI**: Removed model information from the UI to simplify the user experience and focus on functionality rather than technical details.
 
-10. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
+11. **Language Selector Fix**: Fixed issues with the language selector component to properly handle language changes and ensure they're passed to the API.
 
-11. **Model Router Updates**:
+12. **Model Router Updates**:
 
     - Added a new `generateContentV2` function with improved parameter handling
     - Updated the API route to use the new function
     - Standardized language support across models
     - Fixed Gemini API integration to properly handle system messages (Gemini doesn't support system role)
 
-12. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
+13. **UI Simplification**: Streamlined both Knowledge GPT and Learning Content Creator pages for better user experience.
 
-13. **Knowledge GPT Web Search Integration**:
+14. **Knowledge GPT Web Search Integration**:
 
     - Added web search capability to provide up-to-date information
     - Implemented Google Custom Search API integration
     - Updated system prompts to include current information
     - Enhanced UI to inform users about web search capability
 
-14. **Knowledge GPT Improvements** (March 16, 2025):
+15. **Knowledge GPT Improvements** (March 16, 2025):
 
     - Updated loading animation to use three dots instead of spinning icon
     - Enhanced system prompt to instruct LLM to use proper formatting without asterisks
@@ -130,7 +143,7 @@ The current focus is on optimizing the application's backend services, particula
     - Simplified web search logic by removing automatic detection in favor of explicit user control
     - Moved loading animation to appear in chat window instead of on send button
 
-15. **Language Selector Improvements** (March 16, 2025):
+16. **Language Selector Improvements** (March 16, 2025):
 
     - Added "Auto Detect" option instead of showing "(Browser Default)" next to languages
     - Included English in the dropdown list
@@ -139,7 +152,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added local storage to remember user language preferences
     - Improved browser language detection and handling
 
-16. **Medical Knowledge Integration** (March 16, 2025):
+17. **Medical Knowledge Integration** (March 16, 2025):
 
     - Added PubMed API integration for evidence-based medical information
     - Implemented evidence grading system based on study types
@@ -151,7 +164,7 @@ The current focus is on optimizing the application's backend services, particula
     - Added PUBMED_API_KEY to environment variables
     - Updated tips section to inform users that conversational phrases like "thank you" will be treated as new queries
 
-17. **Admin Pages Error Handling Improvements** (March 16, 2025):
+18. **Admin Pages Error Handling Improvements** (March 16, 2025):
 
     - Fixed SelectItem components with empty values in email-logs page and TemplateSearch.tsx
     - Changed empty values to "all" in SelectItem components to prevent errors
@@ -165,7 +178,7 @@ The current focus is on optimizing the application's backend services, particula
     - Implemented fallback to empty arrays when data is missing or undefined
     - Added try-catch blocks for API calls to handle errors independently
 
-18. **Admin Page Database Checks** (March 16, 2025):
+19. **Admin Page Database Checks** (March 16, 2025):
 
     - Added SQL queries to check if tables exist before attempting to query them
     - Used `information_schema.tables` to verify table existence in the database
@@ -178,7 +191,8 @@ The current focus is on optimizing the application's backend services, particula
     - Resolved chunk loading errors by properly handling database queries
     - Improved error logging for all database operations
 
-19. **Tailwind CSS Configuration Fixes** (March 17, 2025):
+20. **Tailwind CSS Configuration Fixes** (March 17, 2025):
+
     - Identified and fixed error related to Tailwind CSS's PostCSS plugin moving to a separate package
     - Installed `@tailwindcss/postcss` package to replace direct usage of `tailwindcss` in PostCSS config
     - Updated `postcss.config.cjs` to use `@tailwindcss/postcss` instead of `tailwindcss` directly
@@ -196,6 +210,17 @@ The current focus is on optimizing the application's backend services, particula
     - Created vercel.json with explicit build commands to ensure proper package installation
     - Disabled CSS optimization in next.config.js to resolve potential conflicts with Tailwind CSS v4
     - Implemented multiple iterative fixes to address persistent build issues on Vercel
+
+21. **Tailwind CSS Configuration** (${new Date().toLocaleDateString()}):
+
+    - Using `@tailwindcss/postcss` instead of direct `tailwindcss` usage in PostCSS config
+    - Using explicit color values with bracket notation instead of named colors
+    - Adding Tailwind imports to all CSS files that use Tailwind features
+    - Standardizing on a single PostCSS configuration file
+    - Maintaining separate CSS files for critical and non-critical content
+    - Ensuring proper comments in CSS files about Tailwind directive usage
+    - Disabling CSS optimization in next.config.js to avoid Tailwind conflicts
+    - Testing changes in a separate branch before merging to main
 
 ### Next Steps
 
@@ -323,10 +348,16 @@ The current focus is on optimizing the application's backend services, particula
     - Adding conditional rendering for UI elements that depend on asynchronously loaded data
     - Using optional chaining and nullish coalescing operators to handle potentially undefined values
 
-14. **Tailwind CSS Configuration** (March 17, 2025):
+14. **Deployment Strategy** (${new Date().toLocaleDateString()}):
 
-- Using `@tailwindcss/postcss` instead of direct `tailwindcss` usage in PostCSS config
-- Using explicit color values with bracket notation instead of named colors
-- Adding Tailwind imports to all CSS files that use Tailwind features
-- Standardizing on a single PostCSS configuration file
-- Testing changes in a separate branch before merging to main
+    - Using custom build scripts to handle Vercel-specific deployment requirements
+    - Temporarily bypassing custom Babel configuration during builds to avoid compiler conflicts
+    - Implementing automatic dependency verification during build process
+    - Using shell scripts with proper Unix permissions handling for build commands
+    - Clearing node_modules cache before builds to prevent stale dependency issues
+    - Adding enhanced debugging output during builds for easier troubleshooting
+    - Implementing fallback mechanisms for critical configuration files
+    - Using a two-stage approach: verify configuration first, then build
+    - Ensuring PostCSS configuration is compatible with Tailwind CSS v4
+    - Adding automatic checks for globals.css to ensure proper Tailwind directives
+    - Keeping custom Babel configuration for development but bypassing it for production builds

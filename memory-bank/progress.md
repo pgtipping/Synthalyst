@@ -1,4 +1,4 @@
-# Progress - March 17, 2025
+# Progress - ${new Date().toLocaleDateString()}
 
 ## What Works
 
@@ -26,9 +26,11 @@
 
 ### Technical Infrastructure
 
-- Next.js 14 with App Router
+- Next.js 15.2.3 with App Router
+- Tailwind CSS 4.0.14 with @tailwindcss/postcss integration
+- Reliable deployment pipeline with custom build scripts
+- Automated configuration verification during build
 - Prisma ORM with PostgreSQL
-- Tailwind CSS with shadcn/ui components
 - Responsive design for all screen sizes
 - API routes for all features
 - Error handling and logging
@@ -211,6 +213,16 @@
 - Created vercel.json with explicit build commands to ensure proper package installation
 - Disabled CSS optimization in next.config.js to resolve potential conflicts with Tailwind CSS v4
 - Implemented iterative approach to fixing Tailwind CSS v4 compatibility issues
+- Created specialized build scripts (vercel-build.sh) to handle the Vercel deployment process reliably
+- Implemented advanced debugging tools for troubleshooting deployment issues
+- Created a Babel configuration verification system that checks for required plugins
+- Implemented temporary Babel configuration bypassing during builds to avoid compiler conflicts
+- Added node_modules cache clearing to prevent stale dependency issues
+- Enhanced CSS verification to ensure proper Tailwind directives in globals.css
+- Fixed Unix permissions handling with chmod for shell scripts in Vercel environment
+- Implemented two-stage build process: verify configuration first, then build
+- Added detailed error logging for all steps of the build process
+- Created explicit error handling for all critical build steps
 
 ### In Progress
 
@@ -367,3 +379,34 @@
   - Team permissions
   - Collaborative editing
   - Activity tracking
+
+## Known Issues
+
+### Deployment Issues
+
+- Potential dependency resolution issues in the CI environment
+- Custom Babel configuration conflicts with Next.js 15 causing build failures
+- Tailwind CSS v4 compatibility requiring special PostCSS configuration
+- Script execution permissions in Unix environments requiring explicit chmod commands
+- Node.js cache issues potentially causing stale dependency references
+- Next.js experimental features like CSS optimization causing conflicts with Tailwind CSS
+- Missing UI component errors during build requiring investigation of import paths
+- Environment-specific behavior differences between local and Vercel environments
+
+### General Issues
+
+- SendGrid Inbound Parse webhook needs to be properly configured to forward emails to the application
+- Need to verify the webhook endpoint is correctly processing incoming emails
+- Need to ensure proper MX records are set up for the domain
+- Need to complete Prisma migration for the EmailLog model
+- Need to add more comprehensive testing for the email service
+- Need to add proper error handling for AI API integrations
+- Need to implement fallback mechanisms for API failures
+- Need to optimize prompts for different AI capabilities
+- Need to ensure no model-specific information is leaked to the UI
+- Web search requires Google Custom Search API key and Search Engine ID configuration
+- Medical Knowledge Assistant treats conversational phrases as new medical queries
+- Some TypeScript errors still exist in test files that need to be addressed
+- Port 3001 sometimes remains in use after server shutdown, requiring manual termination
+- Need to ensure proper separation of client and server components in Next.js, especially regarding metadata exports
+- Need to be careful with library version updates, particularly for packages like lru-cache where API changes can cause build failures
