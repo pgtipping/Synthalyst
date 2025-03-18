@@ -4,11 +4,33 @@ set -e
 # Print commands being executed
 set -x
 
-# Install necessary packages
+# Install necessary packages with explicit versions and ensure they're saved to dependencies
 echo "Installing required packages..."
 npm install --save-dev @babel/plugin-syntax-import-attributes@7.26.0
-npm install --save @tailwindcss/postcss clsx tailwind-merge
-npm install --save @radix-ui/react-slot @radix-ui/react-tabs
+npm install --save @tailwindcss/postcss@4.0.14 clsx@2.1.1 tailwind-merge@3.0.2
+npm install --save @radix-ui/react-slot@1.1.2 @radix-ui/react-tabs@1.1.3
+
+# Verify essential dependencies
+echo "Verifying essential dependencies..."
+if ! npm list clsx >/dev/null 2>&1; then
+  echo "clsx not found, installing..."
+  npm install --save clsx@2.1.1
+fi
+
+if ! npm list tailwind-merge >/dev/null 2>&1; then
+  echo "tailwind-merge not found, installing..."
+  npm install --save tailwind-merge@3.0.2
+fi
+
+if ! npm list @radix-ui/react-tabs >/dev/null 2>&1; then
+  echo "@radix-ui/react-tabs not found, installing..."
+  npm install --save @radix-ui/react-tabs@1.1.3
+fi
+
+if ! npm list @tailwindcss/postcss >/dev/null 2>&1; then
+  echo "@tailwindcss/postcss not found, installing..."
+  npm install --save @tailwindcss/postcss@4.0.14
+fi
 
 # Run the PostCSS config check
 echo "Verifying PostCSS configuration..."

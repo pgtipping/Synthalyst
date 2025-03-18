@@ -4,6 +4,48 @@ const { execSync } = require("child_process");
 
 console.log("Copying UI components to build directory...");
 
+// Function to check if a package is installed
+function isPackageInstalled(packageName) {
+  try {
+    require.resolve(packageName);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Ensure critical dependencies are installed
+const requiredDependencies = [
+  "clsx",
+  "tailwind-merge",
+  "@radix-ui/react-tabs",
+  "@radix-ui/react-slot",
+];
+const missingDependencies = [];
+
+for (const dep of requiredDependencies) {
+  if (!isPackageInstalled(dep)) {
+    missingDependencies.push(dep);
+  }
+}
+
+if (missingDependencies.length > 0) {
+  console.log(
+    `Installing missing dependencies: ${missingDependencies.join(", ")}`
+  );
+  try {
+    execSync(`npm install --save ${missingDependencies.join(" ")}`, {
+      stdio: "inherit",
+    });
+    console.log("Dependencies installed successfully");
+  } catch (error) {
+    console.error("Error installing dependencies:", error.message);
+    console.log(
+      "Continuing with the build process, but some components may not work correctly"
+    );
+  }
+}
+
 // Create components in the src directory
 // This ensures they exist for the build process
 const componentsDir = path.resolve(__dirname, "../src/components/ui");
@@ -293,10 +335,34 @@ essentialComponents.forEach((component) => {
 // Install required dependencies
 try {
   console.log("Installing required dependencies...");
-  execSync("npm install --save clsx tailwind-merge", { stdio: "inherit" });
-  console.log("Dependencies installed successfully");
+  // Check if the dependencies are already installed first
+  const dependenciesNeeded = [];
+
+  try {
+    require.resolve("clsx");
+  } catch (e) {
+    dependenciesNeeded.push("clsx");
+  }
+
+  try {
+    require.resolve("tailwind-merge");
+  } catch (e) {
+    dependenciesNeeded.push("tailwind-merge");
+  }
+
+  if (dependenciesNeeded.length > 0) {
+    execSync(`npm install --save ${dependenciesNeeded.join(" ")}`, {
+      stdio: "inherit",
+    });
+    console.log("Dependencies installed successfully");
+  } else {
+    console.log("Required dependencies already installed");
+  }
 } catch (error) {
   console.error("Error installing dependencies:", error.message);
+  console.log(
+    "Continuing with the build process, but some components may not work correctly"
+  );
 }
 
 // Generate index.ts file to export all components
