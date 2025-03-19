@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Download, Star, Loader2 } from "lucide-react";
 import { Toaster, toast } from "sonner";
-import AdminLayout from "@/components/admin/AdminLayout";
+import { AdminLayout } from "@/app/(admin)/components";
 
 interface FeedbackItem {
   id: string;

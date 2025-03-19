@@ -1,22 +1,21 @@
 "use client";
 
-import { RedisMonitoring } from "@/components/admin/RedisMonitoring";
+import { RedisMonitoring } from "@/app/(admin)/components";
 import { AdminLayout } from "../components";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 export default function MonitoringPage() {
   const { status } = useSession();
-  const router = useRouter();
 
   // Check if user is authenticated and is admin
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login");
+      redirect("/login");
     }
-  }, [status, router]);
+  }, [status]);
 
   if (status === "loading") {
     return (

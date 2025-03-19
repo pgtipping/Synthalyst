@@ -6,6 +6,13 @@ import AdminLayout from "./components/AdminLayout";
 // Import module-specific styles directly
 import "./styles/admin.css";
 
+// Add module-specific metadata to ensure CSS loading priority
+export const metadata = {
+  other: {
+    "admin-styles": true,
+  },
+};
+
 // Do not import global CSS here, it's already imported in the root layout
 
 // Extend the session type to include role
@@ -49,6 +56,9 @@ export default async function AdminRootLayout({ children }: AdminLayoutProps) {
   // Wrap children with the AdminLayout for navigation and sidebar
   return (
     <>
+      {/* Add a direct link to the pre-compiled CSS file for reliability */}
+      <link rel="stylesheet" href="/admin-styles.css" precedence="high" />
+
       <div className="admin-root">
         <AdminLayout>{children}</AdminLayout>
       </div>

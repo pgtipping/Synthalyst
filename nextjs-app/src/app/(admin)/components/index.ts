@@ -8,3 +8,5 @@ export { RedisMonitoring } from "./RedisMonitoring";
 
 // Blog components
 export { default as PostList } from "./blog/PostList";
+export { default as BlogAnalytics } from "./blog/Analytics";
+export { default as BlogSettings } from "./blog/Settings";

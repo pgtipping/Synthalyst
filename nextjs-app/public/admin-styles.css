@@ -1,0 +1,273 @@
+/* Admin styles - Direct CSS loading */
+
+/* Reset and basic styling */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Admin-specific CSS Variables */
+:root {
+  /* Admin Color System */
+  --admin-primary: hsl(215, 100%, 50%);
+  --admin-secondary: hsl(225, 95%, 65%);
+  --admin-success: hsl(120, 100%, 35%);
+  --admin-danger: hsl(0, 100%, 45%);
+  --admin-warning: hsl(40, 100%, 50%);
+  --admin-info: hsl(200, 100%, 50%);
+  --admin-background: hsl(0, 0%, 98%);
+  --admin-card-bg: hsl(0, 0%, 100%);
+  --admin-foreground: hsl(224, 71.4%, 4.1%);
+  --admin-muted-foreground: hsl(220, 8.9%, 46.1%);
+  --admin-border-color: hsl(220, 13%, 91%);
+  --admin-sidebar-width: 16rem;
+  --admin-header-height: 3.5rem;
+}
+
+/* Dark mode variables */
+.dark {
+  --admin-background: hsl(225, 20%, 15%);
+  --admin-card-bg: hsl(225, 25%, 20%);
+  --admin-foreground: hsl(210, 20%, 98%);
+  --admin-muted-foreground: hsl(217.9, 10.6%, 64.9%);
+  --admin-border-color: hsl(215, 27.9%, 16.9%);
+}
+
+/* Base styles */
+body.admin-view {
+  background-color: var(--admin-background);
+  color: var(--admin-foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Admin Layout Components */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--admin-background);
+  position: relative;
+}
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--admin-sidebar-width);
+  background-color: var(--admin-card-bg);
+  border-right: 1px solid var(--admin-border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 40;
+  overflow-y: auto;
+}
+
+.admin-main {
+  flex: 1;
+  margin-left: var(--admin-sidebar-width);
+  padding: 1.5rem;
+  min-height: 100vh;
+}
+
+.admin-header {
+  height: var(--admin-header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--admin-border-color);
+  background-color: var(--admin-card-bg);
+}
+
+/* Common UI Components */
+.admin-card {
+  background-color: var(--admin-card-bg);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--admin-border-color);
+  font-weight: 500;
+}
+
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--admin-border-color);
+}
+
+/* Status indicators */
+.status-active {
+  background-color: rgba(var(--admin-success), 0.2);
+  color: var(--admin-success);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-pending {
+  background-color: rgba(var(--admin-warning), 0.2);
+  color: var(--admin-warning);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-inactive {
+  background-color: rgba(var(--admin-danger), 0.2);
+  color: var(--admin-danger);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .admin-main {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .admin-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Admin Dashboard Components */
+.admin-stats-card {
+  background-color: var(--admin-card-bg);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-stats-card-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--admin-muted-foreground);
+}
+
+.admin-stats-card-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--admin-foreground);
+}
+
+/* Additional utility classes */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.admin-flex {
+  display: flex;
+}
+
+.admin-items-center {
+  align-items: center;
+}
+
+.admin-justify-between {
+  justify-content: space-between;
+}
+
+.admin-grid {
+  display: grid;
+}
+
+.admin-gap-4 {
+  gap: 1rem;
+}
+
+.admin-p-4 {
+  padding: 1rem;
+}
+
+.admin-mb-4 {
+  margin-bottom: 1rem;
+}
+
+.admin-text-lg {
+  font-size: 1.125rem;
+}
+
+.admin-font-medium {
+  font-weight: 500;
+}
+
+.admin-text-gray-500 {
+  color: var(--admin-muted-foreground);
+}
+
+/* Admin Nav */
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  color: var(--admin-foreground);
+  border-radius: 0.375rem;
+  margin-bottom: 0.25rem;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.admin-nav-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.admin-nav-item.active {
+  background-color: rgba(var(--admin-primary), 0.1);
+  color: var(--admin-primary);
+  font-weight: 500;
+}

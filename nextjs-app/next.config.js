@@ -64,9 +64,26 @@ const nextConfig = {
 
       // If global CSS rule exists, modify it to properly handle our modular CSS
       if (globalCssRule) {
-        // Ensure it processes module-specific CSS files
-        globalCssRule.test = /[\\/](globals|critical|admin)\.css$/;
+        // Ensure it processes module-specific CSS files - add admin.css explicitly
+        globalCssRule.test = /[\\/](globals|critical|admin|admin-core)\.css$/;
       }
+
+      // Ensure admin-specific CSS isn't excluded from processing
+      cssRules.forEach((rule) => {
+        if (rule.exclude) {
+          // If rule has an exclude pattern, modify it to not exclude admin CSS
+          if (rule.exclude instanceof RegExp) {
+            const originalExclude = rule.exclude;
+            rule.exclude = function (path) {
+              // Don't exclude admin module CSS
+              if (path.includes("(admin)") && path.includes("styles")) {
+                return false;
+              }
+              return originalExclude.test(path);
+            };
+          }
+        }
+      });
 
       // Add module-specific CSS rules to ensure proper processing
       const moduleSpecificCssRule = {
@@ -250,6 +267,16 @@ const nextConfig = {
             value: "public, max-age=31536000, immutable",
           },
         ],
+      },
+    ];
+  },
+  // Add static file loading configuration
+  async rewrites() {
+    return [
+      // Rewrite for direct admin CSS loading from public directory
+      {
+        source: "/admin-styles.css",
+        destination: "/admin-styles.css",
       },
     ];
   },

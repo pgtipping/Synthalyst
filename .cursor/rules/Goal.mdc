@@ -10,7 +10,5 @@ alwaysApply: true
 ## Rule Statement
 
 - The primary goal is to make LLMs and AI agents used in the app shine. Make them look super intelligent to users. 
-
 - Users of the app should marvel at the quality of the LLM outputs. 
-
-- Ensure your prompting and other methods ALWAYS produce the very best outcomes and highest quality output for users.  
+- Ensure your prompting and other methods ALWAYS produce the very best outcomes and highest quality output for users

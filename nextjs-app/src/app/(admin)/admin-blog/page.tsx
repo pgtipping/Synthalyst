@@ -1,14 +1,16 @@
 import { Metadata } from "next";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PostList from "@/components/admin/blog/PostList";
-import Analytics from "@/components/admin/blog/Analytics";
-import Settings from "@/components/admin/blog/Settings";
-import AdminDashboardWrapper from "@/components/admin/AdminDashboardWrapper";
+import {
+  PostList,
+  BlogAnalytics,
+  BlogSettings,
+} from "@/app/(admin)/components";
+import AdminDashboardWrapper from "@/app/(admin)/components/AdminDashboardWrapper";
 
 export const metadata: Metadata = {
   title: "Blog Management | Admin Dashboard",
@@ -63,13 +65,13 @@ export default async function BlogManagementPage() {
 
           <TabsContent value="analytics" className="space-y-4">
             <Card className="p-6">
-              <Analytics />
+              <BlogAnalytics />
             </Card>
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-4">
             <Card className="p-6">
-              <Settings categories={categories} tags={tags} />
+              <BlogSettings categories={categories} tags={tags} />
             </Card>
           </TabsContent>
         </Tabs>

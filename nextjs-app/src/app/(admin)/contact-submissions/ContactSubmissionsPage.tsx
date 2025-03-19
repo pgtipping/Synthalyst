@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ContactSubmissionsList from "@/components/contact-submissions/ContactSubmissionsList";
-import AdminLayout from "@/components/admin/AdminLayout";
+import { AdminLayout } from "@/app/(admin)/components";
 
 interface ContactSubmission {
   id: string;

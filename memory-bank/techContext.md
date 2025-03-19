@@ -251,79 +251,66 @@ This ordering establishes a clear progression: Plan → Mock Interview → Quest
   - Data sanitization
   - TTL enforcement
 
-## CSS and Styling Infrastructure [${new Date().toLocaleDateString()}]
+## CSS Architecture (Updated March 18, 2024)
 
-### Tailwind CSS Configuration
+The CSS architecture has been completely restructured to resolve styling issues and ensure proper cascade order:
 
-- **Version**: Tailwind CSS 4.0.14
-- **PostCSS Integration**: Using @tailwindcss/postcss 4.0.14 instead of direct tailwindcss usage
-- **Configuration File**: postcss.config.cjs with standardized plugin setup
-- **Configuration Changes**:
-  - Migrated from direct `tailwindcss` plugin usage to `@tailwindcss/postcss` for compatibility with Tailwind v4
-  - Updated PostCSS configuration to use the new plugin format
-  - Verified build process works correctly with the new configuration
-  - Fixed Vercel deployment errors related to PostCSS plugin changes
-  - Removed Tailwind directives from critical.css to avoid duplication
-  - Added clear comments in globals.css about the PostCSS plugin
-  - Created vercel.json with explicit build commands for Vercel deployments
-  - Disabled CSS optimization in next.config.js due to conflicts with Tailwind CSS v4
-- **Deployment Fix (${new Date().toLocaleDateString()})**:
-  - Created special `vercel-build.sh` script to handle build process reliably in Vercel environment
-  - Added PostCSS configuration verification script that ensures correct setup
-  - Temporarily moving Babel configuration files during build to prevent compiler conflicts
-  - Enhanced error logging and debugging with detailed build steps
-  - Added automatic package installation checks to ensure required dependencies are present
-  - Implemented script to debug Babel configuration issues
-  - Created fallback mechanism for globals.css to ensure Tailwind directives are properly included
-  - Added node_modules/.cache clearing step to prevent stale cache issues
-- **Additional Plugins**:
-  - autoprefixer for vendor prefixing
-  - tailwindcss-animate for animation utilities
-  - @tailwindcss/typography for rich text styling
+### CSS Files
 
-### Babel Configuration
+- **critical.css**:
 
-- **Issue**: Next.js 15 with custom Babel configuration requires specific plugins for import attributes
-- **Required Plugin**: @babel/plugin-syntax-import-attributes@7.26.0
-- **Config Files**:
-  - .babelrc with plugin and presets configuration
-  - babel.config.js with size optimization settings
-- **Deployment Fix**:
-  - Temporary removal of custom Babel configuration during build process
-  - Verification script to check and install required plugins
-  - Detailed logging to debug configuration issues
-  - Automatic restoration of config files after build completes
+  - Contains only CSS variables/custom properties
+  - Defines theme colors, spacing, and typography variables
+  - No Tailwind directives
+  - No direct styling rules
+  - Used for global theme configuration
 
-### CSS Organization
+- **globals.css**:
 
-- **Global Styles**: src/app/globals.css with Tailwind imports
-- **Critical CSS**: src/app/critical.css for above-the-fold styling
-- **Non-Critical CSS**: public/styles/non-critical.css loaded asynchronously
-- **Component Styles**: Component-specific CSS modules when needed
-- **Theme Variables**: CSS variables in :root and .dark selectors
+  - Contains Tailwind directives (@tailwind base, components, utilities)
+  - Organizes custom styles into Tailwind layers
+  - Uses @layer to properly integrate with Tailwind's cascade
+  - Contains styling rules that reference CSS variables from critical.css
+  - Primary styling file for the application
 
-### CSS Best Practices
+- **non-critical.css**:
+  - Loaded asynchronously as a separate stylesheet
+  - Contains styles for components that are not critical for initial rendering
+  - Located in public/styles/ directory
+  - Loaded via <link> tag in layout.tsx
 
-- **Color Usage**:
+### Loading Strategy
 
-  - HSL variables for theme colors (--background, --foreground, etc.)
-  - Explicit bracket notation for direct colors (bg-[#f3f4f6])
-  - Consistent color scheme across light and dark modes
+1. `globals.css` is loaded first to ensure Tailwind directives are processed
+2. `critical.css` is loaded second to define CSS variables
+3. `non-critical.css` is loaded asynchronously for non-critical styles
 
-- **Utility Classes**:
+### PostCSS Configuration
 
-  - Proper syntax for custom properties (border-[color:hsl(var(--border))])
-  - Font weight using numeric values (font-[500] instead of font-medium)
-  - Consistent spacing and sizing utilities
+The PostCSS configuration has been updated to use standard Tailwind plugins:
 
-- **Responsive Design**:
-  - Mobile-first approach
-  - Breakpoint-specific classes
-  - Fluid typography and spacing
+```js
+// postcss.config.cjs
+module.exports = {
+  plugins: {
+    "tailwindcss/nesting": {}, // For CSS nesting support
+    tailwindcss: {
+      // Standard Tailwind CSS plugin
+      content: ["./src/**/*.{js,ts,jsx,tsx}"],
+      // Additional configuration...
+    },
+    autoprefixer: {
+      // Browser compatibility settings...
+    },
+  },
+};
+```
 
-### CSS Tooling
+### Tailwind Integration
 
-- **PostCSS**: For processing CSS with plugins
-- **Autoprefixer**: For vendor prefixing
-- **@tailwindcss/typography**: For rich text styling
-- **tailwindcss-animate**: For animation utilities
+- CSS variables are used via the `hsl()` function
+- Tailwind classes reference variables using the `bg-[hsl(var(--variable))]` syntax
+- Component-specific styles are defined in the `@layer components` section
+- Base HTML element styles are defined in the `@layer base` section
+
+This architecture ensures proper CSS cascade and prevents style conflicts while maintaining the benefits of CSS variables and Tailwind utility classes.

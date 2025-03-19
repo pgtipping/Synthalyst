@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-export default function AdminLayout() {
+export default function AdminBlogLayout() {
   // Redirect to new modular architecture location
-  redirect("/admin");
+  redirect("/admin-blog");
 }

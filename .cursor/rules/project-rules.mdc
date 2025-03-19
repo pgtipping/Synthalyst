@@ -6,6 +6,7 @@ alwaysApply: true
 
 # project specific rules
 
+- ***ONLY*** use preview deployment for MODULAR ARCHITECTURE
 - This project is configured to only run its development server on localhost:3001  
 - ALWAYS terminate running server before invoking the build command.
 - ALWAYS check server status BEFORE starting the server.
@@ -26,7 +27,6 @@ alwaysApply: true
 
 ## mandatory rules
 
-- not 95% certain a solution will resolve an issue/error/problem? must search the web for precise fix
 - DO NOT install packages in root folder
 - Always check folder before installing any package
 - focus ALL development in development folder (/nextjs-app)
