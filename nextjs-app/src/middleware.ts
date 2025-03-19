@@ -1,6 +1,7 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { handleRedirects } from "./redirects";
 
 // List of tools that are ready for production
 const PRODUCTION_READY_TOOLS = [
@@ -101,7 +102,13 @@ function handleComingSoonRedirects(
 // Main middleware function
 export default withAuth(
   function middleware(req) {
-    // First, check if we need to redirect to Coming Soon
+    // First, check for modular architecture redirects
+    const moduleRedirect = handleRedirects(req);
+    if (moduleRedirect) {
+      return moduleRedirect;
+    }
+
+    // Then, check if we need to redirect to Coming Soon
     const comingSoonRedirect = handleComingSoonRedirects(req);
     if (comingSoonRedirect) {
       return comingSoonRedirect;

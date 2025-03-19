@@ -1,0 +1,22 @@
+/* CSS Module Test File */
+
+/* Custom class that should be processed by Tailwind */
+.test_tailwind {
+  color: #3b82f6; /* blue-500 */
+  font-weight: bold;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Debug information */
+.debug_info {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: black;
+  color: white;
+  padding: 4px 8px;
+  z-index: 9999;
+  font-family: monospace;
+}

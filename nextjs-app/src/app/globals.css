@@ -1,7 +1,10 @@
 /**
- * This is a global stylesheet for the entire application.
- * It defines common styles that will be applied to all pages.
+ * Global CSS for the entire application.
+ * NOTE: This file should be imported AFTER critical.css
+ * to ensure proper cascading of styles.
  * Tailwind directives are processed by @tailwindcss/postcss plugin
+ * 
+ * PRIORITY: MEDIUM - This CSS file should be loaded AFTER critical.css
  */
 
 @tailwind base;
@@ -9,6 +12,13 @@
 @tailwind utilities;
 
 @layer base {
+  /* 
+   * IMPORTANT: CSS Variables are now defined in critical.css
+   * Don't define :root variables here to avoid conflicts
+   * The variables below are kept for reference only and are commented out
+   */
+
+  /*
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -19,16 +29,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Font family variables */
     --font-geist-sans: "Geist", system-ui, sans-serif;
     --font-geist-mono: "Geist Mono", monospace;
     --font-moon-dance: "Moon Dance", cursive;
 
-    /* Brand blue - updated to be darker for better contrast */
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
-    /* Brand silver - updated to be darker */
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
@@ -49,7 +56,6 @@
   }
 
   .dark {
-    /* Brand black */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
@@ -59,11 +65,9 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    /* Brand blue */
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    /* Brand silver - updated to be lighter */
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
@@ -80,6 +84,7 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
   }
+  */
 
   /* Improve color contrast for accessibility */
   .sm\:inline {
@@ -104,7 +109,8 @@
 /* Add your global styles here */
 
 body {
-  @apply bg-[#f3f4f6];
+  /* Remove direct bg color to allow CSS variables to work */
+  /* @apply bg-[#f3f4f6]; */
   font-family: sans-serif;
 }
 

@@ -37,6 +37,14 @@ const nextConfig = {
       ...config.resolve.alias,
       "@/components/ui": resolvePath(process.cwd(), "src/components/ui"),
       "@/lib/utils": resolvePath(process.cwd(), "src/lib/utils.ts"),
+      // Add module-specific aliases for modular architecture
+      // Admin module
+      "@/admin/components": resolvePath(
+        process.cwd(),
+        "src/app/(admin)/components"
+      ),
+      "@/admin/lib": resolvePath(process.cwd(), "src/app/(admin)/lib"),
+      "@/admin/styles": resolvePath(process.cwd(), "src/app/(admin)/styles"),
     };
 
     // Add externals to prevent server-side only modules from causing issues
@@ -49,43 +57,26 @@ const nextConfig = {
 
     if (cssRules) {
       // Get global CSS rules (non-modules)
-      const globalCSSRules = cssRules.find(
-        ({ test, exclude }) =>
-          test?.test?.(".css") && exclude?.test?.(".module.css")
+      const globalCssRule = cssRules.find(
+        ({ test, sideEffects }) =>
+          test?.test?.("global.css") && sideEffects === true
       );
 
-      // Setup CSS loader properly for Tailwind compatibility
-      if (globalCSSRules?.use) {
-        const cssLoader = globalCSSRules.use.find(({ loader }) =>
-          loader?.includes?.("css-loader")
-        );
-        if (cssLoader?.options) {
-          // Keep modules disabled for global CSS
-          cssLoader.options.modules = false;
-          // Enable source maps for debugging
-          cssLoader.options.sourceMap = true;
-          // Keep import loaders setting
-          cssLoader.options.importLoaders = 2;
-
-          // Allow optimization but ensure it's configured properly
-          if (cssLoader.options.minify !== undefined) {
-            // Allow minification but with safe settings
-            cssLoader.options.minify = true;
-          }
-        }
-
-        // Find PostCSS loader to configure Tailwind properly
-        const postcssLoader = globalCSSRules.use.find(({ loader }) =>
-          loader?.includes?.("postcss-loader")
-        );
-        if (postcssLoader?.options?.postcssOptions) {
-          // Ensure postcss has the right config for preserving Tailwind classes
-          postcssLoader.options.postcssOptions = {
-            ...postcssLoader.options.postcssOptions,
-            // Add any specific config needed for Tailwind preservation
-          };
-        }
+      // If global CSS rule exists, modify it to properly handle our modular CSS
+      if (globalCssRule) {
+        // Ensure it processes module-specific CSS files
+        globalCssRule.test = /[\\/](globals|critical|admin)\.css$/;
       }
+
+      // Add module-specific CSS rules to ensure proper processing
+      const moduleSpecificCssRule = {
+        test: /[\\/]app[\\/]\([^/]+\)[\\/]styles[\\/].*\.css$/,
+        use: globalCssRule ? [...globalCssRule.use] : [],
+        sideEffects: true,
+      };
+
+      // Add the module-specific rule to cssRules
+      cssRules.push(moduleSpecificCssRule);
     }
 
     // Add fallbacks for node modules that aren't available in the browser
@@ -222,12 +213,11 @@ const nextConfig = {
     domains: [
       "lh3.googleusercontent.com",
       "avatars.githubusercontent.com",
+      "localhost",
       "images.unsplash.com",
+      "cdn.sanity.io",
       "source.unsplash.com",
-      "picsum.photos",
-      "placehold.co",
       "res.cloudinary.com",
-      "synthalyst.com",
     ],
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

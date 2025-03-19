@@ -19,7 +19,7 @@ export default async function BlogManagementPage() {
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
-    redirect("/auth/signin?callbackUrl=/admin/blog");
+    redirect("/auth/signin?callbackUrl=/admin-blog");
   }
 
   // Fetch initial data

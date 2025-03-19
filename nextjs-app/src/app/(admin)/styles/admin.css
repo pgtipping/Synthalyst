@@ -1,0 +1,139 @@
+/* Admin module specific styles */
+
+/* Import only CSS variables from the base/critical CSS */
+@import url("../../critical.css") layer(critical);
+
+/* Define admin-specific variables */
+:root {
+  --admin-primary: 215 100% 50%;
+  --admin-secondary: 225 95% 65%;
+  --admin-success: 120 100% 35%;
+  --admin-danger: 0 100% 45%;
+  --admin-warning: 40 100% 50%;
+  --admin-info: 200 100% 50%;
+  --admin-background: 0 0% 98%;
+  --admin-card-background: 0 0% 100%;
+  --admin-sidebar-width: 16rem;
+  --admin-header-height: 3.5rem;
+}
+
+.dark {
+  --admin-background: 225 20% 15%;
+  --admin-card-background: 225 25% 20%;
+}
+
+/* Admin module component styles */
+.admin-layout {
+  background-color: hsl(var(--admin-background));
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: var(--admin-sidebar-width);
+  background-color: hsl(var(--admin-card-background));
+  border-right: 1px solid hsl(var(--border));
+}
+
+.admin-main {
+  margin-left: var(--admin-sidebar-width);
+}
+
+.admin-card {
+  background-color: hsl(var(--admin-card-background));
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header {
+  height: var(--admin-header-height);
+  background-color: hsl(var(--admin-card-background));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+  font-weight: 500;
+}
+
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .admin-main {
+    margin-left: 0;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 40;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+/* Status indicators */
+.status-active {
+  background-color: hsl(var(--admin-success) / 0.2);
+  color: hsl(var(--admin-success));
+}
+
+.status-pending {
+  background-color: hsl(var(--admin-warning) / 0.2);
+  color: hsl(var(--admin-warning));
+}
+
+.status-inactive {
+  background-color: hsl(var(--admin-danger) / 0.2);
+  color: hsl(var(--admin-danger));
+}
+
+/* Utility classes specific to admin */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.admin-stats-card {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: var(--radius);
+  background-color: hsl(var(--admin-card-background));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-stats-card-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+
+.admin-stats-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}

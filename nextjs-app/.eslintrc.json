@@ -1,0 +1,15 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "import/no-commonjs": "error"
+  },
+  "overrides": [
+    {
+      "files": ["*.cjs"],
+      "rules": {
+        "import/no-commonjs": "off",
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    }
+  ]
+}

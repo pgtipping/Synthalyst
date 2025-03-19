@@ -808,6 +808,12 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      {/* Tailwind CSS Debug Indicator */}
+      <div className="fixed bottom-4 right-4 bg-black text-white p-2 rounded shadow-lg z-50 text-xs">
+        <div>Tailwind CSS v4.0.14</div>
+        <div>Debug Mode: {process.env.NODE_ENV}</div>
+      </div>
     </>
   );
 }

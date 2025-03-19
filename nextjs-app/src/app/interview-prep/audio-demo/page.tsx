@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 
 export default function AudioDemoPage() {
   const [audioBlob, setAudioBlob] = useState<Blob | undefined>(undefined);

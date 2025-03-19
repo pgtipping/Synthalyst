@@ -1,25 +1,17 @@
 import type { Metadata } from "next";
 import type { Viewport } from "next/types";
+// Import global CSS first for Tailwind processing
 import "./globals.css";
+// Import critical CSS for specific overrides
+import "./critical.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { ToastProvider } from "@/components/ui/use-toast";
 
 // Import original components
 import ClientLayout from "@/components/ClientLayout";
 import Footer from "@/components/Footer";
 import ConditionalHeader from "@/components/ConditionalHeader";
-
-// Import critical CSS
-import "./critical.css";
-
-// Define font variables without using next/font directly
-const fontVariables = {
-  geistSans: "--font-geist-sans",
-  geistMono: "--font-geist-mono",
-  moonDance: "--font-moon-dance",
-};
 
 export const viewport: Viewport = {
   themeColor: "#4285F4",
@@ -214,7 +206,7 @@ export default function RootLayout({
         <link rel="canonical" href="https://synthalyst.com" />
         <link rel="alternate" hrefLang="en" href="https://synthalyst.com" />
 
-        {/* Resource hints for external domains */}
+        {/* Resource hints for external domains with higher priority */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -222,7 +214,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
-        {/* Add Google Fonts directly */}
+        {/* Add Google Fonts with display=swap for better performance */}
         <link
           href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
@@ -235,6 +227,12 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Moon+Dance&display=swap"
           rel="stylesheet"
         />
+
+        {/* Preload critical CSS files */}
+        <link rel="preload" href="/styles/non-critical.css" as="style" />
+
+        {/* Add non-critical CSS with a lower priority but still as a direct link */}
+        <link rel="stylesheet" href="/styles/non-critical.css" />
 
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
@@ -250,34 +248,75 @@ export default function RootLayout({
           content="facebook-domain-verification-code"
         />
 
-        {/* Load non-critical CSS asynchronously */}
-        <link rel="preload" href="/styles/non-critical.css" as="style" />
-        <noscript>
-          <link rel="stylesheet" href="/styles/non-critical.css" />
-        </noscript>
-
-        {/* JSON-LD structured data */}
+        {/* JSON-LD for Organization data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationJsonLd),
           }}
         />
+
+        {/* CSS Debug Script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // This script runs immediately to check CSS loading
+              (function() {
+                try {
+                  // Create a debug element
+                  const debugElement = document.createElement('div');
+                  debugElement.id = 'css-debug-indicator';
+                  debugElement.style.position = 'fixed';
+                  debugElement.style.bottom = '5px';
+                  debugElement.style.right = '5px';
+                  debugElement.style.padding = '4px 8px';
+                  debugElement.style.background = 'rgba(0,0,0,0.7)';
+                  debugElement.style.color = 'white';
+                  debugElement.style.fontSize = '10px';
+                  debugElement.style.zIndex = '9999';
+                  debugElement.style.pointerEvents = 'none';
+                  
+                  debugElement.textContent = 'CSS loading...';
+                  
+                  // Add to document when body is available
+                  function addDebugElement() {
+                    if (document.body) {
+                      document.body.appendChild(debugElement);
+                      
+                      // After a delay, update the debug info
+                      setTimeout(function() {
+                        const bgColor = getComputedStyle(document.body).backgroundColor;
+                        const criticalIndicator = document.querySelector('.critical-css-loaded') 
+                          ? 'Critical CSS loaded' 
+                          : 'Critical CSS not found';
+                        
+                        debugElement.textContent = criticalIndicator + ' | BG: ' + bgColor;
+                      }, 500);
+                    } else {
+                      setTimeout(addDebugElement, 10);
+                    }
+                  }
+                  
+                  addDebugElement();
+                } catch (e) {
+                  console.error('CSS Debug error:', e);
+                }
+              })();
+            `,
+          }}
+        />
       </head>
-      <body
-        className={`${fontVariables.geistSans} ${fontVariables.geistMono} ${fontVariables.moonDance} antialiased flex flex-col min-h-screen`}
-        suppressHydrationWarning
-      >
-        <ToastProvider>
-          <ClientLayout>
-            <ConditionalHeader />
-            <main className="flex-grow flex flex-col">{children}</main>
+      <body className="min-h-screen bg-background text-foreground font-sans antialiased">
+        <ClientLayout>
+          <ConditionalHeader />
+          <div className="flex min-h-screen flex-col">
+            <main className="flex-1">{children}</main>
             <Footer />
-            <Toaster />
-            <Analytics />
-            <SpeedInsights />
-          </ClientLayout>
-        </ToastProvider>
+          </div>
+          <Toaster />
+          <Analytics />
+          <SpeedInsights />
+        </ClientLayout>
       </body>
     </html>
   );

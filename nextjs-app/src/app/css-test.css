@@ -1,0 +1,31 @@
+/* CSS Test File - For Diagnosing Tailwind Processing Issues */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom class that should be processed by Tailwind */
+.test-tailwind {
+  @apply text-blue-500 font-bold p-4 rounded-lg;
+}
+
+/* Custom variables that should use Tailwind's theme */
+:root {
+  --test-color: theme("colors.blue.500");
+  --test-spacing: theme("spacing.4");
+  --test-shadow: theme("boxShadow.lg");
+}
+
+/* Debug information */
+body::before {
+  content: "Tailwind CSS Test";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: black;
+  color: white;
+  padding: 4px 8px;
+  z-index: 9999;
+  font-family: monospace;
+}
