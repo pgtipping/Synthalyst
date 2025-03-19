@@ -526,6 +526,185 @@ To ensure the modular architecture meets performance requirements:
    - Create fallback mechanisms for module failures
    - Implement proper error reporting for each module
 
+## External App Integration
+
+To incorporate existing standalone applications (e.g., Turnover Calculator, Apartment Affordability Calculator) into the modular architecture, we'll follow this systematic approach:
+
+### Integration Process (2-3 weeks per app)
+
+1. **App Analysis and Preparation**:
+
+   - Audit the standalone app's codebase structure and dependencies
+   - Identify integration requirements and potential conflicts
+   - Create an integration checklist for each app
+   - Document the app's current state, functionality, and user flows
+
+2. **Physical Code Migration**:
+
+   - Create a dedicated route group in `src/app/` (e.g., `(turnover)`, `(affordability)`)
+   - Copy core application code from the standalone repository
+   - Migrate components to the module's component directory (`src/app/(app-name)/components/`)
+   - Move utility functions to the module's lib directory (`src/app/(app-name)/lib/`)
+   - Create a module-specific styles directory (`src/app/(app-name)/styles/`)
+
+3. **Structure Adaptation**:
+
+   - Convert to Next.js App Router format if not already using it:
+     - Rename `index.js/tsx` files to `page.js/tsx`
+     - Structure routes as directories with `page.js/tsx` files inside
+     - Create appropriate `layout.tsx` files for module-specific layouts
+   - Adapt routing patterns to match the main application conventions
+   - Create module-specific entry points and navigation components
+
+4. **Code Refactoring**:
+
+   - Update import paths to reflect the new structure
+   - Replace absolute imports with relative imports within the module
+   - Update any hard-coded URLs or paths to use dynamic configurations
+   - Adapt API calls to match the main application patterns
+   - Refactor any incompatible code patterns or approaches
+
+5. **Dependency Management**:
+
+   - Add unique dependencies to the main project's package.json
+   - Remove duplicate dependencies already present in the main project
+   - Resolve version conflicts with shared dependencies
+   - Update package imports to use the main project's dependencies where appropriate
+   - Document any critical version requirements
+
+### Integration Patterns
+
+1. **CSS Integration**:
+
+   - Create module-specific stylesheets that follow the project's CSS architecture
+   - Use module-specific CSS variables that extend the core design tokens
+   - Implement scoped CSS using the module's prefix or CSS Modules
+   - Import module-specific styles in the module's layout component
+   - Update any inline styles or styled-components to match the project's approach
+
+2. **Authentication Integration**:
+
+   - Connect the integrated app to the main project's authentication system
+   - Update protected routes to use the shared auth patterns
+   - Implement role-based access control if required
+   - Ensure session persistence across module boundaries
+   - Test authentication flows thoroughly after integration
+
+3. **Data Integration**:
+
+   - Adapt data models to work with the main project's database schema
+   - Create appropriate migrations for any new tables or fields
+   - Update API routes to use the shared database connections
+   - Implement data sharing patterns for cross-module functionality
+   - Create data access boundaries and permissions
+
+4. **Configuration Management**:
+
+   - Consolidate environment variables with the main project's configuration
+   - Create module-specific configuration files where needed
+   - Update hardcoded configuration values to use environment variables
+   - Document all configuration requirements
+   - Test with different environment configurations
+
+### Testing Strategy
+
+1. **Standalone Testing**:
+
+   - Create a testing plan for the integrated module
+   - Implement unit tests for critical module functionality
+   - Develop integration tests for module boundaries
+   - Create visual regression tests to verify UI consistency
+   - Document test coverage and critical test cases
+
+2. **Cross-Module Testing**:
+
+   - Test interactions between the integrated module and other modules
+   - Verify navigation flows between modules
+   - Test data sharing between modules
+   - Validate authentication and session persistence
+   - Check for styling conflicts or inconsistencies
+
+### Example Integration: Turnover Calculator
+
+```
+// Before: Standalone Project Structure
+turnover-app/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── Calculator.tsx
+│   │   ├── DataEntry.tsx
+│   │   └── Results.tsx
+│   ├── utils/
+│   │   ├── calculations.ts
+│   │   └── formatters.ts
+│   ├── App.tsx
+│   ├── index.tsx
+│   └── styles.css
+├── package.json
+└── tsconfig.json
+
+// After: Integrated Module Structure
+nextjs-app/
+├── src/
+│   ├── app/
+│   │   ├── (turnover)/
+│   │   │   ├── components/
+│   │   │   │   ├── Calculator.tsx
+│   │   │   │   ├── DataEntry.tsx
+│   │   │   │   └── Results.tsx
+│   │   │   ├── lib/
+│   │   │   │   ├── calculations.ts
+│   │   │   │   └── formatters.ts
+│   │   │   ├── styles/
+│   │   │   │   └── turnover.css
+│   │   │   ├── page.tsx
+│   │   │   └── layout.tsx
+```
+
+### Import Adaptation Example
+
+```typescript
+// Before (in standalone app)
+import { Calculator } from "./components/Calculator";
+import { formatCurrency } from "./utils/formatters";
+
+// After (in integrated module)
+import { Calculator } from "../components/Calculator";
+import { formatCurrency } from "../lib/formatters";
+
+// When using shared components
+import { Button } from "@/components/shared/ui/button";
+```
+
+### Integration Checklist
+
+For each app integration:
+
+1. **Pre-Integration**:
+
+   - [ ] Document current functionality and user flows
+   - [ ] Inventory all dependencies and versions
+   - [ ] Identify shared components that can be reused
+   - [ ] Create integration timeline and milestones
+
+2. **During Integration**:
+
+   - [ ] Create module route group structure
+   - [ ] Migrate core code to new structure
+   - [ ] Update import paths and dependencies
+   - [ ] Adapt API routes and data access
+   - [ ] Implement module-specific styles
+   - [ ] Connect to authentication system
+
+3. **Post-Integration**:
+   - [ ] Test all functionality
+   - [ ] Verify responsive design
+   - [ ] Check accessibility compliance
+   - [ ] Validate performance metrics
+   - [ ] Document any limitations or issues
+   - [ ] Update user documentation
+
 ## Action Items
 
 1. **Immediate Tasks (Week 1)**:
