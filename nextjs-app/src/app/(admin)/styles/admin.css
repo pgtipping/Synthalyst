@@ -1,10 +1,33 @@
 /* Admin module specific styles */
 
-/* Import only CSS variables from the base/critical CSS */
-@import url("../../critical.css") layer(critical);
+/* Import the core admin styles */
+@import "./admin-core.css";
 
-/* Define admin-specific variables */
+/* Core CSS variables required for admin module */
 :root {
+  /* Color system */
+  --background: 0 0% 100%;
+  --foreground: 224 71.4% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 71.4% 4.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 71.4% 4.1%;
+  --primary: 220.9 39.3% 11%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 220 14.3% 95.9%;
+  --secondary-foreground: 220.9 39.3% 11%;
+  --muted: 220 14.3% 95.9%;
+  --muted-foreground: 220 8.9% 46.1%;
+  --accent: 220 14.3% 95.9%;
+  --accent-foreground: 220.9 39.3% 11%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 224 71.4% 4.1%;
+  --radius: 0.5rem;
+
+  /* Admin-specific variables */
   --admin-primary: 215 100% 50%;
   --admin-secondary: 225 95% 65%;
   --admin-success: 120 100% 35%;
@@ -18,30 +41,132 @@
 }
 
 .dark {
+  --background: 224 71.4% 4.1%;
+  --foreground: 210 20% 98%;
+  --card: 224 71.4% 4.1%;
+  --card-foreground: 210 20% 98%;
+  --popover: 224 71.4% 4.1%;
+  --popover-foreground: 210 20% 98%;
+  --primary: 210 20% 98%;
+  --primary-foreground: 220.9 39.3% 11%;
+  --secondary: 215 27.9% 16.9%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 215 27.9% 16.9%;
+  --muted-foreground: 217.9 10.6% 64.9%;
+  --accent: 215 27.9% 16.9%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 215 27.9% 16.9%;
+  --input: 215 27.9% 16.9%;
+  --ring: 216 12.2% 83.9%;
+
   --admin-background: 225 20% 15%;
   --admin-card-background: 225 25% 20%;
 }
 
+/* Ensure basic elements have styling */
+body.admin-view {
+  background-color: #f3f4f6;
+  color: #111827;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+}
+
+/* Essential Tailwind utilities */
+.bg-white {
+  background-color: white;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-gray-800 {
+  color: #1f2937;
+}
+
 /* Admin module component styles */
 .admin-layout {
-  background-color: hsl(var(--admin-background));
+  display: flex;
   min-height: 100vh;
+  background-color: #f3f4f6;
+  background-color: hsl(var(--admin-background));
 }
 
 .admin-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 16rem;
   width: var(--admin-sidebar-width);
+  background-color: white;
   background-color: hsl(var(--admin-card-background));
   border-right: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 40;
 }
 
 .admin-main {
+  flex: 1;
+  margin-left: 16rem;
   margin-left: var(--admin-sidebar-width);
 }
 
 .admin-card {
+  background-color: white;
   background-color: hsl(var(--admin-card-background));
+  border-radius: 0.5rem;
   border-radius: var(--radius);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
 }
 
 .admin-header {
@@ -136,4 +261,11 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: hsl(var(--foreground));
+}
+
+/* Admin root container */
+.admin-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }

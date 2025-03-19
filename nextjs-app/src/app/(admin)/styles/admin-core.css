@@ -1,0 +1,171 @@
+/* Core Admin Styles - Self-contained CSS for admin interface */
+
+/* Reset and basic styling */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background-color: #f9fafb;
+  color: #111827;
+  line-height: 1.5;
+}
+
+/* Utility classes */
+.admin-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.admin-flex {
+  display: flex;
+}
+
+.admin-items-center {
+  align-items: center;
+}
+
+.admin-justify-between {
+  justify-content: space-between;
+}
+
+.admin-min-h-screen {
+  min-height: 100vh;
+}
+
+.admin-bg-white {
+  background-color: white;
+}
+
+.admin-bg-gray-100 {
+  background-color: #f3f4f6;
+}
+
+.admin-text-gray-900 {
+  color: #111827;
+}
+
+.admin-text-gray-600 {
+  color: #4b5563;
+}
+
+.admin-text-xl {
+  font-size: 1.25rem;
+}
+
+.admin-font-bold {
+  font-weight: 700;
+}
+
+.admin-rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.admin-shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.admin-shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.admin-p-4 {
+  padding: 1rem;
+}
+
+.admin-p-6 {
+  padding: 1.5rem;
+}
+
+.admin-mt-4 {
+  margin-top: 1rem;
+}
+
+.admin-mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.admin-space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.admin-border {
+  border: 1px solid #e5e7eb;
+}
+
+.admin-border-b {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-grid {
+  display: grid;
+}
+
+.admin-gap-6 {
+  gap: 1.5rem;
+}
+
+/* Layout */
+.admin-layout {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  display: flex;
+}
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 16rem;
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  transition: transform 0.3s ease-in-out;
+}
+
+.admin-main {
+  flex: 1;
+  margin-left: 16rem;
+}
+
+.admin-header {
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .admin-main {
+    margin-left: 0;
+  }
+}
+
+/* Dashboard specific */
+.admin-stats-card {
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}

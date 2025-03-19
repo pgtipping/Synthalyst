@@ -125,7 +125,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="admin-layout admin-min-h-screen admin-bg-gray-100">
       {/* Sidebar overlay - mobile only */}
       <div
         className={cn(
@@ -139,13 +139,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <div
         id="admin-sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform transition-transform ease-in-out duration-300 lg:translate-x-0 lg:relative",
+          "admin-sidebar transform transition-transform ease-in-out duration-300 lg:translate-x-0 lg:relative",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between h-14 px-4 border-b">
-            <Link href="/admin" className="text-xl font-bold text-gray-900">
+        <div className="admin-flex flex-col h-full">
+          <div className="admin-header">
+            <Link
+              href="/admin"
+              className="admin-text-xl admin-font-bold admin-text-gray-900"
+            >
               Admin
             </Link>
             <Button
@@ -202,11 +205,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="admin-main admin-flex flex-col">
         {/* Mobile menu toggle */}
-        <div className="sticky top-0 z-10 bg-white shadow-sm lg:hidden">
+        <div className="sticky top-0 z-10 admin-bg-white admin-shadow-sm lg:hidden">
           <div className="px-4 py-2">
-            <div className="flex items-center justify-between">
+            <div className="admin-flex admin-items-center admin-justify-between">
               <Button
                 variant="ghost"
                 size="icon"
@@ -216,7 +219,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               >
                 <Menu className="h-6 w-6" />
               </Button>
-              <span className="text-xl font-bold text-gray-900">Admin</span>
+              <span className="admin-text-xl admin-font-bold admin-text-gray-900">
+                Admin
+              </span>
               <Button
                 variant="outline"
                 size="sm"
@@ -232,7 +237,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         <div className="flex-1 py-6 px-4 sm:px-6 lg:px-8">
           <Breadcrumb />
-          <main className="bg-white shadow-sm rounded-lg p-4 sm:p-6 mt-4">
+          <main className="admin-card admin-bg-white admin-rounded-lg admin-shadow-sm admin-p-6 admin-mt-4">
             {children}
           </main>
         </div>

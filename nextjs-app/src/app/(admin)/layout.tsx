@@ -2,7 +2,11 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import AdminLayout from "./components/AdminLayout";
+
+// Import module-specific styles directly
 import "./styles/admin.css";
+
+// Do not import global CSS here, it's already imported in the root layout
 
 // Extend the session type to include role
 interface ExtendedSession {
@@ -43,5 +47,20 @@ export default async function AdminRootLayout({ children }: AdminLayoutProps) {
   }
 
   // Wrap children with the AdminLayout for navigation and sidebar
-  return <AdminLayout>{children}</AdminLayout>;
+  return (
+    <>
+      <div className="admin-root">
+        <AdminLayout>{children}</AdminLayout>
+      </div>
+
+      {/* Add script to add class to body - using a client-side script tag */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+          document.body.classList.add('admin-view');
+        `,
+        }}
+      />
+    </>
+  );
 }
